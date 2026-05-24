@@ -418,8 +418,12 @@ async def serve_by_id(
 
 @app.get("/ratio/{ratio}/{height:int}")
 @app.head("/ratio/{ratio}/{height:int}")
+@app.get("/ratio/{ratio}/{height:int}/{category}")
+@app.head("/ratio/{ratio}/{height:int}/{category}")
 @app.get("/ratio/{ratio}/{height:int}.{ext}")
 @app.head("/ratio/{ratio}/{height:int}.{ext}")
+@app.get("/ratio/{ratio}/{height:int}/{category}.{ext}")
+@app.head("/ratio/{ratio}/{height:int}/{category}.{ext}")
 async def serve_by_ratio(
     ratio: str,
     height: int,
@@ -470,8 +474,12 @@ async def serve_by_ratio(
 
 @app.get("/preset/{preset_name}")
 @app.head("/preset/{preset_name}")
+@app.get("/preset/{preset_name}/{category}")
+@app.head("/preset/{preset_name}/{category}")
 @app.get("/preset/{preset_name}.{ext}")
 @app.head("/preset/{preset_name}.{ext}")
+@app.get("/preset/{preset_name}/{category}.{ext}")
+@app.head("/preset/{preset_name}/{category}.{ext}")
 async def serve_by_preset(
     preset_name: str,
     ext: str = "",
