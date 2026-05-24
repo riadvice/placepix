@@ -418,7 +418,13 @@
                         </div>
                         <div class="form-group">
                             <label>Category <small>(optional)</small></label>
-                            <input type="text" id="category" placeholder="nature, architecture, etc.">
+                            <input type="text" id="category" placeholder="nature, architecture, animals, etc.">
+                            <small>Leave empty for random from all categories</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Seed <small>(optional)</small></label>
+                            <input type="text" id="seed" placeholder="e.g., myseed123">
+                            <small>Use same seed for consistent results</small>
                         </div>
                     </div>
                     
@@ -454,6 +460,14 @@
                             <label>Height</label>
                             <input type="number" id="ratio-height" value="1080" min="8" max="2000">
                         </div>
+                        <div class="form-group">
+                            <label>Category <small>(optional)</small></label>
+                            <input type="text" id="ratio-category" placeholder="nature, architecture, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label>Seed <small>(optional)</small></label>
+                            <input type="text" id="ratio-seed" placeholder="e.g., myseed123">
+                        </div>
                     </div>
                     
                     <!-- Preset endpoint -->
@@ -471,6 +485,15 @@
                                 <option value="desktop">Desktop (1920x1080)</option>
                                 <option value="4k">4K (3840x2160)</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Category <small>(optional)</small></label>
+                            <input type="text" id="preset-category" placeholder="nature, architecture, etc.">
+                            <small>Get realistic images instead of abstract placeholders</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Seed <small>(optional)</small></label>
+                            <input type="text" id="preset-seed" placeholder="e.g., myseed123">
                         </div>
                     </div>
                     
@@ -731,7 +754,9 @@
                     const width = document.getElementById('width').value;
                     const height = document.getElementById('height').value;
                     const category = document.getElementById('category').value;
+                    const seed = document.getElementById('seed').value;
                     url = `/${width}/${height}${category ? '/' + category : ''}`;
+                    if (seed) params.push(`seed=${encodeURIComponent(seed)}`);
                     break;
                     
                 case 'id':
@@ -744,12 +769,18 @@
                 case 'ratio':
                     const ratio = document.getElementById('ratio').value;
                     const ratioHeight = document.getElementById('ratio-height').value;
-                    url = `/ratio/${ratio}/${ratioHeight}`;
+                    const ratioCategory = document.getElementById('ratio-category').value;
+                    const ratioSeed = document.getElementById('ratio-seed').value;
+                    url = `/ratio/${ratio}/${ratioHeight}${ratioCategory ? '/' + ratioCategory : ''}`;
+                    if (ratioSeed) params.push(`seed=${encodeURIComponent(ratioSeed)}`);
                     break;
                     
                 case 'preset':
                     const preset = document.getElementById('preset').value;
-                    url = `/preset/${preset}`;
+                    const presetCategory = document.getElementById('preset-category').value;
+                    const presetSeed = document.getElementById('preset-seed').value;
+                    url = `/preset/${preset}${presetCategory ? '/' + presetCategory : ''}`;
+                    if (presetSeed) params.push(`seed=${encodeURIComponent(presetSeed)}`);
                     break;
                     
                 case 'solid':
