@@ -207,6 +207,9 @@ async def upload_image(
     file: UploadFile,
     category: str = Form(default=""),
 ) -> JSONResponse:
+    if not settings.upload_enabled:
+        raise HTTPException(status_code=403, detail="uploads are disabled")
+
     if not file.filename:
         raise HTTPException(status_code=400, detail="no file provided")
 

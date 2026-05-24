@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     min_height: int = Field(default=8)
     max_width: int = Field(default=2000)
     max_height: int = Field(default=2000)
+    upload_enabled: bool = Field(default=True)
 
     @property
     def bind_host(self) -> str:
