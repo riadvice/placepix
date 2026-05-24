@@ -1463,7 +1463,7 @@ async def image_explorer(page: int = 1) -> Response:
         
         pages = []
         # Always show first page
-        pages.append(1 if current == 1 else f'<a class="page-link" href="/images?page=1">1</a>')
+        pages.append(f'<span class="page-link active">1</span>' if current == 1 else f'<a class="page-link" href="/images?page=1">1</a>')
         
         # Show ellipsis if gap after first page
         if current > 3:
@@ -1483,7 +1483,7 @@ async def image_explorer(page: int = 1) -> Response:
             pages.append('<span class="page-link disabled">...</span>')
         
         # Always show last page
-        pages.append(total if current == total else f'<a class="page-link" href="/images?page={total}">{total}</a>')
+        pages.append(f'<span class="page-link active">{total}</span>' if current == total else f'<a class="page-link" href="/images?page={total}">{total}</a>')
         
         return "".join(pages)
     
@@ -1659,7 +1659,7 @@ async def color_palette(
         
         pages = []
         # Always show first page
-        pages.append(1 if current == 1 else f'<a class="page-link" href="{base_url}&page=1">1</a>')
+        pages.append(f'<span class="page-link active">1</span>' if current == 1 else f'<a class="page-link" href="{base_url}&page=1">1</a>')
         
         # Show ellipsis if gap after first page
         if current > 3:
@@ -1679,7 +1679,7 @@ async def color_palette(
             pages.append('<span class="page-link disabled">...</span>')
         
         # Always show last page
-        pages.append(total if current == total else f'<a class="page-link" href="{base_url}&page={total}">{total}</a>')
+        pages.append(f'<span class="page-link active">{total}</span>' if current == total else f'<a class="page-link" href="{base_url}&page={total}">{total}</a>')
         
         return "".join(pages)
     
