@@ -7,7 +7,7 @@
 
   Serve random images with on-the-fly resizing, filtering, and formatting.
 
-  **Made by [RIADVICE](https://riadvice.com)**
+  **Live:** [placepix.net](https://placepix.net) · **Made by [RIADVICE](https://riadvice.com)**
 
   ---
 </div>
@@ -70,7 +70,7 @@ Visit `http://localhost:3000/features` for an **interactive URL constructor** th
 
 ## Testing
 
-PlacePix includes comprehensive unit tests with 77% code coverage.
+PlacePix includes comprehensive unit tests.
 
 ### Running Tests
 
@@ -100,42 +100,6 @@ pytest --cov=src --cov-report=html
 # Show coverage for specific module
 pytest --cov=src.image_processor --cov-report=term-missing
 ```
-
-**Example coverage output:**
-```
-Name                     Stmts   Miss  Cover   Missing
-------------------------------------------------------
-src/__init__.py              0      0   100%
-src/config.py               34      2    94%   36, 40
-src/image_processor.py     287     68    76%   12-13, 18-19, 131-134...
-src/main.py                457     80    82%   64-109, 113, 269...
-src/metrics.py              70     10    86%   209-243
-src/observer.py             25      0   100%
-------------------------------------------------------
-TOTAL                     1246    288    77%
-```
-
-### Test Statistics
-
-- **200 passing tests** across 7 test files
-- **77% code coverage**
-- Tests cover:
-  - All image processing effects
-  - All API endpoints
-  - Cache headers and metrics
-  - Feature explorer
-  - Edge cases and error handling
-
-### Test Files
-
-- `test_cache_headers.py` - ETag, Last-Modified, 304 responses
-- `test_metrics.py` - Usage tracking and admin dashboard
-- `test_aspect_ratio_presets.py` - Aspect ratios and presets
-- `test_image_effects.py` - Border, padding, noise, pixelate, quality, LQIP
-- `test_advanced_features.py` - Srcset, smart crop, watermark
-- `test_feature_explorer.py` - Feature explorer page
-- `test_comprehensive_coverage.py` - Comprehensive endpoint coverage
-- `test_image_processor_direct.py` - Direct processor method tests
 
 ## Dependencies
 
@@ -432,7 +396,7 @@ docker-compose logs -f
 docker-compose down
 ```
 
-### Docker Hub (Coming Soon)
+### Docker Hub
 
 ```bash
 # Pull from Docker Hub
@@ -440,28 +404,6 @@ docker pull riadvice/placepix:latest
 
 # Run from Docker Hub
 docker run -d -p 3000:3000 -v $(pwd)/images:/app/images riadvice/placepix:latest
-```
-
-### Useful Commands
-
-```bash
-# View logs
-docker logs placepix
-
-# Follow logs
-docker logs -f placepix
-
-# Stop container
-docker stop placepix
-
-# Start container
-docker start placepix
-
-# Remove container
-docker rm placepix
-
-# Execute commands in container
-docker exec -it placepix sh
 ```
 
 ## Categories
