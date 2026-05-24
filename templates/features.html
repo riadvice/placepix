@@ -1008,11 +1008,21 @@
         }
         
         function loadPreview() {
-            const url = document.getElementById('url-output').textContent.replace('GET ', '');
+            let url = document.getElementById('url-output').textContent.replace('GET ', '');
             const preview = document.getElementById('preview');
             const container = document.getElementById('preview-container');
             const sizeDisplay = document.getElementById('image-size');
             const fileSizeDisplay = document.getElementById('file-size');
+            
+            // Add cache-busting for random images (endpoints without seed or ID)
+            const isRandom = currentEndpoint === 'random' || currentEndpoint === 'ratio' || currentEndpoint === 'preset';
+            const hasSeed = url.includes('seed=');
+            
+            if (isRandom && !hasSeed) {
+                // Add timestamp to prevent caching of random images
+                const separator = url.includes('?') ? '&' : '?';
+                url += `${separator}_t=${Date.now()}`;
+            }
             
             // Show loading state
             sizeDisplay.textContent = 'Loading...';
