@@ -31,6 +31,15 @@ class Settings(BaseSettings):
     watermark_position: str = Field(default="bottom-right")
     watermark_opacity: float = Field(default=0.5)
 
+    # S3-compatible storage (optional)
+    s3_enabled: bool = Field(default=False)
+    s3_endpoint: str = Field(default="")
+    s3_access_key: str = Field(default="")
+    s3_secret_key: str = Field(default="")
+    s3_bucket: str = Field(default="")
+    s3_prefix: str = Field(default="")
+    s3_region: str = Field(default="")
+
     @property
     def bind_host(self) -> str:
         return self.host.rsplit(":", 1)[0] if ":" in self.host else self.host

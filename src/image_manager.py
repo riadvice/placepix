@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
 import random
@@ -12,6 +13,13 @@ import yaml
 from PIL import Image
 
 from src.config import settings
+
+try:
+    import boto3
+    from botocore.config import Config
+    _BOTO3_AVAILABLE = True
+except Exception:
+    _BOTO3_AVAILABLE = False
 
 
 def _hex_to_rgb(hex_str: str) -> tuple[int, int, int] | None:
@@ -45,10 +53,11 @@ def _extract_dominant_colors(image_path: Path, num_colors: int = 3) -> list[str]
 
 @dataclass
 class ImageEntry:
-    path: Path
+    path: Path | None
     filename: str
     category: str
     id: int = 0
+    s3_key: str = ""
 
 
 @dataclass
@@ -266,10 +275,19 @@ class ImageManager:
                 ))
                 total += 1
 
+        if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket:
+            s3_categories, next_id = self._scan_s3(manifest, next_id)
+            for cat_name, category in s3_categories.items():
+                if cat_name in new_categories:
+                    new_categories[cat_name].entries.extend(category.entries)
+                else:
+                    new_categories[cat_name] = category
+                total += len(category.entries)
+
         colors = self._load_colors()
         for cat in new_categories.values():
             for entry in cat.entries:
-                if entry.id not in colors:
+                if entry.id not in colors and entry.path is not None:
                     colors[entry.id] = _extract_dominant_colors(entry.path)
 
         self._categories = new_categories
@@ -277,6 +295,70 @@ class ImageManager:
         self._colors = colors
         self._save_manifest(manifest)
         self._save_colors(colors)
+
+    def _scan_s3(self, manifest: dict[str, int], next_id: int) -> tuple[dict[str, Category], int]:
+        """Scan S3 bucket for images and return categories."""
+        new_categories: dict[str, Category] = {}
+        try:
+            client = boto3.client(
+                "s3",
+                endpoint_url=settings.s3_endpoint,
+                aws_access_key_id=settings.s3_access_key,
+                aws_secret_access_key=settings.s3_secret_key,
+                region_name=settings.s3_region or "auto",
+                config=Config(signature_version="s3v4"),
+            )
+            prefix = settings.s3_prefix
+            if prefix and not prefix.endswith("/"):
+                prefix += "/"
+
+            paginator = client.get_paginator("list_objects_v2")
+            pages = paginator.paginate(Bucket=settings.s3_bucket, Prefix=prefix)
+
+            for page in pages:
+                for obj in page.get("Contents", []):
+                    key = obj["Key"]
+                    if key.endswith("/"):
+                        continue
+                    basename = key.split("/")[-1]
+                    if not basename or basename.startswith("."):
+                        continue
+                    ext = os.path.splitext(basename)[1].lower()
+                    if ext not in self.VALID_EXTS:
+                        continue
+
+                    relative_key = key[len(prefix):] if prefix else key
+                    parts = relative_key.split("/")
+                    if len(parts) > 1 and parts[0]:
+                        cat_name = parts[0]
+                        filename = parts[-1]
+                    else:
+                        cat_name = self.ROOT_KEY
+                        filename = basename
+
+                    manifest_key = f"s3://{settings.s3_bucket}/{key}"
+                    if manifest_key not in manifest:
+                        manifest[manifest_key] = next_id
+                        next_id += 1
+
+                    if cat_name not in new_categories:
+                        new_categories[cat_name] = Category(
+                            name=cat_name,
+                            meta=CategoryMeta(),
+                            entries=[],
+                        )
+
+                    new_categories[cat_name].entries.append(ImageEntry(
+                        path=None,
+                        filename=filename,
+                        category=cat_name,
+                        id=manifest[manifest_key],
+                        s3_key=key,
+                    ))
+        except Exception:
+            pass
+
+        return new_categories, next_id
 
     def _scan_subdir(self, subdir: Path, manifest: dict[str, int], next_id: int) -> tuple[list[ImageEntry], CategoryMeta, int]:
         entries: list[ImageEntry] = []

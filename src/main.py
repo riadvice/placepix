@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import os
 import time
 from datetime import datetime, timezone
@@ -8,6 +9,13 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, Header, Depends
+
+try:
+    import boto3
+    from botocore.config import Config
+    _BOTO3_AVAILABLE = True
+except Exception:
+    _BOTO3_AVAILABLE = False
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -235,6 +243,24 @@ def _check_not_modified(
     return False
 
 
+def _resolve_image_source(entry: ImageEntry) -> Path | io.BytesIO:
+    """Return local path or download S3 object into a BytesIO buffer."""
+    if entry.s3_key and _BOTO3_AVAILABLE and settings.s3_enabled:
+        client = boto3.client(
+            "s3",
+            endpoint_url=settings.s3_endpoint,
+            aws_access_key_id=settings.s3_access_key,
+            aws_secret_access_key=settings.s3_secret_key,
+            region_name=settings.s3_region or "auto",
+            config=Config(signature_version="s3v4"),
+        )
+        response = client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
+        return io.BytesIO(response["Body"].read())
+    if entry.path is None:
+        raise HTTPException(status_code=500, detail="image has no local path or S3 key")
+    return entry.path
+
+
 # ── Image serving ───────────────────────────────────────────────────
 def _serve_entry(
     entry: ImageEntry,
@@ -321,9 +347,12 @@ def _serve_entry(
             "watermark_opacity": settings.watermark_opacity,
         }
     
+    # Resolve image source
+    image_source = _resolve_image_source(entry)
+
     # Process image
     processed = processor.process(
-        image_path=entry.path,
+        image_path=image_source,
         width=width,
         height=height,
         grayscale=grayscale,
@@ -354,8 +383,11 @@ def _serve_entry(
 
     # Generate cache headers for new content
     etag = _generate_etag(processed)
-    last_modified = _get_last_modified(entry.path)
-    
+    if entry.path is not None:
+        last_modified = _get_last_modified(entry.path)
+    else:
+        last_modified = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
+
     # Check if client cache is still valid
     if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
         return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
@@ -787,11 +819,15 @@ async def image_info_by_id(image_id: int) -> JSONResponse:
 
     from PIL import Image
 
-    with Image.open(entry.path) as img:
+    source = _resolve_image_source(entry)
+    with Image.open(source) as img:
         width, height = img.size
         fmt = img.format.lower() if img.format else "unknown"
 
-    size = entry.path.stat().st_size
+    if isinstance(source, Path):
+        size = source.stat().st_size
+    else:
+        size = len(source.getvalue())
 
     return JSONResponse({
         "id": entry.id,
@@ -814,11 +850,15 @@ async def image_info(category: str, filename: str) -> JSONResponse:
 
     from PIL import Image
 
-    with Image.open(entry.path) as img:
+    source = _resolve_image_source(entry)
+    with Image.open(source) as img:
         width, height = img.size
         fmt = img.format.lower() if img.format else "unknown"
 
-    size = entry.path.stat().st_size
+    if isinstance(source, Path):
+        size = source.stat().st_size
+    else:
+        size = len(source.getvalue())
 
     return JSONResponse({
         "id": entry.id,
@@ -1146,7 +1186,8 @@ async def generate_srcset(
     
     # Calculate aspect ratio from original image
     from PIL import Image
-    with Image.open(entry.path) as img:
+    source = _resolve_image_source(entry)
+    with Image.open(source) as img:
         aspect_ratio = img.width / img.height
     
     # Generate srcset entries

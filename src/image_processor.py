@@ -41,7 +41,7 @@ class ImageProcessor:
 
     def process(
         self,
-        image_path: Path,
+        image_path: Path | io.BytesIO,
         width: int = 0,
         height: int = 0,
         grayscale: bool = False,
