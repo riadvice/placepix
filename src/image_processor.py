@@ -478,39 +478,43 @@ class ImageProcessor:
         if w == 0 or h == 0:
             w, h = 500, 300
 
-        img = Image.new("RGB", (w, h))
-
         if gradient_type == "radial":
-            # Radial gradient from center
-            for y in range(h):
-                for x in range(w):
-                    dx = x - w / 2
-                    dy = y - h / 2
-                    dist = (dx * dx + dy * dy) ** 0.5
-                    max_dist = ((w / 2) ** 2 + (h / 2) ** 2) ** 0.5
-                    t = min(dist / max_dist, 1.0)
-                    r = int(r1 + (r2 - r1) * t)
-                    g = int(g1 + (g2 - g1) * t)
-                    b = int(b1 + (b2 - b1) * t)
-                    img.putpixel((x, y), (r, g, b))
+            # Radial gradient from center - use numpy for speed
+            import numpy as np
+            y, x = np.ogrid[:h, :w]
+            dx = x - w / 2
+            dy = y - h / 2
+            dist = np.sqrt(dx * dx + dy * dy)
+            max_dist = np.sqrt((w / 2) ** 2 + (h / 2) ** 2)
+            t = np.clip(dist / max_dist, 0, 1)
+            
+            r = (r1 + (r2 - r1) * t).astype(np.uint8)
+            g = (g1 + (g2 - g1) * t).astype(np.uint8)
+            b = (b1 + (b2 - b1) * t).astype(np.uint8)
+            
+            rgb = np.dstack((r, g, b))
+            img = Image.fromarray(rgb, "RGB")
         else:
-            # Linear gradient
-            angle_rad = angle * 3.141592653589793 / 180
-            # Calculate the projection range
+            # Linear gradient - use numpy for speed
+            import numpy as np
+            y, x = np.ogrid[:h, :w]
+            
+            angle_rad = angle * math.pi / 180
             ux = w * math.cos(angle_rad)
             uy = h * math.sin(angle_rad)
-            max_proj = (ux * ux + uy * uy) ** 0.5
+            max_proj = math.sqrt(ux * ux + uy * uy)
             if max_proj == 0:
                 max_proj = 1
-
-            for y in range(h):
-                for x in range(w):
-                    proj = (x * ux + y * uy) / max_proj
-                    t = max(0.0, min(1.0, proj / max_proj))
-                    r = int(r1 + (r2 - r1) * t)
-                    g = int(g1 + (g2 - g1) * t)
-                    b = int(b1 + (b2 - b1) * t)
-                    img.putpixel((x, y), (r, g, b))
+            
+            proj = (x * ux + y * uy) / max_proj
+            t = np.clip(proj / max_proj, 0, 1)
+            
+            r = (r1 + (r2 - r1) * t).astype(np.uint8)
+            g = (g1 + (g2 - g1) * t).astype(np.uint8)
+            b = (b1 + (b2 - b1) * t).astype(np.uint8)
+            
+            rgb = np.dstack((r, g, b))
+            img = Image.fromarray(rgb, "RGB")
 
         buffer = io.BytesIO()
         img.save(buffer, format="PNG", optimize=True)
