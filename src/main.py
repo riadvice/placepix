@@ -33,7 +33,7 @@ from src.seed import seed_images
 # ── Logging Setup ───────────────────────────────────────────────────
 def setup_logging():
     """Configure logging with console output only."""
-    log_format = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+    log_format = "%(asctime)s | %(levelname)-8s | %(name)s | [PID:%(process)d] | %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
     
     # Create logger
@@ -67,15 +67,15 @@ app.add_middleware(
 
 # Seed images if enabled
 if settings.seed_enabled:
-    logger.info(f"Seeding images in {settings.seed_dir}")
+    logger.info(f"Seeding sample images in: {settings.seed_dir}")
     seed_images(settings.seed_dir)
 else:
     logger.info("Seed images disabled")
 
 # In-memory image registry
-logger.info(f"Scanning images from {settings.images_dir} and {settings.seed_dir}")
+logger.info(f"Loading image registry from: {settings.images_dir} and {settings.seed_dir}")
 manager = ImageManager()
-logger.info(f"Loaded {manager.total} images across {len(manager.categories)} categories")
+logger.info(f"Registry loaded: {manager.total} images in {len(manager.categories)} categories")
 
 processor = ImageProcessor(
     min_width=settings.min_width,
@@ -84,9 +84,13 @@ processor = ImageProcessor(
     max_height=settings.max_height,
 )
 
-# Watchdog hot-reload
-logger.info("Starting file watcher for hot-reload")
-_observer = start_watching(manager)
+# Watchdog hot-reload (only start in leader worker)
+if manager._is_leader:
+    logger.info("Starting file watcher for hot-reload")
+    _observer = start_watching(manager)
+else:
+    logger.info("File watcher skipped (not leader worker)")
+    _observer = None
 
 # Metrics tracker (only if admin password is set)
 if settings.admin_password:
@@ -99,7 +103,7 @@ else:
 # Templates
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-logger.info(f"Static files mounted at /static")
+logger.info("Static files mounted at /static")
 
 logger.info(f"PlacePix ready - listening on {settings.bind_host}:{settings.bind_port}")
 
@@ -488,10 +492,10 @@ async def serve_by_id(
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
-    logger.debug(f"Serving image by ID: {image_id} at {width}x{height}")
+    logger.debug(f"Serving image by ID #{image_id} at {width}x{height}")
     entry = manager.get_by_id(image_id)
     if entry is None:
-        logger.warning(f"Image not found: ID {image_id}")
+        logger.warning(f"Image not found: ID #{image_id}")
         raise HTTPException(status_code=404, detail="image not found")
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
@@ -760,7 +764,9 @@ async def serve_image(
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
-    logger.debug(f"Serving image: {width}x{height} from category '{category}' (seed: {seed or 'random'})")
+    cat_display = category or "all"
+    seed_display = seed or "random"
+    logger.debug(f"Serving {width}x{height} from category '{cat_display}' (seed: {seed_display})")
     if color:
         entry = manager.pick_by_color(color, category or None)
     else:
@@ -1288,14 +1294,15 @@ async def upload_image(
     file: UploadFile,
     category: str = Form(default=""),
 ) -> JSONResponse:
-    logger.info(f"Upload request: {file.filename} to category '{category or '__root'}'")
+    cat_display = category or "__root"
+    logger.info(f"Upload request: {file.filename} to category '{cat_display}'")
     
     if not settings.upload_enabled:
-        logger.warning("Upload attempt but uploads are disabled")
+        logger.warning("Upload blocked: uploads are disabled")
         raise HTTPException(status_code=403, detail="uploads are disabled")
 
     if not file.filename:
-        logger.warning("Upload attempt with no filename")
+        logger.warning("Upload failed: no filename provided")
         raise HTTPException(status_code=400, detail="no file provided")
 
     target_dir = settings.images_dir
@@ -1310,7 +1317,7 @@ async def upload_image(
 
     # Trigger rescan
     manager.rescan()
-    logger.info("Rescanned image registry after upload")
+    logger.info("Registry rescanned after upload")
 
     return JSONResponse({
         "success": True,
@@ -1444,7 +1451,7 @@ async def admin_stats_page(
     </style>
 </head>
 <body>
-    <h1>📊 PlacePix Admin Dashboard</h1>
+    <h1>PlacePix Admin Dashboard</h1>
     <div class="stats-grid">{cards_html}</div>
     <div class="tables-grid">
         <div class="table-card">

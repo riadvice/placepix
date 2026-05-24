@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import atexit
 import hashlib
 import io
 import json
 import logging
 import os
 import random
+import fcntl
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -16,6 +18,9 @@ from PIL import Image
 from src.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Global flag to ensure S3 scan happens only once across all workers
+_s3_scan_done = False
 
 try:
     import boto3
@@ -96,6 +101,8 @@ class ImageManager:
         self._categories: dict[str, Category] = {}
         self._total = 0
         self._colors: dict[int, list[str]] = {}
+        self._s3_scanned = False
+        self._is_leader = self._acquire_leader_lock()
         self._rescan()
 
     @property
@@ -195,7 +202,10 @@ class ImageManager:
         if self._manifest_path.exists():
             try:
                 with open(self._manifest_path, "r", encoding="utf-8") as f:
+                    # Acquire shared lock for reading
+                    fcntl.flock(f.fileno(), fcntl.LOCK_SH)
                     data = json.load(f)
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
                 if isinstance(data, dict):
                     return {k: int(v) for k, v in data.items()}
             except Exception:
@@ -206,7 +216,10 @@ class ImageManager:
         """Save the persistent id -> filename mapping."""
         try:
             with open(self._manifest_path, "w", encoding="utf-8") as f:
+                # Acquire exclusive lock for writing
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
                 json.dump(mapping, f, indent=2, sort_keys=True)
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
         except Exception:
             pass
 
@@ -214,11 +227,48 @@ class ImageManager:
     def _colors_path(self) -> Path:
         return settings.seed_dir / ".placepix_colors.json"
 
+    def _acquire_leader_lock(self) -> bool:
+        """Try to acquire leader lock. Returns True if this worker is the leader."""
+        lock_file = settings.seed_dir / ".placepix_leader.lock"
+        try:
+            lock_file.touch(exist_ok=True)
+            f = open(lock_file, "w")
+            try:
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                # Write our PID to the lock file
+                f.write(str(os.getpid()))
+                f.flush()
+                self._leader_lock_file = f
+                logger.info(f"Worker {os.getpid()} acquired leader lock")
+                # Register cleanup on exit
+                atexit.register(self._release_leader_lock)
+                return True
+            except (IOError, BlockingIOError):
+                f.close()
+                logger.debug(f"Worker {os.getpid()} did not acquire leader lock")
+                return False
+        except Exception as e:
+            logger.warning(f"Failed to acquire leader lock: {e}")
+            return False
+
+    def _release_leader_lock(self) -> None:
+        """Release the leader lock."""
+        if hasattr(self, '_leader_lock_file') and self._leader_lock_file:
+            try:
+                fcntl.flock(self._leader_lock_file.fileno(), fcntl.LOCK_UN)
+                self._leader_lock_file.close()
+                logger.info(f"Worker {os.getpid()} released leader lock")
+            except Exception as e:
+                logger.warning(f"Failed to release leader lock: {e}")
+
     def _load_colors(self) -> dict[int, list[str]]:
         if self._colors_path.exists():
             try:
                 with open(self._colors_path, "r", encoding="utf-8") as f:
+                    # Acquire shared lock for reading
+                    fcntl.flock(f.fileno(), fcntl.LOCK_SH)
                     data = json.load(f)
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
                 if isinstance(data, dict):
                     return {int(k): list(v) for k, v in data.items()}
             except Exception:
@@ -228,7 +278,10 @@ class ImageManager:
     def _save_colors(self, colors: dict[int, list[str]]) -> None:
         try:
             with open(self._colors_path, "w", encoding="utf-8") as f:
+                # Acquire exclusive lock for writing
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
                 json.dump(colors, f, indent=2, sort_keys=True)
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
         except Exception:
             pass
 
@@ -241,35 +294,36 @@ class ImageManager:
         if not seed_dir.exists():
             seed_dir.mkdir(parents=True)
 
+        logger.info(f"Scanning image directory: {images_dir}")
         manifest = self._load_manifest()
         next_id = max(manifest.values(), default=0) + 1
 
         new_categories: dict[str, Category] = {}
         total = 0
 
-        # Scan both images_dir and seed_dir
-        for scan_dir in [images_dir, seed_dir]:
-            for item in scan_dir.iterdir():
-                if item.name.startswith(".") or item.name in self.IGNORE_FILES:
-                    continue
+        # Scan images_dir for user images
+        logger.debug(f"  Scanning: {images_dir}")
+        for item in images_dir.iterdir():
+            if item.name.startswith(".") or item.name in self.IGNORE_FILES:
+                continue
 
-                if item.is_dir():
-                    entries, meta, next_id = self._scan_subdir(item, manifest, next_id)
-                    if entries:
-                        if item.name in new_categories:
-                            # Merge entries if category already exists
-                            new_categories[item.name].entries.extend(entries)
-                        else:
-                            new_categories[item.name] = Category(
-                                name=item.name,
-                                meta=meta,
-                                entries=entries,
-                            )
+            if item.is_dir():
+                entries, meta, next_id = self._scan_subdir(item, manifest, next_id)
+                if entries:
+                    if item.name in new_categories:
+                        # Merge entries if category already exists
+                        new_categories[item.name].entries.extend(entries)
+                    else:
+                        new_categories[item.name] = Category(
+                            name=item.name,
+                            meta=meta,
+                            entries=entries,
+                        )
                         total += len(entries)
                 elif item.suffix.lower() in self.VALID_EXTS:
                     root = new_categories.get(self.ROOT_KEY)
                     if root is None:
-                        meta = self._read_meta(scan_dir)
+                        meta = self._read_meta(images_dir)
                         new_categories[self.ROOT_KEY] = Category(
                             name=self.ROOT_KEY,
                             meta=meta,
@@ -288,7 +342,9 @@ class ImageManager:
                     ))
                     total += 1
 
-        if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket:
+        # Only scan S3 on first rescan (startup), and only by leader worker
+        if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned and self._is_leader:
+            logger.info(f"Scanning S3 bucket: {settings.s3_bucket}")
             s3_categories, next_id = self._scan_s3(manifest, next_id)
             for cat_name, category in s3_categories.items():
                 if cat_name in new_categories:
@@ -296,6 +352,8 @@ class ImageManager:
                 else:
                     new_categories[cat_name] = category
                 total += len(category.entries)
+            self._s3_scanned = True
+            logger.info(f"S3 scan complete: found {len(s3_categories)} categories")
 
         colors = self._load_colors()
         for cat in new_categories.values():
@@ -308,7 +366,7 @@ class ImageManager:
         self._colors = colors
         self._save_manifest(manifest)
         self._save_colors(colors)
-        logger.info(f"Rescan complete: {total} images in {len(new_categories)} categories")
+        logger.info(f"Scan complete: {total} images in {len(new_categories)} categories")
 
     def _scan_s3(self, manifest: dict[str, int], next_id: int) -> tuple[dict[str, Category], int]:
         """Scan S3 bucket for images and return categories."""
