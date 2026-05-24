@@ -1046,7 +1046,10 @@ async def feature_explorer(request: Request) -> Any:
     return templates.TemplateResponse(
         request,
         "features.html",
-        {"ga_tracking_id": settings.ga_tracking_id},
+        {
+            "ga_tracking_id": settings.ga_tracking_id,
+            "upload_enabled": settings.upload_enabled and _upload_writable,
+        },
     )
 
 
@@ -1241,9 +1244,12 @@ async def image_explorer(page: int = 1) -> Response:
     <nav>
         <a href="/" class="logo"><img src="/static/logo.svg" alt=""><span>PlacePix</span></a>
         <div class="nav-links">
-            <a href="/">Home</a>
+            <a href="/#categories">Categories</a>
             <a href="/images">Explorer</a>
             <a href="/palette">Palette</a>
+            <a href="/features">🎨 Features</a>
+            {"<a href='/#upload'>Upload</a>" if settings.upload_enabled and _upload_writable else ""}
+            <a href="/#api">API</a>
             <a href="/docs" target="_blank">Docs</a>
         </div>
     </nav>
@@ -1374,9 +1380,12 @@ async def color_palette(
     <nav>
         <a href="/" class="logo"><img src="/static/logo.svg" alt=""><span>PlacePix</span></a>
         <div class="nav-links">
-            <a href="/">Home</a>
+            <a href="/#categories">Categories</a>
             <a href="/images">Explorer</a>
             <a href="/palette">Palette</a>
+            <a href="/features">🎨 Features</a>
+            {"<a href='/#upload'>Upload</a>" if settings.upload_enabled and _upload_writable else ""}
+            <a href="/#api">API</a>
             <a href="/docs" target="_blank">Docs</a>
         </div>
     </nav>
