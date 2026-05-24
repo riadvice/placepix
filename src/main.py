@@ -199,6 +199,31 @@ async def api_images() -> JSONResponse:
     })
 
 
+@app.get("/api/info/{category}/{filename}")
+async def image_info(category: str, filename: str) -> JSONResponse:
+    entry = manager.get_entry(category, filename)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+
+    from PIL import Image
+
+    with Image.open(entry.path) as img:
+        width, height = img.size
+        fmt = img.format.lower() if img.format else "unknown"
+
+    size = entry.path.stat().st_size
+
+    return JSONResponse({
+        "filename": entry.filename,
+        "category": entry.category,
+        "width": width,
+        "height": height,
+        "format": fmt,
+        "size": size,
+        "serve_url": f"/500/500/{entry.category}" if entry.category != manager.ROOT_KEY else "/500/500",
+    })
+
+
 # ── Upload ────────────────────────────────────────────────────────
 from fastapi import Form
 

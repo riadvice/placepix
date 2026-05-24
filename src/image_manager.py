@@ -90,6 +90,15 @@ class ImageManager:
 
         return random.choice(cat.entries)
 
+    def get_entry(self, category: str, filename: str) -> ImageEntry | None:
+        cat = self._categories.get(category)
+        if cat is None:
+            return None
+        for entry in cat.entries:
+            if entry.filename == filename:
+                return entry
+        return None
+
     def list_categories(self) -> list[dict[str, Any]]:
         result = []
         for name, cat in self._categories.items():
