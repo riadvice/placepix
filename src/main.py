@@ -69,8 +69,10 @@ def _get_git_version() -> str:
         return env_version
     try:
         import subprocess
+        # git describe gives: <tag>-<commits-since-tag>-g<short-hash>
+        # e.g. 0.9-87-g929a1dad — falls back to just short hash if no tags
         result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "describe", "--tags", "--always"],
             capture_output=True, text=True, timeout=5,
         )
         if result.returncode == 0:
@@ -1250,7 +1252,10 @@ async def serve_raw_by_path(
 # ── Web UI ──────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> Any:
+    import time
+    t0 = time.perf_counter()
     categories = manager.list_categories()
+    render_time = f"{(time.perf_counter() - t0) * 1000:.1f}"
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -1260,13 +1265,14 @@ async def index(request: Request) -> Any:
             "ga_tracking_id": settings.ga_tracking_id,
             "upload_enabled": settings.upload_enabled and _upload_writable,
             "git_version": _git_version,
+            "render_time": render_time,
         },
     )
 
 
-@app.get("/features", response_class=HTMLResponse)
-async def feature_explorer(request: Request) -> Any:
-    """Interactive feature explorer and URL constructor."""
+@app.get("/url-builder", response_class=HTMLResponse)
+async def url_builder(request: Request) -> Any:
+    """Interactive URL builder and feature explorer."""
     return templates.TemplateResponse(
         request,
         "features.html",
@@ -1275,6 +1281,12 @@ async def feature_explorer(request: Request) -> Any:
             "upload_enabled": settings.upload_enabled and _upload_writable,
         },
     )
+
+
+@app.get("/features")
+async def features_redirect() -> RedirectResponse:
+    """Redirect old /features URL to /url-builder."""
+    return RedirectResponse(url="/url-builder", status_code=301)
 
 
 # ── API metadata ──────────────────────────────────────────────────
@@ -1514,9 +1526,15 @@ async def image_explorer(page: int = 1) -> Response:
         .logo {{ display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--text); }}
         .logo img {{ width: 28px; height: 28px; }}
         .logo span {{ font-weight: 700; font-size: 1.1rem; }}
-        .nav-links {{ display: flex; gap: 1.25rem; font-size: .9rem; }}
+        .nav-links {{ display: flex; gap: 1.25rem; font-size: .9rem; align-items: center; }}
         .nav-links a {{ color: var(--muted); text-decoration: none; }}
         .nav-links a:hover {{ color: var(--accent); }}
+        .dropdown {{ position: relative; display: inline-block; }}
+        .dropdown-toggle {{ cursor: pointer; color: var(--muted); text-decoration: none; font-size: .9rem; }}
+        .dropdown-menu {{ display: none; position: absolute; top: 100%; left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.1); padding: .5rem 0; min-width: 180px; z-index: 100; }}
+        .dropdown-menu a {{ display: block; padding: .4rem .8rem; color: var(--text); text-decoration: none; font-size: .85rem; white-space: nowrap; }}
+        .dropdown-menu a:hover {{ background: #f1f5f9; color: var(--accent); }}
+        .dropdown:hover .dropdown-menu {{ display: block; }}
         h1 {{ text-align: center; margin-bottom: .25rem; font-size: 1.75rem; }}
         .subtitle {{ text-align: center; color: var(--muted); margin-bottom: 1.5rem; font-size: .95rem; }}
         .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }}
@@ -1544,7 +1562,18 @@ async def image_explorer(page: int = 1) -> Response:
             <a href="/#categories">Categories</a>
             <a href="/images">Explorer</a>
             <a href="/palette">Palette</a>
-            <a href="/features">🎨 Features</a>
+            <div class="dropdown">
+                <span class="dropdown-toggle">Features ▾</span>
+                <div class="dropdown-menu">
+                    <a href="/url-builder">URL Builder</a>
+                    <a href="/#smart-crop">Smart Crop</a>
+                    <a href="/#aspect-ratios">Aspect Ratios</a>
+                    <a href="/#filters">Filters & Effects</a>
+                    <a href="/#overlays">Overlays</a>
+                    <a href="/#presets">Presets</a>
+                    <a href="/#api">API Reference</a>
+                </div>
+            </div>
             {"<a href='/#upload'>Upload</a>" if settings.upload_enabled and _upload_writable else ""}
             <a href="/#api">API</a>
             <a href="/docs" target="_blank">Docs</a>
