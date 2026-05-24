@@ -8,9 +8,6 @@ services:
       - ./images:/app/images
       - ./.cache:/app/.cache
       - ./data:/app/data
-    environment:
-      - DATA_DIR=/app/data
-      - IMAGES_DIR=/app/images
-      - CACHE=true
-      - HOST=0.0.0.0:3000
+    env_file:
+      - .env.production
     restart: unless-stopped

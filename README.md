@@ -323,30 +323,11 @@ Copy `.env.example` to `.env` and adjust:
 | `CDN`                | CDN base URL (optional)              | —                |
 | `MAX_WIDTH`          | Maximum allowed width                | `2000`           |
 | `MAX_HEIGHT`         | Maximum allowed height               | `2000`           |
-| `ADMIN_PASSWORD`     | Enable metrics & admin dashboard     | —                |
 | `WATERMARK_ENABLED`  | Enable watermark overlay             | `false`          |
 | `WATERMARK_IMAGE`    | Path to watermark image              | —                |
 | `WATERMARK_TEXT`     | Text watermark                       | —                |
 | `WATERMARK_POSITION` | Position: `top-left`, `bottom-right` | `bottom-right`   |
 | `WATERMARK_OPACITY`  | Watermark opacity (0.0-1.0)          | `0.5`            |
-
-## Admin Dashboard
-
-Set `ADMIN_PASSWORD` in your `.env` to enable usage metrics:
-
-```bash
-# View dashboard
-curl -H "X-Admin-Password: your-password" http://localhost:3000/admin/stats
-
-# Get JSON stats
-curl -H "X-Admin-Password: your-password" http://localhost:3000/api/admin/stats
-```
-
-Tracks:
-- Total requests
-- Cache hit rate
-- Average response time
-- Popular sizes, categories, and formats
 
 ## Docker Deployment
 
@@ -377,7 +358,6 @@ docker run -d \
   -p 3000:3000 \
   -v $(pwd)/images:/app/images \
   -v $(pwd)/.cache:/app/.cache \
-  -e ADMIN_PASSWORD=mysecretpass \
   -e WATERMARK_ENABLED=true \
   -e WATERMARK_TEXT="© MyCompany" \
   --name placepix \
