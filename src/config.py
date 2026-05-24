@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     watermark_position: str = Field(default="bottom-right")
     watermark_opacity: float = Field(default=0.5)
 
+    # Google Analytics (optional)
+    ga_tracking_id: str = Field(default="")
+
     # S3-compatible storage (optional)
     s3_enabled: bool = Field(default=False)
     s3_endpoint: str = Field(default="")

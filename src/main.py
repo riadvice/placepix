@@ -859,6 +859,7 @@ async def index(request: Request) -> Any:
         {
             "categories": categories,
             "total": manager.total,
+            "ga_tracking_id": settings.ga_tracking_id,
         },
     )
 
@@ -866,7 +867,11 @@ async def index(request: Request) -> Any:
 @app.get("/features", response_class=HTMLResponse)
 async def feature_explorer(request: Request) -> Any:
     """Interactive feature explorer and URL constructor."""
-    return templates.TemplateResponse(request, "features.html", {})
+    return templates.TemplateResponse(
+        request,
+        "features.html",
+        {"ga_tracking_id": settings.ga_tracking_id},
+    )
 
 
 # ── API metadata ──────────────────────────────────────────────────
