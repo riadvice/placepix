@@ -56,6 +56,7 @@
       <div class="flex items-center gap-6 text-sm">
         <a href="#categories" class="text-slate-500 hover:text-accent transition">Categories</a>
         <a href="/images" class="text-slate-500 hover:text-accent transition">Explorer</a>
+        <a href="/palette" class="text-slate-500 hover:text-accent transition">Palette</a>
         <a href="#upload" class="text-slate-500 hover:text-accent transition">Upload</a>
         <a href="#api" class="text-slate-500 hover:text-accent transition">API</a>
         <a href="/docs" target="_blank" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium shadow-sm">Docs</a>
@@ -263,6 +264,50 @@
         <div><code class="text-accent font-mono">?saturation=2.0</code> — 0.0 to 2.0</div>
         <div><code class="text-accent font-mono">?sepia=1</code> — warm sepia tone</div>
         <div><code class="text-accent font-mono">?grayscale=1</code> — black &amp; white</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search by Color -->
+  <section class="max-w-7xl mx-auto px-4 pb-12">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Search by Dominant Color</h2>
+    <p class="text-gray-500 mb-6">Find images that match your brand palette. Every image is scanned for its top 3 dominant colors.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <a href="/color/3b82f6/400/300" target="_blank">
+          <img src="/color/3b82f6/400/300" alt="Blue match" class="w-full h-48 object-cover">
+        </a>
+        <div class="p-4">
+          <p class="font-semibold text-sm text-gray-700 mb-1">Blue</p>
+          <code class="text-xs font-mono text-gray-600 break-all">/color/3b82f6/400/300</code>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <a href="/color/10b981/400/300" target="_blank">
+          <img src="/color/10b981/400/300" alt="Green match" class="w-full h-48 object-cover">
+        </a>
+        <div class="p-4">
+          <p class="font-semibold text-sm text-gray-700 mb-1">Green</p>
+          <code class="text-xs font-mono text-gray-600 break-all">/color/10b981/400/300</code>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <a href="/color/e11d48/400/300" target="_blank">
+          <img src="/color/e11d48/400/300" alt="Red match" class="w-full h-48 object-cover">
+        </a>
+        <div class="p-4">
+          <p class="font-semibold text-sm text-gray-700 mb-1">Red</p>
+          <code class="text-xs font-mono text-gray-600 break-all">/color/e11d48/400/300</code>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-100">
+      <p class="text-sm text-gray-600 font-mono mb-2">How it works:</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500">
+        <div><code class="text-accent font-mono">/color/{hex}/{w}/{h}</code> — dedicated color route</div>
+        <div><code class="text-accent font-mono">?color=3b82f6</code> — filter any endpoint by color</div>
+        <div><code class="text-accent font-mono">/api/color/{hex}</code> — list all matching images</div>
+        <div><code class="text-accent font-mono">/api/info/id/1</code> — includes <code>colors: [...]</code></div>
       </div>
     </div>
   </section>

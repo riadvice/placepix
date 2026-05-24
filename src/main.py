@@ -287,8 +287,12 @@ async def serve_image(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    color: str = "",
 ) -> Response:
-    entry = manager.pick(category or None, seed or None)
+    if color:
+        entry = manager.pick_by_color(color, category or None)
+    else:
+        entry = manager.pick(category or None, seed or None)
     if entry is None:
         raise HTTPException(status_code=404, detail="category not found")
     return _serve_entry(
@@ -297,10 +301,40 @@ async def serve_image(
     )
 
 
+@app.get("/color/{hex_color}/{width:int}/{height:int}")
+@app.get("/color/{hex_color}/{width:int}/{height:int}.{ext}")
+async def serve_by_color(
+    hex_color: str,
+    width: int,
+    height: int,
+    ext: str = "",
+    grayscale: bool = False,
+    blur: int = 0,
+    text: str = "",
+    fit: str = "crop",
+    format: str = "",  # noqa: A002
+    tint: str = "",
+    brightness: float = 1.0,
+    contrast: float = 1.0,
+    saturation: float = 1.0,
+    sepia: bool = False,
+) -> Response:
+    entry = manager.pick_by_color(hex_color)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="no image matching that color")
+    return _serve_entry(
+        entry, width, height, ext, grayscale, blur, text, fit, format,
+        tint, brightness, contrast, saturation, sepia,
+    )
+
+
 # ── Random from all (no dimensions) ────────────────────────────────
 @app.get("/random/{category:path}")
-async def random_image(category: str = "") -> RedirectResponse:
-    entry = manager.pick(category or None)
+async def random_image(category: str = "", color: str = "") -> RedirectResponse:
+    if color:
+        entry = manager.pick_by_color(color, category or None)
+    else:
+        entry = manager.pick(category or None)
     if entry is None:
         raise HTTPException(status_code=404, detail="category not found")
     return RedirectResponse(url=f"/500/500/{entry.category}?seed={os.urandom(4).hex()}")
@@ -351,6 +385,7 @@ async def image_info_by_id(image_id: int) -> JSONResponse:
         "height": height,
         "format": fmt,
         "size": size,
+        "colors": manager.get_colors(entry.id),
         "serve_url": f"/id/{entry.id}/500/500",
     })
 
@@ -377,7 +412,27 @@ async def image_info(category: str, filename: str) -> JSONResponse:
         "height": height,
         "format": fmt,
         "size": size,
+        "colors": manager.get_colors(entry.id),
         "serve_url": f"/id/{entry.id}/500/500",
+    })
+
+
+@app.get("/api/color/{hex_color}")
+async def api_color_match(hex_color: str) -> JSONResponse:
+    matches = manager.find_by_color(hex_color)
+    return JSONResponse({
+        "query": hex_color,
+        "count": len(matches),
+        "images": [
+            {
+                "id": e.id,
+                "filename": e.filename,
+                "category": e.category,
+                "colors": manager.get_colors(e.id),
+                "url": f"/id/{e.id}/500/500",
+            }
+            for e in matches
+        ],
     })
 
 
@@ -471,6 +526,7 @@ async def image_explorer(page: int = 1) -> Response:
         <div class="nav-links">
             <a href="/">Home</a>
             <a href="/images">Explorer</a>
+            <a href="/palette">Palette</a>
             <a href="/docs" target="_blank">Docs</a>
         </div>
     </nav>
@@ -478,6 +534,142 @@ async def image_explorer(page: int = 1) -> Response:
     <p class="subtitle">{total} images &mdash; Page {page} of {total_pages}</p>
     <div class="grid">{cards}</div>
     <div class="pager">{prev_link}{page_numbers}{next_link}</div>
+</body>
+</html>"""
+
+    return Response(content=html, media_type="text/html")
+
+
+# ── Color Palette ───────────────────────────────────────────────
+@app.get("/palette")
+async def color_palette(
+    page: int = 1,
+    per_page: int = 24,
+    category: str = "",
+    search: str = "",
+) -> Response:
+    all_colors = manager.list_colors(category=category, search=search)
+    total = len(all_colors)
+    total_pages = max((total + per_page - 1) // per_page, 1)
+    page = max(1, min(page, total_pages))
+    start = (page - 1) * per_page
+    end = start + per_page
+    colors = all_colors[start:end]
+
+    swatches = ""
+    for item in colors:
+        hex_color = item["hex"]
+        count = item["count"]
+        sample_images = ""
+        for sid in item["sample_ids"][:2]:
+            sample_images += f'<img src="/id/{sid}/100/75" alt="" loading="lazy">'
+        swatches += f"""
+        <div class="swatch">
+            <a href="/color/{hex_color.lstrip('#')}/400/300" target="_blank">
+                <div class="color-block" style="background: {hex_color};"></div>
+            </a>
+            <div class="color-info">
+                <code class="hex">{hex_color}</code>
+                <span class="count">{count} image{"s" if count > 1 else ""}</span>
+            </div>
+            <div class="samples">{sample_images}</div>
+        </div>
+        """
+
+    # Category filters with colored dot badges
+    hue_cats = [
+        ("Red", "#ef4444"), ("Orange", "#f97316"), ("Yellow", "#eab308"),
+        ("Green", "#22c55e"), ("Cyan", "#06b6d4"), ("Blue", "#3b82f6"),
+        ("Purple", "#a855f7"), ("Pink", "#ec4899"), ("Brown", "#a0522d"),
+        ("White", "#f8fafc"), ("Gray", "#94a3b8"), ("Black", "#0f172a"),
+    ]
+    cat_buttons = ""
+    for cat, dot_color in hue_cats:
+        active = "active" if category == cat else ""
+        border = "border: 1px solid #cbd5e1;" if cat in ("White", "Gray") else ""
+        cat_buttons += f'<a class="cat-btn {active}" href="/palette?category={cat}&search={search}"><span class="dot" style="background: {dot_color}; {border}"></span>{cat}</a>'
+    all_active = "" if category else "active"
+    cat_buttons = f'<a class="cat-btn {all_active}" href="/palette?search={search}">All</a>' + cat_buttons
+
+    # Pagination
+    base = f"/palette?search={search}"
+    if category:
+        base += f"&category={category}"
+    prev_link = f'<a class="page-link" href="{base}&page={page - 1}">Previous</a>' if page > 1 else '<span class="page-link disabled">Previous</span>'
+    next_link = f'<a class="page-link" href="{base}&page={page + 1}">Next</a>' if page < total_pages else '<span class="page-link disabled">Next</span>'
+    page_numbers = ""
+    for p in range(1, total_pages + 1):
+        active = "active" if p == page else ""
+        page_numbers += f'<a class="page-link {active}" href="{base}&page={p}">{p}</a>'
+
+    pager = f'<div class="pager">{prev_link}{page_numbers}{next_link}</div>' if total_pages > 1 else ""
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlacePix Color Palette</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        :root {{ --bg: #f8fafc; --card: #fff; --text: #1e293b; --muted: #64748b; --accent: #3b82f6; --border: #e2e8f0; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding-bottom: 2rem; }}
+        nav {{ display: flex; align-items: center; justify-content: space-between; max-width: 1400px; margin: 0 auto; padding: .75rem 1.5rem; }}
+        .logo {{ display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--text); }}
+        .logo img {{ width: 28px; height: 28px; }}
+        .logo span {{ font-weight: 700; font-size: 1.1rem; }}
+        .nav-links {{ display: flex; gap: 1.25rem; font-size: .9rem; }}
+        .nav-links a {{ color: var(--muted); text-decoration: none; }}
+        .nav-links a:hover {{ color: var(--accent); }}
+        h1 {{ text-align: center; margin-bottom: .25rem; font-size: 1.75rem; }}
+        .subtitle {{ text-align: center; color: var(--muted); margin-bottom: 1rem; font-size: .95rem; }}
+        .controls {{ max-width: 1400px; margin: 0 auto 1.5rem; padding: 0 1.5rem; }}
+        .search-bar {{ display: flex; gap: .5rem; margin-bottom: .75rem; }}
+        .search-bar input {{ flex: 1; padding: .6rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: .9rem; }}
+        .search-bar button {{ padding: .6rem 1.2rem; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: .9rem; }}
+        .cat-row {{ display: flex; flex-wrap: wrap; gap: .4rem; }}
+        .cat-btn {{ display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .75rem; border-radius: 6px; background: var(--card); border: 1px solid var(--border); color: var(--text); text-decoration: none; font-size: .85rem; }}
+        .cat-btn.active {{ background: var(--accent); color: #fff; border-color: var(--accent); }}
+        .cat-btn:hover {{ background: #f1f5f9; }}
+        .cat-btn .dot {{ display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }}
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.25rem; max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }}
+        .swatch {{ background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); transition: transform .15s, box-shadow .15s; }}
+        .swatch:hover {{ transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }}
+        .color-block {{ width: 100%; height: 120px; display: block; }}
+        .color-info {{ padding: .6rem .8rem; }}
+        .hex {{ font-family: ui-monospace, monospace; font-size: .85rem; font-weight: 600; display: block; }}
+        .count {{ font-size: .75rem; color: var(--muted); }}
+        .samples {{ display: flex; gap: 2px; padding: 0 .8rem .8rem; }}
+        .samples img {{ width: 48px; height: 36px; object-fit: cover; border-radius: 4px; }}
+        .pager {{ display: flex; justify-content: center; align-items: center; gap: .4rem; margin-top: 2.5rem; flex-wrap: wrap; padding: 0 1rem; }}
+        .page-link {{ display: inline-block; padding: .4rem .8rem; border-radius: 8px; background: var(--card); color: var(--text); text-decoration: none; font-size: .9rem; min-width: 2.2rem; text-align: center; border: 1px solid var(--border); }}
+        .page-link.active {{ background: var(--accent); color: #fff; border-color: var(--accent); }}
+        .page-link.disabled {{ color: var(--muted); cursor: default; }}
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo"><img src="/static/logo.svg" alt=""><span>PlacePix</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/images">Explorer</a>
+            <a href="/palette">Palette</a>
+            <a href="/docs" target="_blank">Docs</a>
+        </div>
+    </nav>
+    <h1>Color Palette</h1>
+    <p class="subtitle">{total} dominant colors &mdash; click any to preview matching images</p>
+    <div class="controls">
+        <form class="search-bar" method="get" action="/palette">
+            <input type="hidden" name="category" value="{category}">
+            <input type="text" name="search" placeholder="Search hex color (e.g. 3b82f6)" value="{search}">
+            <button type="submit">Search</button>
+        </form>
+        <div class="cat-row">{cat_buttons}</div>
+    </div>
+    <div class="grid">{swatches}</div>
+    {pager}
 </body>
 </html>"""
 
