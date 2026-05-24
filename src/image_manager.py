@@ -101,6 +101,7 @@ class ImageManager:
         self._categories: dict[str, Category] = {}
         self._total = 0
         self._colors: dict[int, list[str]] = {}
+        self._scanning_colors = False
         self._s3_scanned = False
         self._is_leader = self._acquire_leader_lock()
         self._rescan()
@@ -356,17 +357,46 @@ class ImageManager:
             logger.info(f"S3 scan complete: found {len(s3_categories)} categories")
 
         colors = self._load_colors()
-        for cat in new_categories.values():
-            for entry in cat.entries:
-                if entry.id not in colors and entry.path is not None:
-                    colors[entry.id] = _extract_dominant_colors(entry.path)
 
         self._categories = new_categories
         self._total = total
         self._colors = colors
         self._save_manifest(manifest)
-        self._save_colors(colors)
         logger.info(f"Scan complete: {total} images in {len(new_categories)} categories")
+
+    def scan_colors(self) -> None:
+        """Extract dominant colors for images that don't have them yet."""
+        if self._scanning_colors:
+            return
+        self._scanning_colors = True
+        try:
+            colors = self._load_colors()
+            missing_entries: list[ImageEntry] = []
+            for cat in self._categories.values():
+                for entry in cat.entries:
+                    if entry.id not in colors and entry.path is not None:
+                        missing_entries.append(entry)
+
+            if not missing_entries:
+                logger.info("Color scan: all images already have colors")
+                self._colors = colors
+                return
+
+            logger.info(f"Color scan: extracting colors for {len(missing_entries)} images")
+            for i, entry in enumerate(missing_entries, 1):
+                extracted = _extract_dominant_colors(entry.path)
+                if extracted:
+                    colors[entry.id] = extracted
+                if i % 10 == 0 or i == len(missing_entries):
+                    self._colors = colors
+                    self._save_colors(colors)
+                    logger.debug(f"Color scan: processed {i}/{len(missing_entries)} images")
+
+            self._colors = colors
+            self._save_colors(colors)
+            logger.info(f"Color scan complete: {len(missing_entries)} images processed")
+        finally:
+            self._scanning_colors = False
 
     def _scan_s3(self, manifest: dict[str, int], next_id: int) -> tuple[dict[str, Category], int]:
         """Scan S3 bucket for images and return categories."""
@@ -543,7 +573,8 @@ class ImageManager:
         color_counts: dict[str, int] = {}
         color_samples: dict[str, list[int]] = {}
 
-        for image_id, colors in self._colors.items():
+        # Snapshot to avoid RuntimeError if background thread mutates dict
+        for image_id, colors in list(self._colors.items()):
             for hex_color in colors:
                 if category and self._hex_to_hue_category(hex_color) != category:
                     continue

@@ -18,8 +18,8 @@ class Settings(BaseSettings):
 
     host: str = Field(default="127.0.0.1:3000")
     workers: int = Field(default=2)
-    dir: str = Field(default="./data")
-    seed_dir_str: str = Field(default="./images", alias="seed_dir")
+    dir: str = Field(default="./data", alias="data_dir")
+    seed_dir_str: str = Field(default="./images", alias="images_dir")
     cache: bool = Field(default=True)
     cdn: str = Field(default="")
     min_width: int = Field(default=8)

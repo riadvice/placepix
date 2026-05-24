@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -99,19 +99,68 @@ else:
     logger.info("File watcher skipped (not leader worker)")
     _observer = None
 
-# Cache cleanup scheduler (only start in leader worker)
+# Cache cleaner class for TTL-based cleanup
+class CacheCleaner:
+    """Remove cached files older than a configurable TTL."""
+
+    def __init__(self, cache_dir: Path, ttl_hours: int) -> None:
+        self.cache_dir = cache_dir
+        self.ttl_hours = ttl_hours
+
+    def run(self) -> None:
+        if self.ttl_hours <= 0:
+            return
+        cutoff = time.time() - (self.ttl_hours * 3600)
+        removed = 0
+        freed_bytes = 0
+        for subdir in self.cache_dir.iterdir():
+            if not subdir.is_dir() or len(subdir.name) != 2:
+                continue
+            for file_path in subdir.iterdir():
+                if not file_path.is_file():
+                    continue
+                try:
+                    mtime = file_path.stat().st_mtime
+                    if mtime < cutoff:
+                        freed_bytes += file_path.stat().st_size
+                        file_path.unlink()
+                        removed += 1
+                except Exception:
+                    pass
+            # Remove empty subdirs
+            try:
+                if not any(subdir.iterdir()):
+                    subdir.rmdir()
+            except Exception:
+                pass
+        if removed:
+            logger.info(
+                f"Cache cleanup: removed {removed} stale files, freed {freed_bytes / 1024 / 1024:.2f} MB"
+            )
+
+# Scheduler (only start in leader worker)
 _scheduler = None
-if manager._is_leader and _APSCHEDULER_AVAILABLE and settings.cache_ttl_hours > 0:
-    logger.info(
-        f"Starting cache cleanup scheduler (TTL: {settings.cache_ttl_hours}h, "
-        f"interval: {settings.cache_cleanup_interval_minutes}m)"
-    )
-    _cache_cleaner = CacheCleaner(settings.cache_dir, settings.cache_ttl_hours)
+if manager._is_leader and _APSCHEDULER_AVAILABLE:
     _scheduler = BackgroundScheduler()
+
+    if settings.cache_ttl_hours > 0:
+        logger.info(
+            f"Starting cache cleanup scheduler (TTL: {settings.cache_ttl_hours}h, "
+            f"interval: {settings.cache_cleanup_interval_minutes}m)"
+        )
+        _cache_cleaner = CacheCleaner(settings.cache_dir, settings.cache_ttl_hours)
+        _scheduler.add_job(
+            _cache_cleaner.run,
+            "interval",
+            minutes=settings.cache_cleanup_interval_minutes,
+        )
+
+    # One-time color scan at startup (slight delay so the server is responsive first)
+    logger.info("Scheduling one-time background color scan")
     _scheduler.add_job(
-        _cache_cleaner.run,
-        "interval",
-        minutes=settings.cache_cleanup_interval_minutes,
+        manager.scan_colors,
+        "date",
+        run_date=datetime.now() + timedelta(seconds=5),
     )
     _scheduler.start()
 
@@ -311,45 +360,6 @@ def _read_cached(cache_path: Path) -> bytes | None:
 def _write_cache(cache_path: Path, data: bytes) -> None:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_bytes(data)
-
-
-class CacheCleaner:
-    """Remove cached files older than a configurable TTL."""
-
-    def __init__(self, cache_dir: Path, ttl_hours: int) -> None:
-        self.cache_dir = cache_dir
-        self.ttl_hours = ttl_hours
-
-    def run(self) -> None:
-        if self.ttl_hours <= 0:
-            return
-        cutoff = time.time() - (self.ttl_hours * 3600)
-        removed = 0
-        freed_bytes = 0
-        for subdir in self.cache_dir.iterdir():
-            if not subdir.is_dir() or len(subdir.name) != 2:
-                continue
-            for file_path in subdir.iterdir():
-                if not file_path.is_file():
-                    continue
-                try:
-                    mtime = file_path.stat().st_mtime
-                    if mtime < cutoff:
-                        freed_bytes += file_path.stat().st_size
-                        file_path.unlink()
-                        removed += 1
-                except Exception:
-                    pass
-            # Remove empty subdirs
-            try:
-                if not any(subdir.iterdir()):
-                    subdir.rmdir()
-            except Exception:
-                pass
-        if removed:
-            logger.info(
-                f"Cache cleanup: removed {removed} stale files, freed {freed_bytes / 1024 / 1024:.2f} MB"
-            )
 
 
 def _generate_etag(content: bytes) -> str:
@@ -1300,6 +1310,10 @@ async def color_palette(
 
     pager = f'<div class="pager">{prev_link}{page_numbers}{next_link}</div>' if total_pages > 1 else ""
 
+    scan_banner = ""
+    if manager._scanning_colors:
+        scan_banner = '<div class="scan-banner">Color scan in progress — new colors will appear shortly.</div>'
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1342,6 +1356,7 @@ async def color_palette(
         .page-link {{ display: inline-block; padding: .4rem .8rem; border-radius: 8px; background: var(--card); color: var(--text); text-decoration: none; font-size: .9rem; min-width: 2.2rem; text-align: center; border: 1px solid var(--border); }}
         .page-link.active {{ background: var(--accent); color: #fff; border-color: var(--accent); }}
         .page-link.disabled {{ color: var(--muted); cursor: default; }}
+        .scan-banner {{ max-width: 1400px; margin: 0 auto 1.25rem; padding: .6rem 1rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; color: #1d4ed8; font-size: .9rem; text-align: center; }}
     </style>
 </head>
 <body>
@@ -1364,6 +1379,7 @@ async def color_palette(
         </form>
         <div class="cat-row">{cat_buttons}</div>
     </div>
+    {scan_banner}
     <div class="grid">{swatches}</div>
     {pager}
 </body>

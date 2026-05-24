@@ -112,7 +112,11 @@ class TestImageManagerGaps:
         assert nonexistent.exists()
 
     def test_scan_s3_exception(self, test_images_dir, monkeypatch):
-        monkeypatch.setattr("src.image_manager.settings", Settings(
+        # Test that S3 scan handles exceptions gracefully without full initialization
+        from src.image_manager import ImageManager
+        
+        # Create manager with S3 settings but prevent full scanning
+        test_settings = Settings(
             dir=str(test_images_dir),
             s3_enabled=True,
             s3_endpoint="https://s3.example.com",
@@ -120,12 +124,28 @@ class TestImageManagerGaps:
             s3_secret_key="secret",
             s3_bucket="bucket",
             s3_region="auto",
-        ))
-        from src.image_manager import ImageManager
-        manager = ImageManager()
-        with patch("src.image_manager.boto3.client", side_effect=Exception("S3 error")):
+        )
+        monkeypatch.setattr("src.image_manager.settings", test_settings)
+        
+        # Create manager instance but bypass the automatic rescan
+        manager = ImageManager.__new__(ImageManager)
+        manager._categories = {}
+        manager._total = 0
+        manager._colors = {}
+        manager._scanning_colors = False
+        manager._s3_scanned = False
+        manager._is_leader = False  # Prevent leader operations
+        
+        # Mock boto3 at the module level to prevent any real S3 operations
+        with patch("src.image_manager.boto3") as mock_boto3:
+            # Make the client raise an exception
+            mock_boto3.client.side_effect = Exception("S3 connection error")
+            
             cats, next_id = manager._scan_s3({}, 1)
+        
+        # Should return empty categories on error
         assert cats == {}
+        assert next_id == 1
 
     def test_scan_s3_filters(self, test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(
