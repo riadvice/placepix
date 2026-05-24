@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlacePix - Feature Explorer & URL Constructor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section h3::before {
+            content: "▸";
+            color: #667eea;
+        }
+        
+        .url-output {
+            background: #2d3748;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .preview-image {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .preview-image.show {
+            display: block;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .endpoint-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .endpoint-tab {
+            padding: 8px 16px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        .endpoint-tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .endpoint-tab:hover {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .info-badge {
+            display: inline-block;
+            background: #68d391;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .feature-card p {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 PlacePix Feature Explorer</h1>
+            <p>Build your perfect placeholder image URL with our interactive constructor</p>
+        </header>
+        
+        <div class="content">
+            <!-- Left Panel: URL Constructor -->
+            <div class="panel">
+                <h2>URL Constructor</h2>
+                
+                <!-- Endpoint Selection -->
+                <div class="form-group">
+                    <label>Endpoint Type</label>
+                    <div class="endpoint-tabs">
+                        <button class="endpoint-tab active" data-endpoint="random">Random</button>
+                        <button class="endpoint-tab" data-endpoint="id">By ID</button>
+                        <button class="endpoint-tab" data-endpoint="ratio">Aspect Ratio</button>
+                        <button class="endpoint-tab" data-endpoint="preset">Preset</button>
+                        <button class="endpoint-tab" data-endpoint="solid">Solid Color</button>
+                    </div>
+                </div>
+                
+                <!-- Endpoint-specific fields -->
+                <div id="endpoint-fields">
+                    <!-- Random endpoint -->
+                    <div class="endpoint-config" data-endpoint="random">
+                        <div class="form-group">
+                            <label>Width</label>
+                            <input type="number" id="width" value="500" min="8" max="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="height" value="300" min="8" max="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Category <small>(optional)</small></label>
+                            <input type="text" id="category" placeholder="nature, architecture, etc.">
+                        </div>
+                    </div>
+                    
+                    <!-- ID endpoint -->
+                    <div class="endpoint-config" data-endpoint="id" style="display:none;">
+                        <div class="form-group">
+                            <label>Image ID</label>
+                            <input type="number" id="image-id" value="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Width</label>
+                            <input type="number" id="id-width" value="500" min="8" max="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="id-height" value="300" min="8" max="2000">
+                        </div>
+                    </div>
+                    
+                    <!-- Ratio endpoint -->
+                    <div class="endpoint-config" data-endpoint="ratio" style="display:none;">
+                        <div class="form-group">
+                            <label>Aspect Ratio</label>
+                            <select id="ratio">
+                                <option value="16:9">16:9 (Widescreen)</option>
+                                <option value="4:3">4:3 (Standard)</option>
+                                <option value="1:1">1:1 (Square)</option>
+                                <option value="21:9">21:9 (Ultrawide)</option>
+                                <option value="9:16">9:16 (Portrait)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="ratio-height" value="1080" min="8" max="2000">
+                        </div>
+                    </div>
+                    
+                    <!-- Preset endpoint -->
+                    <div class="endpoint-config" data-endpoint="preset" style="display:none;">
+                        <div class="form-group">
+                            <label>Preset</label>
+                            <select id="preset">
+                                <option value="instagram-square">Instagram Square (1080x1080)</option>
+                                <option value="instagram-portrait">Instagram Portrait (1080x1350)</option>
+                                <option value="youtube-thumbnail">YouTube Thumbnail (1280x720)</option>
+                                <option value="facebook-cover">Facebook Cover (820x312)</option>
+                                <option value="twitter-header">Twitter Header (1500x500)</option>
+                                <option value="mobile">Mobile (375x667)</option>
+                                <option value="tablet">Tablet (768x1024)</option>
+                                <option value="desktop">Desktop (1920x1080)</option>
+                                <option value="4k">4K (3840x2160)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Solid color endpoint -->
+                    <div class="endpoint-config" data-endpoint="solid" style="display:none;">
+                        <div class="form-group">
+                            <label>Width</label>
+                            <input type="number" id="solid-width" value="500" min="8" max="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="solid-height" value="300" min="8" max="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Background Color</label>
+                            <input type="color" id="bg-color" value="#667eea">
+                            <small>Hex color for background</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Text Color <small>(optional)</small></label>
+                            <input type="color" id="fg-color" value="#ffffff">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Common Parameters -->
+                <div class="section">
+                    <h3>Format & Quality</h3>
+                    <div class="form-group">
+                        <label>Format</label>
+                        <select id="format">
+                            <option value="jpeg">JPEG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WebP</option>
+                            <option value="avif">AVIF</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quality (1-100)</label>
+                        <input type="range" id="quality" min="1" max="100" value="85">
+                        <small>Current: <span id="quality-value">85</span></small>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Filters & Effects</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="grayscale">
+                        <label for="grayscale">Grayscale</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="sepia">
+                        <label for="sepia">Sepia</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="lqip">
+                        <label for="lqip">LQIP (Low Quality)</label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Blur (0-10)</label>
+                        <input type="range" id="blur" min="0" max="10" value="0">
+                        <small>Current: <span id="blur-value">0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Noise (0-100)</label>
+                        <input type="range" id="noise" min="0" max="100" value="0">
+                        <small>Current: <span id="noise-value">0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Pixelate (0-50)</label>
+                        <input type="range" id="pixelate" min="0" max="50" value="0">
+                        <small>Current: <span id="pixelate-value">0</span></small>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Layout & Sizing</h3>
+                    <div class="form-group">
+                        <label>Fit Mode</label>
+                        <select id="fit">
+                            <option value="crop">Crop (center)</option>
+                            <option value="smart">Smart Crop (face detection)</option>
+                            <option value="scale">Scale (stretch)</option>
+                            <option value="contain">Contain (fit inside)</option>
+                            <option value="cover">Cover (fill)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Border Width</label>
+                        <input type="number" id="border" min="0" max="50" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Padding</label>
+                        <input type="number" id="padding" min="0" max="100" value="0">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Color Adjustments</h3>
+                    <div class="form-group">
+                        <label>Brightness (0.0-2.0)</label>
+                        <input type="range" id="brightness" min="0" max="200" value="100" step="10">
+                        <small>Current: <span id="brightness-value">1.0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Contrast (0.0-2.0)</label>
+                        <input type="range" id="contrast" min="0" max="200" value="100" step="10">
+                        <small>Current: <span id="contrast-value">1.0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Saturation (0.0-2.0)</label>
+                        <input type="range" id="saturation" min="0" max="200" value="100" step="10">
+                        <small>Current: <span id="saturation-value">1.0</span></small>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Overlays</h3>
+                    <div class="form-group">
+                        <label>Text Overlay <small>(optional)</small></label>
+                        <input type="text" id="text" placeholder="Your text here">
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="watermark">
+                        <label for="watermark">Add Watermark</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Preview & Output -->
+            <div class="panel">
+                <h2>Generated URL & Preview</h2>
+                
+                <div class="url-output" id="url-output">
+                    <div>GET /500/300</div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="copyURL()">📋 Copy URL</button>
+                    <button class="btn-secondary" onclick="openInNewTab()">🔗 Open</button>
+                    <button class="btn-primary" onclick="loadPreview()">👁️ Preview</button>
+                </div>
+                
+                <img id="preview" class="preview-image" alt="Preview">
+                
+                <div class="section" style="margin-top: 30px;">
+                    <h3>Quick Features Reference</h3>
+                    <div class="feature-list">
+                        <div class="feature-card">
+                            <h4>🎯 Smart Crop</h4>
+                            <p>AI face detection for intelligent cropping</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📐 Aspect Ratios</h4>
+                            <p>16:9, 4:3, 1:1, and more</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🎨 Color Effects</h4>
+                            <p>Tint, sepia, grayscale</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>✨ Image Effects</h4>
+                            <p>Blur, noise, pixelate</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📱 Presets</h4>
+                            <p>Social media & ad sizes</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🖼️ Borders</h4>
+                            <p>Custom borders & padding</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentEndpoint = 'random';
+        
+        // Endpoint switching
+        document.querySelectorAll('.endpoint-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.endpoint-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentEndpoint = tab.dataset.endpoint;
+                
+                document.querySelectorAll('.endpoint-config').forEach(config => {
+                    config.style.display = config.dataset.endpoint === currentEndpoint ? 'block' : 'none';
+                });
+                
+                updateURL();
+            });
+        });
+        
+        // Range value updates
+        ['quality', 'blur', 'noise', 'pixelate', 'brightness', 'contrast', 'saturation'].forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(id + '-value');
+            
+            input.addEventListener('input', () => {
+                let value = input.value;
+                if (['brightness', 'contrast', 'saturation'].includes(id)) {
+                    value = (value / 100).toFixed(1);
+                }
+                display.textContent = value;
+                updateURL();
+            });
+        });
+        
+        // Update URL on any input change
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('change', updateURL);
+            element.addEventListener('input', updateURL);
+        });
+        
+        function updateURL() {
+            let url = '';
+            const params = [];
+            
+            // Build base URL based on endpoint
+            switch(currentEndpoint) {
+                case 'random':
+                    const width = document.getElementById('width').value;
+                    const height = document.getElementById('height').value;
+                    const category = document.getElementById('category').value;
+                    url = `/${width}/${height}${category ? '/' + category : ''}`;
+                    break;
+                    
+                case 'id':
+                    const id = document.getElementById('image-id').value;
+                    const idWidth = document.getElementById('id-width').value;
+                    const idHeight = document.getElementById('id-height').value;
+                    url = `/id/${id}/${idWidth}/${idHeight}`;
+                    break;
+                    
+                case 'ratio':
+                    const ratio = document.getElementById('ratio').value;
+                    const ratioHeight = document.getElementById('ratio-height').value;
+                    url = `/ratio/${ratio}/${ratioHeight}`;
+                    break;
+                    
+                case 'preset':
+                    const preset = document.getElementById('preset').value;
+                    url = `/preset/${preset}`;
+                    break;
+                    
+                case 'solid':
+                    const solidWidth = document.getElementById('solid-width').value;
+                    const solidHeight = document.getElementById('solid-height').value;
+                    const bgColor = document.getElementById('bg-color').value.replace('#', '');
+                    const fgColor = document.getElementById('fg-color').value.replace('#', '');
+                    url = `/solid/${solidWidth}x${solidHeight}/${bgColor}/${fgColor}`;
+                    break;
+            }
+            
+            // Add format extension
+            const format = document.getElementById('format').value;
+            if (format !== 'jpeg') {
+                url += `.${format}`;
+            }
+            
+            // Add query parameters
+            if (document.getElementById('grayscale').checked) params.push('grayscale=true');
+            if (document.getElementById('sepia').checked) params.push('sepia=true');
+            if (document.getElementById('lqip').checked) params.push('lqip=true');
+            if (document.getElementById('watermark').checked) params.push('watermark=true');
+            
+            const blur = document.getElementById('blur').value;
+            if (blur > 0) params.push(`blur=${blur}`);
+            
+            const noise = document.getElementById('noise').value;
+            if (noise > 0) params.push(`noise=${noise}`);
+            
+            const pixelate = document.getElementById('pixelate').value;
+            if (pixelate > 0) params.push(`pixelate=${pixelate}`);
+            
+            const quality = document.getElementById('quality').value;
+            if (quality != 85) params.push(`quality=${quality}`);
+            
+            const fit = document.getElementById('fit').value;
+            if (fit !== 'crop') params.push(`fit=${fit}`);
+            
+            const border = document.getElementById('border').value;
+            if (border > 0) params.push(`border=${border}`);
+            
+            const padding = document.getElementById('padding').value;
+            if (padding > 0) params.push(`padding=${padding}`);
+            
+            const brightness = document.getElementById('brightness').value;
+            if (brightness != 100) params.push(`brightness=${(brightness/100).toFixed(1)}`);
+            
+            const contrast = document.getElementById('contrast').value;
+            if (contrast != 100) params.push(`contrast=${(contrast/100).toFixed(1)}`);
+            
+            const saturation = document.getElementById('saturation').value;
+            if (saturation != 100) params.push(`saturation=${(saturation/100).toFixed(1)}`);
+            
+            const text = document.getElementById('text').value;
+            if (text) params.push(`text=${encodeURIComponent(text)}`);
+            
+            // Combine URL and params
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            
+            document.getElementById('url-output').innerHTML = `<div>GET ${url}</div>`;
+        }
+        
+        function copyURL() {
+            const url = document.getElementById('url-output').textContent.replace('GET ', '');
+            const fullURL = window.location.origin + url;
+            navigator.clipboard.writeText(fullURL).then(() => {
+                alert('URL copied to clipboard!');
+            });
+        }
+        
+        function openInNewTab() {
+            const url = document.getElementById('url-output').textContent.replace('GET ', '');
+            window.open(url, '_blank');
+        }
+        
+        function loadPreview() {
+            const url = document.getElementById('url-output').textContent.replace('GET ', '');
+            const preview = document.getElementById('preview');
+            preview.src = url;
+            preview.classList.add('show');
+        }
+        
+        // Initialize
+        updateURL();
+    </script>
+</body>
+</html>

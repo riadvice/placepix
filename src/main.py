@@ -743,6 +743,12 @@ async def index(request: Request) -> Any:
     )
 
 
+@app.get("/features", response_class=HTMLResponse)
+async def feature_explorer(request: Request) -> Any:
+    """Interactive feature explorer and URL constructor."""
+    return templates.TemplateResponse(request, "features.html", {})
+
+
 # ── API metadata ──────────────────────────────────────────────────
 @app.get("/api/images")
 async def api_images() -> JSONResponse:
