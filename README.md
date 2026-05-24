@@ -27,6 +27,28 @@
 
 ## Quick Start
 
+### 🐳 Docker (Recommended)
+
+```bash
+# Build the Docker image
+docker build -t placepix .
+
+# Run the container
+docker run -d \
+  -p 3000:3000 \
+  -v $(pwd)/images:/app/images \
+  -v $(pwd)/.cache:/app/.cache \
+  --name placepix \
+  placepix
+
+# Or use docker-compose
+docker-compose up -d
+```
+
+Visit `http://localhost:3000` to browse the image catalog.
+
+### 📦 Local Installation
+
 ```bash
 # Install dependencies (includes OpenCV for smart crop)
 pip install -e .
@@ -37,8 +59,6 @@ pip install -e ".[dev]"
 # Run server
 python -m src.main
 ```
-
-Visit `http://localhost:3000` to browse the image catalog.
 
 ### 🎨 Feature Explorer
 
@@ -220,6 +240,86 @@ Tracks:
 - Cache hit rate
 - Average response time
 - Popular sizes, categories, and formats
+
+## Docker Deployment
+
+### Building the Image
+
+```bash
+# Build from source
+docker build -t placepix:latest .
+
+# Build with custom tag
+docker build -t placepix:v1.0.0 .
+```
+
+### Running the Container
+
+**Basic run:**
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -v $(pwd)/images:/app/images \
+  --name placepix \
+  placepix:latest
+```
+
+**With environment variables:**
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -v $(pwd)/images:/app/images \
+  -v $(pwd)/.cache:/app/.cache \
+  -e ADMIN_PASSWORD=mysecretpass \
+  -e WATERMARK_ENABLED=true \
+  -e WATERMARK_TEXT="© MyCompany" \
+  --name placepix \
+  placepix:latest
+```
+
+**Using docker-compose:**
+```bash
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Docker Hub (Coming Soon)
+
+```bash
+# Pull from Docker Hub
+docker pull riadvice/placepix:latest
+
+# Run from Docker Hub
+docker run -d -p 3000:3000 -v $(pwd)/images:/app/images riadvice/placepix:latest
+```
+
+### Useful Commands
+
+```bash
+# View logs
+docker logs placepix
+
+# Follow logs
+docker logs -f placepix
+
+# Stop container
+docker stop placepix
+
+# Start container
+docker start placepix
+
+# Remove container
+docker rm placepix
+
+# Execute commands in container
+docker exec -it placepix sh
+```
 
 ## Categories
 
