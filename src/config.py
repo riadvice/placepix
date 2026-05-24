@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     # Google Analytics (optional)
     ga_tracking_id: str = Field(default="")
 
+    # Cache TTL / cleanup (default: 336 hours = 2 weeks, cleanup every 12 hours)
+    cache_ttl_hours: int = Field(default=336)
+    cache_cleanup_interval_minutes: int = Field(default=720)
+
     # Logging
     log_level: str = Field(default="INFO")
 

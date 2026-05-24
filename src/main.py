@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 import logging
 import os
 import time
@@ -22,6 +23,12 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Resp
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
+
+try:
+    from apscheduler.schedulers.background import BackgroundScheduler
+    _APSCHEDULER_AVAILABLE = True
+except Exception:
+    _APSCHEDULER_AVAILABLE = False
 
 from src.config import settings
 from src.image_manager import ImageEntry, ImageManager
@@ -91,6 +98,22 @@ if manager._is_leader:
 else:
     logger.info("File watcher skipped (not leader worker)")
     _observer = None
+
+# Cache cleanup scheduler (only start in leader worker)
+_scheduler = None
+if manager._is_leader and _APSCHEDULER_AVAILABLE and settings.cache_ttl_hours > 0:
+    logger.info(
+        f"Starting cache cleanup scheduler (TTL: {settings.cache_ttl_hours}h, "
+        f"interval: {settings.cache_cleanup_interval_minutes}m)"
+    )
+    _cache_cleaner = CacheCleaner(settings.cache_dir, settings.cache_ttl_hours)
+    _scheduler = BackgroundScheduler()
+    _scheduler.add_job(
+        _cache_cleaner.run,
+        "interval",
+        minutes=settings.cache_cleanup_interval_minutes,
+    )
+    _scheduler.start()
 
 # Metrics tracker (only if admin password is set)
 if settings.admin_password:
@@ -222,38 +245,60 @@ def _cache_path(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    border: str = "",
+    padding: int = 0,
+    noise: int = 0,
+    pixelate: int = 0,
+    quality: int = 85,
+    lqip: bool = False,
+    watermark: str = "",
+    watermark_config: dict | None = None,
 ) -> Path:
-    """Build a deterministic cache file path."""
-    suffix = f".{fmt}"
-    base = entry.filename
-    if "." in base:
-        base = base.rsplit(".", 1)[0]
-    base += suffix
+    """Build a deterministic flat cache file path using SHA256 hash."""
+    hash_input: dict[str, Any] = {
+        "image_id": entry.id,
+        "width": width,
+        "height": height,
+        "fmt": fmt,
+        "grayscale": grayscale,
+        "blur": blur,
+        "text": text,
+        "fit": fit,
+        "tint": tint,
+        "brightness": brightness,
+        "contrast": contrast,
+        "saturation": saturation,
+        "sepia": sepia,
+        "border": border,
+        "padding": padding,
+        "noise": noise,
+        "pixelate": pixelate,
+        "quality": quality,
+        "lqip": lqip,
+        "watermark": watermark,
+    }
+    if watermark_config:
+        hash_input["watermark_config"] = {
+            "image": watermark_config.get("watermark_image", ""),
+            "text": watermark_config.get("watermark_text", ""),
+            "position": watermark_config.get("watermark_position", ""),
+            "opacity": watermark_config.get("watermark_opacity", 0.5),
+        }
 
-    # Include processing params in path
-    parts = [f"{width}x{height}"]
-    if grayscale:
-        parts.append("gray")
-    if sepia:
-        parts.append("sepia")
-    if blur:
-        parts.append(f"blur{blur}")
-    if text:
-        parts.append(f"txt{hashlib.sha256(text.encode()).hexdigest()[:8]}")
-    if fit != "crop":
-        parts.append(fit)
-    if tint:
-        parts.append(f"tint{tint.lstrip('#')}")
-    if brightness != 1.0:
-        parts.append(f"bri{brightness}")
-    if contrast != 1.0:
-        parts.append(f"con{contrast}")
-    if saturation != 1.0:
-        parts.append(f"sat{saturation}")
+    # Include source file mtime for local files to auto-invalidate when source changes
+    if entry.path is not None and entry.path.exists():
+        hash_input["source_mtime"] = entry.path.stat().st_mtime
+    elif entry.s3_key:
+        hash_input["s3_key"] = entry.s3_key
 
-    cache_subdir = settings.cache_dir / "_".join(parts) / entry.category
+    # Deterministic JSON serialization
+    hash_str = json.dumps(hash_input, sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha256(hash_str.encode()).hexdigest()
+
+    # Flat layout: .cache/<first_2_hex>/<full_hash>.<fmt>
+    cache_subdir = settings.cache_dir / digest[:2]
     cache_subdir.mkdir(parents=True, exist_ok=True)
-    return cache_subdir / base
+    return cache_subdir / f"{digest}.{fmt}"
 
 
 def _read_cached(cache_path: Path) -> bytes | None:
@@ -266,6 +311,45 @@ def _read_cached(cache_path: Path) -> bytes | None:
 def _write_cache(cache_path: Path, data: bytes) -> None:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_bytes(data)
+
+
+class CacheCleaner:
+    """Remove cached files older than a configurable TTL."""
+
+    def __init__(self, cache_dir: Path, ttl_hours: int) -> None:
+        self.cache_dir = cache_dir
+        self.ttl_hours = ttl_hours
+
+    def run(self) -> None:
+        if self.ttl_hours <= 0:
+            return
+        cutoff = time.time() - (self.ttl_hours * 3600)
+        removed = 0
+        freed_bytes = 0
+        for subdir in self.cache_dir.iterdir():
+            if not subdir.is_dir() or len(subdir.name) != 2:
+                continue
+            for file_path in subdir.iterdir():
+                if not file_path.is_file():
+                    continue
+                try:
+                    mtime = file_path.stat().st_mtime
+                    if mtime < cutoff:
+                        freed_bytes += file_path.stat().st_size
+                        file_path.unlink()
+                        removed += 1
+                except Exception:
+                    pass
+            # Remove empty subdirs
+            try:
+                if not any(subdir.iterdir()):
+                    subdir.rmdir()
+            except Exception:
+                pass
+        if removed:
+            logger.info(
+                f"Cache cleanup: removed {removed} stale files, freed {freed_bytes / 1024 / 1024:.2f} MB"
+            )
 
 
 def _generate_etag(content: bytes) -> str:
@@ -353,32 +437,44 @@ def _serve_entry(
     if output_format == "jpg":
         output_format = "jpeg"
 
+    # Prepare watermark config
+    watermark_config = None
+    if watermark and settings.watermark_enabled:
+        watermark_config = {
+            "watermark_image": settings.watermark_image,
+            "watermark_text": settings.watermark_text,
+            "watermark_position": settings.watermark_position,
+            "watermark_opacity": settings.watermark_opacity,
+        }
+
     # Build cache key
     cache_path = None
     if settings.cache:
         cache_path = _cache_path(
             entry, width, height, output_format, grayscale, blur, text, fit,
             tint, brightness, contrast, saturation, sepia,
+            border, padding, noise, pixelate, quality, lqip, watermark,
+            watermark_config,
         )
         cached = _read_cached(cache_path)
         if cached is not None:
             logger.debug(f"Cache hit: {entry.filename} at {width}x{height}")
             if settings.cdn:
                 return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
-            
+
             # Generate cache headers
             etag = _generate_etag(cached)
             last_modified = _get_last_modified(cache_path)
-            
+
             # Check if client cache is still valid
             if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
                 logger.debug(f"Client cache valid: {entry.filename}")
                 return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
-            
+
             content_type = f"image/{output_format}"
             filename = f"placepix-{entry.category}-{width}x{height}.{output_format}"
             cache_control = "public, max-age=31536000, immutable" if not is_random else "public, max-age=0, must-revalidate"
-            
+
             return Response(
                 content=cached,
                 media_type=content_type,
@@ -390,16 +486,6 @@ def _serve_entry(
                 },
             )
 
-    # Prepare watermark config
-    watermark_config = None
-    if watermark and settings.watermark_enabled:
-        watermark_config = {
-            "watermark_image": settings.watermark_image,
-            "watermark_text": settings.watermark_text,
-            "watermark_position": settings.watermark_position,
-            "watermark_opacity": settings.watermark_opacity,
-        }
-    
     # Resolve image source
     image_source = _resolve_image_source(entry)
 
