@@ -907,8 +907,8 @@ async def serve_by_preset(
     )
 
 
-@app.get("/solid/{width:int}x{height:int}/{bg_color}")
-@app.get("/solid/{width:int}x{height:int}/{bg_color}/{fg_color}")
+@app.get("/solid/{width:int}/{height:int}/{bg_color}")
+@app.get("/solid/{width:int}/{height:int}/{bg_color}/{fg_color}")
 async def solid_color_placeholder(
     width: int,
     height: int,
@@ -1015,8 +1015,8 @@ async def svg_placeholder(
     )
 
 
-@app.get("/gradient/{width:int}x{height:int}/{from_color}/{to_color}")
-@app.get("/gradient/{width:int}x{height:int}/{from_color}/{to_color}.{ext}")
+@app.get("/gradient/{width:int}/{height:int}/{from_color}/{to_color}")
+@app.get("/gradient/{width:int}/{height:int}/{from_color}/{to_color}.{ext}")
 async def gradient_placeholder(
     width: int,
     height: int,

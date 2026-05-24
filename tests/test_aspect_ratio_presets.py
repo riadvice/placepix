@@ -100,38 +100,38 @@ def test_preset_with_extension(client: TestClient):
 
 def test_solid_color_basic(client: TestClient):
     """Test basic solid color placeholder."""
-    response = client.get("/solid/500x500/ff0000")
+    response = client.get("/solid/500/500/ff0000")
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
 
 
 def test_solid_color_with_fg(client: TestClient):
     """Test solid color with foreground color."""
-    response = client.get("/solid/500x500/000000/ffffff")
+    response = client.get("/solid/500/500/000000/ffffff")
     assert response.status_code == 200
 
 
 def test_solid_color_with_text(client: TestClient):
     """Test solid color with text overlay."""
-    response = client.get("/solid/500x500/3b82f6?text=Hello")
+    response = client.get("/solid/500/500/3b82f6?text=Hello")
     assert response.status_code == 200
 
 
 def test_solid_color_short_hex(client: TestClient):
     """Test solid color with 3-digit hex."""
-    response = client.get("/solid/300x200/f00")
+    response = client.get("/solid/300/200/f00")
     assert response.status_code == 200
 
 
 def test_solid_color_without_hash(client: TestClient):
     """Test solid color without # prefix."""
-    response = client.get("/solid/400x300/00ff00")
+    response = client.get("/solid/400/300/00ff00")
     assert response.status_code == 200
 
 
 def test_solid_color_cache_headers(client: TestClient):
     """Test solid color has proper cache headers."""
-    response = client.get("/solid/500x500/cccccc")
+    response = client.get("/solid/500/500/cccccc")
     assert response.status_code == 200
     assert "ETag" in response.headers
     assert "Cache-Control" in response.headers

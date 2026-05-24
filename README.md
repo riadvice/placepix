@@ -18,7 +18,7 @@
 ✅ **Usage Metrics** - SQLite-based tracking with password-protected admin dashboard  
 ✅ **Aspect Ratio Sizing** - `/ratio/16:9/1080` for responsive layouts  
 ✅ **Preset Dimensions** - Social media & ad sizes (Instagram, YouTube, etc.)  
-✅ **Solid Color Placeholders** - `/solid/500x300/ff0000` with optional text  
+✅ **Solid Color Placeholders** - `/solid/500/300/ff0000` with optional text  
 ✅ **Border & Padding** - Add borders and padding to images  
 ✅ **Image Effects** - Noise, pixelate, quality control, LQIP generation  
 ✅ **Srcset Generation** - API endpoint for responsive image sets  
@@ -177,8 +177,8 @@ Available presets: `instagram-square`, `instagram-portrait`, `youtube-thumbnail`
 ### Solid Color Placeholders
 
 ```
-GET /solid/500x300/ff0000
-GET /solid/500x300/3b82f6/ffffff?text=Hello
+GET /solid/500/300/ff0000
+GET /solid/500/300/3b82f6/ffffff?text=Hello
 ```
 
 ### Srcset Generation

@@ -294,7 +294,7 @@ def test_preset_with_all_parameters(client: TestClient):
 def test_solid_color_with_all_parameters(client: TestClient):
     """Test solid color with all parameters."""
     response = client.get(
-        "/solid/500x300/667eea/ffffff?"
+        "/solid/500/300/667eea/ffffff?"
         "text=Hello&border=5&padding=10"
     )
     assert response.status_code == 200

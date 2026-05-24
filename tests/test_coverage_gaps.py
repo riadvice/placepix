@@ -1169,7 +1169,7 @@ class TestMainGaps:
         assert response.status_code == 404
 
     def test_placeholder_invalid_hex(self, client):
-        response = client.get("/solid/100x100/zzzzzz")
+        response = client.get("/solid/100/100/zzzzzz")
         assert response.status_code == 200
 
     def test_placeholder_font_fallback(self, client):
@@ -1177,7 +1177,7 @@ class TestMainGaps:
         default_font = ImageFont.load_default()
         with patch("PIL.ImageFont.truetype", side_effect=OSError("no font")), \
              patch("PIL.ImageFont.load_default", return_value=default_font):
-            response = client.get("/solid/100x100/ffffff?text=Hi")
+            response = client.get("/solid/100/100/ffffff?text=Hi")
         assert response.status_code == 200
 
     def test_favicon(self, client):

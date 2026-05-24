@@ -396,23 +396,23 @@ class TestRawServing:
 class TestPlaceholderEndpoints:
     def test_solid_color_placeholder(self, client: TestClient):
         """Test solid color placeholder endpoint."""
-        response = client.get("/solid/100x100/ff0000")
+        response = client.get("/solid/100/100/ff0000")
         assert response.status_code == 200
         assert response.headers["content-type"] == "image/png"
 
     def test_solid_color_with_fg(self, client: TestClient):
         """Test solid color with foreground color."""
-        response = client.get("/solid/100x100/ff0000/ffffff")
+        response = client.get("/solid/100/100/ff0000/ffffff")
         assert response.status_code == 200
 
     def test_solid_color_with_text(self, client: TestClient):
         """Test solid color with text overlay."""
-        response = client.get("/solid/100x100/ff0000/ffffff?text=Hello")
+        response = client.get("/solid/100/100/ff0000/ffffff?text=Hello")
         assert response.status_code == 200
 
     def test_solid_invalid_color(self, client: TestClient):
         """Test solid color with invalid hex falls back to gray."""
-        response = client.get("/solid/100x100/gggggg")
+        response = client.get("/solid/100/100/gggggg")
         assert response.status_code == 200
 
     def test_svg_placeholder(self, client: TestClient):
