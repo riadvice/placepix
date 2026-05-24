@@ -103,7 +103,7 @@
 
   <!-- Hero -->
   <section class="relative h-96 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900">
-    <img src="/1200/400/{{ categories[0].name if categories else 'all' }}?seed=hero{{ range(1000,9999)|random }}"
+    <img src="/1200/400/{{ (categories|random).name if categories else 'all' }}"
          alt="Hero" class="absolute inset-0 w-full h-full object-cover opacity-20">
     <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent"></div>
     <div class="absolute bottom-0 left-0 right-0 p-8">

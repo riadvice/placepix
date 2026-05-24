@@ -165,7 +165,7 @@ if manager._is_leader and _APSCHEDULER_AVAILABLE:
     _scheduler.start()
 
 # Upload directory writability check
-_upload_writable = True
+_upload_writable = False
 if settings.upload_enabled:
     if not os.access(settings.images_dir, os.W_OK):
         logger.warning(
@@ -175,6 +175,7 @@ if settings.upload_enabled:
         _upload_writable = False
     else:
         logger.info(f"Upload directory is writable: {settings.images_dir}")
+        _upload_writable = True
 
 # Metrics tracker (always enabled)
 logger.info("Metrics tracking enabled")
