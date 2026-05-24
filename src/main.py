@@ -766,6 +766,19 @@ async def api_images() -> JSONResponse:
     })
 
 
+@app.get("/api/categories")
+async def api_categories() -> JSONResponse:
+    """Get list of available image categories with metadata."""
+    categories_detailed = manager.list_categories()
+    category_names = [cat["name"] for cat in categories_detailed]
+    
+    return JSONResponse({
+        "categories": category_names,
+        "count": len(category_names),
+        "detailed": categories_detailed,
+    })
+
+
 @app.get("/api/info/id/{image_id:int}")
 async def image_info_by_id(image_id: int) -> JSONResponse:
     entry = manager.get_by_id(image_id)

@@ -225,6 +225,80 @@ GET /api/srcset/123?sizes=320,640,1024,1920&format=webp
 
 Returns JSON with responsive image URLs for `<img srcset>`.
 
+## API Endpoints
+
+PlacePix provides RESTful API endpoints for developers:
+
+### Get Categories
+
+```bash
+GET /api/categories
+```
+
+**Response:**
+```json
+{
+  "categories": ["nature", "architecture", "animals", "abstract", "food"],
+  "count": 5,
+  "detailed": [
+    {
+      "name": "nature",
+      "count": 15,
+      "display_name": "Nature",
+      "description": "Beautiful nature and landscapes",
+      "author": "",
+      "tags": []
+    }
+  ]
+}
+```
+
+### Get Images Metadata
+
+```bash
+GET /api/images
+```
+
+**Response:**
+```json
+{
+  "categories": [...],
+  "total": 45
+}
+```
+
+### Get Image Info by ID
+
+```bash
+GET /api/info/id/123
+```
+
+**Response:**
+```json
+{
+  "id": 123,
+  "category": "nature",
+  "width": 1920,
+  "height": 1080,
+  "format": "jpeg",
+  "path": "nature/image.jpg"
+}
+```
+
+### Generate Srcset
+
+```bash
+GET /api/srcset?id=123&sizes=400,800,1200&format=webp
+```
+
+**Response:**
+```json
+{
+  "srcset": "/id/123/400/300.webp 400w, /id/123/800/600.webp 800w, /id/123/1200/900.webp 1200w",
+  "sizes": "(max-width: 400px) 400px, (max-width: 800px) 800px, 1200px"
+}
+```
+
 ### Upload an image
 
 ```bash
