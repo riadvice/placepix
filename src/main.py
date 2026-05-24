@@ -2,19 +2,22 @@ from __future__ import annotations
 
 import hashlib
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
+from fastapi import FastAPI, HTTPException, Request, UploadFile, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.config import settings
 from src.image_manager import ImageEntry, ImageManager
 from src.image_processor import ImageProcessor
+from src.metrics import MetricsTracker
 from src.observer import start_watching
 from src.seed import seed_images
 
@@ -45,9 +48,69 @@ processor = ImageProcessor(
 # Watchdog hot-reload
 _observer = start_watching(manager)
 
+# Metrics tracker (only if admin password is set)
+metrics_tracker = MetricsTracker() if settings.admin_password else None
+
 # Templates
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+# ── Metrics Middleware ──────────────────────────────────────────────
+class MetricsMiddleware(BaseHTTPMiddleware):
+    """Middleware to track request metrics."""
+
+    async def dispatch(self, request: Request, call_next):
+        if not metrics_tracker:
+            return await call_next(request)
+        
+        start_time = time.time()
+        response = await call_next(request)
+        response_time_ms = (time.time() - start_time) * 1000
+        
+        # Extract metadata from request
+        endpoint = request.url.path
+        method = request.method
+        status_code = response.status_code
+        
+        # Try to extract image metadata from path
+        category = None
+        width = None
+        height = None
+        format_ext = None
+        cache_hit = response.headers.get("X-Cache-Hit") == "true"
+        
+        # Parse path for metadata
+        path_parts = endpoint.strip("/").split("/")
+        if len(path_parts) >= 2 and path_parts[0].isdigit() and path_parts[1].isdigit():
+            width = int(path_parts[0])
+            height = int(path_parts[1])
+            if len(path_parts) > 2:
+                category = path_parts[2].split(".")[0]
+                if "." in path_parts[2]:
+                    format_ext = path_parts[2].split(".")[1]
+        
+        # Log the request
+        try:
+            metrics_tracker.log_request(
+                endpoint=endpoint,
+                method=method,
+                status_code=status_code,
+                response_time_ms=response_time_ms,
+                category=category,
+                width=width,
+                height=height,
+                format=format_ext,
+                cache_hit=cache_hit,
+            )
+        except Exception:
+            pass  # Don't fail requests if metrics logging fails
+        
+        return response
+
+
+if metrics_tracker:
+    app.add_middleware(MetricsMiddleware)
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
@@ -783,6 +846,149 @@ async def upload_image(
         "category": category or "__root",
         "path": str(dest),
     })
+
+
+# ── Admin & Metrics ─────────────────────────────────────────────────
+def verify_admin_password(password: str = Header(alias="X-Admin-Password")) -> bool:
+    """Verify admin password from header."""
+    if not settings.admin_password:
+        raise HTTPException(status_code=404, detail="not found")
+    if password != settings.admin_password:
+        raise HTTPException(status_code=403, detail="invalid password")
+    return True
+
+
+@app.get("/admin/stats")
+async def admin_stats_page(
+    request: Request,
+    _: bool = Depends(verify_admin_password),
+) -> Response:
+    """Admin dashboard page."""
+    if not metrics_tracker:
+        raise HTTPException(status_code=404, detail="not found")
+    
+    stats = metrics_tracker.get_stats_summary()
+    
+    # Build stats cards
+    cards_html = f"""
+    <div class="stat-card">
+        <div class="stat-value">{stats['total_requests']:,}</div>
+        <div class="stat-label">Total Requests</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{stats['cache_hit_rate']}%</div>
+        <div class="stat-label">Cache Hit Rate</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{stats['avg_response_time_ms']:.1f}ms</div>
+        <div class="stat-label">Avg Response Time</div>
+    </div>
+    """
+    
+    # Popular sizes table
+    sizes_rows = ""
+    for item in stats['popular_sizes'][:10]:
+        sizes_rows += f"<tr><td>{item['width']}x{item['height']}</td><td>{item['count']:,}</td></tr>"
+    
+    # Popular categories table
+    categories_rows = ""
+    for item in stats['popular_categories'][:10]:
+        categories_rows += f"<tr><td>{item['category']}</td><td>{item['count']:,}</td></tr>"
+    
+    # Popular formats table
+    formats_rows = ""
+    for item in stats['popular_formats'][:10]:
+        formats_rows += f"<tr><td>{item['format'].upper()}</td><td>{item['count']:,}</td></tr>"
+    
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlacePix Admin - Stats</title>
+    <style>
+        :root {{ --bg: #f8fafc; --card: #fff; --text: #1e293b; --muted: #64748b; --accent: #3b82f6; --border: #e2e8f0; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding: 2rem; }}
+        h1 {{ margin-bottom: 2rem; }}
+        .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }}
+        .stat-card {{ background: var(--card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }}
+        .stat-value {{ font-size: 2rem; font-weight: 700; color: var(--accent); }}
+        .stat-label {{ color: var(--muted); margin-top: 0.5rem; }}
+        .tables-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }}
+        .table-card {{ background: var(--card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }}
+        .table-card h2 {{ font-size: 1.1rem; margin-bottom: 1rem; }}
+        table {{ width: 100%; border-collapse: collapse; }}
+        th, td {{ padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }}
+        th {{ font-weight: 600; color: var(--muted); font-size: 0.875rem; }}
+        tr:last-child td {{ border-bottom: none; }}
+    </style>
+</head>
+<body>
+    <h1>📊 PlacePix Admin Dashboard</h1>
+    <div class="stats-grid">{cards_html}</div>
+    <div class="tables-grid">
+        <div class="table-card">
+            <h2>Popular Sizes</h2>
+            <table>
+                <thead><tr><th>Size</th><th>Requests</th></tr></thead>
+                <tbody>{sizes_rows}</tbody>
+            </table>
+        </div>
+        <div class="table-card">
+            <h2>Popular Categories</h2>
+            <table>
+                <thead><tr><th>Category</th><th>Requests</th></tr></thead>
+                <tbody>{categories_rows}</tbody>
+            </table>
+        </div>
+        <div class="table-card">
+            <h2>Popular Formats</h2>
+            <table>
+                <thead><tr><th>Format</th><th>Requests</th></tr></thead>
+                <tbody>{formats_rows}</tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>"""
+    
+    return Response(content=html, media_type="text/html")
+
+
+@app.get("/api/admin/stats")
+async def api_admin_stats(
+    _: bool = Depends(verify_admin_password),
+) -> JSONResponse:
+    """Get stats as JSON."""
+    if not metrics_tracker:
+        raise HTTPException(status_code=404, detail="not found")
+    
+    return JSONResponse(metrics_tracker.get_stats_summary())
+
+
+@app.get("/api/admin/popular-sizes")
+async def api_admin_popular_sizes(
+    limit: int = 10,
+    _: bool = Depends(verify_admin_password),
+) -> JSONResponse:
+    """Get popular sizes."""
+    if not metrics_tracker:
+        raise HTTPException(status_code=404, detail="not found")
+    
+    return JSONResponse(metrics_tracker.get_popular_sizes(limit))
+
+
+@app.get("/api/admin/popular-categories")
+async def api_admin_popular_categories(
+    limit: int = 10,
+    _: bool = Depends(verify_admin_password),
+) -> JSONResponse:
+    """Get popular categories."""
+    if not metrics_tracker:
+        raise HTTPException(status_code=404, detail="not found")
+    
+    return JSONResponse(metrics_tracker.get_popular_categories(limit))
 
 
 # ── Entry point ─────────────────────────────────────────────────────
