@@ -15,7 +15,8 @@ build/
 .cache/
 data/
 images/
-
+test_data/
+test_images/
 # Config (optional, user-specific)
 .env
 
