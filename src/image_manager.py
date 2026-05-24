@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import logging
 import os
 import random
 from dataclasses import dataclass, field
@@ -13,6 +14,8 @@ import yaml
 from PIL import Image
 
 from src.config import settings
+
+logger = logging.getLogger(__name__)
 
 try:
     import boto3
@@ -305,6 +308,7 @@ class ImageManager:
         self._colors = colors
         self._save_manifest(manifest)
         self._save_colors(colors)
+        logger.info(f"Rescan complete: {total} images in {len(new_categories)} categories")
 
     def _scan_s3(self, manifest: dict[str, int], next_id: int) -> tuple[dict[str, Category], int]:
         """Scan S3 bucket for images and return categories."""

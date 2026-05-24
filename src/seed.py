@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 import random
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
+
+logger = logging.getLogger(__name__)
 
 
 SEED_CATEGORIES = [
@@ -61,9 +64,10 @@ def seed_images(images_dir: Path, count_per_category: int = 5) -> None:
     images_dir.mkdir(parents=True, exist_ok=True)
     
     if any(images_dir.iterdir()):
+        logger.info(f"Directory {images_dir} already has content, skipping seed")
         return  # already has content
 
-    print("[placepix] data/ is empty, seeding sample images...")
+    logger.info(f"Seeding sample images in {images_dir}")
 
     for slug, name, desc in SEED_CATEGORIES:
         cat_dir = images_dir / slug
@@ -81,4 +85,4 @@ def seed_images(images_dir: Path, count_per_category: int = 5) -> None:
             img = _add_sample_text(img, f"{name} {i + 1}")
             img.save(cat_dir / f"sample_{i + 1}.jpg", quality=85)
 
-    print("[placepix] Sample images seeded.")
+    logger.info(f"Seeded {len(SEED_CATEGORIES) * count_per_category} sample images")

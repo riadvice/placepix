@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import logging
 import os
 import time
 from datetime import datetime, timezone
@@ -29,6 +30,29 @@ from src.metrics import MetricsTracker
 from src.observer import start_watching
 from src.seed import seed_images
 
+# ── Logging Setup ───────────────────────────────────────────────────
+def setup_logging():
+    """Configure logging with console output only."""
+    log_format = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+    date_format = "%Y-%m-%d %H:%M:%S"
+    
+    # Create logger
+    logger = logging.getLogger()
+    logger.setLevel(getattr(logging, settings.log_level.upper()))
+    
+    # Clear existing handlers
+    logger.handlers.clear()
+    
+    # Console handler only
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(getattr(logging, settings.log_level.upper()))
+    console_handler.setFormatter(logging.Formatter(log_format, date_format))
+    logger.addHandler(console_handler)
+    
+    return logger
+
+logger = setup_logging()
+
 # ── Setup ───────────────────────────────────────────────────────────
 app = FastAPI(title="PlacePix", version="1.0.0")
 
@@ -43,10 +67,16 @@ app.add_middleware(
 
 # Seed images if enabled
 if settings.seed_enabled:
+    logger.info(f"Seeding images in {settings.seed_dir}")
     seed_images(settings.seed_dir)
+else:
+    logger.info("Seed images disabled")
 
 # In-memory image registry
+logger.info(f"Scanning images from {settings.images_dir} and {settings.seed_dir}")
 manager = ImageManager()
+logger.info(f"Loaded {manager.total} images across {len(manager.categories)} categories")
+
 processor = ImageProcessor(
     min_width=settings.min_width,
     max_width=settings.max_width,
@@ -55,14 +85,23 @@ processor = ImageProcessor(
 )
 
 # Watchdog hot-reload
+logger.info("Starting file watcher for hot-reload")
 _observer = start_watching(manager)
 
 # Metrics tracker (only if admin password is set)
-metrics_tracker = MetricsTracker() if settings.admin_password else None
+if settings.admin_password:
+    logger.info("Metrics tracking enabled")
+    metrics_tracker = MetricsTracker()
+else:
+    logger.info("Metrics tracking disabled (no admin password set)")
+    metrics_tracker = None
 
 # Templates
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+logger.info(f"Static files mounted at /static")
+
+logger.info(f"PlacePix ready - listening on {settings.bind_host}:{settings.bind_port}")
 
 
 # ── Metrics Middleware ──────────────────────────────────────────────
@@ -76,6 +115,13 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         response = await call_next(request)
         response_time_ms = (time.time() - start_time) * 1000
+        
+        # Log the request
+        logger.info(
+            f"{request.method} {request.url.path} - "
+            f"Status: {response.status_code} - "
+            f"Time: {response_time_ms:.2f}ms"
+        )
         
         # Extract metadata from request
         endpoint = request.url.path
@@ -312,6 +358,7 @@ def _serve_entry(
         )
         cached = _read_cached(cache_path)
         if cached is not None:
+            logger.debug(f"Cache hit: {entry.filename} at {width}x{height}")
             if settings.cdn:
                 return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
             
@@ -321,6 +368,7 @@ def _serve_entry(
             
             # Check if client cache is still valid
             if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
+                logger.debug(f"Client cache valid: {entry.filename}")
                 return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
             
             content_type = f"image/{output_format}"
@@ -352,6 +400,7 @@ def _serve_entry(
     image_source = _resolve_image_source(entry)
 
     # Process image
+    logger.debug(f"Processing image: {entry.filename} -> {width}x{height} {output_format}")
     processed = processor.process(
         image_path=image_source,
         width=width,
@@ -379,6 +428,7 @@ def _serve_entry(
     # Cache if enabled
     if settings.cache and cache_path is not None:
         _write_cache(cache_path, processed)
+        logger.debug(f"Cached processed image: {cache_path}")
         if settings.cdn:
             return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
 
@@ -438,8 +488,10 @@ async def serve_by_id(
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
+    logger.debug(f"Serving image by ID: {image_id} at {width}x{height}")
     entry = manager.get_by_id(image_id)
     if entry is None:
+        logger.warning(f"Image not found: ID {image_id}")
         raise HTTPException(status_code=404, detail="image not found")
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
@@ -485,8 +537,10 @@ async def serve_by_ratio(
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
     """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
+    logger.debug(f"Serving image by ratio: {ratio} at height {height}")
     width, height = _parse_aspect_ratio(ratio, height)
     if width == 0 or height == 0:
+        logger.warning(f"Invalid aspect ratio format: {ratio}")
         raise HTTPException(status_code=400, detail="invalid aspect ratio format")
     
     if color:
@@ -494,6 +548,7 @@ async def serve_by_ratio(
     else:
         entry = manager.pick(category or None, seed or None)
     if entry is None:
+        logger.warning(f"Category not found for ratio: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
     
     is_random = not seed
@@ -540,7 +595,9 @@ async def serve_by_preset(
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
     """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
+    logger.debug(f"Serving image by preset: {preset_name}")
     if preset_name not in PRESETS:
+        logger.warning(f"Unknown preset: {preset_name}")
         raise HTTPException(status_code=404, detail=f"unknown preset: {preset_name}")
     
     width, height = PRESETS[preset_name]
@@ -550,6 +607,7 @@ async def serve_by_preset(
     else:
         entry = manager.pick(category or None, seed or None)
     if entry is None:
+        logger.warning(f"Category not found for preset: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
     
     is_random = not seed
@@ -702,11 +760,13 @@ async def serve_image(
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
+    logger.debug(f"Serving image: {width}x{height} from category '{category}' (seed: {seed or 'random'})")
     if color:
         entry = manager.pick_by_color(color, category or None)
     else:
         entry = manager.pick(category or None, seed or None)
     if entry is None:
+        logger.warning(f"Category not found: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
     # Random images should not be cached long-term
     is_random = not seed
@@ -747,8 +807,10 @@ async def serve_by_color(
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
+    logger.debug(f"Serving image by color: {hex_color} at {width}x{height}")
     entry = manager.pick_by_color(hex_color)
     if entry is None:
+        logger.warning(f"No image matching color: {hex_color}")
         raise HTTPException(status_code=404, detail="no image matching that color")
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
@@ -1226,10 +1288,14 @@ async def upload_image(
     file: UploadFile,
     category: str = Form(default=""),
 ) -> JSONResponse:
+    logger.info(f"Upload request: {file.filename} to category '{category or '__root'}'")
+    
     if not settings.upload_enabled:
+        logger.warning("Upload attempt but uploads are disabled")
         raise HTTPException(status_code=403, detail="uploads are disabled")
 
     if not file.filename:
+        logger.warning("Upload attempt with no filename")
         raise HTTPException(status_code=400, detail="no file provided")
 
     target_dir = settings.images_dir
@@ -1240,9 +1306,11 @@ async def upload_image(
     dest = target_dir / file.filename
     content = await file.read()
     dest.write_bytes(content)
+    logger.info(f"File saved: {dest} ({len(content)} bytes)")
 
     # Trigger rescan
     manager.rescan()
+    logger.info("Rescanned image registry after upload")
 
     return JSONResponse({
         "success": True,

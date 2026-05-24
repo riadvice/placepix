@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 from threading import Thread
 
@@ -8,6 +9,8 @@ from watchdog.observers import Observer
 
 from src.config import settings
 from src.image_manager import ImageManager
+
+logger = logging.getLogger(__name__)
 
 
 class _RescanHandler(FileSystemEventHandler):
@@ -21,6 +24,7 @@ class _RescanHandler(FileSystemEventHandler):
         if now - self._last_rescan < self._debounce_seconds:
             return
         self._last_rescan = now
+        logger.debug(f"File system event detected: {event.event_type} - {event.src_path}")
         # debounce: wait a moment for bulk file operations to finish
         time.sleep(0.3)
         self.manager.rescan()
@@ -31,5 +35,7 @@ def start_watching(manager: ImageManager) -> Observer:
     observer = Observer()
     handler = _RescanHandler(manager)
     observer.schedule(handler, str(settings.images_dir), recursive=True)
+    observer.schedule(handler, str(settings.seed_dir), recursive=True)
     observer.start()
+    logger.info(f"File watcher started for {settings.images_dir} and {settings.seed_dir}")
     return observer

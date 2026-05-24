@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from pydantic import Field
@@ -35,6 +36,9 @@ class Settings(BaseSettings):
 
     # Google Analytics (optional)
     ga_tracking_id: str = Field(default="")
+
+    # Logging
+    log_level: str = Field(default="INFO")
 
     # S3-compatible storage (optional)
     s3_enabled: bool = Field(default=False)
