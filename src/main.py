@@ -1237,8 +1237,28 @@ async def image_explorer(page: int = 1) -> Response:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlacePix Image Explorer</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>PlacePix Image Explorer — Browse All Images</title>
+    <meta name="description" content="Browse and explore all placeholder images in the PlacePix gallery. View image IDs, categories, and generate custom URLs with different sizes and formats.">
+    <meta name="keywords" content="image gallery, placeholder images, image explorer, image database, developer tools">
+    <meta name="author" content="RiAdvice">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://placepix.riadvice.com/images">
+    <meta property="og:title" content="PlacePix Image Explorer — Browse All Images">
+    <meta property="og:description" content="Browse and explore all placeholder images in the PlacePix gallery. View image IDs, categories, and generate custom URLs.">
+    <meta property="og:image" content="https://placepix.riadvice.com/static/logo.svg">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://placepix.riadvice.com/images">
+    <meta name="twitter:title" content="PlacePix Image Explorer — Browse All Images">
+    <meta name="twitter:description" content="Browse and explore all placeholder images in the PlacePix gallery. View image IDs, categories, and generate custom URLs.">
+    <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
+    
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="canonical" href="https://placepix.riadvice.com/images">
     <style>
         :root {{ --bg: #f8fafc; --card: #fff; --text: #1e293b; --muted: #64748b; --accent: #3b82f6; --border: #e2e8f0; }}
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -1281,6 +1301,11 @@ async def image_explorer(page: int = 1) -> Response:
             {"<a href='/#upload'>Upload</a>" if settings.upload_enabled and _upload_writable else ""}
             <a href="/#api">API</a>
             <a href="/docs" target="_blank">Docs</a>
+            <a href="https://github.com/riadvice/placepix" target="_blank" title="GitHub">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                </svg>
+            </a>
         </div>
     </nav>
     <h1>Image Explorer</h1>
@@ -1398,8 +1423,28 @@ async def color_palette(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlacePix Color Palette</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>PlacePix Color Palette — Browse Images by Dominant Color</title>
+    <meta name="description" content="Browse placeholder images by their dominant colors. Find images that match your brand palette with PlacePix color search. Filter by color, category, and search hex codes.">
+    <meta name="keywords" content="color palette, image colors, color search, dominant colors, brand colors, placeholder images, design tools">
+    <meta name="author" content="RiAdvice">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://placepix.riadvice.com/palette">
+    <meta property="og:title" content="PlacePix Color Palette — Browse Images by Dominant Color">
+    <meta property="og:description" content="Browse placeholder images by their dominant colors. Find images that match your brand palette with PlacePix color search.">
+    <meta property="og:image" content="https://placepix.riadvice.com/static/logo.svg">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://placepix.riadvice.com/palette">
+    <meta name="twitter:title" content="PlacePix Color Palette — Browse Images by Dominant Color">
+    <meta name="twitter:description" content="Browse placeholder images by their dominant colors. Find images that match your brand palette with PlacePix color search.">
+    <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
+    
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="canonical" href="https://placepix.riadvice.com/palette">
     <style>
         :root {{ --bg: #f8fafc; --card: #fff; --text: #1e293b; --muted: #64748b; --accent: #3b82f6; --border: #e2e8f0; }}
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -1449,6 +1494,11 @@ async def color_palette(
             {"<a href='/#upload'>Upload</a>" if settings.upload_enabled and _upload_writable else ""}
             <a href="/#api">API</a>
             <a href="/docs" target="_blank">Docs</a>
+            <a href="https://github.com/riadvice/placepix" target="_blank" title="GitHub">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                </svg>
+            </a>
         </div>
     </nav>
     <h1>Color Palette</h1>
