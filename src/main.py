@@ -257,6 +257,7 @@ def _serve_entry(
     pixelate: int = 0,
     quality: int = 85,
     lqip: bool = False,
+    watermark: str = "",
     if_none_match: str | None = None,
     if_modified_since: str | None = None,
     is_random: bool = False,
@@ -310,6 +311,16 @@ def _serve_entry(
                 },
             )
 
+    # Prepare watermark config
+    watermark_config = None
+    if watermark and settings.watermark_enabled:
+        watermark_config = {
+            "watermark_image": settings.watermark_image,
+            "watermark_text": settings.watermark_text,
+            "watermark_position": settings.watermark_position,
+            "watermark_opacity": settings.watermark_opacity,
+        }
+    
     # Process image
     processed = processor.process(
         image_path=entry.path,
@@ -331,6 +342,8 @@ def _serve_entry(
         pixelate=pixelate,
         quality=quality,
         lqip=lqip,
+        watermark=watermark,
+        watermark_config=watermark_config,
     )
 
     # Cache if enabled
@@ -388,6 +401,7 @@ async def serve_by_id(
     pixelate: int = 0,
     quality: int = 85,
     lqip: bool = False,
+    watermark: str = "",
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -397,7 +411,7 @@ async def serve_by_id(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
-        border, padding, noise, pixelate, quality, lqip,
+        border, padding, noise, pixelate, quality, lqip, watermark,
         if_none_match, if_modified_since, is_random=False,
     )
 
@@ -423,6 +437,13 @@ async def serve_by_ratio(
     saturation: float = 1.0,
     sepia: bool = False,
     color: str = "",
+    border: str = "",
+    padding: int = 0,
+    noise: int = 0,
+    pixelate: int = 0,
+    quality: int = 85,
+    lqip: bool = False,
+    watermark: str = "",
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -442,6 +463,7 @@ async def serve_by_ratio(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        border, padding, noise, pixelate, quality, lqip, watermark,
         if_none_match, if_modified_since, is_random,
     )
 
@@ -466,6 +488,13 @@ async def serve_by_preset(
     saturation: float = 1.0,
     sepia: bool = False,
     color: str = "",
+    border: str = "",
+    padding: int = 0,
+    noise: int = 0,
+    pixelate: int = 0,
+    quality: int = 85,
+    lqip: bool = False,
+    watermark: str = "",
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -486,6 +515,7 @@ async def serve_by_preset(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        border, padding, noise, pixelate, quality, lqip, watermark,
         if_none_match, if_modified_since, is_random,
     )
 
@@ -621,6 +651,13 @@ async def serve_image(
     saturation: float = 1.0,
     sepia: bool = False,
     color: str = "",
+    border: str = "",
+    padding: int = 0,
+    noise: int = 0,
+    pixelate: int = 0,
+    quality: int = 85,
+    lqip: bool = False,
+    watermark: str = "",
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -635,6 +672,7 @@ async def serve_image(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        border, padding, noise, pixelate, quality, lqip, watermark,
         if_none_match, if_modified_since, is_random,
     )
 
@@ -658,6 +696,13 @@ async def serve_by_color(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    border: str = "",
+    padding: int = 0,
+    noise: int = 0,
+    pixelate: int = 0,
+    quality: int = 85,
+    lqip: bool = False,
+    watermark: str = "",
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -667,6 +712,7 @@ async def serve_by_color(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        border, padding, noise, pixelate, quality, lqip, watermark,
         if_none_match, if_modified_since, is_random=True,
     )
 
@@ -1050,6 +1096,52 @@ async def upload_image(
         "filename": file.filename,
         "category": category or "__root",
         "path": str(dest),
+    })
+
+
+# ── Srcset Generation ──────────────────────────────────────────────
+@app.get("/api/srcset/{image_id:int}")
+async def generate_srcset(
+    image_id: int,
+    sizes: str = "320,640,1024,1920",
+    format: str = "jpeg",  # noqa: A002
+) -> JSONResponse:
+    """Generate srcset URLs for responsive images."""
+    entry = manager.get_by_id(image_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+    
+    # Parse sizes
+    try:
+        size_list = [int(s.strip()) for s in sizes.split(",")]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="invalid sizes format")
+    
+    # Calculate aspect ratio from original image
+    from PIL import Image
+    with Image.open(entry.path) as img:
+        aspect_ratio = img.width / img.height
+    
+    # Generate srcset entries
+    srcset_entries = []
+    for width in size_list:
+        height = int(width / aspect_ratio)
+        url = f"/id/{image_id}/{width}/{height}.{format}"
+        srcset_entries.append({
+            "url": url,
+            "width": width,
+            "height": height,
+            "descriptor": f"{width}w",
+        })
+    
+    # Generate srcset string
+    srcset_string = ", ".join(f"{e['url']} {e['descriptor']}" for e in srcset_entries)
+    
+    return JSONResponse({
+        "id": image_id,
+        "srcset": srcset_entries,
+        "srcset_string": srcset_string,
+        "aspect_ratio": round(aspect_ratio, 3),
     })
 
 

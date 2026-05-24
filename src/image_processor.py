@@ -12,6 +12,12 @@ try:
 except Exception:
     _AVIF_AVAILABLE = False
 
+try:
+    import cv2
+    _OPENCV_AVAILABLE = True
+except Exception:
+    _OPENCV_AVAILABLE = False
+
 
 class ImageProcessor:
     """Process images with resize, crop, grayscale, blur, text overlay, format."""
@@ -54,6 +60,8 @@ class ImageProcessor:
         pixelate: int = 0,
         quality: int = 85,
         lqip: bool = False,
+        watermark: str = "",
+        watermark_config: dict | None = None,
     ) -> bytes:
         with Image.open(image_path) as img:
             img = img.convert("RGB")
@@ -102,6 +110,10 @@ class ImageProcessor:
             # Generate LQIP if requested
             if lqip:
                 img = self._generate_lqip(img)
+            
+            # Apply watermark
+            if watermark and watermark_config:
+                img = self._apply_watermark(img, watermark, watermark_config)
 
             if text:
                 img = self._add_text(img, text)
@@ -139,6 +151,9 @@ class ImageProcessor:
 
         if fit == "crop":
             return self._crop_center(img, width, height)
+        
+        if fit == "smart":
+            return self._smart_crop(img, width, height)
 
         if fit == "contain":
             img.thumbnail((width, height), Image.Resampling.LANCZOS)
@@ -303,3 +318,154 @@ class ImageProcessor:
         lqip = lqip.filter(ImageFilter.GaussianBlur(radius=10))
         
         return lqip
+    
+    def _smart_crop(self, img: Image.Image, width: int, height: int) -> Image.Image:
+        """Smart crop using OpenCV face detection, fallback to center crop."""
+        if not _OPENCV_AVAILABLE:
+            # Fallback to center crop if OpenCV not available
+            return self._crop_center(img, width, height)
+        
+        # Convert PIL to OpenCV format
+        img_array = np.array(img)
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+        
+        # Load Haar Cascade for face detection
+        try:
+            cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            face_cascade = cv2.CascadeClassifier(cascade_path)
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        except Exception:
+            # Fallback to center crop on error
+            return self._crop_center(img, width, height)
+        
+        if len(faces) == 0:
+            # No faces detected, use center crop
+            return self._crop_center(img, width, height)
+        
+        # Calculate bounding box that includes all faces
+        x_min = min(x for x, y, w, h in faces)
+        y_min = min(y for x, y, w, h in faces)
+        x_max = max(x + w for x, y, w, h in faces)
+        y_max = max(y + h for x, y, w, h in faces)
+        
+        # Add padding around faces (20%)
+        face_width = x_max - x_min
+        face_height = y_max - y_min
+        padding_x = int(face_width * 0.2)
+        padding_y = int(face_height * 0.2)
+        
+        x_min = max(0, x_min - padding_x)
+        y_min = max(0, y_min - padding_y)
+        x_max = min(img.width, x_max + padding_x)
+        y_max = min(img.height, y_max + padding_y)
+        
+        # Calculate crop region maintaining target aspect ratio
+        target_ratio = width / height
+        current_width = x_max - x_min
+        current_height = y_max - y_min
+        current_ratio = current_width / current_height
+        
+        if current_ratio > target_ratio:
+            # Too wide, adjust width
+            new_width = int(current_height * target_ratio)
+            x_center = (x_min + x_max) // 2
+            x_min = max(0, x_center - new_width // 2)
+            x_max = min(img.width, x_min + new_width)
+        else:
+            # Too tall, adjust height
+            new_height = int(current_width / target_ratio)
+            y_center = (y_min + y_max) // 2
+            y_min = max(0, y_center - new_height // 2)
+            y_max = min(img.height, y_min + new_height)
+        
+        # Crop and resize
+        cropped = img.crop((x_min, y_min, x_max, y_max))
+        return cropped.resize((width, height), Image.Resampling.LANCZOS)
+    
+    def _apply_watermark(self, img: Image.Image, position: str, config: dict) -> Image.Image:
+        """Apply watermark to image."""
+        # Get watermark settings
+        watermark_image = config.get("watermark_image", "")
+        watermark_text = config.get("watermark_text", "")
+        opacity = config.get("watermark_opacity", 0.5)
+        
+        # Use provided position or config position
+        if not position or position == "true":
+            position = config.get("watermark_position", "bottom-right")
+        
+        # Create watermark layer
+        watermark = None
+        
+        if watermark_image and Path(watermark_image).exists():
+            # Load image watermark
+            try:
+                with Image.open(watermark_image) as wm:
+                    wm = wm.convert("RGBA")
+                    # Scale watermark to 20% of image width
+                    wm_width = int(img.width * 0.2)
+                    wm_height = int(wm.height * (wm_width / wm.width))
+                    watermark = wm.resize((wm_width, wm_height), Image.Resampling.LANCZOS)
+            except Exception:
+                watermark = None
+        
+        if watermark is None and watermark_text:
+            # Create text watermark
+            wm_img = Image.new("RGBA", img.size, (255, 255, 255, 0))
+            draw = ImageDraw.Draw(wm_img)
+            font_size = max(12, int(img.width * 0.03))
+            try:
+                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+            except Exception:
+                font = ImageFont.load_default()
+            
+            bbox = draw.textbbox((0, 0), watermark_text, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            
+            # Position text
+            x, y = self._get_watermark_position(position, img.width, img.height, text_width, text_height)
+            draw.text((x, y), watermark_text, fill=(255, 255, 255, int(255 * opacity)), font=font)
+            watermark = wm_img
+        
+        if watermark is None:
+            return img
+        
+        # Apply watermark with opacity
+        if watermark.mode != "RGBA":
+            watermark = watermark.convert("RGBA")
+        
+        # Adjust opacity
+        alpha = watermark.split()[3]
+        alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
+        watermark.putalpha(alpha)
+        
+        # Position watermark
+        if watermark.size != img.size:
+            wm_width, wm_height = watermark.size
+            x, y = self._get_watermark_position(position, img.width, img.height, wm_width, wm_height)
+        else:
+            x, y = 0, 0
+        
+        # Composite
+        img_rgba = img.convert("RGBA")
+        img_rgba.paste(watermark, (x, y), watermark)
+        return img_rgba.convert("RGB")
+    
+    def _get_watermark_position(self, position: str, img_width: int, img_height: int, wm_width: int, wm_height: int) -> tuple[int, int]:
+        """Calculate watermark position."""
+        padding = 20
+        
+        position = position.lower()
+        if position == "top-left":
+            return (padding, padding)
+        elif position == "top-right":
+            return (img_width - wm_width - padding, padding)
+        elif position == "bottom-left":
+            return (padding, img_height - wm_height - padding)
+        elif position == "bottom-right":
+            return (img_width - wm_width - padding, img_height - wm_height - padding)
+        elif position == "center":
+            return ((img_width - wm_width) // 2, (img_height - wm_height) // 2)
+        else:
+            # Default to bottom-right
+            return (img_width - wm_width - padding, img_height - wm_height - padding)
