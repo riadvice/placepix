@@ -87,12 +87,32 @@ pytest -v
 # Run specific test file
 pytest tests/test_image_effects.py
 
-# Run with coverage report
+# Run with coverage report (shows missing lines)
 pytest --cov=src --cov-report=term-missing
 
-# Run with HTML coverage report
+# Run with detailed coverage in console
+pytest --cov=src --cov-report=term-missing -v
+
+# Run with HTML coverage report (interactive)
 pytest --cov=src --cov-report=html
 # Open htmlcov/index.html in browser
+
+# Show coverage for specific module
+pytest --cov=src.image_processor --cov-report=term-missing
+```
+
+**Example coverage output:**
+```
+Name                     Stmts   Miss  Cover   Missing
+------------------------------------------------------
+src/__init__.py              0      0   100%
+src/config.py               34      2    94%   36, 40
+src/image_processor.py     287     68    76%   12-13, 18-19, 131-134...
+src/main.py                457     80    82%   64-109, 113, 269...
+src/metrics.py              70     10    86%   209-243
+src/observer.py             25      0   100%
+------------------------------------------------------
+TOTAL                     1246    288    77%
 ```
 
 ### Test Statistics
