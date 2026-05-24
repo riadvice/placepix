@@ -145,7 +145,7 @@
   {% endif %}
 
   <!-- Categories -->
-  <section id="categories" class="max-w-7xl mx-auto px-4 pb-12">
+  <section id="categories" class="max-w-7xl mx-auto px-4 {% if not upload_enabled %}pt-12{% endif %} pb-12">
     <div class="flex items-end justify-between mb-8">
       <div>
         <h2 class="text-3xl font-bold text-stone-800">Categories</h2>
