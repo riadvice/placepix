@@ -22,7 +22,7 @@ COPY templates/ ./templates/
 COPY static/ ./static/
 
 # Ensure the mount point exists
-RUN mkdir -p /app/images /app/.cache
+RUN mkdir -p /app/images /app/.cache /app/data
 
 ENV IMAGES_DIR=/app/images
 ENV CACHE=true

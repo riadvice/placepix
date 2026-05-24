@@ -342,8 +342,8 @@ class ImageManager:
                     ))
                     total += 1
 
-        # Only scan S3 on first rescan (startup), and only by leader worker
-        if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned and self._is_leader:
+        # Only scan S3 on first rescan (startup) in each worker
+        if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned:
             logger.info(f"Scanning S3 bucket: {settings.s3_bucket}")
             s3_categories, next_id = self._scan_s3(manifest, next_id)
             for cat_name, category in s3_categories.items():
