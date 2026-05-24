@@ -114,6 +114,41 @@ if metrics_tracker:
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
+# Preset dimensions for common use cases
+PRESETS = {
+    # Social media
+    "facebook-cover": (820, 312),
+    "twitter-header": (1500, 500),
+    "instagram-square": (1080, 1080),
+    "instagram-portrait": (1080, 1350),
+    "youtube-thumbnail": (1280, 720),
+    # Ad sizes
+    "leaderboard": (728, 90),
+    "banner": (468, 60),
+    "skyscraper": (160, 600),
+    "rectangle": (300, 250),
+    # Screen sizes
+    "mobile": (375, 667),
+    "tablet": (768, 1024),
+    "desktop": (1920, 1080),
+    "4k": (3840, 2160),
+}
+
+
+def _parse_aspect_ratio(ratio_str: str, height: int) -> tuple[int, int]:
+    """Parse aspect ratio string like '16:9' and calculate width."""
+    try:
+        parts = ratio_str.split(":")
+        if len(parts) != 2:
+            return 0, 0
+        w_ratio = float(parts[0])
+        h_ratio = float(parts[1])
+        width = int(height * (w_ratio / h_ratio))
+        return width, height
+    except (ValueError, ZeroDivisionError):
+        return 0, 0
+
+
 def _cache_path(
     entry: ImageEntry,
     width: int,
@@ -345,6 +380,157 @@ async def serve_by_id(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         if_none_match, if_modified_since, is_random=False,
+    )
+
+
+@app.get("/ratio/{ratio}/{height:int}")
+@app.head("/ratio/{ratio}/{height:int}")
+@app.get("/ratio/{ratio}/{height:int}.{ext}")
+@app.head("/ratio/{ratio}/{height:int}.{ext}")
+async def serve_by_ratio(
+    ratio: str,
+    height: int,
+    ext: str = "",
+    category: str = "",
+    grayscale: bool = False,
+    blur: int = 0,
+    seed: str = "",
+    text: str = "",
+    fit: str = "crop",
+    format: str = "",  # noqa: A002
+    tint: str = "",
+    brightness: float = 1.0,
+    contrast: float = 1.0,
+    saturation: float = 1.0,
+    sepia: bool = False,
+    color: str = "",
+    if_none_match: str | None = Header(default=None),
+    if_modified_since: str | None = Header(default=None),
+) -> Response:
+    """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
+    width, height = _parse_aspect_ratio(ratio, height)
+    if width == 0 or height == 0:
+        raise HTTPException(status_code=400, detail="invalid aspect ratio format")
+    
+    if color:
+        entry = manager.pick_by_color(color, category or None)
+    else:
+        entry = manager.pick(category or None, seed or None)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="category not found")
+    
+    is_random = not seed
+    return _serve_entry(
+        entry, width, height, ext, grayscale, blur, text, fit, format,
+        tint, brightness, contrast, saturation, sepia,
+        if_none_match, if_modified_since, is_random,
+    )
+
+
+@app.get("/preset/{preset_name}")
+@app.head("/preset/{preset_name}")
+@app.get("/preset/{preset_name}.{ext}")
+@app.head("/preset/{preset_name}.{ext}")
+async def serve_by_preset(
+    preset_name: str,
+    ext: str = "",
+    category: str = "",
+    grayscale: bool = False,
+    blur: int = 0,
+    seed: str = "",
+    text: str = "",
+    fit: str = "crop",
+    format: str = "",  # noqa: A002
+    tint: str = "",
+    brightness: float = 1.0,
+    contrast: float = 1.0,
+    saturation: float = 1.0,
+    sepia: bool = False,
+    color: str = "",
+    if_none_match: str | None = Header(default=None),
+    if_modified_since: str | None = Header(default=None),
+) -> Response:
+    """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
+    if preset_name not in PRESETS:
+        raise HTTPException(status_code=404, detail=f"unknown preset: {preset_name}")
+    
+    width, height = PRESETS[preset_name]
+    
+    if color:
+        entry = manager.pick_by_color(color, category or None)
+    else:
+        entry = manager.pick(category or None, seed or None)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="category not found")
+    
+    is_random = not seed
+    return _serve_entry(
+        entry, width, height, ext, grayscale, blur, text, fit, format,
+        tint, brightness, contrast, saturation, sepia,
+        if_none_match, if_modified_since, is_random,
+    )
+
+
+@app.get("/solid/{width:int}x{height:int}/{bg_color}")
+@app.get("/solid/{width:int}x{height:int}/{bg_color}/{fg_color}")
+async def solid_color_placeholder(
+    width: int,
+    height: int,
+    bg_color: str,
+    fg_color: str = "ffffff",
+    text: str = "",
+) -> Response:
+    """Generate solid color placeholder with optional text."""
+    from PIL import Image, ImageDraw, ImageFont
+    
+    # Clamp size
+    width = max(1, min(width, 5000))
+    height = max(1, min(height, 5000))
+    
+    # Parse colors
+    def _parse_hex(color: str) -> tuple[int, int, int]:
+        h = color.lstrip("#")
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        if len(h) != 6 or not all(c in "0123456789abcdefABCDEF" for c in h):
+            return (204, 204, 204)  # Default gray
+        return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+    
+    bg_rgb = _parse_hex(bg_color)
+    fg_rgb = _parse_hex(fg_color)
+    
+    # Create image
+    img = Image.new("RGB", (width, height), bg_rgb)
+    
+    # Add text if provided
+    if text:
+        draw = ImageDraw.Draw(img)
+        font_size = max(12, min(width, height) // 10)
+        try:
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+        except Exception:
+            font = ImageFont.load_default()
+        
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        x = (width - text_width) // 2
+        y = (height - text_height) // 2
+        draw.text((x, y), text, fill=fg_rgb, font=font)
+    
+    # Convert to bytes
+    import io
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    content = buffer.getvalue()
+    
+    return Response(
+        content=content,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "public, max-age=2592000, immutable",
+            "ETag": _generate_etag(content),
+        },
     )
 
 
