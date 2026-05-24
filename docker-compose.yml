@@ -9,5 +9,5 @@ services:
       - ./.cache:/app/.cache
       - ./data:/app/data
     env_file:
-      - .env.production
+      - .env
     restart: unless-stopped
