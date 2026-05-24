@@ -134,7 +134,7 @@ def _serve_entry(
     # Determine output format
     output_format = output_format or ext.lstrip(".") or "jpeg"
     output_format = output_format.lower()
-    if output_format not in ("jpeg", "jpg", "png", "webp"):
+    if output_format not in ("jpeg", "jpg", "png", "webp", "avif"):
         output_format = "jpeg"
     if output_format == "jpg":
         output_format = "jpeg"

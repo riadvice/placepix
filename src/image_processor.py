@@ -5,6 +5,12 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
+try:
+    import pillow_avif  # noqa: F401
+    _AVIF_AVAILABLE = True
+except Exception:
+    _AVIF_AVAILABLE = False
+
 
 class ImageProcessor:
     """Process images with resize, crop, grayscale, blur, text overlay, format."""
@@ -76,13 +82,15 @@ class ImageProcessor:
             buffer = io.BytesIO()
             fmt = self._normalize_format(output_format)
             if fmt == "jpeg":
-                img.save(buffer, format="JPEG", quality=85, optimize=True)
+                img.save(buffer, format="JPEG", quality=85, optimize=True, progressive=True)
             elif fmt == "png":
                 img.save(buffer, format="PNG", optimize=True)
             elif fmt == "webp":
                 img.save(buffer, format="WEBP", quality=85, method=6)
+            elif fmt == "avif":
+                img.save(buffer, format="AVIF", quality=85)
             else:
-                img.save(buffer, format="JPEG", quality=85)
+                img.save(buffer, format="JPEG", quality=85, progressive=True)
 
             return buffer.getvalue()
 
@@ -200,4 +208,6 @@ class ImageProcessor:
             return "jpeg"
         if fmt in ("png", "webp"):
             return fmt
+        if fmt == "avif":
+            return "avif"
         return "jpeg"
