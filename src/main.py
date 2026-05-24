@@ -1729,15 +1729,9 @@ async def color_palette(
         .logo {{ display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--text); }}
         .logo img {{ width: 28px; height: 28px; }}
         .logo span {{ font-weight: 700; font-size: 1.1rem; }}
-        .nav-links {{ display: flex; gap: 1.25rem; font-size: .9rem; align-items: center; }}
+        .nav-links {{ display: flex; gap: 1.25rem; font-size: .9rem; }}
         .nav-links a {{ color: var(--muted); text-decoration: none; }}
         .nav-links a:hover {{ color: var(--accent); }}
-        .dropdown {{ position: relative; display: inline-block; }}
-        .dropdown-toggle {{ cursor: pointer; color: var(--muted); text-decoration: none; font-size: .9rem; }}
-        .dropdown-menu {{ display: none; position: absolute; top: 100%; left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.1); padding: .5rem 0; min-width: 180px; z-index: 100; }}
-        .dropdown-menu a {{ display: block; padding: .4rem .8rem; color: var(--text); text-decoration: none; font-size: .85rem; white-space: nowrap; }}
-        .dropdown-menu a:hover {{ background: #f1f5f9; color: var(--accent); }}
-        .dropdown:hover .dropdown-menu {{ display: block; }}
         h1 {{ text-align: center; margin-bottom: .25rem; font-size: 1.75rem; }}
         .subtitle {{ text-align: center; color: var(--muted); margin-bottom: 1rem; font-size: .95rem; }}
         .controls {{ max-width: 1400px; margin: 0 auto 1.5rem; padding: 0 1.5rem; }}
