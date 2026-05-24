@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 
 from pydantic import Field
@@ -11,7 +12,7 @@ class Settings(BaseSettings):
     """All settings have sensible defaults; .env is optional."""
 
     model_config = SettingsConfigDict(
-        env_file=[".env", ".env.test"],
+        env_file=[".env.test"] if os.getenv("TESTING") or os.getenv("PYTEST_CURRENT_TEST") else [".env"],
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -63,11 +64,15 @@ class Settings(BaseSettings):
 
     @property
     def images_dir(self) -> Path:
-        return Path(self.dir).resolve()
+        return Path(self.seed_dir_str).resolve()
 
     @property
     def seed_dir(self) -> Path:
         return Path(self.seed_dir_str).resolve()
+
+    @property
+    def data_dir(self) -> Path:
+        return Path(self.dir).resolve()
 
     @property
     def cache_dir(self) -> Path:
