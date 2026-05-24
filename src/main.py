@@ -48,7 +48,21 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
-def _cache_path(entry: ImageEntry, width: int, height: int, fmt: str, grayscale: bool, blur: int, text: str, fit: str) -> Path:
+def _cache_path(
+    entry: ImageEntry,
+    width: int,
+    height: int,
+    fmt: str,
+    grayscale: bool,
+    blur: int,
+    text: str,
+    fit: str,
+    tint: str = "",
+    brightness: float = 1.0,
+    contrast: float = 1.0,
+    saturation: float = 1.0,
+    sepia: bool = False,
+) -> Path:
     """Build a deterministic cache file path."""
     suffix = f".{fmt}"
     base = entry.filename
@@ -60,12 +74,22 @@ def _cache_path(entry: ImageEntry, width: int, height: int, fmt: str, grayscale:
     parts = [f"{width}x{height}"]
     if grayscale:
         parts.append("gray")
+    if sepia:
+        parts.append("sepia")
     if blur:
         parts.append(f"blur{blur}")
     if text:
         parts.append(f"txt{hashlib.sha256(text.encode()).hexdigest()[:8]}")
     if fit != "crop":
         parts.append(fit)
+    if tint:
+        parts.append(f"tint{tint.lstrip('#')}")
+    if brightness != 1.0:
+        parts.append(f"bri{brightness}")
+    if contrast != 1.0:
+        parts.append(f"con{contrast}")
+    if saturation != 1.0:
+        parts.append(f"sat{saturation}")
 
     cache_subdir = settings.cache_dir / "_".join(parts) / entry.category
     cache_subdir.mkdir(parents=True, exist_ok=True)
@@ -95,6 +119,11 @@ def _serve_entry(
     text: str = "",
     fit: str = "crop",
     output_format: str = "",
+    tint: str = "",
+    brightness: float = 1.0,
+    contrast: float = 1.0,
+    saturation: float = 1.0,
+    sepia: bool = False,
 ) -> Response:
     """Process and serve a single image entry."""
     # Validate size
@@ -113,7 +142,10 @@ def _serve_entry(
     # Build cache key
     cache_path = None
     if settings.cache:
-        cache_path = _cache_path(entry, width, height, output_format, grayscale, blur, text, fit)
+        cache_path = _cache_path(
+            entry, width, height, output_format, grayscale, blur, text, fit,
+            tint, brightness, contrast, saturation, sepia,
+        )
         cached = _read_cached(cache_path)
         if cached is not None:
             if settings.cdn:
@@ -139,6 +171,11 @@ def _serve_entry(
         text=text,
         fit=fit,
         output_format=output_format,
+        tint=tint,
+        brightness=brightness,
+        contrast=contrast,
+        saturation=saturation,
+        sepia=sepia,
     )
 
     # Cache if enabled
@@ -171,11 +208,19 @@ async def serve_by_id(
     text: str = "",
     fit: str = "crop",
     format: str = "",  # noqa: A002
+    tint: str = "",
+    brightness: float = 1.0,
+    contrast: float = 1.0,
+    saturation: float = 1.0,
+    sepia: bool = False,
 ) -> Response:
     entry = manager.get_by_id(image_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="image not found")
-    return _serve_entry(entry, width, height, ext, grayscale, blur, text, fit, format)
+    return _serve_entry(
+        entry, width, height, ext, grayscale, blur, text, fit, format,
+        tint, brightness, contrast, saturation, sepia,
+    )
 
 
 @app.get("/svg/{width:int}/{height:int}")
@@ -237,11 +282,19 @@ async def serve_image(
     text: str = "",
     fit: str = "crop",
     format: str = "",  # noqa: A002
+    tint: str = "",
+    brightness: float = 1.0,
+    contrast: float = 1.0,
+    saturation: float = 1.0,
+    sepia: bool = False,
 ) -> Response:
     entry = manager.pick(category or None, seed or None)
     if entry is None:
         raise HTTPException(status_code=404, detail="category not found")
-    return _serve_entry(entry, width, height, ext, grayscale, blur, text, fit, format)
+    return _serve_entry(
+        entry, width, height, ext, grayscale, blur, text, fit, format,
+        tint, brightness, contrast, saturation, sepia,
+    )
 
 
 # ── Random from all (no dimensions) ────────────────────────────────

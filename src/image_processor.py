@@ -3,7 +3,7 @@ from __future__ import annotations
 import io
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 
 class ImageProcessor:
@@ -36,12 +36,32 @@ class ImageProcessor:
         text: str = "",
         fit: str = "crop",
         output_format: str = "jpeg",
+        tint: str = "",
+        brightness: float = 1.0,
+        contrast: float = 1.0,
+        saturation: float = 1.0,
+        sepia: bool = False,
     ) -> bytes:
         with Image.open(image_path) as img:
             img = img.convert("RGB")
 
             if grayscale:
                 img = img.convert("L").convert("RGB")
+
+            if sepia:
+                img = self._apply_sepia(img)
+
+            if brightness != 1.0:
+                img = ImageEnhance.Brightness(img).enhance(brightness)
+
+            if contrast != 1.0:
+                img = ImageEnhance.Contrast(img).enhance(contrast)
+
+            if saturation != 1.0:
+                img = ImageEnhance.Color(img).enhance(saturation)
+
+            if tint:
+                img = self._apply_tint(img, tint)
 
             if blur > 0:
                 img = img.filter(ImageFilter.GaussianBlur(radius=blur))
@@ -150,6 +170,29 @@ class ImageProcessor:
         draw.text((x, y), text, fill=(255, 255, 255), font=font)
 
         return img
+
+    def _apply_sepia(self, img: Image.Image) -> Image.Image:
+        """Apply a sepia tone filter."""
+        # Sepia matrix: R=(.393,.769,.189), G=(.349,.686,.168), B=(.272,.534,.131)
+        matrix = (
+            0.393, 0.769, 0.189, 0,
+            0.349, 0.686, 0.168, 0,
+            0.272, 0.534, 0.131, 0,
+        )
+        return img.convert("RGB", matrix)
+
+    def _apply_tint(self, img: Image.Image, tint_hex: str) -> Image.Image:
+        """Blend image with a hex color overlay at 50% opacity."""
+        h = tint_hex.lstrip("#")
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        if len(h) != 6 or not all(c in "0123456789abcdefABCDEF" for c in h):
+            return img
+        r = int(h[0:2], 16)
+        g = int(h[2:4], 16)
+        b = int(h[4:6], 16)
+        overlay = Image.new("RGB", img.size, (r, g, b))
+        return Image.blend(img, overlay, alpha=0.5)
 
     def _normalize_format(self, fmt: str) -> str:
         fmt = fmt.lower().lstrip(".")
