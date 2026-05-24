@@ -283,6 +283,84 @@ async def image_info(category: str, filename: str) -> JSONResponse:
     })
 
 
+# ── Image Explorer ────────────────────────────────────────────────
+@app.get("/images")
+async def image_explorer(page: int = 1) -> Response:
+    per_page = 20
+    entries, total = manager.list_entries(page=page, per_page=per_page)
+    total_pages = max((total + per_page - 1) // per_page, 1)
+    page = max(1, min(page, total_pages))
+
+    cards = ""
+    for entry in entries:
+        thumb_url = f"/id/{entry.id}/200/150"
+        view_url = f"/id/{entry.id}/800/600"
+        info_url = f"/api/info/id/{entry.id}"
+        cards += f"""
+        <div class="card">
+            <a href="{view_url}" target="_blank"><img src="{thumb_url}" alt="{entry.filename}" loading="lazy"></a>
+            <div class="info">
+                <div class="id">ID: <a href="{view_url}" target="_blank">{entry.id}</a></div>
+                <div class="meta">{entry.category} / {entry.filename}</div>
+                <div class="links">
+                    <a href="{view_url}" target="_blank">view</a>
+                    <a href="{info_url}" target="_blank">info</a>
+                </div>
+            </div>
+        </div>
+        """
+
+    # Pagination
+    prev_link = f'<a class="page-link" href="/images?page={page - 1}">Previous</a>' if page > 1 else '<span class="page-link disabled">Previous</span>'
+    next_link = f'<a class="page-link" href="/images?page={page + 1}">Next</a>' if page < total_pages else '<span class="page-link disabled">Next</span>'
+    page_numbers = ""
+    for p in range(1, total_pages + 1):
+        if p == page:
+            page_numbers += f'<span class="page-link active">{p}</span>'
+        else:
+            page_numbers += f'<a class="page-link" href="/images?page={p}">{p}</a>'
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlacePix Image Explorer</title>
+    <style>
+        :root {{ --bg: #111; --card: #1a1a1a; --text: #e0e0e0; --muted: #888; --accent: #4ea1f3; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding: 2rem; }}
+        h1 {{ text-align: center; margin-bottom: 0.5rem; }}
+        .subtitle {{ text-align: center; color: var(--muted); margin-bottom: 2rem; }}
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; max-width: 1400px; margin: 0 auto; }}
+        .card {{ background: var(--card); border-radius: 10px; overflow: hidden; transition: transform .15s; }}
+        .card:hover {{ transform: translateY(-3px); }}
+        .card img {{ width: 100%; height: 150px; object-fit: cover; display: block; }}
+        .info {{ padding: .75rem 1rem; }}
+        .id {{ font-weight: 600; font-size: 1rem; margin-bottom: .25rem; }}
+        .id a {{ color: var(--text); text-decoration: none; }}
+        .id a:hover {{ color: var(--accent); }}
+        .meta {{ font-size: .8rem; color: var(--muted); margin-bottom: .5rem; }}
+        .links {{ display: flex; gap: .75rem; font-size: .85rem; }}
+        .links a {{ color: var(--accent); text-decoration: none; }}
+        .links a:hover {{ text-decoration: underline; }}
+        .pager {{ display: flex; justify-content: center; align-items: center; gap: .4rem; margin-top: 2.5rem; flex-wrap: wrap; }}
+        .page-link {{ display: inline-block; padding: .4rem .8rem; border-radius: 6px; background: var(--card); color: var(--text); text-decoration: none; font-size: .9rem; min-width: 2.2rem; text-align: center; }}
+        .page-link.active {{ background: var(--accent); color: #fff; }}
+        .page-link.disabled {{ color: var(--muted); cursor: default; }}
+    </style>
+</head>
+<body>
+    <h1>PlacePix Image Explorer</h1>
+    <p class="subtitle">{total} images &mdash; Page {page} of {total_pages}</p>
+    <div class="grid">{cards}</div>
+    <div class="pager">{prev_link}{page_numbers}{next_link}</div>
+</body>
+</html>"""
+
+    return Response(content=html, media_type="text/html")
+
+
 # ── Upload ────────────────────────────────────────────────────────
 from fastapi import Form
 

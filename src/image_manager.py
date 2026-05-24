@@ -116,6 +116,17 @@ class ImageManager:
                     return entry
         return None
 
+    def list_entries(self, page: int = 1, per_page: int = 20) -> tuple[list[ImageEntry], int]:
+        """Return a flat, paginated list of all entries and total count."""
+        all_entries: list[ImageEntry] = []
+        for cat in self._categories.values():
+            all_entries.extend(cat.entries)
+        all_entries.sort(key=lambda e: e.id)
+        total = len(all_entries)
+        start = (page - 1) * per_page
+        end = start + per_page
+        return all_entries[start:end], total
+
     def list_categories(self) -> list[dict[str, Any]]:
         result = []
         for name, cat in self._categories.items():
