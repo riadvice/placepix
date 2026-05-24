@@ -567,8 +567,9 @@
                         </div>
                         <div class="form-group">
                             <label>Category <small>(optional)</small></label>
-                            <input type="text" id="category" list="categories-list" placeholder="Select or type category...">
-                            <datalist id="categories-list"></datalist>
+                            <select id="category">
+                                <option value="">All categories (random)</option>
+                            </select>
                             <small>Leave empty for random from all categories</small>
                         </div>
                         <div class="form-group">
@@ -612,7 +613,9 @@
                         </div>
                         <div class="form-group">
                             <label>Category <small>(optional)</small></label>
-                            <input type="text" id="ratio-category" list="categories-list" placeholder="Select or type category...">
+                            <select id="ratio-category">
+                                <option value="">All categories (random)</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Seed <small>(optional)</small></label>
@@ -638,7 +641,9 @@
                         </div>
                         <div class="form-group">
                             <label>Category <small>(optional)</small></label>
-                            <input type="text" id="preset-category" list="categories-list" placeholder="Select or type category...">
+                            <select id="preset-category">
+                                <option value="">All categories (random)</option>
+                            </select>
                             <small>Get realistic images instead of abstract placeholders</small>
                         </div>
                         <div class="form-group">
@@ -1093,13 +1098,27 @@
                 const data = await response.json();
                 
                 if (data.categories && data.categories.length > 0) {
-                    const datalist = document.getElementById('categories-list');
-                    datalist.innerHTML = '';
+                    // Get all category select elements
+                    const selects = [
+                        document.getElementById('category'),
+                        document.getElementById('ratio-category'),
+                        document.getElementById('preset-category')
+                    ];
                     
-                    data.categories.forEach(category => {
-                        const option = document.createElement('option');
-                        option.value = category;
-                        datalist.appendChild(option);
+                    // Populate each select
+                    selects.forEach(select => {
+                        // Keep the first "All categories" option
+                        const firstOption = select.options[0];
+                        select.innerHTML = '';
+                        select.appendChild(firstOption);
+                        
+                        // Add category options
+                        data.categories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category;
+                            option.textContent = category;
+                            select.appendChild(option);
+                        });
                     });
                     
                     console.log(`Loaded ${data.categories.length} categories:`, data.categories);
