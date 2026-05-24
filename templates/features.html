@@ -46,16 +46,68 @@
             min-height: 100vh;
         }
         
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+        }
+        
+        nav .logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        nav .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        
+        nav .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: color 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        
+        nav .nav-links a:hover {
+            color: var(--primary);
+            background: var(--background);
+        }
+        
+        nav .nav-links a.active {
+            color: var(--primary);
+            background: var(--background);
+        }
+        
         header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 48px 32px;
+            padding: 40px 32px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         header h1 {
-            font-size: 2.75em;
+            font-size: 2.5em;
             margin-bottom: 12px;
             font-weight: 700;
             letter-spacing: -0.02em;
@@ -67,6 +119,20 @@
             font-weight: 400;
             max-width: 600px;
             margin: 0 auto;
+        }
+        
+        @media (max-width: 768px) {
+            nav .nav-container {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+            
+            nav .nav-links {
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
         
         .content {
@@ -452,6 +518,18 @@
     </style>
 </head>
 <body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">🎨 PlacePix</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/images">Image Explorer</a>
+                <a href="/palette">Color Palette</a>
+                <a href="/features" class="active">Feature Explorer</a>
+            </div>
+        </div>
+    </nav>
+    
     <div class="container">
         <header>
             <h1>🎨 PlacePix Feature Explorer</h1>
