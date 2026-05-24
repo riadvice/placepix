@@ -19,7 +19,7 @@ def test_settings_defaults():
     assert settings.max_width == 2000
     assert settings.max_height == 2000
     assert settings.upload_enabled is True
-    assert settings.admin_password == ""
+    assert settings.admin_password == "admin"
     assert settings.watermark_enabled is False
     assert settings.watermark_image == ""
     assert settings.watermark_text == ""
