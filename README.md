@@ -40,6 +40,14 @@ python -m src.main
 
 Visit `http://localhost:3000` to browse the image catalog.
 
+### 🎨 Feature Explorer
+
+Visit `http://localhost:3000/features` for an **interactive URL constructor** that lets you:
+- Build URLs visually with all available parameters
+- Preview images in real-time
+- Copy generated URLs instantly
+- Explore all features with live examples
+
 ## Dependencies
 
 ### Python Packages
