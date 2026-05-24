@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     watermark_position: str = Field(default="bottom-right")
     watermark_opacity: float = Field(default=0.5)
 
+    # Base64 output max dimension (default: 256x256)
+    base64_max_size: int = Field(default=256)
+
     # Google Analytics (optional)
     ga_tracking_id: str = Field(default="")
 

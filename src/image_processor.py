@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import math
 from pathlib import Path
 
 import numpy as np
@@ -451,6 +452,70 @@ class ImageProcessor:
         img_rgba.paste(watermark, (x, y), watermark)
         return img_rgba.convert("RGB")
     
+    def generate_gradient(
+        self,
+        width: int,
+        height: int,
+        from_hex: str,
+        to_hex: str,
+        angle: int = 0,
+        gradient_type: str = "linear",
+    ) -> bytes:
+        """Generate a gradient placeholder image."""
+        from_hex = from_hex.lstrip("#")
+        to_hex = to_hex.lstrip("#")
+        if len(from_hex) == 3:
+            from_hex = "".join(c * 2 for c in from_hex)
+        if len(to_hex) == 3:
+            to_hex = "".join(c * 2 for c in to_hex)
+        if len(from_hex) != 6 or len(to_hex) != 6:
+            raise ValueError("invalid hex color")
+
+        r1, g1, b1 = int(from_hex[0:2], 16), int(from_hex[2:4], 16), int(from_hex[4:6], 16)
+        r2, g2, b2 = int(to_hex[0:2], 16), int(to_hex[2:4], 16), int(to_hex[4:6], 16)
+
+        w, h = self.clamp_size(width, height)
+        if w == 0 or h == 0:
+            w, h = 500, 300
+
+        img = Image.new("RGB", (w, h))
+
+        if gradient_type == "radial":
+            # Radial gradient from center
+            for y in range(h):
+                for x in range(w):
+                    dx = x - w / 2
+                    dy = y - h / 2
+                    dist = (dx * dx + dy * dy) ** 0.5
+                    max_dist = ((w / 2) ** 2 + (h / 2) ** 2) ** 0.5
+                    t = min(dist / max_dist, 1.0)
+                    r = int(r1 + (r2 - r1) * t)
+                    g = int(g1 + (g2 - g1) * t)
+                    b = int(b1 + (b2 - b1) * t)
+                    img.putpixel((x, y), (r, g, b))
+        else:
+            # Linear gradient
+            angle_rad = angle * 3.141592653589793 / 180
+            # Calculate the projection range
+            ux = w * math.cos(angle_rad)
+            uy = h * math.sin(angle_rad)
+            max_proj = (ux * ux + uy * uy) ** 0.5
+            if max_proj == 0:
+                max_proj = 1
+
+            for y in range(h):
+                for x in range(w):
+                    proj = (x * ux + y * uy) / max_proj
+                    t = max(0.0, min(1.0, proj / max_proj))
+                    r = int(r1 + (r2 - r1) * t)
+                    g = int(g1 + (g2 - g1) * t)
+                    b = int(b1 + (b2 - b1) * t)
+                    img.putpixel((x, y), (r, g, b))
+
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG", optimize=True)
+        return buffer.getvalue()
+
     def _get_watermark_position(self, position: str, img_width: int, img_height: int, wm_width: int, wm_height: int) -> tuple[int, int]:
         """Calculate watermark position."""
         padding = 20

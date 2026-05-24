@@ -42,31 +42,31 @@
         }
         
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --primary-light: #60a5fa;
-            --secondary: #8b5cf6;
-            --accent: #06b6d4;
-            --success: #10b981;
-            --background: #f8fafc;
+            --primary: #b45309;
+            --primary-dark: #92400e;
+            --primary-light: #d97706;
+            --secondary: #78716c;
+            --accent: #d97706;
+            --success: #22c55e;
+            --background: #fafaf9;
             --surface: #ffffff;
-            --border: #e2e8f0;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
+            --border: #e7e5e4;
+            --text-primary: #1c1917;
+            --text-secondary: #78716c;
+            --text-muted: #a8a29e;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
         
         [data-theme="dark"] {
-            --background: #0f172a;
-            --surface: #1e293b;
-            --border: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
+            --background: #09090b;
+            --surface: #18181b;
+            --border: #3f3f46;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
@@ -92,15 +92,15 @@
         nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            border-bottom: 1px solid rgba(231, 229, 228, 0.6);
             position: sticky;
             top: 0;
             z-index: 50;
         }
         
         [data-theme="dark"] nav {
-            background: rgba(30, 41, 59, 0.8);
-            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            background: rgba(9, 9, 11, 0.8);
+            border-bottom: 1px solid rgba(63, 63, 70, 0.6);
         }
         
         nav .nav-container {
@@ -153,7 +153,7 @@
             font-weight: 600;
         }
         
-        nav .nav-links .btn-docs {
+        .btn-docs {
             background: var(--primary);
             color: white;
             padding: 8px 16px;
@@ -168,11 +168,11 @@
         }
         
         header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
+            background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%);
+            color: var(--text-primary);
             padding: 40px 32px;
             text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border);
         }
         
         header h1 {
@@ -238,12 +238,12 @@
             }
             
             .panel.sticky::-webkit-scrollbar-thumb {
-                background: #667eea;
+                background: #d97706;
                 border-radius: 4px;
             }
             
             .panel.sticky::-webkit-scrollbar-thumb:hover {
-                background: #764ba2;
+                background: #f59e0b;
             }
         }
         
@@ -270,7 +270,7 @@
             content: '';
             width: 4px;
             height: 24px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border-radius: 2px;
         }
         
@@ -307,7 +307,7 @@
         .form-group select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
         }
         
         .form-group small {
@@ -696,7 +696,7 @@
                 <a href="/#categories">Categories</a>
                 <a href="/images">Explorer</a>
                 <a href="/palette">Palette</a>
-                <a href="/features" class="active">🎨 Features</a>
+                <a href="/features" class="active">Features</a>
                 {% if upload_enabled %}
                 <a href="/#upload">Upload</a>
                 {% endif %}
@@ -713,7 +713,7 @@
     
     <div class="container">
         <header>
-            <h1>🎨 PlacePix Feature Explorer</h1>
+            <h1>PlacePix Feature Explorer</h1>
             <p>Build your perfect placeholder image URL with our interactive constructor</p>
         </header>
         
@@ -976,10 +976,10 @@
                 </div>
                 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="copyURL()">📋 Copy URL</button>
-                    <button class="btn-secondary" onclick="openInNewTab()">🔗 Open</button>
-                    <button class="btn-primary" onclick="loadPreview()">👁️ Preview</button>
-                    <button class="btn-secondary" onclick="showQRCode()">📱 QR Code</button>
+                    <button class="btn-primary" onclick="copyURL()">Copy URL</button>
+                    <button class="btn-secondary" onclick="openInNewTab()">Open</button>
+                    <button class="btn-primary" onclick="loadPreview()">Preview</button>
+                    <button class="btn-secondary" onclick="showQRCode()">QR Code</button>
                 </div>
                 
                 <div id="preview-container" class="preview-container">
@@ -993,8 +993,8 @@
                             <strong>File Size:</strong> 
                             <span id="file-size">Loading...</span>
                         </span>
-                        <span style="color: #999; font-size: 11px;">
-                            💡 Click image to zoom
+                        <span style="color: var(--text-muted); font-size: 11px;">
+                            Click image to zoom
                         </span>
                     </div>
                 </div>
@@ -1003,27 +1003,27 @@
                     <h3>Quick Features Reference</h3>
                     <div class="feature-list">
                         <div class="feature-card">
-                            <h4>🎯 Smart Crop</h4>
+                            <h4>Smart Crop</h4>
                             <p>AI face detection for intelligent cropping</p>
                         </div>
                         <div class="feature-card">
-                            <h4>📐 Aspect Ratios</h4>
+                            <h4>Aspect Ratios</h4>
                             <p>16:9, 4:3, 1:1, and more</p>
                         </div>
                         <div class="feature-card">
-                            <h4>🎨 Color Effects</h4>
+                            <h4>Color Effects</h4>
                             <p>Tint, sepia, grayscale</p>
                         </div>
                         <div class="feature-card">
-                            <h4>✨ Image Effects</h4>
+                            <h4>Image Effects</h4>
                             <p>Blur, noise, pixelate</p>
                         </div>
                         <div class="feature-card">
-                            <h4>📱 Presets</h4>
+                            <h4>Presets</h4>
                             <p>Social media & ad sizes</p>
                         </div>
                         <div class="feature-card">
-                            <h4>🖼️ Borders</h4>
+                            <h4>Borders</h4>
                             <p>Custom borders & padding</p>
                         </div>
                     </div>
@@ -1428,7 +1428,7 @@
     <!-- QR Code Modal -->
     <div class="qr-modal" id="qr-modal" onclick="if(event.target === this) closeQRModal()">
         <div class="qr-content">
-            <h3>📱 Scan QR Code</h3>
+            <h3>Scan QR Code</h3>
             <p style="color: var(--text-secondary); margin-bottom: 16px;">Scan to open this URL on your mobile device</p>
             <canvas id="qr-canvas"></canvas>
             <button class="qr-close" onclick="closeQRModal()">Close</button>
@@ -1437,7 +1437,7 @@
     
     <!-- Keyboard Shortcuts Hint -->
     <div class="shortcuts-hint">
-        <strong>⌨️ Shortcuts:</strong>
+        <strong>Shortcuts:</strong>
         <kbd>Ctrl</kbd>+<kbd>P</kbd> Preview
         <kbd>Ctrl</kbd>+<kbd>U</kbd> Copy
         <kbd>Ctrl</kbd>+<kbd>Q</kbd> QR

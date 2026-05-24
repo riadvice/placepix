@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import base64
 import hashlib
 import io
 import json
@@ -59,6 +61,30 @@ def setup_logging():
     return logger
 
 logger = setup_logging()
+
+# ── Request Coalescing (thundering herd protection) ─────────────────
+# Deduplicate identical in-flight image processing requests
+_inflight: dict[str, asyncio.Event] = {}
+_inflight_lock = asyncio.Lock()
+
+
+async def _claim_inflight(key: str) -> asyncio.Event | None:
+    """Claim responsibility for processing a request. Returns None if already claimed."""
+    async with _inflight_lock:
+        if key in _inflight:
+            return _inflight[key]
+        event = asyncio.Event()
+        _inflight[key] = event
+        return None
+
+
+async def _release_inflight(key: str) -> None:
+    """Signal completion and remove the in-flight key."""
+    async with _inflight_lock:
+        event = _inflight.pop(key, None)
+        if event is not None:
+            event.set()
+
 
 # ── Setup ───────────────────────────────────────────────────────────
 app = FastAPI(title="PlacePix", version="1.0.0")
@@ -418,7 +444,68 @@ def _resolve_image_source(entry: ImageEntry) -> Path | io.BytesIO:
 
 
 # ── Image serving ───────────────────────────────────────────────────
-def _serve_entry(
+def _build_process_key(
+    entry: ImageEntry,
+    width: int,
+    height: int,
+    output_format: str,
+    grayscale: bool,
+    blur: int,
+    text: str,
+    fit: str,
+    tint: str,
+    brightness: float,
+    contrast: float,
+    saturation: float,
+    sepia: bool,
+    border: str,
+    padding: int,
+    noise: int,
+    pixelate: int,
+    quality: int,
+    lqip: bool,
+    watermark: str,
+    watermark_config: dict | None,
+) -> str:
+    """Build a deterministic key for request coalescing (no filesystem side effects)."""
+    hash_input: dict[str, Any] = {
+        "image_id": entry.id,
+        "width": width,
+        "height": height,
+        "fmt": output_format,
+        "grayscale": grayscale,
+        "blur": blur,
+        "text": text,
+        "fit": fit,
+        "tint": tint,
+        "brightness": brightness,
+        "contrast": contrast,
+        "saturation": saturation,
+        "sepia": sepia,
+        "border": border,
+        "padding": padding,
+        "noise": noise,
+        "pixelate": pixelate,
+        "quality": quality,
+        "lqip": lqip,
+        "watermark": watermark,
+    }
+    if watermark_config:
+        hash_input["watermark_config"] = {
+            "image": watermark_config.get("watermark_image", ""),
+            "text": watermark_config.get("watermark_text", ""),
+            "position": watermark_config.get("watermark_position", ""),
+            "opacity": watermark_config.get("watermark_opacity", 0.5),
+        }
+    if entry.path is not None and entry.path.exists():
+        hash_input["source_mtime"] = entry.path.stat().st_mtime
+    elif entry.s3_key:
+        hash_input["s3_key"] = entry.s3_key
+    hash_str = json.dumps(hash_input, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(hash_str.encode()).hexdigest()
+
+
+async def _serve_entry(
     entry: ImageEntry,
     width: int,
     height: int,
@@ -443,8 +530,9 @@ def _serve_entry(
     if_none_match: str | None = None,
     if_modified_since: str | None = None,
     is_random: bool = False,
+    as_base64: bool = False,
 ) -> Response:
-    """Process and serve a single image entry."""
+    """Process and serve a single image entry with coalescing and base64 support."""
     # Validate size
     width, height = processor.clamp_size(width, height)
     if width == 0 and height == 0:
@@ -457,6 +545,14 @@ def _serve_entry(
         output_format = "jpeg"
     if output_format == "jpg":
         output_format = "jpeg"
+
+    # Validate base64 size limit
+    if as_base64:
+        if width > settings.base64_max_size or height > settings.base64_max_size:
+            raise HTTPException(
+                status_code=400,
+                detail=f"base64 images limited to {settings.base64_max_size}x{settings.base64_max_size} px",
+            )
 
     # Prepare watermark config
     watermark_config = None
@@ -492,56 +588,81 @@ def _serve_entry(
                 logger.debug(f"Client cache valid: {entry.filename}")
                 return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
 
-            content_type = f"image/{output_format}"
-            filename = f"placepix-{entry.category}-{width}x{height}.{output_format}"
-            cache_control = "public, max-age=31536000, immutable" if not is_random else "public, max-age=0, must-revalidate"
-
-            return Response(
-                content=cached,
-                media_type=content_type,
-                headers={
-                    "Content-Disposition": f'inline; filename="{filename}"',
-                    "Cache-Control": cache_control,
-                    "ETag": etag,
-                    "Last-Modified": last_modified,
-                },
+            return _build_image_response(
+                cached, output_format, entry.category, width, height, is_random, as_base64
             )
 
-    # Resolve image source
-    image_source = _resolve_image_source(entry)
-
-    # Process image
-    logger.debug(f"Processing image: {entry.filename} -> {width}x{height} {output_format}")
-    processed = processor.process(
-        image_path=image_source,
-        width=width,
-        height=height,
-        grayscale=grayscale,
-        blur=blur,
-        text=text,
-        fit=fit,
-        output_format=output_format,
-        tint=tint,
-        brightness=brightness,
-        contrast=contrast,
-        saturation=saturation,
-        sepia=sepia,
-        border=border,
-        padding=padding,
-        noise=noise,
-        pixelate=pixelate,
-        quality=quality,
-        lqip=lqip,
-        watermark=watermark,
-        watermark_config=watermark_config,
+    # Build coalescing key
+    inflight_key = _build_process_key(
+        entry, width, height, output_format, grayscale, blur, text, fit,
+        tint, brightness, contrast, saturation, sepia,
+        border, padding, noise, pixelate, quality, lqip, watermark,
+        watermark_config,
     )
 
-    # Cache if enabled
-    if settings.cache and cache_path is not None:
-        _write_cache(cache_path, processed)
-        logger.debug(f"Cached processed image: {cache_path}")
-        if settings.cdn:
-            return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
+    # Request coalescing: wait if another identical request is already processing
+    existing_event = await _claim_inflight(inflight_key)
+    if existing_event is not None:
+        logger.debug(f"Coalescing request for {entry.filename} ({width}x{height})")
+        await existing_event.wait()
+        # After waiting, check cache again
+        if settings.cache and cache_path is not None:
+            cached = _read_cached(cache_path)
+            if cached is not None:
+                return _build_image_response(
+                    cached, output_format, entry.category, width, height, is_random, as_base64
+                )
+        # Cache miss after waiting (evicted or error) — fall through to process ourselves
+        logger.debug(f"Cache miss after coalescing, processing: {entry.filename}")
+        # Re-claim since previous claim was released
+        second_claim = await _claim_inflight(inflight_key)
+        if second_claim is not None:
+            await second_claim.wait()
+            if settings.cache and cache_path is not None:
+                cached = _read_cached(cache_path)
+                if cached is not None:
+                    return _build_image_response(
+                        cached, output_format, entry.category, width, height, is_random, as_base64
+                    )
+
+    try:
+        # Resolve image source
+        image_source = _resolve_image_source(entry)
+
+        # Process image
+        logger.debug(f"Processing image: {entry.filename} -> {width}x{height} {output_format}")
+        processed = processor.process(
+            image_path=image_source,
+            width=width,
+            height=height,
+            grayscale=grayscale,
+            blur=blur,
+            text=text,
+            fit=fit,
+            output_format=output_format,
+            tint=tint,
+            brightness=brightness,
+            contrast=contrast,
+            saturation=saturation,
+            sepia=sepia,
+            border=border,
+            padding=padding,
+            noise=noise,
+            pixelate=pixelate,
+            quality=quality,
+            lqip=lqip,
+            watermark=watermark,
+            watermark_config=watermark_config,
+        )
+
+        # Cache if enabled
+        if settings.cache and cache_path is not None:
+            _write_cache(cache_path, processed)
+            logger.debug(f"Cached processed image: {cache_path}")
+            if settings.cdn:
+                return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
+    finally:
+        await _release_inflight(inflight_key)
 
     # Generate cache headers for new content
     etag = _generate_etag(processed)
@@ -553,20 +674,51 @@ def _serve_entry(
     # Check if client cache is still valid
     if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
         return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
-    
+
+    return _build_image_response(
+        processed, output_format, entry.category, width, height, is_random, as_base64,
+        etag=etag, last_modified=last_modified,
+    )
+
+
+def _build_image_response(
+    image_bytes: bytes,
+    output_format: str,
+    category: str,
+    width: int,
+    height: int,
+    is_random: bool,
+    as_base64: bool = False,
+    etag: str | None = None,
+    last_modified: str | None = None,
+) -> Response:
+    """Build the final response, optionally as base64 JSON."""
+    if as_base64:
+        b64 = base64.b64encode(image_bytes).decode("ascii")
+        data_url = f"data:image/{output_format};base64,{b64}"
+        return JSONResponse({
+            "data": data_url,
+            "width": width,
+            "height": height,
+            "format": output_format,
+        })
+
     content_type = f"image/{output_format}"
-    filename = f"placepix-{entry.category}-{width}x{height}.{output_format}"
+    filename = f"placepix-{category}-{width}x{height}.{output_format}"
     cache_control = "public, max-age=31536000, immutable" if not is_random else "public, max-age=0, must-revalidate"
-    
+    headers: dict[str, str] = {
+        "Content-Disposition": f'inline; filename="{filename}"',
+        "Cache-Control": cache_control,
+    }
+    if etag:
+        headers["ETag"] = etag
+    if last_modified:
+        headers["Last-Modified"] = last_modified
+
     return Response(
-        content=processed,
+        content=image_bytes,
         media_type=content_type,
-        headers={
-            "Content-Disposition": f'inline; filename="{filename}"',
-            "Cache-Control": cache_control,
-            "ETag": etag,
-            "Last-Modified": last_modified,
-        },
+        headers=headers,
     )
 
 
@@ -596,6 +748,7 @@ async def serve_by_id(
     quality: int = 85,
     lqip: bool = False,
     watermark: str = "",
+    base64: bool = False,
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -604,11 +757,11 @@ async def serve_by_id(
     if entry is None:
         logger.warning(f"Image not found: ID #{image_id}")
         raise HTTPException(status_code=404, detail="image not found")
-    return _serve_entry(
+    return await _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random=False,
+        if_none_match, if_modified_since, is_random=False, as_base64=base64,
     )
 
 
@@ -644,6 +797,7 @@ async def serve_by_ratio(
     quality: int = 85,
     lqip: bool = False,
     watermark: str = "",
+    base64: bool = False,
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -663,11 +817,11 @@ async def serve_by_ratio(
         raise HTTPException(status_code=404, detail="category not found")
     
     is_random = not seed
-    return _serve_entry(
+    return await _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random,
+        if_none_match, if_modified_since, is_random, as_base64=base64,
     )
 
 
@@ -702,6 +856,7 @@ async def serve_by_preset(
     quality: int = 85,
     lqip: bool = False,
     watermark: str = "",
+    base64: bool = False,
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -722,11 +877,11 @@ async def serve_by_preset(
         raise HTTPException(status_code=404, detail="category not found")
     
     is_random = not seed
-    return _serve_entry(
+    return await _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random,
+        if_none_match, if_modified_since, is_random, as_base64=base64,
     )
 
 
@@ -838,6 +993,52 @@ async def svg_placeholder(
     )
 
 
+@app.get("/gradient/{width:int}x{height:int}/{from_color}/{to_color}")
+@app.get("/gradient/{width:int}x{height:int}/{from_color}/{to_color}.{ext}")
+async def gradient_placeholder(
+    width: int,
+    height: int,
+    from_color: str,
+    to_color: str,
+    ext: str = "",
+    angle: int = 0,
+    gradient_type: str = "linear",
+) -> Response:
+    """Generate gradient placeholder image (linear or radial)."""
+    try:
+        gradient_bytes = processor.generate_gradient(
+            width, height, from_color, to_color, angle, gradient_type
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Determine format from extension or default to PNG
+    output_format = ext.lstrip(".").lower() or "png"
+    if output_format not in ("png", "jpeg", "jpg", "webp"):
+        output_format = "png"
+
+    # Re-encode if not PNG (gradient generator outputs PNG)
+    if output_format != "png":
+        from PIL import Image
+        img = Image.open(io.BytesIO(gradient_bytes))
+        buffer = io.BytesIO()
+        img.save(buffer, format=output_format.upper(), optimize=True)
+        gradient_bytes = buffer.getvalue()
+
+    content_type = f"image/{output_format}"
+    filename = f"placepix-gradient-{width}x{height}.{output_format}"
+
+    return Response(
+        content=gradient_bytes,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f'inline; filename="{filename}"',
+            "Cache-Control": "public, max-age=2592000, immutable",
+            "ETag": _generate_etag(gradient_bytes),
+        },
+    )
+
+
 @app.get("/{width:int}/{height:int}/{category}")
 @app.head("/{width:int}/{height:int}/{category}")
 @app.get("/{width:int}/{height:int}/{category}.{ext}")
@@ -868,6 +1069,7 @@ async def serve_image(
     quality: int = 85,
     lqip: bool = False,
     watermark: str = "",
+    base64: bool = False,
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -883,11 +1085,11 @@ async def serve_image(
         raise HTTPException(status_code=404, detail="category not found")
     # Random images should not be cached long-term
     is_random = not seed
-    return _serve_entry(
+    return await _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random,
+        if_none_match, if_modified_since, is_random, as_base64=base64,
     )
 
 
@@ -917,6 +1119,7 @@ async def serve_by_color(
     quality: int = 85,
     lqip: bool = False,
     watermark: str = "",
+    base64: bool = False,
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -925,11 +1128,11 @@ async def serve_by_color(
     if entry is None:
         logger.warning(f"No image matching color: {hex_color}")
         raise HTTPException(status_code=404, detail="no image matching that color")
-    return _serve_entry(
+    return await _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random=True,
+        if_none_match, if_modified_since, is_random=True, as_base64=base64,
     )
 
 
@@ -1164,6 +1367,29 @@ async def favicon() -> Response:
     if svg_path.exists():
         return Response(content=svg_path.read_bytes(), media_type="image/svg+xml")
     raise HTTPException(status_code=404, detail="favicon not found")
+
+
+# ── Health & Readiness (Docker/Kubernetes) ─────────────────────────
+@app.get("/health")
+async def health() -> JSONResponse:
+    """Health check endpoint (liveness probe)."""
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/ready")
+async def readiness() -> JSONResponse:
+    """Readiness check endpoint (ready when images are scanned)."""
+    # Check if manager has scanned images
+    if manager.total == 0:
+        return JSONResponse(
+            {"status": "not_ready", "images_loaded": 0, "categories": 0},
+            status_code=503,
+        )
+    return JSONResponse({
+        "status": "ready",
+        "images_loaded": manager.total,
+        "categories": len(manager.categories),
+    })
 
 
 # ── Image Explorer ────────────────────────────────────────────────

@@ -40,11 +40,14 @@
       theme: {
         extend: {
           colors: {
-            primary: '#0f172a',
-            accent: '#3b82f6',
-            secondary: '#64748b',
+            primary: '#1c1917',
+            accent: '#b45309',
+            'accent-hover': '#d97706',
+            secondary: '#78716c',
             surface: '#ffffff',
-            muted: '#f8fafc',
+            'surface-light': '#fafaf9',
+            muted: '#f5f5f4',
+            'border-subtle': '#e7e5e4',
           }
         }
       }
@@ -52,12 +55,12 @@
   </script>
   <style>
     .drop-zone {
-      border: 2px dashed #cbd5e1;
+      border: 2px dashed #d6d3d1;
       transition: all 0.2s;
     }
     .drop-zone.dragover {
-      border-color: #E94560;
-      background: rgba(233, 69, 96, 0.05);
+      border-color: #b45309;
+      background: rgba(180, 83, 9, 0.04);
     }
     .hero-img {
       animation: fadeIn 1s ease-in;
@@ -74,25 +77,25 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-surface-light min-h-screen">
   <!-- Navigation -->
-  <nav class="bg-white/80 backdrop-blur border-b border-slate-200/60 sticky top-0 z-50">
+  <nav class="bg-white/80 backdrop-blur border-b border-border-subtle/60 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
       <div class="flex items-center gap-3">
         <img src="/static/logo.svg" alt="PlacePix" class="w-8 h-8">
-        <span class="font-bold text-xl tracking-tight text-slate-800">PlacePix</span>
+        <span class="font-bold text-xl tracking-tight text-stone-800">PlacePix</span>
       </div>
       <div class="flex items-center gap-6 text-sm">
-        <a href="#categories" class="text-slate-500 hover:text-accent transition">Categories</a>
-        <a href="/images" class="text-slate-500 hover:text-accent transition">Explorer</a>
-        <a href="/palette" class="text-slate-500 hover:text-accent transition">Palette</a>
-        <a href="/features" class="text-accent hover:text-blue-600 transition font-medium">🎨 Features</a>
+        <a href="#categories" class="text-stone-500 hover:text-accent transition">Categories</a>
+        <a href="/images" class="text-stone-500 hover:text-accent transition">Explorer</a>
+        <a href="/palette" class="text-stone-500 hover:text-accent transition">Palette</a>
+        <a href="/features" class="text-accent hover:text-accent-hover transition font-medium">Features</a>
         {% if upload_enabled %}
-        <a href="#upload" class="text-slate-500 hover:text-accent transition">Upload</a>
+        <a href="#upload" class="text-stone-500 hover:text-accent transition">Upload</a>
         {% endif %}
-        <a href="#api" class="text-slate-500 hover:text-accent transition">API</a>
-        <a href="/docs" target="_blank" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium shadow-sm">Docs</a>
-        <a href="https://github.com/riadvice/placepix" target="_blank" class="text-slate-500 hover:text-accent transition" title="GitHub">
+        <a href="#api" class="text-stone-500 hover:text-accent transition">API</a>
+        <a href="/docs" target="_blank" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-accent-hover transition font-medium shadow-sm">Docs</a>
+        <a href="https://github.com/riadvice/placepix" target="_blank" class="text-stone-500 hover:text-accent transition" title="GitHub">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
           </svg>
@@ -102,15 +105,15 @@
   </nav>
 
   <!-- Hero -->
-  <section class="relative h-96 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900">
+  <section class="relative h-96 overflow-hidden bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
     <img src="/1200/400/{{ (categories|random).name if categories else 'all' }}"
-         alt="Hero" class="absolute inset-0 w-full h-full object-cover opacity-20">
-    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent"></div>
+         alt="Hero" class="absolute inset-0 w-full h-full object-cover opacity-30">
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-stone-900/20 to-transparent"></div>
     <div class="absolute bottom-0 left-0 right-0 p-8">
       <div class="max-w-7xl mx-auto">
         <h1 class="text-5xl font-bold text-white mb-3">PlacePix</h1>
-        <p class="text-slate-200 text-lg max-w-2xl">Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.</p>
-        <p class="text-sm text-slate-400 mt-4">{{ total }} images across {{ categories|length }} categories</p>
+        <p class="text-stone-200 text-lg max-w-2xl">Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.</p>
+        <p class="text-sm text-stone-400 mt-4">{{ total }} images across {{ categories|length }} categories</p>
       </div>
     </div>
   </section>
@@ -118,18 +121,18 @@
   {% if upload_enabled %}
   <!-- Upload Zone -->
   <section id="upload" class="max-w-7xl mx-auto px-4 py-8">
-    <div id="drop-zone" class="drop-zone rounded-xl p-10 text-center cursor-pointer bg-white hover:shadow-md transition">
-      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="drop-zone" class="drop-zone rounded-xl p-10 text-center cursor-pointer bg-surface hover:shadow-md transition">
+      <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
       </div>
-      <p class="text-gray-700 font-semibold text-lg">Drag & drop images here</p>
-      <p class="text-sm text-gray-400 mt-1">or click to browse files</p>
+      <p class="text-stone-700 font-semibold text-lg">Drag & drop images here</p>
+      <p class="text-sm text-stone-400 mt-1">or click to browse files</p>
       <input type="file" id="file-input" class="hidden" multiple accept="image/*">
       <div class="mt-4 inline-flex items-center gap-2">
-        <label class="text-sm text-gray-500">Category:</label>
-        <select id="upload-category" class="border rounded-lg px-3 py-2 text-sm bg-gray-50 focus:ring-2 focus:ring-accent focus:border-accent">
+        <label class="text-sm text-stone-500">Category:</label>
+        <select id="upload-category" class="border border-border-subtle rounded-lg px-3 py-2 text-sm bg-surface text-stone-700 focus:ring-2 focus:ring-accent focus:border-accent">
           <option value="">__root (no category)</option>
           {% for cat in categories %}
           <option value="{{ cat.name }}">{{ cat.display_name or cat.name }}</option>
@@ -145,39 +148,39 @@
   <section id="categories" class="max-w-7xl mx-auto px-4 pb-12">
     <div class="flex items-end justify-between mb-8">
       <div>
-        <h2 class="text-3xl font-bold text-gray-800">Categories</h2>
-        <p class="text-gray-500 mt-1">Click any size to get a random image from that category</p>
+        <h2 class="text-3xl font-bold text-stone-800">Categories</h2>
+        <p class="text-stone-500 mt-1">Click any size to get a random image from that category</p>
       </div>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {% for cat in categories %}
-      <div class="cat-card bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer">
-        <div class="h-48 bg-gray-200 relative overflow-hidden">
+      <div class="cat-card bg-surface rounded-xl border border-border-subtle hover:border-accent/40 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 overflow-hidden group cursor-pointer">
+        <div class="h-48 bg-muted relative overflow-hidden">
           <img src="/600/400/{{ cat.name }}?seed={{ range(1000,9999)|random }}" 
                alt="{{ cat.display_name or cat.name }}" 
                class="cat-img w-full h-full object-cover" loading="lazy">
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <div class="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div class="flex gap-2">
-              <a href="/200/200/{{ cat.name }}" class="text-xs bg-white/90 text-gray-800 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">200×200</a>
-              <a href="/400/300/{{ cat.name }}" class="text-xs bg-white/90 text-gray-800 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">400×300</a>
-              <a href="/800/600/{{ cat.name }}" class="text-xs bg-white/90 text-gray-800 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">800×600</a>
+              <a href="/200/200/{{ cat.name }}" class="text-xs bg-white/90 text-stone-700 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">200×200</a>
+              <a href="/400/300/{{ cat.name }}" class="text-xs bg-white/90 text-stone-700 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">400×300</a>
+              <a href="/800/600/{{ cat.name }}" class="text-xs bg-white/90 text-stone-700 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">800×600</a>
             </div>
           </div>
-          <div class="absolute top-3 right-3 bg-primary/90 backdrop-blur text-white text-xs px-2.5 py-1 rounded-full font-medium">{{ cat.count }}</div>
+          <div class="absolute top-3 right-3 bg-accent/90 backdrop-blur text-white text-xs px-2.5 py-1 rounded-full font-medium">{{ cat.count }}</div>
         </div>
         <div class="p-4">
-          <h3 class="font-bold text-lg text-gray-800 group-hover:text-accent transition-colors">{{ cat.display_name or cat.name }}</h3>
+          <h3 class="font-bold text-xl text-stone-800 group-hover:text-accent transition-colors">{{ cat.display_name or cat.name }}</h3>
           {% if cat.description %}
-          <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ cat.description }}</p>
+          <p class="text-sm text-stone-500 mt-1 line-clamp-2">{{ cat.description }}</p>
           {% endif %}
           {% if cat.author %}
-          <p class="text-xs text-gray-400 mt-2">by {{ cat.author }}</p>
+          <p class="text-xs text-stone-400 mt-2">by {{ cat.author }}</p>
           {% endif %}
           {% if cat.tags %}
           <div class="flex flex-wrap gap-1 mt-3">
             {% for tag in cat.tags %}
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{{ tag }}</span>
+            <span class="text-xs bg-muted text-stone-600 px-2 py-0.5 rounded">{{ tag }}</span>
             {% endfor %}
           </div>
           {% endif %}
@@ -189,15 +192,15 @@
 
   <!-- Random Showcase -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-lg">
+    <div class="bg-surface border border-border-subtle rounded-2xl p-8 shadow-lg">
       <div class="flex flex-col md:flex-row gap-8 items-center">
         <div class="flex-1">
-          <h2 class="text-2xl font-bold mb-3">Need a random image?</h2>
-          <p class="text-blue-100 mb-6">Grab any size from any category — or let PlacePix pick one for you.</p>
+          <h2 class="text-2xl font-bold text-stone-800 mb-3">Need a random image?</h2>
+          <p class="text-stone-500 mb-6">Grab any size from any category — or let PlacePix pick one for you.</p>
           <div class="flex flex-wrap gap-3">
-            <a href="/400/300" class="bg-white text-blue-600 px-5 py-2.5 rounded-lg font-medium hover:bg-blue-50 transition shadow-sm">400 × 300</a>
-            <a href="/800/600" class="bg-white/15 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/25 transition">800 × 600</a>
-            <a href="/1920/1080" class="bg-white/15 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/25 transition">1920 × 1080</a>
+            <a href="/400/300" class="bg-accent text-white px-5 py-2.5 rounded-lg font-medium hover:bg-accent-hover transition shadow-sm">400 × 300</a>
+            <a href="/800/600" class="bg-stone-100 px-5 py-2.5 rounded-lg font-medium hover:bg-stone-200 transition text-stone-700">800 × 600</a>
+            <a href="/1920/1080" class="bg-stone-100 px-5 py-2.5 rounded-lg font-medium hover:bg-stone-200 transition text-stone-700">1920 × 1080</a>
           </div>
         </div>
         <div class="w-full md:w-80">
@@ -210,31 +213,31 @@
 
   <!-- SVG Placeholder -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">SVG Placeholder Mode</h2>
-    <p class="text-gray-500 mb-6">Zero-processing wireframe placeholders. Perfect for layouts and mockups.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6">SVG Placeholder Mode</h2>
+    <p class="text-stone-500 mb-6">Zero-processing wireframe placeholders. Perfect for layouts and mockups.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/svg/400/300?bg=e2e8f0&fg=64748b" alt="Default" class="w-full h-48 object-cover">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/svg/400/300?bg=e7e5e4&fg=78716c" alt="Default" class="w-full h-48 object-cover">
         <div class="p-4">
-          <code class="text-xs font-mono text-gray-600 break-all">/svg/400/300?bg=e2e8f0&fg=64748b</code>
+          <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=e7e5e4&fg=78716c</code>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/svg/400/300?bg=1a1a2e&fg=e94560&text=Hero" alt="Custom text" class="w-full h-48 object-cover">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/svg/400/300?bg=1c1917&fg=d97706&text=Hero" alt="Custom text" class="w-full h-48 object-cover">
         <div class="p-4">
-          <code class="text-xs font-mono text-gray-600 break-all">/svg/400/300?bg=1a1a2e&fg=e94560&text=Hero</code>
+          <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=1c1917&fg=d97706&text=Hero</code>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/svg/400/300?bg=10b981&fg=fff&text=CTA" alt="Green CTA" class="w-full h-48 object-cover">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/svg/400/300?bg=d97706&fg=ffffff&text=CTA" alt="Amber CTA" class="w-full h-48 object-cover">
         <div class="p-4">
-          <code class="text-xs font-mono text-gray-600 break-all">/svg/400/300?bg=10b981&fg=fff&text=CTA</code>
+          <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=d97706&fg=ffffff&text=CTA</code>
         </div>
       </div>
     </div>
-    <div class="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-100">
-      <p class="text-sm text-gray-600 font-mono mb-2">Parameters:</p>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm text-gray-500">
+    <div class="mt-6 bg-muted rounded-xl p-4 border border-border-subtle">
+      <p class="text-sm text-stone-600 font-mono mb-2">Parameters:</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm text-stone-500">
         <div><code class="text-accent font-mono">bg</code> — background hex color</div>
         <div><code class="text-accent font-mono">fg</code> — text hex color</div>
         <div><code class="text-accent font-mono">text</code> — custom label (default: width×height)</div>
@@ -242,58 +245,95 @@
     </div>
   </section>
 
-  <!-- Color Manipulation -->
+  <!-- Gradient Placeholders -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Color Manipulation</h2>
-    <p class="text-gray-500 mb-6">Apply filters and color adjustments to any image on the fly.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6">Gradient Placeholders</h2>
+    <p class="text-stone-500 mb-6">Generate linear or radial gradient images on the fly. Perfect for backgrounds and overlays.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/400/300/nature?seed=colors&amp;sepia=1" alt="Sepia" class="w-full h-48 object-cover">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/gradient/400/300/3b82f6/10b981" alt="Linear gradient" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Sepia Tone</p>
-          <code class="text-xs font-mono text-gray-600 break-all">?sepia=1</code>
+          <p class="font-semibold text-sm text-stone-700 mb-1">Linear Gradient</p>
+          <code class="text-xs font-mono text-stone-500 break-all">/gradient/400/300/3b82f6/10b981</code>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/400/300/nature?seed=colors&amp;tint=3b82f6" alt="Blue Tint" class="w-full h-48 object-cover">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/gradient/400/300/e11d48/f59e0b?angle=45" alt="Angled gradient" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Blue Tint</p>
-          <code class="text-xs font-mono text-gray-600 break-all">?tint=3b82f6</code>
+          <p class="font-semibold text-sm text-stone-700 mb-1">45° Angle</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?angle=45</code>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/400/300/nature?seed=colors&amp;brightness=1.3&amp;contrast=1.2" alt="Brighten" class="w-full h-48 object-cover">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/gradient/400/300/1e293b/64748b?gradient_type=radial" alt="Radial gradient" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Brighten &amp; Contrast</p>
-          <code class="text-xs font-mono text-gray-600 break-all">?brightness=1.3&amp;contrast=1.2</code>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/400/300/nature?seed=colors&amp;saturation=2.0" alt="Saturation" class="w-full h-48 object-cover">
-        <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">High Saturation</p>
-          <code class="text-xs font-mono text-gray-600 break-all">?saturation=2.0</code>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/400/300/nature?seed=colors&amp;grayscale=1" alt="Grayscale" class="w-full h-48 object-cover">
-        <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Grayscale</p>
-          <code class="text-xs font-mono text-gray-600 break-all">?grayscale=1</code>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <img src="/400/300/nature?seed=colors&amp;tint=e11d48&amp;brightness=0.8&amp;contrast=1.3" alt="Dramatic" class="w-full h-48 object-cover">
-        <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Dramatic Red</p>
-          <code class="text-xs font-mono text-gray-600 break-all">?tint=e11d48&amp;brightness=0.8&amp;contrast=1.3</code>
+          <p class="font-semibold text-sm text-stone-700 mb-1">Radial Gradient</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?gradient_type=radial</code>
         </div>
       </div>
     </div>
-    <div class="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-100">
-      <p class="text-sm text-gray-600 font-mono mb-2">Parameters:</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-500">
-        <div><code class="text-accent font-mono">?tint=3b82f6</code> — hex color overlay</div>
+    <div class="mt-6 bg-muted rounded-xl p-4 border border-border-subtle">
+      <p class="text-sm text-stone-600 font-mono mb-2">Parameters:</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-stone-500">
+        <div><code class="text-accent font-mono">/gradient/{w}x{h}/{from}/{to}</code> — gradient endpoint</div>
+        <div><code class="text-accent font-mono">?angle=45</code> — linear angle (0-360)</div>
+        <div><code class="text-accent font-mono">?gradient_type=radial</code> — radial from center</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Color Manipulation -->
+  <section class="max-w-7xl mx-auto px-4 pb-12">
+    <h2 class="text-2xl font-bold text-stone-800 mb-6">Color Manipulation</h2>
+    <p class="text-stone-500 mb-6">Apply filters and color adjustments to any image on the fly.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;sepia=1" alt="Sepia" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Sepia Tone</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?sepia=1</code>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;tint=d97706" alt="Amber Tint" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Amber Tint</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?tint=d97706</code>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;brightness=1.3&amp;contrast=1.2" alt="Brighten" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Brighten &amp; Contrast</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?brightness=1.3&amp;contrast=1.2</code>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;saturation=2.0" alt="Saturation" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">High Saturation</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?saturation=2.0</code>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;grayscale=1" alt="Grayscale" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Grayscale</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?grayscale=1</code>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;tint=e11d48&amp;brightness=0.8&amp;contrast=1.3" alt="Dramatic" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Dramatic Red</p>
+          <code class="text-xs font-mono text-stone-500 break-all">?tint=e11d48&amp;brightness=0.8&amp;contrast=1.3</code>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 bg-muted rounded-xl p-4 border border-border-subtle">
+      <p class="text-sm text-stone-600 font-mono mb-2">Parameters:</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-stone-500">
+        <div><code class="text-accent font-mono">?tint=d97706</code> — hex color overlay</div>
         <div><code class="text-accent font-mono">?brightness=1.3</code> — 0.0 to 2.0</div>
         <div><code class="text-accent font-mono">?contrast=1.2</code> — 0.0 to 2.0</div>
         <div><code class="text-accent font-mono">?saturation=2.0</code> — 0.0 to 2.0</div>
@@ -305,42 +345,42 @@
 
   <!-- Search by Color -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Search by Dominant Color</h2>
-    <p class="text-gray-500 mb-6">Find images that match your brand palette. Every image is scanned for its top 3 dominant colors.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6">Search by Dominant Color</h2>
+    <p class="text-stone-500 mb-6">Find images that match your brand palette. Every image is scanned for its top 3 dominant colors.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <a href="/color/3b82f6/400/300" target="_blank">
-          <img src="/color/3b82f6/400/300" alt="Blue match" class="w-full h-48 object-cover">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <a href="/color/d97706/400/300" target="_blank">
+          <img src="/color/d97706/400/300" alt="Amber match" class="w-full h-48 object-cover">
         </a>
         <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Blue</p>
-          <code class="text-xs font-mono text-gray-600 break-all">/color/3b82f6/400/300</code>
+          <p class="font-semibold text-sm text-stone-700 mb-1">Amber</p>
+          <code class="text-xs font-mono text-stone-500 break-all">/color/d97706/400/300</code>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <a href="/color/10b981/400/300" target="_blank">
           <img src="/color/10b981/400/300" alt="Green match" class="w-full h-48 object-cover">
         </a>
         <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Green</p>
-          <code class="text-xs font-mono text-gray-600 break-all">/color/10b981/400/300</code>
+          <p class="font-semibold text-sm text-stone-700 mb-1">Green</p>
+          <code class="text-xs font-mono text-stone-500 break-all">/color/10b981/400/300</code>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <a href="/color/e11d48/400/300" target="_blank">
           <img src="/color/e11d48/400/300" alt="Red match" class="w-full h-48 object-cover">
         </a>
         <div class="p-4">
-          <p class="font-semibold text-sm text-gray-700 mb-1">Red</p>
-          <code class="text-xs font-mono text-gray-600 break-all">/color/e11d48/400/300</code>
+          <p class="font-semibold text-sm text-stone-700 mb-1">Red</p>
+          <code class="text-xs font-mono text-stone-500 break-all">/color/e11d48/400/300</code>
         </div>
       </div>
     </div>
-    <div class="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-100">
-      <p class="text-sm text-gray-600 font-mono mb-2">How it works:</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500">
+    <div class="mt-6 bg-muted rounded-xl p-4 border border-border-subtle">
+      <p class="text-sm text-stone-600 font-mono mb-2">How it works:</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-stone-500">
         <div><code class="text-accent font-mono">/color/{hex}/{w}/{h}</code> — dedicated color route</div>
-        <div><code class="text-accent font-mono">?color=3b82f6</code> — filter any endpoint by color</div>
+        <div><code class="text-accent font-mono">?color=d97706</code> — filter any endpoint by color</div>
         <div><code class="text-accent font-mono">/api/color/{hex}</code> — list all matching images</div>
         <div><code class="text-accent font-mono">/api/info/id/1</code> — includes <code>colors: [...]</code></div>
       </div>
@@ -349,70 +389,111 @@
 
   <!-- API Usage -->
   <section id="api" class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">API Reference</h2>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
-        <p class="text-sm text-gray-500">All endpoints support CORS and return images with long-term cache headers.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6">API Reference</h2>
+    <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+      <div class="bg-muted px-6 py-4 border-b border-border-subtle">
+        <p class="text-sm text-stone-500">All endpoints support CORS and return images with long-term cache headers.</p>
       </div>
-      <div class="divide-y divide-gray-100">
-        <div class="px-6 py-4 hover:bg-gray-50 transition">
+      <div class="divide-y divide-border-subtle">
+        <div class="px-6 py-4 hover:bg-muted/50 transition">
           <div class="flex items-center gap-3">
             <span class="bg-accent text-white text-xs font-bold px-2 py-1 rounded">GET</span>
-            <code class="text-sm font-mono text-gray-800">/{width}/{height}/{category}</code>
+            <code class="text-sm font-mono text-stone-800">/{width}/{height}/{category}</code>
           </div>
-          <p class="text-sm text-gray-500 mt-1 pl-12">Random image from a category</p>
+          <p class="text-sm text-stone-500 mt-1 pl-12">Random image from a category</p>
         </div>
-        <div class="px-6 py-4 hover:bg-gray-50 transition">
+        <div class="px-6 py-4 hover:bg-muted/50 transition">
           <div class="flex items-center gap-3">
             <span class="bg-accent text-white text-xs font-bold px-2 py-1 rounded">GET</span>
-            <code class="text-sm font-mono text-gray-800">/{width}/{height}</code>
+            <code class="text-sm font-mono text-stone-800">/{width}/{height}</code>
           </div>
-          <p class="text-sm text-gray-500 mt-1 pl-12">Random image from all categories</p>
+          <p class="text-sm text-stone-500 mt-1 pl-12">Random image from all categories</p>
         </div>
-        <div class="px-6 py-4 bg-gray-50/50">
-          <p class="text-sm font-semibold text-gray-700 mb-2">Query Parameters</p>
+        <div class="px-6 py-4 hover:bg-muted/50 transition">
+          <div class="flex items-center gap-3">
+            <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">GET</span>
+            <code class="text-sm font-mono text-stone-800">/health</code>
+          </div>
+          <p class="text-sm text-stone-500 mt-1 pl-12">Health check (liveness probe for Docker/K8s)</p>
+        </div>
+        <div class="px-6 py-4 hover:bg-muted/50 transition">
+          <div class="flex items-center gap-3">
+            <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">GET</span>
+            <code class="text-sm font-mono text-stone-800">/ready</code>
+          </div>
+          <p class="text-sm text-stone-500 mt-1 pl-12">Readiness check (returns 503 until images loaded)</p>
+        </div>
+        <div class="px-6 py-4 bg-muted/30">
+          <p class="text-sm font-semibold text-stone-700 mb-2">Query Parameters</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-            <div class="flex gap-2"><code class="text-accent font-mono">?grayscale=1</code><span class="text-gray-500">Grayscale</span></div>
-            <div class="flex gap-2"><code class="text-accent font-mono">?blur=2</code><span class="text-gray-500">Gaussian blur (1-10)</span></div>
-            <div class="flex gap-2"><code class="text-accent font-mono">?seed=abc</code><span class="text-gray-500">Deterministic image</span></div>
-            <div class="flex gap-2"><code class="text-accent font-mono">?text=Hello</code><span class="text-gray-500">Text overlay</span></div>
-            <div class="flex gap-2"><code class="text-accent font-mono">?fit=crop</code><span class="text-gray-500">Resize mode</span></div>
-            <div class="flex gap-2"><code class="text-accent font-mono">.avif</code><span class="text-gray-500">AVIF output (smaller)</span></div>
-            <div class="flex gap-2"><code class="text-accent font-mono">.webp</code><span class="text-gray-500">WebP output</span></div>
-            <div class="flex gap-2"><code class="text-accent font-mono">.png</code><span class="text-gray-500">PNG output (lossless)</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?grayscale=1</code><span class="text-stone-500">Grayscale</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?blur=2</code><span class="text-stone-500">Gaussian blur (1-10)</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?seed=abc</code><span class="text-stone-500">Deterministic image</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?text=Hello</code><span class="text-stone-500">Text overlay</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?fit=crop</code><span class="text-stone-500">Resize mode</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?base64=1</code><span class="text-stone-500">Return base64 JSON (max 256px)</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">.avif</code><span class="text-stone-500">AVIF output (smaller)</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">.webp</code><span class="text-stone-500">WebP output</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">.png</code><span class="text-stone-500">PNG output (lossless)</span></div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Figma Integration -->
+  <section class="max-w-7xl mx-auto px-4 pb-12">
+    <h2 class="text-2xl font-bold text-stone-800 mb-6">Figma Integration</h2>
+    <p class="text-stone-500 mb-6">Embed live PlacePix images directly in your Figma designs using iframe embeds.</p>
+    <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+      <div class="p-6">
+        <p class="text-sm text-stone-600 mb-4">Paste this iframe code into Figma as an embedded URL:</p>
+        <div class="bg-stone-900 rounded-lg p-4 overflow-x-auto">
+          <code class="text-sm text-green-400 font-mono whitespace-nowrap">
+            &lt;iframe src="https://your-placepix-instance.com/800/600/nature?seed=figma" width="800" height="600" frameborder="0"&gt;&lt;/iframe&gt;
+          </code>
+        </div>
+        <p class="text-xs text-stone-400 mt-3">Replace <code class="text-stone-600">your-placepix-instance.com</code> with your actual PlacePix URL.</p>
+      </div>
+      <div class="bg-muted px-6 py-4 border-t border-border-subtle">
+        <p class="text-sm text-stone-600 font-mono mb-2">Tips:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-stone-500">
+          <div>• Use <code class="text-accent font-mono">?seed=xyz</code> for consistent images</div>
+          <div>• Adjust width/height in both URL and iframe attributes</div>
+          <div>• Add <code class="text-accent font-mono">?grayscale=1</code> for wireframe mode</div>
+          <div>• Use <code class="text-accent font-mono">/gradient/</code> for placeholder backgrounds</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
-  <footer class="bg-slate-900 text-white py-8 mt-auto">
+  <footer class="bg-stone-900 text-white py-8 mt-auto border-t border-stone-700">
     <div class="max-w-7xl mx-auto px-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         <!-- About -->
         <div>
-          <p class="text-slate-400 text-sm font-medium mb-2">PlacePix</p>
-          <p class="text-slate-500 text-xs">Self-hosted placeholder image service with resizing, filters, and text overlays.</p>
+          <p class="text-stone-300 text-sm font-medium mb-2">PlacePix</p>
+          <p class="text-stone-400 text-xs">Self-hosted placeholder image service with resizing, filters, and text overlays.</p>
         </div>
         <!-- Links -->
         <div>
-          <p class="text-slate-400 text-sm font-medium mb-2">Links</p>
+          <p class="text-stone-300 text-sm font-medium mb-2">Links</p>
           <div class="flex flex-col gap-1">
-            <a href="https://github.com/riadvice/placepix" target="_blank" class="text-slate-500 text-xs hover:text-blue-400 transition">GitHub Repository</a>
-            <a href="https://github.com/riadvice/placepix/issues" target="_blank" class="text-slate-500 text-xs hover:text-blue-400 transition">Report an Issue</a>
-            <a href="https://riadvice.com" target="_blank" class="text-slate-500 text-xs hover:text-blue-400 transition">RiAdvice</a>
+            <a href="https://github.com/riadvice/placepix" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition">GitHub Repository</a>
+            <a href="https://github.com/riadvice/placepix/issues" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition">Report an Issue</a>
+            <a href="https://riadvice.com" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition">RiAdvice</a>
           </div>
         </div>
         <!-- License -->
         <div>
-          <p class="text-slate-400 text-sm font-medium mb-2">License</p>
-          <p class="text-slate-500 text-xs">MIT License — Open source and free to use</p>
-          <p class="text-slate-600 text-xs mt-1">Inspired by <a href="https://picsum.photos/" class="text-blue-400 hover:underline" target="_blank">picsum.photos</a> and <a href="https://lorem.space/" class="text-blue-400 hover:underline" target="_blank">lorem.space</a></p>
+          <p class="text-stone-300 text-sm font-medium mb-2">License</p>
+          <p class="text-stone-400 text-xs">MIT License — Open source and free to use</p>
+          <p class="text-stone-500 text-xs mt-1">Inspired by <a href="https://picsum.photos/" class="text-amber-400 hover:underline" target="_blank">picsum.photos</a> and <a href="https://lorem.space/" class="text-amber-400 hover:underline" target="_blank">lorem.space</a></p>
         </div>
       </div>
-      <div class="border-t border-slate-800 mt-8 pt-6 text-center">
-        <p class="text-slate-600 text-xs">Made with ❤️ by <a href="https://riadvice.com" class="text-blue-400 hover:underline" target="_blank">RIADVICE</a> · <a href="https://github.com/riadvice/placepix" class="text-blue-400 hover:underline" target="_blank">GitHub</a></p>
+      <div class="border-t border-stone-700 mt-8 pt-6 text-center">
+        <p class="text-stone-500 text-xs">Built by <a href="https://riadvice.com" class="text-amber-400 hover:underline" target="_blank">RIADVICE</a> · <a href="https://github.com/riadvice/placepix" class="text-amber-400 hover:underline" target="_blank">GitHub</a></p>
       </div>
     </div>
   </footer>
@@ -441,7 +522,7 @@
       if (!files.length) return;
       statusEl.classList.remove('hidden');
       statusEl.textContent = `Uploading ${files.length} file(s)...`;
-      statusEl.className = 'mt-3 text-sm text-center font-medium text-gray-600';
+      statusEl.className = 'mt-3 text-sm text-center font-medium text-stone-500';
 
       let uploaded = 0;
       const category = categorySelect.value;
