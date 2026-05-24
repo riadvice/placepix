@@ -85,33 +85,25 @@ def _write_cache(cache_path: Path, data: bytes) -> None:
 
 
 # ── Image serving ───────────────────────────────────────────────────
-@app.get("/{width:int}/{height:int}/{category}")
-@app.get("/{width:int}/{height:int}/{category}.{ext}")
-@app.get("/{width:int}/{height:int}/")
-async def serve_image(
+def _serve_entry(
+    entry: ImageEntry,
     width: int,
     height: int,
-    category: str = "",
     ext: str = "",
     grayscale: bool = False,
     blur: int = 0,
-    seed: str = "",
     text: str = "",
     fit: str = "crop",
-    format: str = "",  # noqa: A002
+    output_format: str = "",
 ) -> Response:
+    """Process and serve a single image entry."""
     # Validate size
     width, height = processor.clamp_size(width, height)
     if width == 0 and height == 0:
         width, height = 500, 500
 
-    # Pick image
-    entry = manager.pick(category or None, seed or None)
-    if entry is None:
-        raise HTTPException(status_code=404, detail="category not found")
-
     # Determine output format
-    output_format = format or ext.lstrip(".") or "jpeg"
+    output_format = output_format or ext.lstrip(".") or "jpeg"
     output_format = output_format.lower()
     if output_format not in ("jpeg", "jpg", "png", "webp"):
         output_format = "jpeg"
@@ -167,6 +159,46 @@ async def serve_image(
     )
 
 
+@app.get("/id/{image_id:int}/{width:int}/{height:int}")
+@app.get("/id/{image_id:int}/{width:int}/{height:int}.{ext}")
+async def serve_by_id(
+    image_id: int,
+    width: int,
+    height: int,
+    ext: str = "",
+    grayscale: bool = False,
+    blur: int = 0,
+    text: str = "",
+    fit: str = "crop",
+    format: str = "",  # noqa: A002
+) -> Response:
+    entry = manager.get_by_id(image_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+    return _serve_entry(entry, width, height, ext, grayscale, blur, text, fit, format)
+
+
+@app.get("/{width:int}/{height:int}/{category}")
+@app.get("/{width:int}/{height:int}/{category}.{ext}")
+@app.get("/{width:int}/{height:int}/")
+async def serve_image(
+    width: int,
+    height: int,
+    category: str = "",
+    ext: str = "",
+    grayscale: bool = False,
+    blur: int = 0,
+    seed: str = "",
+    text: str = "",
+    fit: str = "crop",
+    format: str = "",  # noqa: A002
+) -> Response:
+    entry = manager.pick(category or None, seed or None)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="category not found")
+    return _serve_entry(entry, width, height, ext, grayscale, blur, text, fit, format)
+
+
 # ── Random from all (no dimensions) ────────────────────────────────
 @app.get("/random/{category:path}")
 async def random_image(category: str = "") -> RedirectResponse:
@@ -199,6 +231,32 @@ async def api_images() -> JSONResponse:
     })
 
 
+@app.get("/api/info/id/{image_id:int}")
+async def image_info_by_id(image_id: int) -> JSONResponse:
+    entry = manager.get_by_id(image_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+
+    from PIL import Image
+
+    with Image.open(entry.path) as img:
+        width, height = img.size
+        fmt = img.format.lower() if img.format else "unknown"
+
+    size = entry.path.stat().st_size
+
+    return JSONResponse({
+        "id": entry.id,
+        "filename": entry.filename,
+        "category": entry.category,
+        "width": width,
+        "height": height,
+        "format": fmt,
+        "size": size,
+        "serve_url": f"/id/{entry.id}/500/500",
+    })
+
+
 @app.get("/api/info/{category}/{filename}")
 async def image_info(category: str, filename: str) -> JSONResponse:
     entry = manager.get_entry(category, filename)
@@ -214,13 +272,14 @@ async def image_info(category: str, filename: str) -> JSONResponse:
     size = entry.path.stat().st_size
 
     return JSONResponse({
+        "id": entry.id,
         "filename": entry.filename,
         "category": entry.category,
         "width": width,
         "height": height,
         "format": fmt,
         "size": size,
-        "serve_url": f"/500/500/{entry.category}" if entry.category != manager.ROOT_KEY else "/500/500",
+        "serve_url": f"/id/{entry.id}/500/500",
     })
 
 

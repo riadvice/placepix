@@ -18,6 +18,7 @@ class ImageEntry:
     path: Path
     filename: str
     category: str
+    id: int = 0
 
 
 @dataclass
@@ -99,6 +100,22 @@ class ImageManager:
                 return entry
         return None
 
+    def get_by_filename(self, filename: str) -> ImageEntry | None:
+        """Look up an image by filename across all categories."""
+        for cat in self._categories.values():
+            for entry in cat.entries:
+                if entry.filename == filename:
+                    return entry
+        return None
+
+    def get_by_id(self, image_id: int) -> ImageEntry | None:
+        """Look up an image by its stable numeric ID."""
+        for cat in self._categories.values():
+            for entry in cat.entries:
+                if entry.id == image_id:
+                    return entry
+        return None
+
     def list_categories(self) -> list[dict[str, Any]]:
         result = []
         for name, cat in self._categories.items():
@@ -115,10 +132,37 @@ class ImageManager:
     def rescan(self) -> None:
         self._rescan()
 
+    @property
+    def _manifest_path(self) -> Path:
+        return settings.images_dir / ".placepix_manifest.json"
+
+    def _load_manifest(self) -> dict[str, int]:
+        """Load the persistent id -> filename mapping."""
+        if self._manifest_path.exists():
+            try:
+                with open(self._manifest_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    return {k: int(v) for k, v in data.items()}
+            except Exception:
+                pass
+        return {}
+
+    def _save_manifest(self, mapping: dict[str, int]) -> None:
+        """Save the persistent id -> filename mapping."""
+        try:
+            with open(self._manifest_path, "w", encoding="utf-8") as f:
+                json.dump(mapping, f, indent=2, sort_keys=True)
+        except Exception:
+            pass
+
     def _rescan(self) -> None:
         images_dir = settings.images_dir
         if not images_dir.exists():
             images_dir.mkdir(parents=True)
+
+        manifest = self._load_manifest()
+        next_id = max(manifest.values(), default=0) + 1
 
         new_categories: dict[str, Category] = {}
         total = 0
@@ -128,7 +172,7 @@ class ImageManager:
                 continue
 
             if item.is_dir():
-                entries, meta = self._scan_subdir(item)
+                entries, meta, next_id = self._scan_subdir(item, manifest, next_id)
                 if entries:
                     new_categories[item.name] = Category(
                         name=item.name,
@@ -146,30 +190,42 @@ class ImageManager:
                         entries=[],
                     )
                     root = new_categories[self.ROOT_KEY]
+                key = f"{self.ROOT_KEY}/{item.name}"
+                if key not in manifest:
+                    manifest[key] = next_id
+                    next_id += 1
                 root.entries.append(ImageEntry(
                     path=item,
                     filename=item.name,
                     category=self.ROOT_KEY,
+                    id=manifest[key],
                 ))
                 total += 1
 
         self._categories = new_categories
         self._total = total
+        self._save_manifest(manifest)
 
-    def _scan_subdir(self, subdir: Path) -> tuple[list[ImageEntry], CategoryMeta]:
+    def _scan_subdir(self, subdir: Path, manifest: dict[str, int], next_id: int) -> tuple[list[ImageEntry], CategoryMeta, int]:
         entries: list[ImageEntry] = []
         for child in subdir.iterdir():
             if child.name.startswith(".") or child.name in self.IGNORE_FILES:
                 continue
             if child.is_file() and child.suffix.lower() in self.VALID_EXTS:
+                key = f"{subdir.name}/{child.name}"
+                if key not in manifest:
+                    manifest[key] = next_id
+                    next_id += 1
                 entries.append(ImageEntry(
                     path=child,
                     filename=child.name,
                     category=subdir.name,
+                    id=manifest[key],
                 ))
 
         meta = self._read_meta(subdir)
-        return entries, meta
+        return entries, meta, next_id
+
 
     def _read_meta(self, directory: Path) -> CategoryMeta:
         json_file = directory / "category.json"
