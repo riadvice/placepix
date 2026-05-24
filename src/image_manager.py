@@ -195,7 +195,7 @@ class ImageManager:
 
     @property
     def _manifest_path(self) -> Path:
-        return settings.images_dir / ".placepix_manifest.json"
+        return settings.seed_dir / ".placepix_manifest.json"
 
     def _load_manifest(self) -> dict[str, int]:
         """Load the persistent id -> filename mapping."""
