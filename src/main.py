@@ -1192,15 +1192,45 @@ async def image_explorer(page: int = 1) -> Response:
         </div>
         """
 
-    # Pagination
+    # Smart pagination - show limited page numbers with ellipsis
+    def get_smart_pagination(current: int, total: int) -> str:
+        if total <= 7:
+            # Show all pages if 7 or fewer
+            return "".join(
+                f'<span class="page-link active">{p}</span>' if p == current
+                else f'<a class="page-link" href="/images?page={p}">{p}</a>'
+                for p in range(1, total + 1)
+            )
+        
+        pages = []
+        # Always show first page
+        pages.append(1 if current == 1 else f'<a class="page-link" href="/images?page=1">1</a>')
+        
+        # Show ellipsis if gap after first page
+        if current > 3:
+            pages.append('<span class="page-link disabled">...</span>')
+        
+        # Show pages around current
+        start = max(2, current - 1)
+        end = min(total - 1, current + 1)
+        for p in range(start, end + 1):
+            if p == current:
+                pages.append(f'<span class="page-link active">{p}</span>')
+            else:
+                pages.append(f'<a class="page-link" href="/images?page={p}">{p}</a>')
+        
+        # Show ellipsis if gap before last page
+        if current < total - 2:
+            pages.append('<span class="page-link disabled">...</span>')
+        
+        # Always show last page
+        pages.append(total if current == total else f'<a class="page-link" href="/images?page={total}">{total}</a>')
+        
+        return "".join(pages)
+    
     prev_link = f'<a class="page-link" href="/images?page={page - 1}">Previous</a>' if page > 1 else '<span class="page-link disabled">Previous</span>'
     next_link = f'<a class="page-link" href="/images?page={page + 1}">Next</a>' if page < total_pages else '<span class="page-link disabled">Next</span>'
-    page_numbers = ""
-    for p in range(1, total_pages + 1):
-        if p == page:
-            page_numbers += f'<span class="page-link active">{p}</span>'
-        else:
-            page_numbers += f'<a class="page-link" href="/images?page={p}">{p}</a>'
+    page_numbers = get_smart_pagination(page, total_pages)
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -1314,16 +1344,48 @@ async def color_palette(
     all_active = "" if category else "active"
     cat_buttons = f'<a class="cat-btn {all_active}" href="/palette?search={search}">All</a>' + cat_buttons
 
-    # Pagination
+    # Smart pagination - show limited page numbers with ellipsis
+    def get_smart_pagination(current: int, total: int, base_url: str) -> str:
+        if total <= 7:
+            # Show all pages if 7 or fewer
+            return "".join(
+                f'<span class="page-link active">{p}</span>' if p == current
+                else f'<a class="page-link" href="{base_url}&page={p}">{p}</a>'
+                for p in range(1, total + 1)
+            )
+        
+        pages = []
+        # Always show first page
+        pages.append(1 if current == 1 else f'<a class="page-link" href="{base_url}&page=1">1</a>')
+        
+        # Show ellipsis if gap after first page
+        if current > 3:
+            pages.append('<span class="page-link disabled">...</span>')
+        
+        # Show pages around current
+        start = max(2, current - 1)
+        end = min(total - 1, current + 1)
+        for p in range(start, end + 1):
+            if p == current:
+                pages.append(f'<span class="page-link active">{p}</span>')
+            else:
+                pages.append(f'<a class="page-link" href="{base_url}&page={p}">{p}</a>')
+        
+        # Show ellipsis if gap before last page
+        if current < total - 2:
+            pages.append('<span class="page-link disabled">...</span>')
+        
+        # Always show last page
+        pages.append(total if current == total else f'<a class="page-link" href="{base_url}&page={total}">{total}</a>')
+        
+        return "".join(pages)
+    
     base = f"/palette?search={search}"
     if category:
         base += f"&category={category}"
     prev_link = f'<a class="page-link" href="{base}&page={page - 1}">Previous</a>' if page > 1 else '<span class="page-link disabled">Previous</span>'
     next_link = f'<a class="page-link" href="{base}&page={page + 1}">Next</a>' if page < total_pages else '<span class="page-link disabled">Next</span>'
-    page_numbers = ""
-    for p in range(1, total_pages + 1):
-        active = "active" if p == page else ""
-        page_numbers += f'<a class="page-link {active}" href="{base}&page={p}">{p}</a>'
+    page_numbers = get_smart_pagination(page, total_pages, base)
 
     pager = f'<div class="pager">{prev_link}{page_numbers}{next_link}</div>' if total_pages > 1 else ""
 
