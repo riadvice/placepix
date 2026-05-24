@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import hashlib
+import html
 import io
 import json
 import logging
@@ -1531,7 +1532,7 @@ async def image_explorer(page: int = 1) -> Response:
         .nav-links a:hover {{ color: var(--accent); }}
         .dropdown {{ position: relative; display: inline-block; }}
         .dropdown-toggle {{ cursor: pointer; color: var(--muted); text-decoration: none; font-size: .9rem; }}
-        .dropdown-menu {{ display: none; position: absolute; top: 100%; left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.1); padding: .5rem 0; min-width: 180px; z-index: 100; }}
+        .dropdown-menu {{ display: none; position: absolute; top: 100%; left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.1); padding: .75rem 0 .5rem; min-width: 180px; z-index: 100; margin-top: -.25rem; }}
         .dropdown-menu a {{ display: block; padding: .4rem .8rem; color: var(--text); text-decoration: none; font-size: .85rem; white-space: nowrap; }}
         .dropdown-menu a:hover {{ background: #f1f5f9; color: var(--accent); }}
         .dropdown:hover .dropdown-menu {{ display: block; }}
@@ -1564,10 +1565,10 @@ async def image_explorer(page: int = 1) -> Response:
             <a href="/#categories">Categories</a>
             <a href="/images">Explorer</a>
             <a href="/palette">Palette</a>
+            <a href="/url-builder">URL Builder</a>
             <div class="dropdown">
                 <span class="dropdown-toggle">Features ▾</span>
                 <div class="dropdown-menu">
-                    <a href="/url-builder">URL Builder</a>
                     <a href="/#smart-crop">Smart Crop</a>
                     <a href="/#aspect-ratios">Aspect Ratios</a>
                     <a href="/#filters">Filters & Effects</a>
@@ -1604,7 +1605,13 @@ async def color_palette(
     category: str = "",
     search: str = "",
 ) -> Response:
-    all_colors = manager.list_colors(category=category, search=search)
+    try:
+        all_colors = manager.list_colors(category=category, search=search)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    safe_category = html.escape(category, quote=True)
+    safe_search = html.escape(search, quote=True)
     total = len(all_colors)
     total_pages = max((total + per_page - 1) // per_page, 1)
     page = max(1, min(page, total_pages))
@@ -1643,9 +1650,9 @@ async def color_palette(
     for cat, dot_color in hue_cats:
         active = "active" if category == cat else ""
         border = "border: 1px solid #cbd5e1;" if cat in ("White", "Gray") else ""
-        cat_buttons += f'<a class="cat-btn {active}" href="/palette?category={cat}&search={search}"><span class="dot" style="background: {dot_color}; {border}"></span>{cat}</a>'
+        cat_buttons += f'<a class="cat-btn {active}" href="/palette?category={cat}&search={safe_search}"><span class="dot" style="background: {dot_color}; {border}"></span>{cat}</a>'
     all_active = "" if category else "active"
-    cat_buttons = f'<a class="cat-btn {all_active}" href="/palette?search={search}">All</a>' + cat_buttons
+    cat_buttons = f'<a class="cat-btn {all_active}" href="/palette?search={safe_search}">All</a>' + cat_buttons
 
     # Smart pagination - show limited page numbers with ellipsis
     def get_smart_pagination(current: int, total: int, base_url: str) -> str:
@@ -1683,9 +1690,9 @@ async def color_palette(
         
         return "".join(pages)
     
-    base = f"/palette?search={search}"
-    if category:
-        base += f"&category={category}"
+    base = f"/palette?search={safe_search}"
+    if safe_category:
+        base += f"&category={safe_category}"
     prev_link = f'<a class="page-link" href="{base}&page={page - 1}">Previous</a>' if page > 1 else '<span class="page-link disabled">Previous</span>'
     next_link = f'<a class="page-link" href="{base}&page={page + 1}">Next</a>' if page < total_pages else '<span class="page-link disabled">Next</span>'
     page_numbers = get_smart_pagination(page, total_pages, base)
@@ -1734,6 +1741,12 @@ async def color_palette(
         .nav-links {{ display: flex; gap: 1.25rem; font-size: .9rem; }}
         .nav-links a {{ color: var(--muted); text-decoration: none; }}
         .nav-links a:hover {{ color: var(--accent); }}
+        .dropdown {{ position: relative; display: inline-block; }}
+        .dropdown-toggle {{ cursor: pointer; color: var(--muted); text-decoration: none; font-size: .9rem; }}
+        .dropdown-menu {{ display: none; position: absolute; top: 100%; left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.1); padding: .75rem 0 .5rem; min-width: 180px; z-index: 100; margin-top: -.25rem; }}
+        .dropdown-menu a {{ display: block; padding: .4rem .8rem; color: var(--text); text-decoration: none; font-size: .85rem; white-space: nowrap; }}
+        .dropdown-menu a:hover {{ background: #f1f5f9; color: var(--accent); }}
+        .dropdown:hover .dropdown-menu {{ display: block; }}
         .btn-docs {{ background: #b45309; color: #fff; padding: .4rem .9rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .85rem; }}
         .btn-docs:hover {{ background: #92400e; }}
         h1 {{ text-align: center; margin-bottom: .25rem; font-size: 1.75rem; }}
@@ -1770,10 +1783,10 @@ async def color_palette(
             <a href="/#categories">Categories</a>
             <a href="/images">Explorer</a>
             <a href="/palette">Palette</a>
+            <a href="/url-builder">URL Builder</a>
             <div class="dropdown">
                 <span class="dropdown-toggle">Features ▾</span>
                 <div class="dropdown-menu">
-                    <a href="/url-builder">URL Builder</a>
                     <a href="/#smart-crop">Smart Crop</a>
                     <a href="/#aspect-ratios">Aspect Ratios</a>
                     <a href="/#filters">Filters & Effects</a>
@@ -1796,8 +1809,8 @@ async def color_palette(
     <p class="subtitle">{total} dominant colors &mdash; click any to preview matching images</p>
     <div class="controls">
         <form class="search-bar" method="get" action="/palette">
-            <input type="hidden" name="category" value="{category}">
-            <input type="text" name="search" placeholder="Search hex color (e.g. 3b82f6)" value="{search}">
+            <input type="hidden" name="category" value="{safe_category}">
+            <input type="text" name="search" placeholder="Search hex color (e.g. 3b82f6)" value="{safe_search}">
             <button type="submit">Search</button>
         </form>
         <div class="cat-row">{cat_buttons}</div>

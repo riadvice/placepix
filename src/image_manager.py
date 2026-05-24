@@ -19,6 +19,8 @@ from src.config import settings
 
 logger = logging.getLogger(__name__)
 
+VALID_CATEGORIES = {"White", "Black", "Gray", "Brown", "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Other"}
+
 # Global flag to ensure S3 scan happens only once across all workers
 _s3_scan_done = False
 
@@ -641,6 +643,9 @@ class ImageManager:
 
     def list_colors(self, category: str = "", search: str = "") -> list[dict[str, Any]]:
         """Return unique dominant colors across all images, sorted by image count."""
+        if category and category not in VALID_CATEGORIES:
+            raise ValueError(f"Invalid category: {category}. Valid categories are: {', '.join(sorted(VALID_CATEGORIES))}")
+        
         color_counts: dict[str, int] = {}
         color_samples: dict[str, list[int]] = {}
 
