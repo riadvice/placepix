@@ -40,10 +40,34 @@ python -m src.main
 
 Visit `http://localhost:3000` to browse the image catalog.
 
-## System Requirements
+## Dependencies
 
-- Python 3.10+
-- OpenCV (for smart crop feature): `libgl1-mesa-glx libglib2.0-0` on Linux
+### Python Packages
+- **FastAPI** - Web framework
+- **Pillow** - Image processing
+- **NumPy** - Noise/grain effects
+- **OpenCV** (`opencv-python`) - Smart crop with face detection
+- **pillow-avif** - AVIF format support (optional)
+- **uvicorn** - ASGI server
+
+### System Requirements
+
+**Python**: 3.10 or higher
+
+**Linux System Libraries** (for OpenCV):
+```bash
+# Debian/Ubuntu
+sudo apt-get install libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
+
+# Alpine (Docker)
+apk add --no-cache libgomp libglib2.0 libsm libxext libxrender
+```
+
+**macOS**: No additional system dependencies required
+
+**Windows**: No additional system dependencies required
+
+All Python dependencies are automatically installed via `pip install -e .`
 
 ## Usage
 
