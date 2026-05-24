@@ -769,6 +769,86 @@ async def random_image(category: str = "", color: str = "") -> RedirectResponse:
     return RedirectResponse(url=f"/500/500/{entry.category}?seed={os.urandom(4).hex()}")
 
 
+# ── Raw image serving ───────────────────────────────────────────────
+_CONTENT_TYPES: dict[str, str] = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+    ".bmp": "image/bmp",
+    ".tiff": "image/tiff",
+    ".tif": "image/tiff",
+    ".avif": "image/avif",
+    ".svg": "image/svg+xml",
+}
+
+
+def _serve_raw(
+    entry: ImageEntry,
+    if_none_match: str | None = None,
+    if_modified_since: str | None = None,
+) -> Response:
+    """Serve the original unprocessed image file."""
+    source = _resolve_image_source(entry)
+
+    if isinstance(source, Path):
+        content = source.read_bytes()
+        last_modified = _get_last_modified(source)
+        ext = source.suffix.lower()
+    else:
+        content = source.getvalue()
+        last_modified = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        ext = os.path.splitext(entry.filename)[1].lower()
+
+    etag = _generate_etag(content)
+
+    if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
+        return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
+
+    media_type = _CONTENT_TYPES.get(ext, "application/octet-stream")
+
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f'inline; filename="{entry.filename}"',
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "ETag": etag,
+            "Last-Modified": last_modified,
+        },
+    )
+
+
+@app.get("/api/raw/id/{image_id:int}")
+@app.head("/api/raw/id/{image_id:int}")
+async def serve_raw_by_id(
+    image_id: int,
+    if_none_match: str | None = Header(default=None),
+    if_modified_since: str | None = Header(default=None),
+) -> Response:
+    """Serve the original unprocessed image by ID."""
+    entry = manager.get_by_id(image_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+    return _serve_raw(entry, if_none_match, if_modified_since)
+
+
+@app.get("/api/raw/{category}/{filename}")
+@app.head("/api/raw/{category}/{filename}")
+async def serve_raw_by_path(
+    category: str,
+    filename: str,
+    if_none_match: str | None = Header(default=None),
+    if_modified_since: str | None = Header(default=None),
+) -> Response:
+    """Serve the original unprocessed image by category and filename."""
+    entry = manager.get_entry(category, filename)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+    return _serve_raw(entry, if_none_match, if_modified_since)
+
+
 # ── Web UI ──────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> Any:
