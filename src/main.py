@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, Header, Depends
+from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
 
 try:
     import boto3
@@ -164,13 +164,21 @@ if manager._is_leader and _APSCHEDULER_AVAILABLE:
     )
     _scheduler.start()
 
-# Metrics tracker (only if admin password is set)
-if settings.admin_password:
-    logger.info("Metrics tracking enabled")
-    metrics_tracker = MetricsTracker()
-else:
-    logger.info("Metrics tracking disabled (no admin password set)")
-    metrics_tracker = None
+# Upload directory writability check
+_upload_writable = True
+if settings.upload_enabled:
+    if not os.access(settings.images_dir, os.W_OK):
+        logger.warning(
+            f"Uploads are enabled but the image directory is not writable: {settings.images_dir}. "
+            "Upload functionality will be hidden in the UI."
+        )
+        _upload_writable = False
+    else:
+        logger.info(f"Upload directory is writable: {settings.images_dir}")
+
+# Metrics tracker (always enabled)
+logger.info("Metrics tracking enabled")
+metrics_tracker = MetricsTracker()
 
 # Templates
 templates = Jinja2Templates(directory="templates")
@@ -185,9 +193,6 @@ class MetricsMiddleware(BaseHTTPMiddleware):
     """Middleware to track request metrics."""
 
     async def dispatch(self, request: Request, call_next):
-        if not metrics_tracker:
-            return await call_next(request)
-        
         start_time = time.time()
         response = await call_next(request)
         response_time_ms = (time.time() - start_time) * 1000
@@ -1025,6 +1030,7 @@ async def index(request: Request) -> Any:
             "categories": categories,
             "total": manager.total,
             "ga_tracking_id": settings.ga_tracking_id,
+            "upload_enabled": settings.upload_enabled and _upload_writable,
         },
     )
 
@@ -1399,8 +1405,8 @@ async def upload_image(
     cat_display = category or "__root"
     logger.info(f"Upload request: {file.filename} to category '{cat_display}'")
     
-    if not settings.upload_enabled:
-        logger.warning("Upload blocked: uploads are disabled")
+    if not settings.upload_enabled or not _upload_writable:
+        logger.warning("Upload blocked: uploads are disabled or directory is not writable")
         raise HTTPException(status_code=403, detail="uploads are disabled")
 
     if not file.filename:
@@ -1474,149 +1480,6 @@ async def generate_srcset(
         "srcset_string": srcset_string,
         "aspect_ratio": round(aspect_ratio, 3),
     })
-
-
-# ── Admin & Metrics ─────────────────────────────────────────────────
-def verify_admin_password(password: str = Header(alias="X-Admin-Password")) -> bool:
-    """Verify admin password from header."""
-    if not settings.admin_password:
-        raise HTTPException(status_code=404, detail="not found")
-    if password != settings.admin_password:
-        raise HTTPException(status_code=403, detail="invalid password")
-    return True
-
-
-@app.get("/admin/stats")
-async def admin_stats_page(
-    request: Request,
-    _: bool = Depends(verify_admin_password),
-) -> Response:
-    """Admin dashboard page."""
-    if not metrics_tracker:
-        raise HTTPException(status_code=404, detail="not found")
-    
-    stats = metrics_tracker.get_stats_summary()
-    
-    # Build stats cards
-    cards_html = f"""
-    <div class="stat-card">
-        <div class="stat-value">{stats['total_requests']:,}</div>
-        <div class="stat-label">Total Requests</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{stats['cache_hit_rate']}%</div>
-        <div class="stat-label">Cache Hit Rate</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{stats['avg_response_time_ms']:.1f}ms</div>
-        <div class="stat-label">Avg Response Time</div>
-    </div>
-    """
-    
-    # Popular sizes table
-    sizes_rows = ""
-    for item in stats['popular_sizes'][:10]:
-        sizes_rows += f"<tr><td>{item['width']}x{item['height']}</td><td>{item['count']:,}</td></tr>"
-    
-    # Popular categories table
-    categories_rows = ""
-    for item in stats['popular_categories'][:10]:
-        categories_rows += f"<tr><td>{item['category']}</td><td>{item['count']:,}</td></tr>"
-    
-    # Popular formats table
-    formats_rows = ""
-    for item in stats['popular_formats'][:10]:
-        formats_rows += f"<tr><td>{item['format'].upper()}</td><td>{item['count']:,}</td></tr>"
-    
-    html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlacePix Admin - Stats</title>
-    <style>
-        :root {{ --bg: #f8fafc; --card: #fff; --text: #1e293b; --muted: #64748b; --accent: #3b82f6; --border: #e2e8f0; }}
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding: 2rem; }}
-        h1 {{ margin-bottom: 2rem; }}
-        .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }}
-        .stat-card {{ background: var(--card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }}
-        .stat-value {{ font-size: 2rem; font-weight: 700; color: var(--accent); }}
-        .stat-label {{ color: var(--muted); margin-top: 0.5rem; }}
-        .tables-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }}
-        .table-card {{ background: var(--card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }}
-        .table-card h2 {{ font-size: 1.1rem; margin-bottom: 1rem; }}
-        table {{ width: 100%; border-collapse: collapse; }}
-        th, td {{ padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }}
-        th {{ font-weight: 600; color: var(--muted); font-size: 0.875rem; }}
-        tr:last-child td {{ border-bottom: none; }}
-    </style>
-</head>
-<body>
-    <h1>PlacePix Admin Dashboard</h1>
-    <div class="stats-grid">{cards_html}</div>
-    <div class="tables-grid">
-        <div class="table-card">
-            <h2>Popular Sizes</h2>
-            <table>
-                <thead><tr><th>Size</th><th>Requests</th></tr></thead>
-                <tbody>{sizes_rows}</tbody>
-            </table>
-        </div>
-        <div class="table-card">
-            <h2>Popular Categories</h2>
-            <table>
-                <thead><tr><th>Category</th><th>Requests</th></tr></thead>
-                <tbody>{categories_rows}</tbody>
-            </table>
-        </div>
-        <div class="table-card">
-            <h2>Popular Formats</h2>
-            <table>
-                <thead><tr><th>Format</th><th>Requests</th></tr></thead>
-                <tbody>{formats_rows}</tbody>
-            </table>
-        </div>
-    </div>
-</body>
-</html>"""
-    
-    return Response(content=html, media_type="text/html")
-
-
-@app.get("/api/admin/stats")
-async def api_admin_stats(
-    _: bool = Depends(verify_admin_password),
-) -> JSONResponse:
-    """Get stats as JSON."""
-    if not metrics_tracker:
-        raise HTTPException(status_code=404, detail="not found")
-    
-    return JSONResponse(metrics_tracker.get_stats_summary())
-
-
-@app.get("/api/admin/popular-sizes")
-async def api_admin_popular_sizes(
-    limit: int = 10,
-    _: bool = Depends(verify_admin_password),
-) -> JSONResponse:
-    """Get popular sizes."""
-    if not metrics_tracker:
-        raise HTTPException(status_code=404, detail="not found")
-    
-    return JSONResponse(metrics_tracker.get_popular_sizes(limit))
-
-
-@app.get("/api/admin/popular-categories")
-async def api_admin_popular_categories(
-    limit: int = 10,
-    _: bool = Depends(verify_admin_password),
-) -> JSONResponse:
-    """Get popular categories."""
-    if not metrics_tracker:
-        raise HTTPException(status_code=404, detail="not found")
-    
-    return JSONResponse(metrics_tracker.get_popular_categories(limit))
 
 
 # ── Entry point ─────────────────────────────────────────────────────

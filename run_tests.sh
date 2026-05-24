@@ -9,16 +9,16 @@ echo "🧪 PlacePix Test Runner"
 echo "======================="
 
 # Create test directories
+TEST_DATA_DIR="./test_data"
 TEST_IMAGES_DIR="./test_images"
-TEST_SEED_DIR="./test_seed"
 TEST_CACHE_DIR="./test_cache"
 
 # Clean up any existing test directories
 echo "🧹 Cleaning up previous test artifacts..."
-rm -rf "$TEST_IMAGES_DIR" "$TEST_SEED_DIR" "$TEST_CACHE_DIR"
+rm -rf "$TEST_DATA_DIR" "$TEST_IMAGES_DIR" "$TEST_CACHE_DIR"
 
 # Create fresh test directories
-mkdir -p "$TEST_IMAGES_DIR" "$TEST_SEED_DIR"
+mkdir -p "$TEST_DATA_DIR" "$TEST_IMAGES_DIR"
 
 # Set test environment
 echo "🔧 Setting up test environment..."
@@ -51,6 +51,6 @@ fi
 
 # Clean up test directories
 echo "🧹 Cleaning up test directories..."
-rm -rf "$TEST_IMAGES_DIR" "$TEST_SEED_DIR" "$TEST_CACHE_DIR"
+rm -rf "$TEST_DATA_DIR" "$TEST_IMAGES_DIR" "$TEST_CACHE_DIR"
 
 echo "🎉 Test run completed successfully!"

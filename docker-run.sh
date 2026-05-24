@@ -26,8 +26,8 @@ exec docker run --rm \
     -v "$(pwd)/images:/app/images" \
     -v "$(pwd)/.cache:/app/.cache" \
     -v "$(pwd)/data:/app/data" \
+    -e DATA_DIR=/app/data \
     -e IMAGES_DIR=/app/images \
-    -e SEED_DIR=/app/data \
     -e CACHE=true \
     -e HOST=0.0.0.0:3000 \
     "$IMAGE_NAME"

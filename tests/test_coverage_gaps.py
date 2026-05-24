@@ -909,33 +909,6 @@ class TestImageManagerGaps:
         with pytest.raises(Exception):
             _resolve_image_source(entry)
 
-    def test_admin_stats_no_tracker(self, test_images_dir, monkeypatch):
-        from src.main import app
-        monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
-        monkeypatch.setattr("src.main.metrics_tracker", None)
-        client = TestClient(app)
-        response = client.get("/api/admin/stats?password=admin")
-        # May return 404 or 422 for auth failure
-        assert response.status_code in [404, 422]
-
-    def test_admin_popular_sizes_no_tracker(self, test_images_dir, monkeypatch):
-        from src.main import app
-        monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
-        monkeypatch.setattr("src.main.metrics_tracker", None)
-        client = TestClient(app)
-        response = client.get("/api/admin/popular-sizes?password=admin")
-        # May return 404 or 422 for auth failure
-        assert response.status_code in [404, 422]
-
-    def test_admin_popular_categories_no_tracker(self, test_images_dir, monkeypatch):
-        from src.main import app
-        monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
-        monkeypatch.setattr("src.main.metrics_tracker", None)
-        client = TestClient(app)
-        response = client.get("/api/admin/popular-categories?password=admin")
-        # May return 404 or 422 for auth failure
-        assert response.status_code in [404, 422]
-
     def test_serve_by_id(self, test_images_dir, monkeypatch):
         from src.main import manager, app
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))

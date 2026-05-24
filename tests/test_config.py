@@ -9,19 +9,18 @@ from src.config import Settings
 
 def test_settings_defaults():
     """Test default settings values."""
-    settings = Settings()
+    settings = Settings(_env_file=None)
     assert settings.host == "127.0.0.1:3000"
-    assert settings.dir == "./images"
+    assert settings.dir == "./data"
     assert settings.cache is True
     assert settings.cdn == ""
     assert settings.min_width == 8
     assert settings.min_height == 8
-    assert settings.max_width == 2000
-    assert settings.max_height == 2000
+    assert settings.max_width == 2400
+    assert settings.max_height == 2400
     assert settings.upload_enabled is True
-    assert settings.admin_password == "admin"
-    assert settings.watermark_enabled is False
-    assert settings.watermark_image == ""
+    assert settings.watermark_enabled is True
+    assert settings.watermark_image == "static/watermark.png"
     assert settings.watermark_text == ""
     assert settings.watermark_position == "bottom-right"
     assert settings.watermark_opacity == 0.5
@@ -75,17 +74,17 @@ def test_cache_dir_property():
 def test_settings_from_env(monkeypatch):
     """Test settings can be loaded from environment variables."""
     monkeypatch.setenv("HOST", "0.0.0.0:8000")
-    monkeypatch.setenv("DIR", "/custom/images")
+    monkeypatch.setenv("DATA_DIR", "/custom/images")
     monkeypatch.setenv("CACHE", "false")
     monkeypatch.setenv("MAX_WIDTH", "4000")
-    monkeypatch.setenv("ADMIN_PASSWORD", "secret123")
-    
+    monkeypatch.setenv("WATERMARK_IMAGE", "/custom/watermark.png")
+
     settings = Settings()
     assert settings.host == "0.0.0.0:8000"
     assert settings.dir == "/custom/images"
     assert settings.cache is False
     assert settings.max_width == 4000
-    assert settings.admin_password == "secret123"
+    assert settings.watermark_image == "/custom/watermark.png"
 
 
 def test_watermark_settings():

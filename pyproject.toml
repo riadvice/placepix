@@ -30,3 +30,4 @@ dev = [
 
 [project.scripts]
 placepix = "src.main:run"
+placepix-stats = "src.admin:main"

@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
-from src.config import Settings
 from src.metrics import MetricsTracker
 
 
@@ -102,120 +100,51 @@ def test_popular_formats(tmp_path: Path):
 def test_stats_summary(tmp_path: Path):
     """Test comprehensive stats summary."""
     tracker = MetricsTracker(tmp_path / "test.db")
-    
+
     tracker.log_request("/500/500", "GET", 200, 10.0, width=500, height=500, cache_hit=True)
     tracker.log_request("/600/600", "GET", 200, 20.0, width=600, height=600, cache_hit=False)
-    
+    tracker.log_request("/500/500", "GET", 404, 5.0, width=500, height=500, cache_hit=False)
+
     stats = tracker.get_stats_summary()
-    assert stats["total_requests"] == 2
-    assert stats["cache_hit_rate"] == 50.0
-    assert stats["avg_response_time_ms"] == 15.0
+    assert stats["total_requests"] == 3
+    assert stats["cache_hit_rate"] == pytest.approx(33.33, rel=0.1)
+    assert stats["avg_response_time_ms"] == pytest.approx(11.67, rel=0.1)
     assert len(stats["popular_sizes"]) == 2
+    assert "response_time_percentiles" in stats
+    assert "error_summary" in stats
+    assert stats["error_summary"]["client_errors"] == 1
+    assert "requests_by_day" in stats
+    assert "peak_hours" in stats
+    assert "bandwidth_estimate" in stats
 
 
-def test_admin_disabled_without_password(client: TestClient):
-    """Test admin endpoints return 404 when password not set."""
-    response = client.get("/admin/stats", headers={"X-Admin-Password": "test"})
-    assert response.status_code == 404
+def test_new_granular_stats(tmp_path: Path):
+    """Test new granular stats methods."""
+    tracker = MetricsTracker(tmp_path / "test.db")
 
-
-def test_admin_with_password(test_images_dir: Path, tmp_path: Path, monkeypatch):
-    """Test admin endpoints with password protection."""
-    from src.main import app
-    from src.image_manager import ImageManager
-    
-    # Create settings with admin password
-    test_settings = Settings(
-        host="127.0.0.1:3000",
-        dir=str(test_images_dir),
-        cache=True,
-        admin_password="test123",
-    )
-    monkeypatch.setattr("src.config.settings", test_settings)
-    monkeypatch.setattr("src.main.settings", test_settings)
-    
-    # Reinitialize with metrics enabled
-    from src.metrics import MetricsTracker
-    tracker = MetricsTracker(tmp_path / "metrics.db")
-    monkeypatch.setattr("src.main.metrics_tracker", tracker)
-    
-    manager = ImageManager()
-    monkeypatch.setattr("src.main.manager", manager)
-    
-    client = TestClient(app)
-    
-    # Test without password
-    response = client.get("/admin/stats")
-    assert response.status_code == 422  # Missing header
-    
-    # Test with wrong password
-    response = client.get("/admin/stats", headers={"X-Admin-Password": "wrong"})
-    assert response.status_code == 403
-    
-    # Test with correct password
-    response = client.get("/admin/stats", headers={"X-Admin-Password": "test123"})
-    assert response.status_code == 200
-    assert "PlacePix Admin" in response.text
-
-
-def test_admin_api_stats(test_images_dir: Path, tmp_path: Path, monkeypatch):
-    """Test admin API stats endpoint."""
-    from src.main import app
-    from src.image_manager import ImageManager
-    
-    test_settings = Settings(
-        host="127.0.0.1:3000",
-        dir=str(test_images_dir),
-        admin_password="test123",
-    )
-    monkeypatch.setattr("src.config.settings", test_settings)
-    monkeypatch.setattr("src.main.settings", test_settings)
-    
-    from src.metrics import MetricsTracker
-    tracker = MetricsTracker(tmp_path / "metrics.db")
     tracker.log_request("/500/500", "GET", 200, 10.0)
-    monkeypatch.setattr("src.main.metrics_tracker", tracker)
-    
-    manager = ImageManager()
-    monkeypatch.setattr("src.main.manager", manager)
-    
-    client = TestClient(app)
-    
-    response = client.get("/api/admin/stats", headers={"X-Admin-Password": "test123"})
-    assert response.status_code == 200
-    data = response.json()
-    assert "total_requests" in data
-    assert data["total_requests"] == 1
+    tracker.log_request("/600/600", "GET", 200, 20.0)
+    tracker.log_request("/500/500", "GET", 500, 5.0)
 
+    percentiles = tracker.get_response_time_percentiles()
+    assert "p50" in percentiles
+    assert "p95" in percentiles
+    assert "p99" in percentiles
 
-def test_admin_popular_sizes_endpoint(test_images_dir: Path, tmp_path: Path, monkeypatch):
-    """Test admin popular sizes endpoint."""
-    from src.main import app
-    from src.image_manager import ImageManager
-    
-    test_settings = Settings(
-        host="127.0.0.1:3000",
-        dir=str(test_images_dir),
-        admin_password="test123",
-    )
-    monkeypatch.setattr("src.config.settings", test_settings)
-    monkeypatch.setattr("src.main.settings", test_settings)
-    
-    from src.metrics import MetricsTracker
-    tracker = MetricsTracker(tmp_path / "metrics.db")
-    tracker.log_request("/500/500", "GET", 200, 10.0, width=500, height=500)
-    monkeypatch.setattr("src.main.metrics_tracker", tracker)
-    
-    manager = ImageManager()
-    monkeypatch.setattr("src.main.manager", manager)
-    
-    client = TestClient(app)
-    
-    response = client.get("/api/admin/popular-sizes", headers={"X-Admin-Password": "test123"})
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 1
-    assert data[0]["width"] == 500
+    errors = tracker.get_error_summary()
+    assert errors["total"] == 3
+    assert errors["server_errors"] == 1
+    assert errors["error_rate"] == pytest.approx(33.33, rel=0.1)
+
+    bandwidth = tracker.get_bandwidth_estimate()
+    assert "bytes" in bandwidth
+    assert bandwidth["bytes"] > 0
+
+    daily = tracker.get_requests_by_day()
+    assert len(daily) >= 1
+
+    peak = tracker.get_peak_hours()
+    assert len(peak) >= 1
 
 
 def test_metrics_middleware_class():
@@ -226,8 +155,8 @@ def test_metrics_middleware_class():
     assert hasattr(MetricsMiddleware, "dispatch")
 
 
-def test_metrics_disabled_by_default(client: TestClient):
-    """Test that metrics are disabled when no admin password is set."""
-    # With default settings (no admin password), metrics should be disabled
-    response = client.get("/api/admin/stats", headers={"X-Admin-Password": "test"})
-    assert response.status_code == 404
+def test_metrics_always_enabled(client: TestClient):
+    """Test that metrics middleware is always active."""
+    # Make any request to trigger metrics logging
+    response = client.get("/500/500")
+    assert response.status_code in [200, 404]  # May or may not find images

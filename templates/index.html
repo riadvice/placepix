@@ -67,7 +67,9 @@
         <a href="/images" class="text-slate-500 hover:text-accent transition">Explorer</a>
         <a href="/palette" class="text-slate-500 hover:text-accent transition">Palette</a>
         <a href="/features" class="text-accent hover:text-blue-600 transition font-medium">🎨 Features</a>
+        {% if upload_enabled %}
         <a href="#upload" class="text-slate-500 hover:text-accent transition">Upload</a>
+        {% endif %}
         <a href="#api" class="text-slate-500 hover:text-accent transition">API</a>
         <a href="/docs" target="_blank" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium shadow-sm">Docs</a>
       </div>
@@ -88,6 +90,7 @@
     </div>
   </section>
 
+  {% if upload_enabled %}
   <!-- Upload Zone -->
   <section id="upload" class="max-w-7xl mx-auto px-4 py-8">
     <div id="drop-zone" class="drop-zone rounded-xl p-10 text-center cursor-pointer bg-white hover:shadow-md transition">
@@ -111,6 +114,15 @@
     </div>
     <div id="upload-status" class="mt-3 text-sm text-center hidden font-medium"></div>
   </section>
+  {% else %}
+  <!-- Upload Warning -->
+  <section id="upload" class="max-w-7xl mx-auto px-4 py-8">
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+      <p class="text-amber-800 font-semibold">Uploads are enabled but the image directory is not writable.</p>
+      <p class="text-amber-600 text-sm mt-1">Upload functionality has been disabled. Check directory permissions.</p>
+    </div>
+  </section>
+  {% endif %}
 
   <!-- Categories -->
   <section id="categories" class="max-w-7xl mx-auto px-4 pb-12">

@@ -260,10 +260,9 @@ class _TestSettings:
             cdn="",
             min_width=8,
             min_height=8,
-            max_width=2000,
-            max_height=2000,
+            max_width=2400,
+            max_height=2400,
             upload_enabled=True,
-            admin_password="",
         )
 
 

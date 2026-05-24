@@ -242,15 +242,119 @@ class MetricsTracker:
                 )
                 conn.commit()
 
+    def get_requests_by_day(self, limit: int = 7) -> list[dict[str, Any]]:
+        """Get daily request counts for the last N days."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute(
+                """
+                SELECT DATE(timestamp) as day, COUNT(*) as count
+                FROM requests
+                GROUP BY day
+                ORDER BY day DESC
+                LIMIT ?
+                """,
+                (limit,),
+            )
+            return [
+                {"day": row[0], "count": row[1]}
+                for row in cursor.fetchall()
+            ]
+
+    def get_response_time_percentiles(self) -> dict[str, float]:
+        """Get response time percentiles (p50, p95, p99)."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute(
+                "SELECT response_time_ms FROM requests ORDER BY response_time_ms"
+            )
+            times = [row[0] for row in cursor.fetchall()]
+        if not times:
+            return {"p50": 0.0, "p95": 0.0, "p99": 0.0}
+        n = len(times)
+
+        def _percentile(sorted_vals: list[float], p: float) -> float:
+            k = (len(sorted_vals) - 1) * p
+            f = int(k)
+            c = f + 1 if f + 1 < len(sorted_vals) else f
+            return sorted_vals[f] + (k - f) * (sorted_vals[c] - sorted_vals[f])
+
+        return {
+            "p50": round(_percentile(times, 0.50), 2),
+            "p95": round(_percentile(times, 0.95), 2),
+            "p99": round(_percentile(times, 0.99), 2),
+        }
+
+    def get_error_summary(self) -> dict[str, Any]:
+        """Get error rate breakdown (4xx vs 5xx)."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute(
+                """
+                SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status_code >= 400 AND status_code < 500 THEN 1 ELSE 0 END) as client_errors,
+                    SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) as server_errors
+                FROM requests
+                """
+            )
+            total, client_errors, server_errors = cursor.fetchone()
+        if not total:
+            return {"total": 0, "client_errors": 0, "server_errors": 0, "error_rate": 0.0}
+        errors = (client_errors or 0) + (server_errors or 0)
+        return {
+            "total": total,
+            "client_errors": client_errors or 0,
+            "server_errors": server_errors or 0,
+            "error_rate": round((errors / total) * 100, 2),
+        }
+
+    def get_peak_hours(self, limit: int = 5) -> list[dict[str, Any]]:
+        """Get top N busiest hours of day."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute(
+                """
+                SELECT strftime('%H:00', timestamp) as hour, COUNT(*) as count
+                FROM requests
+                GROUP BY hour
+                ORDER BY count DESC
+                LIMIT ?
+                """,
+                (limit,),
+            )
+            return [
+                {"hour": row[0], "count": row[1]}
+                for row in cursor.fetchall()
+            ]
+
+    def get_bandwidth_estimate(self) -> dict[str, Any]:
+        """Estimate bandwidth served based on requested dimensions."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute(
+                """
+                SELECT SUM(COALESCE(width, 500) * COALESCE(height, 500) * 3) as bytes
+                FROM requests
+                """
+            )
+            row = cursor.fetchone()
+            bytes_est = row[0] or 0
+        return {
+            "bytes": bytes_est,
+            "mb": round(bytes_est / (1024 * 1024), 2),
+            "gb": round(bytes_est / (1024 * 1024 * 1024), 2),
+        }
+
     def get_stats_summary(self) -> dict[str, Any]:
         """Get comprehensive stats summary."""
         return {
             "total_requests": self.get_total_requests(),
             "cache_hit_rate": round(self.get_cache_hit_rate(), 2),
             "avg_response_time_ms": round(self.get_avg_response_time(), 2),
+            "response_time_percentiles": self.get_response_time_percentiles(),
             "popular_sizes": self.get_popular_sizes(10),
             "popular_categories": self.get_popular_categories(10),
             "popular_formats": self.get_popular_formats(10),
             "requests_by_endpoint": self.get_requests_by_endpoint(),
             "requests_by_status": self.get_requests_by_status(),
+            "requests_by_day": self.get_requests_by_day(7),
+            "error_summary": self.get_error_summary(),
+            "peak_hours": self.get_peak_hours(5),
+            "bandwidth_estimate": self.get_bandwidth_estimate(),
         }

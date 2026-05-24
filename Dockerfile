@@ -24,6 +24,7 @@ COPY static/ ./static/
 # Ensure the mount point exists
 RUN mkdir -p /app/images /app/.cache /app/data
 
+ENV DATA_DIR=/app/data
 ENV IMAGES_DIR=/app/images
 ENV CACHE=true
 ENV HOST=0.0.0.0:3000
