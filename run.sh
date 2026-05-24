@@ -42,4 +42,23 @@ log "Web UI : http://127.0.0.1:3000/"
 log ""
 log "Press Ctrl+C to stop"
 
-exec "$VENV_DIR/bin/python" -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --reload --reload-dir src "$@"
+# Check if workers should be used (disable reload with workers)
+# Read from .env if available, default to 2
+if [[ -f ".env" ]]; then
+  WORKERS=$(grep -E "^WORKERS=" .env 2>/dev/null | cut -d '=' -f2 | tr -d ' ')
+fi
+# Default to 2 if not set or empty
+WORKERS="${WORKERS:-2}"
+
+# Ensure WORKERS is a number
+if ! [[ "$WORKERS" =~ ^[0-9]+$ ]]; then
+  WORKERS=2
+fi
+
+if [[ "$WORKERS" -gt 1 ]]; then
+  log "Running with $WORKERS workers (reload disabled)"
+  exec "$VENV_DIR/bin/python" -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --workers "$WORKERS" "$@"
+else
+  log "Running with auto-reload (single worker)"
+  exec "$VENV_DIR/bin/python" -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --reload --reload-dir src "$@"
+fi

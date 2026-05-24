@@ -12,7 +12,7 @@ class MetricsTracker:
     """Track usage metrics in SQLite database."""
 
     def __init__(self, db_path: Path | None = None) -> None:
-        self.db_path = db_path or settings.images_dir / ".placepix_metrics.db"
+        self.db_path = db_path or settings.seed_dir / ".placepix_metrics.db"
         self._init_db()
 
     def _init_db(self) -> None:

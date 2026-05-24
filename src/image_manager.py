@@ -212,7 +212,7 @@ class ImageManager:
 
     @property
     def _colors_path(self) -> Path:
-        return settings.images_dir / ".placepix_colors.json"
+        return settings.seed_dir / ".placepix_colors.json"
 
     def _load_colors(self) -> dict[int, list[str]]:
         if self._colors_path.exists():

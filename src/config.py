@@ -17,8 +17,9 @@ class Settings(BaseSettings):
     )
 
     host: str = Field(default="127.0.0.1:3000")
+    workers: int = Field(default=2)
     dir: str = Field(default="./images")
-    seed_dir: str = Field(default="./data")
+    seed_dir_str: str = Field(default="./data", alias="seed_dir")
     cache: bool = Field(default=True)
     cdn: str = Field(default="")
     min_width: int = Field(default=8)
@@ -63,7 +64,7 @@ class Settings(BaseSettings):
 
     @property
     def seed_dir(self) -> Path:
-        return Path(self.seed_dir).resolve()
+        return Path(self.seed_dir_str).resolve()
 
     @property
     def cache_dir(self) -> Path:
