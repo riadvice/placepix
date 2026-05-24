@@ -27,81 +27,191 @@
       border-color: #E94560;
       background: rgba(233, 69, 96, 0.05);
     }
+    .hero-img {
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(1.02); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .cat-card:hover .cat-img {
+      transform: scale(1.05);
+    }
+    .cat-img {
+      transition: transform 0.4s ease;
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <!-- Header -->
-  <header class="bg-primary text-white py-8">
-    <div class="max-w-6xl mx-auto px-4">
-      <h1 class="text-4xl font-bold">PlacePix</h1>
-      <p class="text-gray-300 mt-2">Self-hosted placeholder image service — inspired by <a href="https://picsum.photos/" class="text-accent underline" target="_blank">picsum.photos</a> and <a href="https://lorem.space/" class="text-accent underline" target="_blank">lorem.space</a></p>
-      <p class="text-sm text-gray-400 mt-1">{{ total }} images loaded across {{ categories|length }} categories</p>
+  <!-- Navigation -->
+  <nav class="bg-primary text-white py-4">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center font-bold text-sm">PX</div>
+        <span class="font-bold text-xl tracking-tight">PlacePix</span>
+      </div>
+      <div class="flex items-center gap-6 text-sm">
+        <a href="#categories" class="text-gray-300 hover:text-white transition">Categories</a>
+        <a href="#upload" class="text-gray-300 hover:text-white transition">Upload</a>
+        <a href="#api" class="text-gray-300 hover:text-white transition">API</a>
+        <a href="/docs" target="_blank" class="bg-accent px-4 py-2 rounded-lg hover:bg-opacity-90 transition font-medium">Docs</a>
+      </div>
     </div>
-  </header>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative h-96 overflow-hidden">
+    <img src="/1200/400/{{ categories[0].name if categories else 'all' }}?seed=hero{{ range(1000,9999)|random }}" 
+         alt="Hero" class="w-full h-full object-cover hero-img">
+    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent"></div>
+    <div class="absolute bottom-0 left-0 right-0 p-8">
+      <div class="max-w-7xl mx-auto">
+        <h1 class="text-5xl font-bold text-white mb-3">PlacePix</h1>
+        <p class="text-gray-200 text-lg max-w-2xl">Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.</p>
+        <div class="flex gap-3 mt-5">
+          <a href="https://picsum.photos/" target="_blank" class="text-sm bg-white/10 backdrop-blur px-4 py-2 rounded-full text-white hover:bg-white/20 transition">picsum.photos &rarr;</a>
+          <a href="https://lorem.space/" target="_blank" class="text-sm bg-white/10 backdrop-blur px-4 py-2 rounded-full text-white hover:bg-white/20 transition">lorem.space &rarr;</a>
+        </div>
+        <p class="text-sm text-gray-400 mt-4">{{ total }} images across {{ categories|length }} categories</p>
+      </div>
+    </div>
+  </section>
 
   <!-- Upload Zone -->
-  <section class="max-w-6xl mx-auto px-4 py-6">
-    <div id="drop-zone" class="drop-zone rounded-lg p-8 text-center cursor-pointer bg-white">
-      <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-      </svg>
-      <p class="text-gray-600 font-medium">Drag & drop images here</p>
-      <p class="text-sm text-gray-400 mt-1">or click to browse</p>
+  <section id="upload" class="max-w-7xl mx-auto px-4 py-8">
+    <div id="drop-zone" class="drop-zone rounded-xl p-10 text-center cursor-pointer bg-white hover:shadow-md transition">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        </svg>
+      </div>
+      <p class="text-gray-700 font-semibold text-lg">Drag & drop images here</p>
+      <p class="text-sm text-gray-400 mt-1">or click to browse files</p>
       <input type="file" id="file-input" class="hidden" multiple accept="image/*">
-      <select id="upload-category" class="mt-3 border rounded px-3 py-1 text-sm">
-        <option value="">__root (no category)</option>
-        {% for cat in categories %}
-        <option value="{{ cat.name }}">{{ cat.display_name or cat.name }}</option>
-        {% endfor %}
-      </select>
+      <div class="mt-4 inline-flex items-center gap-2">
+        <label class="text-sm text-gray-500">Category:</label>
+        <select id="upload-category" class="border rounded-lg px-3 py-2 text-sm bg-gray-50 focus:ring-2 focus:ring-accent focus:border-accent">
+          <option value="">__root (no category)</option>
+          {% for cat in categories %}
+          <option value="{{ cat.name }}">{{ cat.display_name or cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
-    <div id="upload-status" class="mt-2 text-sm text-center hidden"></div>
+    <div id="upload-status" class="mt-3 text-sm text-center hidden font-medium"></div>
   </section>
 
   <!-- Categories -->
-  <section class="max-w-6xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <section id="categories" class="max-w-7xl mx-auto px-4 pb-12">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-800">Categories</h2>
+        <p class="text-gray-500 mt-1">Click any size to get a random image from that category</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       {% for cat in categories %}
-      <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
-        <div class="h-40 bg-gray-200 relative">
-          <img src="/400/300/{{ cat.name }}?seed=home" alt="{{ cat.display_name or cat.name }}" class="w-full h-full object-cover" loading="lazy">
-          <div class="absolute top-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded">{{ cat.count }} images</div>
+      <div class="cat-card bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer">
+        <div class="h-48 bg-gray-200 relative overflow-hidden">
+          <img src="/600/400/{{ cat.name }}?seed={{ range(1000,9999)|random }}" 
+               alt="{{ cat.display_name or cat.name }}" 
+               class="cat-img w-full h-full object-cover" loading="lazy">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="flex gap-2">
+              <a href="/200/200/{{ cat.name }}" class="text-xs bg-white/90 text-gray-800 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">200×200</a>
+              <a href="/400/300/{{ cat.name }}" class="text-xs bg-white/90 text-gray-800 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">400×300</a>
+              <a href="/800/600/{{ cat.name }}" class="text-xs bg-white/90 text-gray-800 px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition font-medium">800×600</a>
+            </div>
+          </div>
+          <div class="absolute top-3 right-3 bg-primary/90 backdrop-blur text-white text-xs px-2.5 py-1 rounded-full font-medium">{{ cat.count }}</div>
         </div>
         <div class="p-4">
-          <h3 class="font-bold text-lg text-gray-800">{{ cat.display_name or cat.name }}</h3>
+          <h3 class="font-bold text-lg text-gray-800 group-hover:text-accent transition-colors">{{ cat.display_name or cat.name }}</h3>
           {% if cat.description %}
-          <p class="text-sm text-gray-500 mt-1">{{ cat.description }}</p>
+          <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ cat.description }}</p>
           {% endif %}
           {% if cat.author %}
-          <p class="text-xs text-gray-400 mt-1">by {{ cat.author }}</p>
+          <p class="text-xs text-gray-400 mt-2">by {{ cat.author }}</p>
           {% endif %}
-          <div class="mt-3 flex gap-2">
-            <a href="/200/200/{{ cat.name }}" class="text-xs bg-secondary text-white px-3 py-1 rounded hover:bg-opacity-90">200×200</a>
-            <a href="/400/300/{{ cat.name }}" class="text-xs bg-secondary text-white px-3 py-1 rounded hover:bg-opacity-90">400×300</a>
-            <a href="/800/600/{{ cat.name }}" class="text-xs bg-secondary text-white px-3 py-1 rounded hover:bg-opacity-90">800×600</a>
+          {% if cat.tags %}
+          <div class="flex flex-wrap gap-1 mt-3">
+            {% for tag in cat.tags %}
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{{ tag }}</span>
+            {% endfor %}
           </div>
+          {% endif %}
         </div>
       </div>
       {% endfor %}
     </div>
   </section>
 
-  <!-- Usage -->
-  <section class="max-w-6xl mx-auto px-4 pb-12">
-    <div class="bg-primary rounded-lg p-6 text-white">
-      <h2 class="text-xl font-bold mb-4">API Usage</h2>
-      <div class="space-y-2 font-mono text-sm">
-        <p><span class="text-accent">GET</span> /{width}/{height}/{category} — random image from category</p>
-        <p><span class="text-accent">GET</span> /{width}/{height} — random image from all</p>
-        <p class="text-gray-300 pl-4">?grayscale=1 — grayscale</p>
-        <p class="text-gray-300 pl-4">?blur=2 — gaussian blur (1-10)</p>
-        <p class="text-gray-300 pl-4">?seed=abc — deterministic image</p>
-        <p class="text-gray-300 pl-4">?text=Hello — text overlay</p>
-        <p class="text-gray-300 pl-4">?fit=crop|scale|contain|cover — resize mode</p>
+  <!-- Random Showcase -->
+  <section class="max-w-7xl mx-auto px-4 pb-12">
+    <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-8 text-white">
+      <div class="flex flex-col md:flex-row gap-8 items-center">
+        <div class="flex-1">
+          <h2 class="text-2xl font-bold mb-3">Need a random image?</h2>
+          <p class="text-gray-300 mb-6">Grab any size from any category — or let PlacePix pick one for you.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/400/300" class="bg-white text-primary px-5 py-2.5 rounded-lg font-medium hover:bg-gray-100 transition">400 × 300</a>
+            <a href="/800/600" class="bg-white/10 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/20 transition">800 × 600</a>
+            <a href="/1920/1080" class="bg-white/10 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/20 transition">1920 × 1080</a>
+          </div>
+        </div>
+        <div class="w-full md:w-80">
+          <img src="/400/300/{{ categories[0].name if categories else 'all' }}?seed=showcase{{ range(1000,9999)|random }}" 
+               alt="Random" class="rounded-xl shadow-2xl w-full">
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- API Usage -->
+  <section id="api" class="max-w-7xl mx-auto px-4 pb-12">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">API Reference</h2>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+        <p class="text-sm text-gray-500">All endpoints support CORS and return images with long-term cache headers.</p>
+      </div>
+      <div class="divide-y divide-gray-100">
+        <div class="px-6 py-4 hover:bg-gray-50 transition">
+          <div class="flex items-center gap-3">
+            <span class="bg-accent text-white text-xs font-bold px-2 py-1 rounded">GET</span>
+            <code class="text-sm font-mono text-gray-800">/{width}/{height}/{category}</code>
+          </div>
+          <p class="text-sm text-gray-500 mt-1 pl-12">Random image from a category</p>
+        </div>
+        <div class="px-6 py-4 hover:bg-gray-50 transition">
+          <div class="flex items-center gap-3">
+            <span class="bg-accent text-white text-xs font-bold px-2 py-1 rounded">GET</span>
+            <code class="text-sm font-mono text-gray-800">/{width}/{height}</code>
+          </div>
+          <p class="text-sm text-gray-500 mt-1 pl-12">Random image from all categories</p>
+        </div>
+        <div class="px-6 py-4 bg-gray-50/50">
+          <p class="text-sm font-semibold text-gray-700 mb-2">Query Parameters</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+            <div class="flex gap-2"><code class="text-accent font-mono">?grayscale=1</code><span class="text-gray-500">Grayscale</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?blur=2</code><span class="text-gray-500">Gaussian blur (1-10)</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?seed=abc</code><span class="text-gray-500">Deterministic image</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?text=Hello</code><span class="text-gray-500">Text overlay</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">?fit=crop</code><span class="text-gray-500">Resize mode</span></div>
+            <div class="flex gap-2"><code class="text-accent font-mono">.webp</code><span class="text-gray-500">Format override</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-primary text-white py-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <p class="text-gray-400 text-sm">PlacePix — open-source placeholder image service</p>
+      <p class="text-gray-500 text-xs mt-1">Inspired by <a href="https://picsum.photos/" class="text-accent hover:underline" target="_blank">picsum.photos</a> and <a href="https://lorem.space/" class="text-accent hover:underline" target="_blank">lorem.space</a></p>
+    </div>
+  </footer>
 
   <script>
     const dropZone = document.getElementById('drop-zone');
@@ -127,6 +237,7 @@
       if (!files.length) return;
       statusEl.classList.remove('hidden');
       statusEl.textContent = `Uploading ${files.length} file(s)...`;
+      statusEl.className = 'mt-3 text-sm text-center font-medium text-gray-600';
 
       let uploaded = 0;
       const category = categorySelect.value;
@@ -145,6 +256,7 @@
       }
 
       statusEl.textContent = `Uploaded ${uploaded}/${files.length} files. Reloading...`;
+      statusEl.className = 'mt-3 text-sm text-center font-medium text-accent';
       setTimeout(() => location.reload(), 1000);
     }
   </script>
