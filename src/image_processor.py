@@ -3,7 +3,8 @@ from __future__ import annotations
 import io
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+import numpy as np
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
 try:
     import pillow_avif  # noqa: F401
@@ -47,6 +48,12 @@ class ImageProcessor:
         contrast: float = 1.0,
         saturation: float = 1.0,
         sepia: bool = False,
+        border: str = "",
+        padding: int = 0,
+        noise: int = 0,
+        pixelate: int = 0,
+        quality: int = 85,
+        lqip: bool = False,
     ) -> bytes:
         with Image.open(image_path) as img:
             img = img.convert("RGB")
@@ -75,22 +82,44 @@ class ImageProcessor:
             if width > 0 or height > 0:
                 w, h = self.clamp_size(width, height)
                 img = self._resize(img, w, h, fit)
+            
+            # Apply pixelate effect
+            if pixelate > 1:
+                img = self._apply_pixelate(img, pixelate)
+            
+            # Apply noise/grain effect
+            if noise > 0:
+                img = self._apply_noise(img, noise)
+            
+            # Apply padding
+            if padding > 0:
+                img = ImageOps.expand(img, border=padding, fill=(255, 255, 255))
+            
+            # Apply border
+            if border:
+                img = self._apply_border(img, border)
+            
+            # Generate LQIP if requested
+            if lqip:
+                img = self._generate_lqip(img)
 
             if text:
                 img = self._add_text(img, text)
 
             buffer = io.BytesIO()
             fmt = self._normalize_format(output_format)
+            # Clamp quality to valid range
+            quality = max(1, min(quality, 100))
             if fmt == "jpeg":
-                img.save(buffer, format="JPEG", quality=85, optimize=True, progressive=True)
+                img.save(buffer, format="JPEG", quality=quality, optimize=True, progressive=True)
             elif fmt == "png":
                 img.save(buffer, format="PNG", optimize=True)
             elif fmt == "webp":
-                img.save(buffer, format="WEBP", quality=85, method=6)
+                img.save(buffer, format="WEBP", quality=quality, method=6)
             elif fmt == "avif":
-                img.save(buffer, format="AVIF", quality=85)
+                img.save(buffer, format="AVIF", quality=quality)
             else:
-                img.save(buffer, format="JPEG", quality=85, progressive=True)
+                img.save(buffer, format="JPEG", quality=quality, progressive=True)
 
             return buffer.getvalue()
 
@@ -211,3 +240,66 @@ class ImageProcessor:
         if fmt == "avif":
             return "avif"
         return "jpeg"
+    
+    def _apply_border(self, img: Image.Image, border_spec: str) -> Image.Image:
+        """Apply border to image. Format: 'width' or 'width,color'."""
+        parts = border_spec.split(",")
+        try:
+            width = int(parts[0])
+        except (ValueError, IndexError):
+            return img
+        
+        # Parse color if provided
+        color = (0, 0, 0)  # Default black
+        if len(parts) > 1:
+            h = parts[1].lstrip("#")
+            if len(h) == 3:
+                h = "".join(c * 2 for c in h)
+            if len(h) == 6 and all(c in "0123456789abcdefABCDEF" for c in h):
+                color = (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+        
+        return ImageOps.expand(img, border=width, fill=color)
+    
+    def _apply_noise(self, img: Image.Image, amount: int) -> Image.Image:
+        """Apply noise/grain effect to image."""
+        # Clamp amount to 0-100
+        amount = max(0, min(amount, 100))
+        if amount == 0:
+            return img
+        
+        # Convert to numpy array
+        img_array = np.array(img)
+        
+        # Generate noise
+        noise_strength = amount / 100.0 * 50  # Scale to reasonable range
+        noise = np.random.normal(0, noise_strength, img_array.shape).astype(np.int16)
+        
+        # Add noise and clip to valid range
+        noisy = np.clip(img_array.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+        
+        return Image.fromarray(noisy)
+    
+    def _apply_pixelate(self, img: Image.Image, pixel_size: int) -> Image.Image:
+        """Apply pixelate/mosaic effect."""
+        if pixel_size <= 1:
+            return img
+        
+        # Downscale
+        small_width = max(1, img.width // pixel_size)
+        small_height = max(1, img.height // pixel_size)
+        small = img.resize((small_width, small_height), Image.Resampling.NEAREST)
+        
+        # Upscale back with nearest neighbor
+        return small.resize((img.width, img.height), Image.Resampling.NEAREST)
+    
+    def _generate_lqip(self, img: Image.Image) -> Image.Image:
+        """Generate Low Quality Image Placeholder."""
+        # Resize to very small (10% of original or 20x20, whichever is larger)
+        target_width = max(20, img.width // 10)
+        target_height = max(20, img.height // 10)
+        
+        # Resize and apply heavy blur
+        lqip = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+        lqip = lqip.filter(ImageFilter.GaussianBlur(radius=10))
+        
+        return lqip

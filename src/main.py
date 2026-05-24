@@ -251,6 +251,12 @@ def _serve_entry(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    border: str = "",
+    padding: int = 0,
+    noise: int = 0,
+    pixelate: int = 0,
+    quality: int = 85,
+    lqip: bool = False,
     if_none_match: str | None = None,
     if_modified_since: str | None = None,
     is_random: bool = False,
@@ -319,6 +325,12 @@ def _serve_entry(
         contrast=contrast,
         saturation=saturation,
         sepia=sepia,
+        border=border,
+        padding=padding,
+        noise=noise,
+        pixelate=pixelate,
+        quality=quality,
+        lqip=lqip,
     )
 
     # Cache if enabled
@@ -370,6 +382,12 @@ async def serve_by_id(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    border: str = "",
+    padding: int = 0,
+    noise: int = 0,
+    pixelate: int = 0,
+    quality: int = 85,
+    lqip: bool = False,
     if_none_match: str | None = Header(default=None),
     if_modified_since: str | None = Header(default=None),
 ) -> Response:
@@ -379,6 +397,7 @@ async def serve_by_id(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        border, padding, noise, pixelate, quality, lqip,
         if_none_match, if_modified_since, is_random=False,
     )
 
