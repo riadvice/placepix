@@ -283,6 +283,15 @@ async def image_info(category: str, filename: str) -> JSONResponse:
     })
 
 
+# ── Favicon ───────────────────────────────────────────────────────
+@app.get("/favicon.svg")
+async def favicon() -> Response:
+    svg_path = Path("static/logo.svg")
+    if svg_path.exists():
+        return Response(content=svg_path.read_bytes(), media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="favicon not found")
+
+
 # ── Image Explorer ────────────────────────────────────────────────
 @app.get("/images")
 async def image_explorer(page: int = 1) -> Response:
@@ -326,15 +335,23 @@ async def image_explorer(page: int = 1) -> Response:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlacePix Image Explorer</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
-        :root {{ --bg: #111; --card: #1a1a1a; --text: #e0e0e0; --muted: #888; --accent: #4ea1f3; }}
+        :root {{ --bg: #f8fafc; --card: #fff; --text: #1e293b; --muted: #64748b; --accent: #3b82f6; --border: #e2e8f0; }}
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding: 2rem; }}
-        h1 {{ text-align: center; margin-bottom: 0.5rem; }}
-        .subtitle {{ text-align: center; color: var(--muted); margin-bottom: 2rem; }}
-        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; max-width: 1400px; margin: 0 auto; }}
-        .card {{ background: var(--card); border-radius: 10px; overflow: hidden; transition: transform .15s; }}
-        .card:hover {{ transform: translateY(-3px); }}
+        body {{ background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding-bottom: 2rem; }}
+        nav {{ display: flex; align-items: center; justify-content: space-between; max-width: 1400px; margin: 0 auto; padding: .75rem 1.5rem; }}
+        .logo {{ display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--text); }}
+        .logo img {{ width: 28px; height: 28px; }}
+        .logo span {{ font-weight: 700; font-size: 1.1rem; }}
+        .nav-links {{ display: flex; gap: 1.25rem; font-size: .9rem; }}
+        .nav-links a {{ color: var(--muted); text-decoration: none; }}
+        .nav-links a:hover {{ color: var(--accent); }}
+        h1 {{ text-align: center; margin-bottom: .25rem; font-size: 1.75rem; }}
+        .subtitle {{ text-align: center; color: var(--muted); margin-bottom: 1.5rem; font-size: .95rem; }}
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }}
+        .card {{ background: var(--card); border-radius: 12px; overflow: hidden; transition: transform .15s, box-shadow .15s; border: 1px solid var(--border); }}
+        .card:hover {{ transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }}
         .card img {{ width: 100%; height: 150px; object-fit: cover; display: block; }}
         .info {{ padding: .75rem 1rem; }}
         .id {{ font-weight: 600; font-size: 1rem; margin-bottom: .25rem; }}
@@ -344,14 +361,22 @@ async def image_explorer(page: int = 1) -> Response:
         .links {{ display: flex; gap: .75rem; font-size: .85rem; }}
         .links a {{ color: var(--accent); text-decoration: none; }}
         .links a:hover {{ text-decoration: underline; }}
-        .pager {{ display: flex; justify-content: center; align-items: center; gap: .4rem; margin-top: 2.5rem; flex-wrap: wrap; }}
-        .page-link {{ display: inline-block; padding: .4rem .8rem; border-radius: 6px; background: var(--card); color: var(--text); text-decoration: none; font-size: .9rem; min-width: 2.2rem; text-align: center; }}
-        .page-link.active {{ background: var(--accent); color: #fff; }}
+        .pager {{ display: flex; justify-content: center; align-items: center; gap: .4rem; margin-top: 2.5rem; flex-wrap: wrap; padding: 0 1rem; }}
+        .page-link {{ display: inline-block; padding: .4rem .8rem; border-radius: 8px; background: var(--card); color: var(--text); text-decoration: none; font-size: .9rem; min-width: 2.2rem; text-align: center; border: 1px solid var(--border); }}
+        .page-link.active {{ background: var(--accent); color: #fff; border-color: var(--accent); }}
         .page-link.disabled {{ color: var(--muted); cursor: default; }}
     </style>
 </head>
 <body>
-    <h1>PlacePix Image Explorer</h1>
+    <nav>
+        <a href="/" class="logo"><img src="/static/logo.svg" alt=""><span>PlacePix</span></a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/images">Explorer</a>
+            <a href="/docs" target="_blank">Docs</a>
+        </div>
+    </nav>
+    <h1>Image Explorer</h1>
     <p class="subtitle">{total} images &mdash; Page {page} of {total_pages}</p>
     <div class="grid">{cards}</div>
     <div class="pager">{prev_link}{page_numbers}{next_link}</div>

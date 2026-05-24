@@ -4,15 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PlacePix — Placeholder Image Service</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            primary: '#1A1A2E',
-            accent: '#E94560',
-            secondary: '#0F3460',
+            primary: '#0f172a',
+            accent: '#3b82f6',
+            secondary: '#64748b',
+            surface: '#ffffff',
+            muted: '#f8fafc',
           }
         }
       }
@@ -44,36 +47,36 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
   <!-- Navigation -->
-  <nav class="bg-primary text-white py-4">
-    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+  <nav class="bg-white/80 backdrop-blur border-b border-slate-200/60 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center font-bold text-sm">PX</div>
-        <span class="font-bold text-xl tracking-tight">PlacePix</span>
+        <img src="/static/logo.svg" alt="PlacePix" class="w-8 h-8">
+        <span class="font-bold text-xl tracking-tight text-slate-800">PlacePix</span>
       </div>
       <div class="flex items-center gap-6 text-sm">
-        <a href="#categories" class="text-gray-300 hover:text-white transition">Categories</a>
-        <a href="/images" class="text-gray-300 hover:text-white transition">Explorer</a>
-        <a href="#upload" class="text-gray-300 hover:text-white transition">Upload</a>
-        <a href="#api" class="text-gray-300 hover:text-white transition">API</a>
-        <a href="/docs" target="_blank" class="bg-accent px-4 py-2 rounded-lg hover:bg-opacity-90 transition font-medium">Docs</a>
+        <a href="#categories" class="text-slate-500 hover:text-accent transition">Categories</a>
+        <a href="/images" class="text-slate-500 hover:text-accent transition">Explorer</a>
+        <a href="#upload" class="text-slate-500 hover:text-accent transition">Upload</a>
+        <a href="#api" class="text-slate-500 hover:text-accent transition">API</a>
+        <a href="/docs" target="_blank" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium shadow-sm">Docs</a>
       </div>
     </div>
   </nav>
 
   <!-- Hero -->
-  <section class="relative h-96 overflow-hidden">
-    <img src="/1200/400/{{ categories[0].name if categories else 'all' }}?seed=hero{{ range(1000,9999)|random }}" 
-         alt="Hero" class="w-full h-full object-cover hero-img">
-    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent"></div>
+  <section class="relative h-96 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900">
+    <img src="/1200/400/{{ categories[0].name if categories else 'all' }}?seed=hero{{ range(1000,9999)|random }}"
+         alt="Hero" class="absolute inset-0 w-full h-full object-cover opacity-20">
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent"></div>
     <div class="absolute bottom-0 left-0 right-0 p-8">
       <div class="max-w-7xl mx-auto">
         <h1 class="text-5xl font-bold text-white mb-3">PlacePix</h1>
-        <p class="text-gray-200 text-lg max-w-2xl">Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.</p>
+        <p class="text-slate-200 text-lg max-w-2xl">Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.</p>
         <div class="flex gap-3 mt-5">
           <a href="https://picsum.photos/" target="_blank" class="text-sm bg-white/10 backdrop-blur px-4 py-2 rounded-full text-white hover:bg-white/20 transition">picsum.photos &rarr;</a>
           <a href="https://lorem.space/" target="_blank" class="text-sm bg-white/10 backdrop-blur px-4 py-2 rounded-full text-white hover:bg-white/20 transition">lorem.space &rarr;</a>
         </div>
-        <p class="text-sm text-gray-400 mt-4">{{ total }} images across {{ categories|length }} categories</p>
+        <p class="text-sm text-slate-400 mt-4">{{ total }} images across {{ categories|length }} categories</p>
       </div>
     </div>
   </section>
@@ -150,19 +153,19 @@
 
   <!-- Random Showcase -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-8 text-white">
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-lg">
       <div class="flex flex-col md:flex-row gap-8 items-center">
         <div class="flex-1">
           <h2 class="text-2xl font-bold mb-3">Need a random image?</h2>
-          <p class="text-gray-300 mb-6">Grab any size from any category — or let PlacePix pick one for you.</p>
+          <p class="text-blue-100 mb-6">Grab any size from any category — or let PlacePix pick one for you.</p>
           <div class="flex flex-wrap gap-3">
-            <a href="/400/300" class="bg-white text-primary px-5 py-2.5 rounded-lg font-medium hover:bg-gray-100 transition">400 × 300</a>
-            <a href="/800/600" class="bg-white/10 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/20 transition">800 × 600</a>
-            <a href="/1920/1080" class="bg-white/10 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/20 transition">1920 × 1080</a>
+            <a href="/400/300" class="bg-white text-blue-600 px-5 py-2.5 rounded-lg font-medium hover:bg-blue-50 transition shadow-sm">400 × 300</a>
+            <a href="/800/600" class="bg-white/15 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/25 transition">800 × 600</a>
+            <a href="/1920/1080" class="bg-white/15 backdrop-blur px-5 py-2.5 rounded-lg font-medium hover:bg-white/25 transition">1920 × 1080</a>
           </div>
         </div>
         <div class="w-full md:w-80">
-          <img src="/400/300/{{ categories[0].name if categories else 'all' }}?seed=showcase{{ range(1000,9999)|random }}" 
+          <img src="/400/300/{{ categories[0].name if categories else 'all' }}?seed=showcase{{ range(1000,9999)|random }}"
                alt="Random" class="rounded-xl shadow-2xl w-full">
         </div>
       </div>
@@ -207,10 +210,10 @@
   </section>
 
   <!-- Footer -->
-  <footer class="bg-primary text-white py-8 mt-auto">
+  <footer class="bg-slate-900 text-white py-8 mt-auto">
     <div class="max-w-7xl mx-auto px-4 text-center">
-      <p class="text-gray-400 text-sm">PlacePix — open-source placeholder image service</p>
-      <p class="text-gray-500 text-xs mt-1">Inspired by <a href="https://picsum.photos/" class="text-accent hover:underline" target="_blank">picsum.photos</a> and <a href="https://lorem.space/" class="text-accent hover:underline" target="_blank">lorem.space</a></p>
+      <p class="text-slate-400 text-sm">PlacePix — open-source placeholder image service</p>
+      <p class="text-slate-500 text-xs mt-1">Inspired by <a href="https://picsum.photos/" class="text-blue-400 hover:underline" target="_blank">picsum.photos</a> and <a href="https://lorem.space/" class="text-blue-400 hover:underline" target="_blank">lorem.space</a></p>
     </div>
   </footer>
 
