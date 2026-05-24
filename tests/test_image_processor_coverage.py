@@ -238,3 +238,448 @@ def test_process_with_invalid_image_path():
     processor = ImageProcessor()
     with pytest.raises(Exception):
         processor.process(Path("/nonexistent/image.jpg"), width=400, height=300)
+
+
+def test_avif_import_failure(monkeypatch):
+    """Test when pillow_avif import fails."""
+    import src.image_processor
+    original_avif = src.image_processor._AVIF_AVAILABLE
+    monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", False)
+    
+    # Should still work, just fallback
+    assert src.image_processor._AVIF_AVAILABLE == False
+    monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", original_avif)
+
+
+def test_opencv_import_failure(monkeypatch):
+    """Test when opencv import fails."""
+    import src.image_processor
+    original_opencv = src.image_processor._OPENCV_AVAILABLE
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", False)
+    
+    # Should still work, just fallback
+    assert src.image_processor._OPENCV_AVAILABLE == False
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
+
+
+def test_pixelate_size_one(complex_image):
+    """Test pixelate with size 1 (no effect)."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        result = processor._apply_pixelate(img, 1)
+        assert result.size == img.size
+
+
+def test_noise_amount_zero(complex_image):
+    """Test noise with amount 0 (no effect)."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        result = processor._apply_noise(img, 0)
+        assert result.size == img.size
+
+
+def test_watermark_convert_to_rgba(complex_image):
+    """Test watermark conversion to RGBA when not already RGBA."""
+    processor = ImageProcessor()
+    config = {
+        "watermark_text": "Test",
+        "watermark_position": "center",
+        "watermark_opacity": 0.5,
+    }
+    result = processor.process(
+        complex_image, width=400, height=300, watermark="center", watermark_config=config
+    )
+    assert isinstance(result, bytes)
+
+
+def test_resize_zero_dimensions(complex_image):
+    """Test resize with both width and height as 0 (no resize)."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        result = processor._resize(img, 0, 0, "crop")
+        assert result.size == img.size
+
+
+def test_watermark_invalid_image_path(complex_image):
+    """Test watermark with invalid image path falls back to text."""
+    processor = ImageProcessor()
+    config = {
+        "watermark_image": "/nonexistent/watermark.png",
+        "watermark_text": "Fallback Text",
+        "watermark_position": "bottom-right",
+        "watermark_opacity": 0.5,
+    }
+    result = processor.process(
+        complex_image, width=400, height=300, watermark="bottom-right", watermark_config=config
+    )
+    assert isinstance(result, bytes)
+
+
+def test_watermark_no_image_no_text(complex_image):
+    """Test watermark with no image and no text returns original image."""
+    processor = ImageProcessor()
+    config = {
+        "watermark_image": "",
+        "watermark_text": "",
+        "watermark_position": "bottom-right",
+        "watermark_opacity": 0.5,
+    }
+    result = processor.process(
+        complex_image, width=400, height=300, watermark="bottom-right", watermark_config=config
+    )
+    assert isinstance(result, bytes)
+
+
+def test_watermark_position_default(complex_image):
+    """Test watermark with invalid position uses default."""
+    processor = ImageProcessor()
+    config = {
+        "watermark_text": "Test",
+        "watermark_position": "bottom-right",
+        "watermark_opacity": 0.5,
+    }
+    result = processor.process(
+        complex_image, width=400, height=300, watermark="invalid-position", watermark_config=config
+    )
+    assert isinstance(result, bytes)
+
+
+def test_border_invalid_width(complex_image):
+    """Test border with invalid width."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        img = img.convert("RGB")
+        result = processor._apply_border(img, "abc")
+        assert result.size == img.size
+
+
+def test_border_empty_string(complex_image):
+    """Test border with empty string."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        img = img.convert("RGB")
+        result = processor._apply_border(img, "")
+        assert result.size == img.size
+
+
+def test_process_png_format(complex_image):
+    """Test PNG format processing."""
+    processor = ImageProcessor()
+    result = processor.process(complex_image, width=400, height=300, output_format="png")
+    assert isinstance(result, bytes)
+
+
+def test_process_webp_format(complex_image):
+    """Test WebP format processing."""
+    processor = ImageProcessor()
+    result = processor.process(complex_image, width=400, height=300, output_format="webp")
+    assert isinstance(result, bytes)
+
+
+def test_process_quality_clamping(complex_image):
+    """Test quality clamping to valid range."""
+    processor = ImageProcessor()
+    # Test quality below 1
+    result = processor.process(complex_image, width=400, height=300, quality=-10)
+    assert isinstance(result, bytes)
+    # Test quality above 100
+    result = processor.process(complex_image, width=400, height=300, quality=150)
+    assert isinstance(result, bytes)
+
+
+def test_resize_default_case(complex_image):
+    """Test resize with invalid fit mode uses default crop."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        result = processor._resize(img, 400, 300, "invalid")
+        assert result.size == (400, 300)
+
+
+def test_tint_3digit_hex(complex_image):
+    """Test tint with 3-digit hex color."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        img = img.convert("RGB")
+        result = processor._apply_tint(img, "f00")
+        assert result.size == img.size
+
+
+def test_border_3digit_hex(complex_image):
+    """Test border with 3-digit hex color."""
+    processor = ImageProcessor()
+    with Image.open(complex_image) as img:
+        img = img.convert("RGB")
+        result = processor._apply_border(img, "5,f00")
+        # Border adds to image size (5px on each side = 10px total)
+        assert result.size == (img.width + 10, img.height + 10)
+
+
+def test_watermark_position_from_config(complex_image):
+    """Test watermark uses position from config when position is 'true'."""
+    processor = ImageProcessor()
+    config = {
+        "watermark_text": "Test",
+        "watermark_position": "top-left",
+        "watermark_opacity": 0.5,
+    }
+    result = processor.process(
+        complex_image, width=400, height=300, watermark="true", watermark_config=config
+    )
+    assert isinstance(result, bytes)
+
+
+def test_smart_crop_opencv_error(complex_image, monkeypatch):
+    """Test smart crop when opencv cascade loading fails."""
+    import src.image_processor
+    original_opencv = src.image_processor._OPENCV_AVAILABLE
+    
+    # Mock OpenCV as available but cascade loading fails
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
+    
+    # Mock cv2 to raise exception on cascade load
+    import cv2
+    original_cascade = cv2.CascadeClassifier
+    def failing_cascade(*args, **kwargs):
+        raise Exception("Cascade load failed")
+    monkeypatch.setattr(cv2, "CascadeClassifier", failing_cascade)
+    
+    processor = ImageProcessor()
+    result = processor.process(complex_image, width=400, height=300, fit="smart")
+    assert isinstance(result, bytes)
+    
+    # Restore
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
+    monkeypatch.setattr(cv2, "CascadeClassifier", original_cascade)
+
+
+def test_smart_crop_no_faces_detected(complex_image, monkeypatch):
+    """Test smart crop when no faces are detected."""
+    import src.image_processor
+    import cv2
+    import numpy as np
+    
+    original_opencv = src.image_processor._OPENCV_AVAILABLE
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
+    
+    # Mock detectMultiScale to return empty array
+    original_detect = cv2.CascadeClassifier.detectMultiScale
+    def empty_detect(self, *args, **kwargs):
+        return np.array([])
+    monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", empty_detect)
+    
+    processor = ImageProcessor()
+    result = processor.process(complex_image, width=400, height=300, fit="smart")
+    assert isinstance(result, bytes)
+    
+    # Restore
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
+    monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", original_detect)
+
+
+def test_smart_crop_with_faces(complex_image, monkeypatch):
+    """Test smart crop when faces are detected."""
+    import src.image_processor
+    import cv2
+    import numpy as np
+
+    original_opencv = src.image_processor._OPENCV_AVAILABLE
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
+
+    # Mock detectMultiScale to return faces
+    original_detect = cv2.CascadeClassifier.detectMultiScale
+    def faces_detect(self, *args, **kwargs):
+        return np.array([[100, 100, 50, 50], [200, 150, 60, 60]])
+    monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", faces_detect)
+
+    processor = ImageProcessor()
+    result = processor.process(complex_image, width=400, height=300, fit="smart")
+    assert isinstance(result, bytes)
+
+    # Restore
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
+    monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", original_detect)
+
+
+def test_smart_crop_taller_than_wide(complex_image, monkeypatch):
+    """Test smart crop when current ratio is taller than target."""
+    import src.image_processor
+    import cv2
+    import numpy as np
+
+    original_opencv = src.image_processor._OPENCV_AVAILABLE
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
+
+    # Mock detectMultiScale to return faces that create tall aspect ratio
+    original_detect = cv2.CascadeClassifier.detectMultiScale
+    def tall_faces_detect(self, *args, **kwargs):
+        return np.array([[100, 100, 50, 200]])
+    monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", tall_faces_detect)
+
+    processor = ImageProcessor()
+    result = processor.process(complex_image, width=400, height=300, fit="smart")
+    assert isinstance(result, bytes)
+
+    # Restore
+    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
+    monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", original_detect)
+
+
+def test_add_text_font_exception(complex_image, monkeypatch):
+    """Test text overlay when font loading fails."""
+    import PIL.ImageFont
+    from PIL import ImageFont
+
+    original_truetype = PIL.ImageFont.truetype
+    original_load_default = PIL.ImageFont.load_default
+
+    def failing_truetype(*args, **kwargs):
+        raise Exception("Font not found")
+
+    # Create a mock font
+    mock_font = ImageFont.load_default()
+
+    monkeypatch.setattr(PIL.ImageFont, "truetype", failing_truetype)
+    monkeypatch.setattr(PIL.ImageFont, "load_default", lambda: mock_font)
+
+    processor = ImageProcessor()
+    result = processor.process(complex_image, width=400, height=300, text="Test")
+    assert isinstance(result, bytes)
+
+    # Restore
+    monkeypatch.setattr(PIL.ImageFont, "truetype", original_truetype)
+    monkeypatch.setattr(PIL.ImageFont, "load_default", original_load_default)
+
+
+def test_watermark_font_exception(complex_image, monkeypatch):
+    """Test watermark text when font loading fails."""
+    import PIL.ImageFont
+    from PIL import ImageFont
+
+    original_truetype = PIL.ImageFont.truetype
+    original_load_default = PIL.ImageFont.load_default
+
+    def failing_truetype(*args, **kwargs):
+        raise Exception("Font not found")
+
+    # Create a mock font
+    mock_font = ImageFont.load_default()
+
+    monkeypatch.setattr(PIL.ImageFont, "truetype", failing_truetype)
+    monkeypatch.setattr(PIL.ImageFont, "load_default", lambda: mock_font)
+
+    processor = ImageProcessor()
+    config = {
+        "watermark_text": "Test",
+        "watermark_position": "bottom-right",
+        "watermark_opacity": 0.5,
+    }
+    result = processor.process(
+        complex_image, width=400, height=300, watermark="bottom-right", watermark_config=config
+    )
+    assert isinstance(result, bytes)
+
+    # Restore
+    monkeypatch.setattr(PIL.ImageFont, "truetype", original_truetype)
+    monkeypatch.setattr(PIL.ImageFont, "load_default", original_load_default)
+
+
+def test_watermark_rgba_conversion(complex_image):
+    """Test watermark conversion to RGBA."""
+    processor = ImageProcessor()
+    # Create a non-RGBA watermark image
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as wm:
+        wm_img = Image.new("RGB", (100, 100), color=(255, 255, 255))
+        wm_img.save(wm.name)
+        wm_path = Path(wm.name)
+
+    try:
+        config = {
+            "watermark_image": str(wm_path),
+            "watermark_position": "center",
+            "watermark_opacity": 0.5,
+        }
+        result = processor.process(
+            complex_image, width=400, height=300, watermark="center", watermark_config=config
+        )
+        assert isinstance(result, bytes)
+    finally:
+        wm_path.unlink()
+
+
+def test_watermark_nonexistent_image_with_text(complex_image):
+    """Test watermark with non-existent image path falls back to text."""
+    processor = ImageProcessor()
+    config = {
+        "watermark_image": "/nonexistent/path/watermark.png",
+        "watermark_text": "Fallback Text",
+        "watermark_position": "bottom-right",
+        "watermark_opacity": 0.5,
+    }
+    result = processor.process(
+        complex_image, width=400, height=300, watermark="bottom-right", watermark_config=config
+    )
+    assert isinstance(result, bytes)
+
+
+def test_watermark_image_load_exception_with_mock(complex_image, monkeypatch):
+    """Test watermark image load exception by mocking Path.exists and Image.open."""
+    from pathlib import Path
+    from PIL import Image
+
+    # Create a real file that exists
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as wm:
+        # Write invalid image data
+        wm.write(b"invalid image data")
+        wm_path = Path(wm.name)
+
+    try:
+        # Mock Image.open to raise exception for this specific path
+        original_open = Image.open
+        def selective_open(path, *args, **kwargs):
+            if str(path) == str(wm_path):
+                raise Exception("Invalid image data")
+            return original_open(path, *args, **kwargs)
+
+        monkeypatch.setattr(Image, "open", selective_open)
+
+        processor = ImageProcessor()
+        config = {
+            "watermark_image": str(wm_path),
+            "watermark_text": "Fallback",
+            "watermark_position": "bottom-right",
+            "watermark_opacity": 0.5,
+        }
+        result = processor.process(
+            complex_image, width=400, height=300, watermark="bottom-right", watermark_config=config
+        )
+        assert isinstance(result, bytes)
+
+        # Restore
+        monkeypatch.setattr(Image, "open", original_open)
+    finally:
+        wm_path.unlink()
+
+
+def test_watermark_same_size_non_rgba(complex_image):
+    """Test watermark RGBA conversion when watermark size equals image size (line 435)."""
+    processor = ImageProcessor()
+    # Create a watermark that's the same size as the processed image (400x300)
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as wm:
+        wm_img = Image.new("RGB", (400, 300), color=(255, 255, 255))
+        wm_img.save(wm.name)
+        wm_path = Path(wm.name)
+
+    try:
+        config = {
+            "watermark_image": str(wm_path),
+            "watermark_position": "center",
+            "watermark_opacity": 0.5,
+        }
+        result = processor.process(
+            complex_image, width=400, height=300, watermark="center", watermark_config=config
+        )
+        assert isinstance(result, bytes)
+    finally:
+        wm_path.unlink()
+
+
