@@ -178,6 +178,51 @@ async def serve_by_id(
     return _serve_entry(entry, width, height, ext, grayscale, blur, text, fit, format)
 
 
+@app.get("/svg/{width:int}/{height:int}")
+async def svg_placeholder(
+    width: int,
+    height: int,
+    bg: str = "ccc",
+    fg: str = "fff",
+    text: str = "",
+) -> Response:
+    """Return a lightweight SVG placeholder — zero Pillow processing."""
+    # Clamp to sane limits
+    width = max(1, min(width, 5000))
+    height = max(1, min(height, 5000))
+
+    display_text = text or f"{width}x{height}"
+
+    # Sanitize hex colors (allow 3, 4, 6, 8 digit hex)
+    def _clean_hex(raw: str, fallback: str) -> str:
+        h = raw.lstrip("#")
+        if all(c in "0123456789abcdefABCDEF" for c in h) and len(h) in (3, 4, 6, 8):
+            return f"#{h}"
+        return fallback
+
+    bg_color = _clean_hex(bg, "#ccc")
+    fg_color = _clean_hex(fg, "#fff")
+
+    # Pick font size proportional to the smaller dimension
+    font_size = min(width, height) // 8
+    font_size = max(10, min(font_size, 120))
+
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
+  <rect width="100%" height="100%" fill="{bg_color}"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+        fill="{fg_color}" font-family="system-ui, -apple-system, sans-serif"
+        font-size="{font_size}px" font-weight="500">{display_text}</text>
+</svg>"""
+
+    return Response(
+        content=svg,
+        media_type="image/svg+xml",
+        headers={
+            "Cache-Control": "public, max-age=2592000, stale-while-revalidate=60, immutable",
+        },
+    )
+
+
 @app.get("/{width:int}/{height:int}/{category}")
 @app.get("/{width:int}/{height:int}/{category}.{ext}")
 @app.get("/{width:int}/{height:int}/")
