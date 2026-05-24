@@ -231,8 +231,12 @@ class ImageManager:
 
     def _rescan(self) -> None:
         images_dir = settings.images_dir
+        seed_dir = settings.seed_dir
+        
         if not images_dir.exists():
             images_dir.mkdir(parents=True)
+        if not seed_dir.exists():
+            seed_dir.mkdir(parents=True)
 
         manifest = self._load_manifest()
         next_id = max(manifest.values(), default=0) + 1
@@ -240,40 +244,46 @@ class ImageManager:
         new_categories: dict[str, Category] = {}
         total = 0
 
-        for item in images_dir.iterdir():
-            if item.name.startswith(".") or item.name in self.IGNORE_FILES:
-                continue
+        # Scan both images_dir and seed_dir
+        for scan_dir in [images_dir, seed_dir]:
+            for item in scan_dir.iterdir():
+                if item.name.startswith(".") or item.name in self.IGNORE_FILES:
+                    continue
 
-            if item.is_dir():
-                entries, meta, next_id = self._scan_subdir(item, manifest, next_id)
-                if entries:
-                    new_categories[item.name] = Category(
-                        name=item.name,
-                        meta=meta,
-                        entries=entries,
-                    )
-                    total += len(entries)
-            elif item.suffix.lower() in self.VALID_EXTS:
-                root = new_categories.get(self.ROOT_KEY)
-                if root is None:
-                    meta = self._read_meta(images_dir)
-                    new_categories[self.ROOT_KEY] = Category(
-                        name=self.ROOT_KEY,
-                        meta=meta,
-                        entries=[],
-                    )
-                    root = new_categories[self.ROOT_KEY]
-                key = f"{self.ROOT_KEY}/{item.name}"
-                if key not in manifest:
-                    manifest[key] = next_id
-                    next_id += 1
-                root.entries.append(ImageEntry(
-                    path=item,
-                    filename=item.name,
-                    category=self.ROOT_KEY,
-                    id=manifest[key],
-                ))
-                total += 1
+                if item.is_dir():
+                    entries, meta, next_id = self._scan_subdir(item, manifest, next_id)
+                    if entries:
+                        if item.name in new_categories:
+                            # Merge entries if category already exists
+                            new_categories[item.name].entries.extend(entries)
+                        else:
+                            new_categories[item.name] = Category(
+                                name=item.name,
+                                meta=meta,
+                                entries=entries,
+                            )
+                        total += len(entries)
+                elif item.suffix.lower() in self.VALID_EXTS:
+                    root = new_categories.get(self.ROOT_KEY)
+                    if root is None:
+                        meta = self._read_meta(scan_dir)
+                        new_categories[self.ROOT_KEY] = Category(
+                            name=self.ROOT_KEY,
+                            meta=meta,
+                            entries=[],
+                        )
+                        root = new_categories[self.ROOT_KEY]
+                    key = f"{self.ROOT_KEY}/{item.name}"
+                    if key not in manifest:
+                        manifest[key] = next_id
+                        next_id += 1
+                    root.entries.append(ImageEntry(
+                        path=item,
+                        filename=item.name,
+                        category=self.ROOT_KEY,
+                        id=manifest[key],
+                    ))
+                    total += 1
 
         if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket:
             s3_categories, next_id = self._scan_s3(manifest, next_id)

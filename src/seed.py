@@ -58,14 +58,16 @@ def _add_sample_text(img: Image.Image, text: str) -> Image.Image:
 
 def seed_images(images_dir: Path, count_per_category: int = 5) -> None:
     """Generate sample images if the directory is empty."""
+    images_dir.mkdir(parents=True, exist_ok=True)
+    
     if any(images_dir.iterdir()):
         return  # already has content
 
-    print("[placepix] images/ is empty, seeding sample images...")
+    print("[placepix] data/ is empty, seeding sample images...")
 
     for slug, name, desc in SEED_CATEGORIES:
         cat_dir = images_dir / slug
-        cat_dir.mkdir(parents=True)
+        cat_dir.mkdir(parents=True, exist_ok=True)
 
         # Write category metadata
         import json

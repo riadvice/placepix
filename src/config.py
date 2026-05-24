@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     host: str = Field(default="127.0.0.1:3000")
     dir: str = Field(default="./images")
+    seed_dir: str = Field(default="./data")
     cache: bool = Field(default=True)
     cdn: str = Field(default="")
     min_width: int = Field(default=8)
@@ -24,6 +25,7 @@ class Settings(BaseSettings):
     max_width: int = Field(default=2000)
     max_height: int = Field(default=2000)
     upload_enabled: bool = Field(default=True)
+    seed_enabled: bool = Field(default=False)
     admin_password: str = Field(default="")
     watermark_enabled: bool = Field(default=False)
     watermark_image: str = Field(default="")
@@ -54,6 +56,10 @@ class Settings(BaseSettings):
     @property
     def images_dir(self) -> Path:
         return Path(self.dir).resolve()
+
+    @property
+    def seed_dir(self) -> Path:
+        return Path(self.seed_dir).resolve()
 
     @property
     def cache_dir(self) -> Path:

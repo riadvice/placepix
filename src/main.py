@@ -41,8 +41,9 @@ app.add_middleware(
     max_age=86400,
 )
 
-# Seed images if empty
-seed_images(settings.images_dir)
+# Seed images if enabled
+if settings.seed_enabled:
+    seed_images(settings.seed_dir)
 
 # In-memory image registry
 manager = ImageManager()
