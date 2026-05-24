@@ -147,16 +147,106 @@
             margin-bottom: 15px;
         }
         
-        .preview-image {
-            width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .preview-container {
             margin-top: 20px;
             display: none;
         }
         
-        .preview-image.show {
+        .preview-container.show {
             display: block;
+        }
+        
+        .preview-image {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+        
+        .preview-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .image-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .image-info span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .image-info strong {
+            color: #667eea;
+        }
+        
+        /* Zoom Modal */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+        
+        .zoom-modal.active {
+            display: flex;
+        }
+        
+        .zoom-modal img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+        }
+        
+        .zoom-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .zoom-close:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .zoom-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 14px;
         }
         
         .button-group {
@@ -502,7 +592,22 @@
                     <button class="btn-primary" onclick="loadPreview()">👁️ Preview</button>
                 </div>
                 
-                <img id="preview" class="preview-image" alt="Preview">
+                <div id="preview-container" class="preview-container">
+                    <img id="preview" class="preview-image" alt="Preview" onclick="zoomImage()">
+                    <div class="image-info">
+                        <span>
+                            <strong>Size:</strong> 
+                            <span id="image-size">Loading...</span>
+                        </span>
+                        <span>
+                            <strong>File Size:</strong> 
+                            <span id="file-size">Loading...</span>
+                        </span>
+                        <span style="color: #999; font-size: 11px;">
+                            💡 Click image to zoom
+                        </span>
+                    </div>
+                </div>
                 
                 <div class="section" style="margin-top: 30px;">
                     <h3>Quick Features Reference</h3>
@@ -534,6 +639,16 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    
+    <!-- Zoom Modal -->
+    <div id="zoom-modal" class="zoom-modal" onclick="closeZoom()">
+        <span class="zoom-close" onclick="closeZoom()">&times;</span>
+        <img id="zoom-image" src="" alt="Zoomed preview">
+        <div class="zoom-info" id="zoom-info">
+            <strong>Original Size:</strong> <span id="zoom-size">-</span> | 
+            <strong>File Size:</strong> <span id="zoom-file-size">-</span>
         </div>
     </div>
     
@@ -685,9 +800,70 @@
         function loadPreview() {
             const url = document.getElementById('url-output').textContent.replace('GET ', '');
             const preview = document.getElementById('preview');
-            preview.src = url;
-            preview.classList.add('show');
+            const container = document.getElementById('preview-container');
+            const sizeDisplay = document.getElementById('image-size');
+            const fileSizeDisplay = document.getElementById('file-size');
+            
+            // Show loading state
+            sizeDisplay.textContent = 'Loading...';
+            fileSizeDisplay.textContent = 'Loading...';
+            
+            // Create a new image to get dimensions
+            const img = new Image();
+            img.onload = function() {
+                preview.src = url;
+                container.classList.add('show');
+                sizeDisplay.textContent = `${img.naturalWidth} × ${img.naturalHeight}px`;
+                
+                // Fetch to get file size
+                fetch(url)
+                    .then(response => {
+                        const contentLength = response.headers.get('content-length');
+                        if (contentLength) {
+                            const sizeKB = (parseInt(contentLength) / 1024).toFixed(2);
+                            fileSizeDisplay.textContent = `${sizeKB} KB`;
+                        } else {
+                            return response.blob().then(blob => {
+                                const sizeKB = (blob.size / 1024).toFixed(2);
+                                fileSizeDisplay.textContent = `${sizeKB} KB`;
+                            });
+                        }
+                    })
+                    .catch(() => {
+                        fileSizeDisplay.textContent = 'Unknown';
+                    });
+            };
+            img.onerror = function() {
+                sizeDisplay.textContent = 'Error loading';
+                fileSizeDisplay.textContent = '-';
+            };
+            img.src = url;
         }
+        
+        function zoomImage() {
+            const preview = document.getElementById('preview');
+            const modal = document.getElementById('zoom-modal');
+            const zoomImg = document.getElementById('zoom-image');
+            const zoomSize = document.getElementById('zoom-size');
+            const zoomFileSize = document.getElementById('zoom-file-size');
+            
+            zoomImg.src = preview.src;
+            zoomSize.textContent = document.getElementById('image-size').textContent;
+            zoomFileSize.textContent = document.getElementById('file-size').textContent;
+            modal.classList.add('active');
+        }
+        
+        function closeZoom() {
+            const modal = document.getElementById('zoom-modal');
+            modal.classList.remove('active');
+        }
+        
+        // Close zoom on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeZoom();
+            }
+        });
         
         // Initialize
         updateURL();
