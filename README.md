@@ -1,8 +1,16 @@
-# PlacePix
+<div align="center">
+  <img src="static/logo.svg" alt="PlacePix Logo" width="200"/>
+  
+  # PlacePix
 
-A self-hosted placeholder image server inspired by [picsum.photos](https://picsum.photos) and [lorem-server](https://github.com/manasky/lorem-server).
+  A self-hosted placeholder image server inspired by [picsum.photos](https://picsum.photos) and [lorem-server](https://github.com/manasky/lorem-server).
 
-Serve random images with on-the-fly resizing, filtering, and formatting.
+  Serve random images with on-the-fly resizing, filtering, and formatting.
+
+  **Made by [RIADVICE](https://riadvice.com)**
+
+  ---
+</div>
 
 ## Features
 
