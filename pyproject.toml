@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [project.scripts]
-placepic = "src.main:run"
+placepix = "src.main:run"

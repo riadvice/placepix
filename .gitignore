@@ -23,6 +23,9 @@ images/
 *.swp
 *.swo
 
+# Docker
+.dockerignore
+
 # OS files
 .DS_Store
 Thumbs.db

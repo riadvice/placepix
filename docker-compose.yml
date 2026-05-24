@@ -1,0 +1,14 @@
+services:
+  placepix:
+    build: .
+    container_name: placepix
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./images:/app/images
+      - ./.cache:/app/.cache
+    environment:
+      - IMAGES_DIR=/app/images
+      - CACHE=true
+      - HOST=0.0.0.0:3000
+    restart: unless-stopped
