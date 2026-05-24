@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlacePix Feature Explorer — Build Custom Image URLs</title>
-    <meta name="description" content="Interactive URL constructor for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more. Perfect for developers and designers.">
-    <meta name="keywords" content="placeholder image generator, URL constructor, image filters, image effects, developer tools, design mockups, image API">
+    <title>URL Builder — PlacePix</title>
+    <meta name="description" content="Interactive URL builder for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more. Perfect for developers and designers.">
+    <meta name="keywords" content="placeholder image generator, URL builder, image filters, image effects, developer tools, design mockups, image API">
     <meta name="author" content="RiAdvice">
     <meta name="robots" content="index, follow">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://placepix.riadvice.com/features">
-    <meta property="og:title" content="PlacePix Feature Explorer — Build Custom Image URLs">
+    <meta property="og:url" content="https://placepix.riadvice.com/url-builder">
+    <meta property="og:title" content="URL Builder — PlacePix">
     <meta property="og:description" content="Interactive URL constructor for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more.">
     <meta property="og:image" content="https://placepix.riadvice.com/static/logo.svg">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://placepix.riadvice.com/features">
-    <meta name="twitter:title" content="PlacePix Feature Explorer — Build Custom Image URLs">
+    <meta name="twitter:url" content="https://placepix.riadvice.com/url-builder">
+    <meta name="twitter:title" content="URL Builder — PlacePix">
     <meta name="twitter:description" content="Interactive URL constructor for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more.">
     <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
     
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    <link rel="canonical" href="https://placepix.riadvice.com/features">
+    <link rel="canonical" href="https://placepix.riadvice.com/url-builder">
     {% if ga_tracking_id %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_id }}"></script>
     <script>
@@ -151,6 +151,57 @@
         nav .nav-links a.active {
             color: var(--primary);
             font-weight: 600;
+        }
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-toggle {
+            cursor: pointer;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-size: 0.875em;
+        }
+        
+        .dropdown-toggle:hover {
+            color: var(--primary);
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            padding: 8px 0;
+            min-width: 180px;
+            z-index: 100;
+            margin-top: 4px;
+        }
+        
+        .dropdown-menu a {
+            display: block;
+            padding: 8px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.875em;
+            white-space: nowrap;
+            transition: background 0.2s ease;
+        }
+        
+        .dropdown-menu a:hover {
+            background: var(--background);
+            color: var(--primary);
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            display: block;
         }
         
         .btn-docs {
@@ -696,7 +747,18 @@
                 <a href="/#categories">Categories</a>
                 <a href="/images">Explorer</a>
                 <a href="/palette">Palette</a>
-                <a href="/features" class="active">Features</a>
+                <div class="dropdown">
+                    <span class="dropdown-toggle" style="color: var(--primary); font-weight: 600;">Features ▾</span>
+                    <div class="dropdown-menu">
+                        <a href="/url-builder" style="color: var(--primary); font-weight: 600;">URL Builder</a>
+                        <a href="/#smart-crop">Smart Crop</a>
+                        <a href="/#aspect-ratios">Aspect Ratios</a>
+                        <a href="/#filters">Filters & Effects</a>
+                        <a href="/#overlays">Overlays</a>
+                        <a href="/#presets">Presets</a>
+                        <a href="/#api">API Reference</a>
+                    </div>
+                </div>
                 {% if upload_enabled %}
                 <a href="/#upload">Upload</a>
                 {% endif %}
@@ -713,7 +775,7 @@
     
     <div class="container">
         <header>
-            <h1>PlacePix Feature Explorer</h1>
+            <h1>URL Builder — Interactive Placeholder Image Constructor</h1>
             <p>Build your perfect placeholder image URL with our interactive constructor</p>
         </header>
         
@@ -731,6 +793,10 @@
                         <button class="endpoint-tab" data-endpoint="ratio">Aspect Ratio</button>
                         <button class="endpoint-tab" data-endpoint="preset">Preset</button>
                         <button class="endpoint-tab" data-endpoint="solid">Solid Color</button>
+                        <button class="endpoint-tab" data-endpoint="color-match">Color Match</button>
+                        <button class="endpoint-tab" data-endpoint="svg">SVG</button>
+                        <button class="endpoint-tab" data-endpoint="gradient">Gradient</button>
+                        <button class="endpoint-tab" data-endpoint="lucky">I'm Feeling Lucky</button>
                     </div>
                 </div>
                 
@@ -757,6 +823,11 @@
                             <label>Seed <small>(optional)</small></label>
                             <input type="text" id="seed" placeholder="e.g., myseed123">
                             <small>Use same seed for consistent results</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Color <small>(optional)</small></label>
+                            <input type="color" id="random-color-match" value="#3b82f6">
+                            <small>Match images by dominant color</small>
                         </div>
                     </div>
                     
@@ -802,6 +873,11 @@
                             <label>Seed <small>(optional)</small></label>
                             <input type="text" id="ratio-seed" placeholder="e.g., myseed123">
                         </div>
+                        <div class="form-group">
+                            <label>Target Color <small>(optional)</small></label>
+                            <input type="color" id="ratio-color-match" value="#3b82f6">
+                            <small>Match images by dominant color</small>
+                        </div>
                     </div>
                     
                     <!-- Preset endpoint -->
@@ -831,6 +907,11 @@
                             <label>Seed <small>(optional)</small></label>
                             <input type="text" id="preset-seed" placeholder="e.g., myseed123">
                         </div>
+                        <div class="form-group">
+                            <label>Target Color <small>(optional)</small></label>
+                            <input type="color" id="preset-color-match" value="#3b82f6">
+                            <small>Match images by dominant color</small>
+                        </div>
                     </div>
                     
                     <!-- Solid color endpoint -->
@@ -851,6 +932,87 @@
                         <div class="form-group">
                             <label>Text Color <small>(optional)</small></label>
                             <input type="color" id="fg-color" value="#ffffff">
+                        </div>
+                        <div class="form-group">
+                            <label>Text <small>(optional)</small></label>
+                            <input type="text" id="solid-text" placeholder="Your text here">
+                        </div>
+                    </div>
+                    
+                    <!-- Color Match endpoint -->
+                    <div class="endpoint-config" data-endpoint="color-match" style="display:none;">
+                        <div class="form-group">
+                            <label>Target Color (hex)</label>
+                            <input type="color" id="match-color" value="#3b82f6">
+                            <small>Find images matching this dominant color</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Width</label>
+                            <input type="number" id="match-width" value="500" min="8" max="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="match-height" value="300" min="8" max="2000">
+                        </div>
+                    </div>
+                    
+                    <!-- SVG endpoint -->
+                    <div class="endpoint-config" data-endpoint="svg" style="display:none;">
+                        <div class="form-group">
+                            <label>Width</label>
+                            <input type="number" id="svg-width" value="500" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="svg-height" value="300" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label>Background Color</label>
+                            <input type="color" id="svg-bg" value="#cccccc">
+                            <small>Hex color (without #)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Foreground Color <small>(optional)</small></label>
+                            <input type="color" id="svg-fg" value="#ffffff">
+                        </div>
+                        <div class="form-group">
+                            <label>Text <small>(optional)</small></label>
+                            <input type="text" id="svg-text" placeholder="Default: {width}x{height}">
+                        </div>
+                    </div>
+                    
+                    <!-- Gradient endpoint -->
+                    <div class="endpoint-config" data-endpoint="gradient" style="display:none;">
+                        <div class="form-group">
+                            <label>Width</label>
+                            <input type="number" id="grad-width" value="500" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="grad-height" value="300" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label>From Color</label>
+                            <input type="color" id="grad-from" value="#667eea">
+                        </div>
+                        <div class="form-group">
+                            <label>To Color</label>
+                            <input type="color" id="grad-to" value="#764ba2">
+                        </div>
+                    </div>
+                    
+                    <!-- Lucky / Random redirect endpoint -->
+                    <div class="endpoint-config" data-endpoint="lucky" style="display:none;">
+                        <div class="form-group">
+                            <label>Category <small>(optional)</small></label>
+                            <select id="random-category">
+                                <option value="">All categories</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Color <small>(optional)</small></label>
+                            <input type="color" id="random-color" value="#3b82f6">
+                            <small>Match images by dominant color</small>
                         </div>
                     </div>
                 </div>
@@ -922,8 +1084,9 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Border Width</label>
-                        <input type="number" id="border" min="0" max="50" value="0">
+                        <label>Border <small>(width or width,color)</small></label>
+                        <input type="text" id="border" placeholder="e.g., 5 or 5,ff0000" value="">
+                        <small>Width in pixels, optionally with hex color</small>
                     </div>
                     
                     <div class="form-group">
@@ -934,6 +1097,11 @@
                 
                 <div class="section">
                     <h3>Color Adjustments</h3>
+                    <div class="form-group">
+                        <label>Tint <small>(optional)</small></label>
+                        <input type="color" id="tint" value="#b45309">
+                        <small>Apply a color tint overlay</small>
+                    </div>
                     <div class="form-group">
                         <label>Brightness (0.0-2.0)</label>
                         <input type="range" id="brightness" min="0" max="200" value="100" step="10">
@@ -963,6 +1131,14 @@
                     <div class="checkbox-group">
                         <input type="checkbox" id="watermark">
                         <label for="watermark">Add Watermark</label>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Output</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="base64">
+                        <label for="base64">Return Base64</label>
                     </div>
                 </div>
             </div>
@@ -1084,55 +1260,112 @@
         function updateURL() {
             let url = '';
             const params = [];
+            let supportsFormat = true;
             
             // Build base URL based on endpoint
             switch(currentEndpoint) {
-                case 'random':
+                case 'random': {
                     const width = document.getElementById('width').value;
                     const height = document.getElementById('height').value;
                     const category = document.getElementById('category').value;
                     const seed = document.getElementById('seed').value;
+                    const colorMatch = document.getElementById('random-color-match').value;
                     url = `/${width}/${height}${category ? '/' + category : ''}`;
                     if (seed) params.push(`seed=${encodeURIComponent(seed)}`);
+                    if (colorMatch && colorMatch !== '#3b82f6') params.push(`color=${encodeURIComponent(colorMatch.replace('#', ''))}`);
                     break;
+                }
                     
-                case 'id':
+                case 'id': {
                     const id = document.getElementById('image-id').value;
                     const idWidth = document.getElementById('id-width').value;
                     const idHeight = document.getElementById('id-height').value;
                     url = `/id/${id}/${idWidth}/${idHeight}`;
                     break;
+                }
                     
-                case 'ratio':
+                case 'ratio': {
                     const ratio = document.getElementById('ratio').value;
                     const ratioHeight = document.getElementById('ratio-height').value;
                     const ratioCategory = document.getElementById('ratio-category').value;
                     const ratioSeed = document.getElementById('ratio-seed').value;
+                    const ratioColor = document.getElementById('ratio-color-match').value;
                     url = `/ratio/${ratio}/${ratioHeight}${ratioCategory ? '/' + ratioCategory : ''}`;
                     if (ratioSeed) params.push(`seed=${encodeURIComponent(ratioSeed)}`);
+                    if (ratioColor && ratioColor !== '#3b82f6') params.push(`color=${encodeURIComponent(ratioColor.replace('#', ''))}`);
                     break;
+                }
                     
-                case 'preset':
+                case 'preset': {
                     const preset = document.getElementById('preset').value;
                     const presetCategory = document.getElementById('preset-category').value;
                     const presetSeed = document.getElementById('preset-seed').value;
+                    const presetColor = document.getElementById('preset-color-match').value;
                     url = `/preset/${preset}${presetCategory ? '/' + presetCategory : ''}`;
                     if (presetSeed) params.push(`seed=${encodeURIComponent(presetSeed)}`);
+                    if (presetColor && presetColor !== '#3b82f6') params.push(`color=${encodeURIComponent(presetColor.replace('#', ''))}`);
                     break;
+                }
                     
-                case 'solid':
+                case 'solid': {
                     const solidWidth = document.getElementById('solid-width').value;
                     const solidHeight = document.getElementById('solid-height').value;
                     const bgColor = document.getElementById('bg-color').value.replace('#', '');
                     const fgColor = document.getElementById('fg-color').value.replace('#', '');
+                    const solidText = document.getElementById('solid-text').value;
                     url = `/solid/${solidWidth}x${solidHeight}/${bgColor}/${fgColor}`;
+                    if (solidText) params.push(`text=${encodeURIComponent(solidText)}`);
+                    supportsFormat = false;
                     break;
+                }
+                    
+                case 'color-match': {
+                    const matchColor = document.getElementById('match-color').value.replace('#', '');
+                    const matchWidth = document.getElementById('match-width').value;
+                    const matchHeight = document.getElementById('match-height').value;
+                    url = `/color/${matchColor}/${matchWidth}/${matchHeight}`;
+                    break;
+                }
+                    
+                case 'svg': {
+                    const svgWidth = document.getElementById('svg-width').value;
+                    const svgHeight = document.getElementById('svg-height').value;
+                    const svgBg = document.getElementById('svg-bg').value.replace('#', '');
+                    const svgFg = document.getElementById('svg-fg').value.replace('#', '');
+                    const svgText = document.getElementById('svg-text').value;
+                    url = `/svg/${svgWidth}/${svgHeight}`;
+                    params.push(`bg=${svgBg}`);
+                    params.push(`fg=${svgFg}`);
+                    if (svgText) params.push(`text=${encodeURIComponent(svgText)}`);
+                    supportsFormat = false;
+                    break;
+                }
+                    
+                case 'gradient': {
+                    const gradWidth = document.getElementById('grad-width').value;
+                    const gradHeight = document.getElementById('grad-height').value;
+                    const gradFrom = document.getElementById('grad-from').value.replace('#', '');
+                    const gradTo = document.getElementById('grad-to').value.replace('#', '');
+                    url = `/gradient/${gradWidth}x${gradHeight}/${gradFrom}/${gradTo}`;
+                    break;
+                }
+                    
+                case 'lucky': {
+                    const luckyCategory = document.getElementById('random-category').value;
+                    const luckyColor = document.getElementById('random-color').value;
+                    url = `/random/${luckyCategory}`;
+                    if (luckyColor && luckyColor !== '#3b82f6') params.push(`color=${encodeURIComponent(luckyColor.replace('#', ''))}`);
+                    supportsFormat = false;
+                    break;
+                }
             }
             
             // Add format extension
-            const format = document.getElementById('format').value;
-            if (format !== 'jpeg') {
-                url += `.${format}`;
+            if (supportsFormat) {
+                const format = document.getElementById('format').value;
+                if (format !== 'jpeg') {
+                    url += `.${format}`;
+                }
             }
             
             // Add query parameters
@@ -1140,6 +1373,7 @@
             if (document.getElementById('sepia').checked) params.push('sepia=true');
             if (document.getElementById('lqip').checked) params.push('lqip=true');
             if (document.getElementById('watermark').checked) params.push('watermark=true');
+            if (document.getElementById('base64').checked) params.push('base64=true');
             
             const blur = document.getElementById('blur').value;
             if (blur > 0) params.push(`blur=${blur}`);
@@ -1157,7 +1391,7 @@
             if (fit !== 'crop') params.push(`fit=${fit}`);
             
             const border = document.getElementById('border').value;
-            if (border > 0) params.push(`border=${border}`);
+            if (border) params.push(`border=${encodeURIComponent(border)}`);
             
             const padding = document.getElementById('padding').value;
             if (padding > 0) params.push(`padding=${padding}`);
@@ -1170,6 +1404,9 @@
             
             const saturation = document.getElementById('saturation').value;
             if (saturation != 100) params.push(`saturation=${(saturation/100).toFixed(1)}`);
+            
+            const tint = document.getElementById('tint').value;
+            if (tint && tint !== '#b45309') params.push(`tint=${encodeURIComponent(tint.replace('#', ''))}`);
             
             const text = document.getElementById('text').value;
             if (text) params.push(`text=${encodeURIComponent(text)}`);

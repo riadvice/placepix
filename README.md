@@ -60,9 +60,9 @@ pip install -e ".[dev]"
 python -m src.main
 ```
 
-### 🎨 Feature Explorer
+### 🔗 URL Builder
 
-Visit `http://localhost:3000/features` for an **interactive URL constructor** that lets you:
+Visit `http://localhost:3000/url-builder` for an **interactive URL constructor** that lets you:
 - Build URLs visually with all available parameters
 - Preview images in real-time
 - Copy generated URLs instantly
