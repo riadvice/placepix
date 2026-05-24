@@ -68,6 +68,55 @@ Visit `http://localhost:3000/features` for an **interactive URL constructor** th
 - Copy generated URLs instantly
 - Explore all features with live examples
 
+## Testing
+
+PlacePix includes comprehensive unit tests with 77% code coverage.
+
+### Running Tests
+
+```bash
+# Install dev dependencies first
+pip install -e ".[dev]"
+
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_image_effects.py
+
+# Run with coverage report
+pytest --cov=src --cov-report=term-missing
+
+# Run with HTML coverage report
+pytest --cov=src --cov-report=html
+# Open htmlcov/index.html in browser
+```
+
+### Test Statistics
+
+- **200 passing tests** across 7 test files
+- **77% code coverage**
+- Tests cover:
+  - All image processing effects
+  - All API endpoints
+  - Cache headers and metrics
+  - Feature explorer
+  - Edge cases and error handling
+
+### Test Files
+
+- `test_cache_headers.py` - ETag, Last-Modified, 304 responses
+- `test_metrics.py` - Usage tracking and admin dashboard
+- `test_aspect_ratio_presets.py` - Aspect ratios and presets
+- `test_image_effects.py` - Border, padding, noise, pixelate, quality, LQIP
+- `test_advanced_features.py` - Srcset, smart crop, watermark
+- `test_feature_explorer.py` - Feature explorer page
+- `test_comprehensive_coverage.py` - Comprehensive endpoint coverage
+- `test_image_processor_direct.py` - Direct processor method tests
+
 ## Dependencies
 
 ### Python Packages
