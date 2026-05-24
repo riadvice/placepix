@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     max_width: int = Field(default=2000)
     max_height: int = Field(default=2000)
     upload_enabled: bool = Field(default=True)
+    admin_password: str = Field(default="")
+    watermark_enabled: bool = Field(default=False)
+    watermark_image: str = Field(default="")
+    watermark_text: str = Field(default="")
+    watermark_position: str = Field(default="bottom-right")
+    watermark_opacity: float = Field(default=0.5)
 
     @property
     def bind_host(self) -> str:

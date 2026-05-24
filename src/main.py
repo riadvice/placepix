@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile
+from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -23,8 +24,10 @@ app = FastAPI(title="PlacePix", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "HEAD", "OPTIONS", "POST"],
     allow_headers=["*"],
+    expose_headers=["ETag", "Last-Modified", "Content-Length", "Cache-Control"],
+    max_age=86400,
 )
 
 # Seed images if empty
@@ -108,6 +111,32 @@ def _write_cache(cache_path: Path, data: bytes) -> None:
     cache_path.write_bytes(data)
 
 
+def _generate_etag(content: bytes) -> str:
+    """Generate ETag from content hash."""
+    return f'"{hashlib.md5(content).hexdigest()}"'
+
+
+def _get_last_modified(path: Path) -> str:
+    """Get Last-Modified header from file mtime."""
+    mtime = path.stat().st_mtime
+    dt = datetime.fromtimestamp(mtime, tz=timezone.utc)
+    return dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+
+def _check_not_modified(
+    if_none_match: str | None,
+    if_modified_since: str | None,
+    etag: str,
+    last_modified: str,
+) -> bool:
+    """Check if client cache is still valid."""
+    if if_none_match:
+        return if_none_match == etag
+    if if_modified_since:
+        return if_modified_since == last_modified
+    return False
+
+
 # ── Image serving ───────────────────────────────────────────────────
 def _serve_entry(
     entry: ImageEntry,
@@ -124,6 +153,9 @@ def _serve_entry(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    if_none_match: str | None = None,
+    if_modified_since: str | None = None,
+    is_random: bool = False,
 ) -> Response:
     """Process and serve a single image entry."""
     # Validate size
@@ -150,14 +182,27 @@ def _serve_entry(
         if cached is not None:
             if settings.cdn:
                 return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
+            
+            # Generate cache headers
+            etag = _generate_etag(cached)
+            last_modified = _get_last_modified(cache_path)
+            
+            # Check if client cache is still valid
+            if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
+                return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
+            
             content_type = f"image/{output_format}"
             filename = f"placepix-{entry.category}-{width}x{height}.{output_format}"
+            cache_control = "public, max-age=31536000, immutable" if not is_random else "public, max-age=0, must-revalidate"
+            
             return Response(
                 content=cached,
                 media_type=content_type,
                 headers={
                     "Content-Disposition": f'inline; filename="{filename}"',
-                    "Cache-Control": "public, max-age=2592000, stale-while-revalidate=60, immutable",
+                    "Cache-Control": cache_control,
+                    "ETag": etag,
+                    "Last-Modified": last_modified,
                 },
             )
 
@@ -184,20 +229,34 @@ def _serve_entry(
         if settings.cdn:
             return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
 
+    # Generate cache headers for new content
+    etag = _generate_etag(processed)
+    last_modified = _get_last_modified(entry.path)
+    
+    # Check if client cache is still valid
+    if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
+        return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
+    
     content_type = f"image/{output_format}"
     filename = f"placepix-{entry.category}-{width}x{height}.{output_format}"
+    cache_control = "public, max-age=31536000, immutable" if not is_random else "public, max-age=0, must-revalidate"
+    
     return Response(
         content=processed,
         media_type=content_type,
         headers={
             "Content-Disposition": f'inline; filename="{filename}"',
-            "Cache-Control": "public, max-age=2592000, stale-while-revalidate=60, immutable",
+            "Cache-Control": cache_control,
+            "ETag": etag,
+            "Last-Modified": last_modified,
         },
     )
 
 
 @app.get("/id/{image_id:int}/{width:int}/{height:int}")
+@app.head("/id/{image_id:int}/{width:int}/{height:int}")
 @app.get("/id/{image_id:int}/{width:int}/{height:int}.{ext}")
+@app.head("/id/{image_id:int}/{width:int}/{height:int}.{ext}")
 async def serve_by_id(
     image_id: int,
     width: int,
@@ -213,6 +272,8 @@ async def serve_by_id(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    if_none_match: str | None = Header(default=None),
+    if_modified_since: str | None = Header(default=None),
 ) -> Response:
     entry = manager.get_by_id(image_id)
     if entry is None:
@@ -220,6 +281,7 @@ async def serve_by_id(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        if_none_match, if_modified_since, is_random=False,
     )
 
 
@@ -269,8 +331,11 @@ async def svg_placeholder(
 
 
 @app.get("/{width:int}/{height:int}/{category}")
+@app.head("/{width:int}/{height:int}/{category}")
 @app.get("/{width:int}/{height:int}/{category}.{ext}")
+@app.head("/{width:int}/{height:int}/{category}.{ext}")
 @app.get("/{width:int}/{height:int}/")
+@app.head("/{width:int}/{height:int}/")
 async def serve_image(
     width: int,
     height: int,
@@ -288,6 +353,8 @@ async def serve_image(
     saturation: float = 1.0,
     sepia: bool = False,
     color: str = "",
+    if_none_match: str | None = Header(default=None),
+    if_modified_since: str | None = Header(default=None),
 ) -> Response:
     if color:
         entry = manager.pick_by_color(color, category or None)
@@ -295,14 +362,19 @@ async def serve_image(
         entry = manager.pick(category or None, seed or None)
     if entry is None:
         raise HTTPException(status_code=404, detail="category not found")
+    # Random images should not be cached long-term
+    is_random = not seed
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        if_none_match, if_modified_since, is_random,
     )
 
 
 @app.get("/color/{hex_color}/{width:int}/{height:int}")
+@app.head("/color/{hex_color}/{width:int}/{height:int}")
 @app.get("/color/{hex_color}/{width:int}/{height:int}.{ext}")
+@app.head("/color/{hex_color}/{width:int}/{height:int}.{ext}")
 async def serve_by_color(
     hex_color: str,
     width: int,
@@ -318,6 +390,8 @@ async def serve_by_color(
     contrast: float = 1.0,
     saturation: float = 1.0,
     sepia: bool = False,
+    if_none_match: str | None = Header(default=None),
+    if_modified_since: str | None = Header(default=None),
 ) -> Response:
     entry = manager.pick_by_color(hex_color)
     if entry is None:
@@ -325,6 +399,7 @@ async def serve_by_color(
     return _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
+        if_none_match, if_modified_since, is_random=True,
     )
 
 
