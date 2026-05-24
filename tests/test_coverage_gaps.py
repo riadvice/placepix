@@ -739,10 +739,13 @@ class TestImageManagerGaps:
         response = client.post("/api/upload")
         assert response.status_code == 422
 
-    def test_upload_with_category(self, test_images_dir, monkeypatch):
+    def test_upload_with_category(self, test_images_dir, tmp_path, monkeypatch):
+        seed_dir = tmp_path / "seed"
+        seed_dir.mkdir()
         settings = Settings(
             host="127.0.0.1:3000",
             dir=str(test_images_dir),
+            images_dir=str(seed_dir),
             cache=True,
             upload_enabled=True,
         )

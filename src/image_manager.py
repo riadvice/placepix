@@ -43,6 +43,23 @@ def _color_distance(c1: tuple[int, int, int], c2: tuple[int, int, int]) -> float
     return ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2 + (c1[2] - c2[2]) ** 2) ** 0.5
 
 
+def _extract_dominant_colors_from_bytes(image_data: bytes, num_colors: int = 3) -> list[str]:
+    """Extract dominant colors from image bytes."""
+    try:
+        with Image.open(io.BytesIO(image_data)) as img:
+            img = img.convert("RGB")
+            img.thumbnail((100, 100))
+            quantized = img.quantize(colors=num_colors + 2)
+            palette = quantized.getpalette()[: num_colors * 3]
+            colors = []
+            for i in range(0, len(palette), 3):
+                r, g, b = palette[i], palette[i + 1], palette[i + 2]
+                colors.append(f"#{r:02x}{g:02x}{b:02x}")
+            return colors[:num_colors]
+    except Exception:
+        return []
+
+
 def _extract_dominant_colors(image_path: Path, num_colors: int = 3) -> list[str]:
     try:
         with Image.open(image_path) as img:
@@ -196,7 +213,7 @@ class ImageManager:
 
     @property
     def _manifest_path(self) -> Path:
-        return settings.seed_dir / ".placepix_manifest.json"
+        return settings.data_dir / ".placepix_manifest.json"
 
     def _load_manifest(self) -> dict[str, int]:
         """Load the persistent id -> filename mapping."""
@@ -226,11 +243,11 @@ class ImageManager:
 
     @property
     def _colors_path(self) -> Path:
-        return settings.seed_dir / ".placepix_colors.json"
+        return settings.data_dir / ".placepix_colors.json"
 
     def _acquire_leader_lock(self) -> bool:
         """Try to acquire leader lock. Returns True if this worker is the leader."""
-        lock_file = settings.seed_dir / ".placepix_leader.lock"
+        lock_file = settings.data_dir / ".placepix_leader.lock"
         try:
             lock_file.touch(exist_ok=True)
             f = open(lock_file, "w")
@@ -288,12 +305,12 @@ class ImageManager:
 
     def _rescan(self) -> None:
         images_dir = settings.images_dir
-        seed_dir = settings.seed_dir
+        data_dir = settings.data_dir
         
         if not images_dir.exists():
             images_dir.mkdir(parents=True)
-        if not seed_dir.exists():
-            seed_dir.mkdir(parents=True)
+        if not data_dir.exists():
+            data_dir.mkdir(parents=True)
 
         logger.info(f"Scanning image directory: {images_dir}")
         manifest = self._load_manifest()
@@ -344,6 +361,7 @@ class ImageManager:
                     total += 1
 
         # Only scan S3 on first rescan (startup) in each worker
+        logger.debug(f"S3 scan check: enabled={settings.s3_enabled}, boto3={_BOTO3_AVAILABLE}, endpoint={bool(settings.s3_endpoint)}, bucket={bool(settings.s3_bucket)}, already_scanned={self._s3_scanned}")
         if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned:
             logger.info(f"Scanning S3 bucket: {settings.s3_bucket}")
             s3_categories, next_id = self._scan_s3(manifest, next_id)
@@ -355,6 +373,8 @@ class ImageManager:
                 total += len(category.entries)
             self._s3_scanned = True
             logger.info(f"S3 scan complete: found {len(s3_categories)} categories")
+        else:
+            logger.debug("S3 scan skipped (disabled, not configured, or already scanned)")
 
         colors = self._load_colors()
 
@@ -374,7 +394,7 @@ class ImageManager:
             missing_entries: list[ImageEntry] = []
             for cat in self._categories.values():
                 for entry in cat.entries:
-                    if entry.id not in colors and entry.path is not None:
+                    if entry.id not in colors:
                         missing_entries.append(entry)
 
             if not missing_entries:
@@ -383,14 +403,61 @@ class ImageManager:
                 return
 
             logger.info(f"Color scan: extracting colors for {len(missing_entries)} images")
+
+            # Initialize S3 client if needed for S3 images
+            s3_client = None
+            has_s3_images = any(e.s3_key for e in missing_entries)
+            if has_s3_images and _BOTO3_AVAILABLE and settings.s3_enabled:
+                try:
+                    s3_client = boto3.client(
+                        "s3",
+                        endpoint_url=settings.s3_endpoint,
+                        aws_access_key_id=settings.s3_access_key,
+                        aws_secret_access_key=settings.s3_secret_key,
+                        region_name=settings.s3_region or "auto",
+                        config=Config(signature_version="s3v4"),
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to initialize S3 client for color scan: {e}")
+
+            total = len(missing_entries)
+            last_logged_percent = 0
+
             for i, entry in enumerate(missing_entries, 1):
-                extracted = _extract_dominant_colors(entry.path)
+                source = entry.path if entry.path else f"S3:{entry.s3_key}"
+                logger.info(f"Color scan [{i}/{total}]: processing {entry.filename} from {source}")
+                extracted: list[str] = []
+
+                if entry.path is not None:
+                    # Local file
+                    extracted = _extract_dominant_colors(entry.path)
+                elif entry.s3_key and s3_client:
+                    # S3 image - download and extract
+                    try:
+                        response = s3_client.get_object(
+                            Bucket=settings.s3_bucket, Key=entry.s3_key
+                        )
+                        image_data = response["Body"].read()
+                        extracted = _extract_dominant_colors_from_bytes(image_data)
+                    except Exception as e:
+                        logger.warning(f"Failed to extract colors from S3 image {entry.s3_key}: {e}")
+
                 if extracted:
                     colors[entry.id] = extracted
-                if i % 10 == 0 or i == len(missing_entries):
+                    logger.info(f"Color scan [{i}/{total}]: {entry.filename} -> {extracted}")
+                else:
+                    logger.warning(f"Color scan [{i}/{total}]: {entry.filename} -> no colors extracted")
+
+                # Log progress every 5%
+                percent = int((i / total) * 100)
+                if percent >= last_logged_percent + 5 or i == total:
+                    logger.info(f"Color scan progress: {percent}% ({i}/{total} images)")
+                    last_logged_percent = percent
+
+                # Save colors periodically
+                if i % 10 == 0 or i == total:
                     self._colors = colors
                     self._save_colors(colors)
-                    logger.debug(f"Color scan: processed {i}/{len(missing_entries)} images")
 
             self._colors = colors
             self._save_colors(colors)
@@ -402,6 +469,7 @@ class ImageManager:
         """Scan S3 bucket for images and return categories."""
         new_categories: dict[str, Category] = {}
         try:
+            logger.info(f"Connecting to S3: endpoint={settings.s3_endpoint}, bucket={settings.s3_bucket}")
             client = boto3.client(
                 "s3",
                 endpoint_url=settings.s3_endpoint,
@@ -414,6 +482,7 @@ class ImageManager:
             if prefix and not prefix.endswith("/"):
                 prefix += "/"
 
+            logger.info(f"Listing S3 objects with prefix: '{prefix}'")
             paginator = client.get_paginator("list_objects_v2")
             pages = paginator.paginate(Bucket=settings.s3_bucket, Prefix=prefix)
 
@@ -457,8 +526,10 @@ class ImageManager:
                         id=manifest[manifest_key],
                         s3_key=key,
                     ))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"S3 scan failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
 
         return new_categories, next_id
 

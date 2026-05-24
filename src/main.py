@@ -396,16 +396,21 @@ def _check_not_modified(
 def _resolve_image_source(entry: ImageEntry) -> Path | io.BytesIO:
     """Return local path or download S3 object into a BytesIO buffer."""
     if entry.s3_key and _BOTO3_AVAILABLE and settings.s3_enabled:
-        client = boto3.client(
-            "s3",
-            endpoint_url=settings.s3_endpoint,
-            aws_access_key_id=settings.s3_access_key,
-            aws_secret_access_key=settings.s3_secret_key,
-            region_name=settings.s3_region or "auto",
-            config=Config(signature_version="s3v4"),
-        )
-        response = client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
-        return io.BytesIO(response["Body"].read())
+        logger.debug(f"Loading S3 image: {entry.s3_key}")
+        try:
+            client = boto3.client(
+                "s3",
+                endpoint_url=settings.s3_endpoint,
+                aws_access_key_id=settings.s3_access_key,
+                aws_secret_access_key=settings.s3_secret_key,
+                region_name=settings.s3_region or "auto",
+                config=Config(signature_version="s3v4"),
+            )
+            response = client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
+            return io.BytesIO(response["Body"].read())
+        except Exception as e:
+            logger.error(f"Failed to load S3 image {entry.s3_key}: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to load S3 image: {e}")
     if entry.path is None:
         raise HTTPException(status_code=500, detail="image has no local path or S3 key")
     return entry.path
