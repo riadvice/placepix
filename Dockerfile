@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 
+ARG GIT_VERSION=dev
+ENV GIT_VERSION=${GIT_VERSION}
+
 WORKDIR /app
 
 # Install system dependencies for OpenCV and image processing

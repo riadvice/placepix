@@ -62,6 +62,25 @@ def setup_logging():
 
 logger = setup_logging()
 
+# ── Git version ────────────────────────────────────────────────────
+def _get_git_version() -> str:
+    env_version = os.environ.get("GIT_VERSION")
+    if env_version and env_version != "dev":
+        return env_version
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return "dev"
+
+_git_version = _get_git_version()
+
 # ── Request Coalescing (thundering herd protection) ─────────────────
 # Deduplicate identical in-flight image processing requests
 _inflight: dict[str, asyncio.Event] = {}
@@ -1240,6 +1259,7 @@ async def index(request: Request) -> Any:
             "total": manager.total,
             "ga_tracking_id": settings.ga_tracking_id,
             "upload_enabled": settings.upload_enabled and _upload_writable,
+            "git_version": _git_version,
         },
     )
 
