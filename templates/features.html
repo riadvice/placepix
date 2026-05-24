@@ -1089,7 +1089,7 @@
         // Fetch and populate categories
         async function loadCategories() {
             try {
-                const response = await fetch('/api/images');
+                const response = await fetch('/api/categories');
                 const data = await response.json();
                 
                 if (data.categories && data.categories.length > 0) {
