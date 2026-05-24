@@ -479,6 +479,16 @@ Add a `category.json` for metadata:
 }
 ```
 
+## Inspiration
+
+PlacePix was inspired by these excellent services:
+
+- **[picsum.photos](https://picsum.photos)** - The Lorem Ipsum for photos. A simple, elegant placeholder image service.
+- **[lorem.space](https://lorem.space)** - Modern placeholder images with various categories and filters.
+- **[lorem-server](https://github.com/manasky/lorem-server)** - Self-hosted placeholder image server in Go.
+
+PlacePix combines the best ideas from these services while adding unique features like smart cropping, watermarks, comprehensive image effects, and a beautiful feature explorer interface.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
