@@ -11,26 +11,19 @@ CURRENT_COMMIT=$(git rev-parse HEAD)
 # Get the exact tag for the current commit (if any)
 EXACT_TAG=$(git tag --points-at HEAD 2>/dev/null | head -n 1)
 
-# Determine the version tag to use
-if [ -n "$EXACT_TAG" ]; then
-    # Current commit is exactly on a tag, use it
-    VERSION_TAG="$EXACT_TAG"
-    echo "[placepix] Current commit is on tag: $VERSION_TAG"
-else
-    # Not on a tag, use git describe to generate a version
-    # This will output something like v1.2.3-4-gabcdef if there are commits after the last tag
-    # or just the tag if we're exactly on it (but we already checked that case)
-    DESCRIBE=$(git describe --tags --always 2>/dev/null || echo "dev")
-    
-    # If the describe output doesn't start with 'v', prepend it for consistency
-    if [[ ! "$DESCRIBE" =~ ^v[0-9] ]]; then
-        VERSION_TAG="$DESCRIBE"
-    else
-        VERSION_TAG="$DESCRIBE"
-    fi
-    
-    echo "[placepix] Current commit is not on a tag, using: $VERSION_TAG"
+# Only proceed if current commit is exactly on a tag
+if [ -z "$EXACT_TAG" ]; then
+    echo "[placepix] ERROR: Current commit is not on a git tag."
+    echo "[placepix] Only tagged commits can be published to Docker Hub."
+    echo "[placepix] Current commit: $CURRENT_COMMIT"
+    echo "[placepix] Please create and push a tag first, e.g.:"
+    echo "[placepix]   git tag v1.2.3"
+    echo "[placepix]   git push origin v1.2.3"
+    exit 1
 fi
+
+VERSION_TAG="$EXACT_TAG"
+echo "[placepix] Current commit is on tag: $VERSION_TAG"
 
 # Build the image
 echo "[placepix] Building Docker image..."
