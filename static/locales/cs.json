@@ -232,7 +232,6 @@
 
   "docker.title": "Docker nasazení na jednom řádku",
   "docker.desc": "Spusťte PlacePix za pár sekund jedním Docker příkazem. Není vyžadována konfigurace.",
-  "docker.note": "Docker obraz brzy dorazí na Docker Hub. Připojte adresář s obrázky pro začátek.",
   "docker.features": "Funkce:",
   "docker.feature1": "Automatické skenování obrázků",
   "docker.feature2": "Extrakce barev",

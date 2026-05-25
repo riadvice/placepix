@@ -232,7 +232,6 @@
 
   "docker.title": "এক লাইনের Docker ডিপ্লয়",
   "docker.desc": "একটি একক Docker কমান্ড দিয়ে সেকেন্ডে PlacePix চালান। কোনো কনফিগারেশন প্রয়োজন নেই।",
-  "docker.note": "Docker ইমেজ শীঘ্রই Docker Hub-এ আসবে। শুরু করতে আপনার ইমেজ ডিরেক্টরি মাউন্ট করুন।",
   "docker.features": "বৈশিষ্ট্য:",
   "docker.feature1": "স্বয়ংক্রিয় ইমেজ স্ক্যান",
   "docker.feature2": "রঙ নিষ্কাশন",

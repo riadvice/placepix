@@ -232,7 +232,6 @@
 
   "docker.title": "Docker Deploy หนึ่งบรรทัด",
   "docker.desc": "เรียกใช้ PlacePix ในไม่กี่วินาทีด้วยคำสั่ง Docker เดียว ไม่ต้องการการกำหนดค่า",
-  "docker.note": "Docker image จะมาเร็วๆ ที่ Docker Hub ต่อเชื่อมไดเรกทอรีรูปภาพของคุณเพื่อเริ่มต้น",
   "docker.features": "คุณสมบัติ:",
   "docker.feature1": "สแกนรูปภาพอัตโนมัติ",
   "docker.feature2": "การแยกสี",

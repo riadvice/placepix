@@ -232,7 +232,6 @@
 
   "docker.title": "Docker Deploy på én linje",
   "docker.desc": "Kjør PlacePix på sekunder med én Docker-kommando. Ingen konfigurasjon nødvendig.",
-  "docker.note": "Docker-bilde kommer snart til Docker Hub. Monter bildemappen din for å begynne.",
   "docker.features": "Funksjoner:",
   "docker.feature1": "Automatisk bildeskan",
   "docker.feature2": "Fargeutvinning",

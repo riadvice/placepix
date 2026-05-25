@@ -232,7 +232,6 @@
 
   "docker.title": "ワンラインDockerデプロイ",
   "docker.desc": "単一のDockerコマンドで数秒でPlacePixを実行。設定は不要です。",
-  "docker.note": "Dockerイメージは近日Docker Hubに登場予定。画像ディレクトリをマウントして開始。",
   "docker.features": "機能:",
   "docker.feature1": "自動画像スキャン",
   "docker.feature2": "色抽出",

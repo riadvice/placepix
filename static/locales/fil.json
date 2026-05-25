@@ -232,7 +232,6 @@
 
   "docker.title": "Isang Linyang Docker Deploy",
   "docker.desc": "Patakbuhin ang PlacePix sa ilang segundo gamit ang isang Docker command. Walang kailangang configuration.",
-  "docker.note": "Docker image ay darating sa Docker Hub. I-mount ang iyong images directory para magsimula.",
   "docker.features": "Mga Feature:",
   "docker.feature1": "Auto image scanning",
   "docker.feature2": "Color extraction",

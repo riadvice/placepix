@@ -253,7 +253,6 @@
 
   "docker.title": "One-Line Docker Deploy",
   "docker.desc": "Get PlacePix running in seconds with a single Docker command. No configuration needed.",
-  "docker.note": "Docker image coming soon to Docker Hub. Mount your images directory to get started.",
   "docker.features": "Features:",
   "docker.feature1": "Auto image scanning",
   "docker.feature2": "Color extraction",

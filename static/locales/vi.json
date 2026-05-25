@@ -232,7 +232,6 @@
 
   "docker.title": "Triển khai Docker một dòng",
   "docker.desc": "Chạy PlacePix trong vài giây với một lệnh Docker duy nhất. Không cần cấu hình.",
-  "docker.note": "Docker image sẽ sớm có trên Docker Hub. Mount thư mục hình ảnh của bạn để bắt đầu.",
   "docker.features": "Tính năng:",
   "docker.feature1": "Quét hình ảnh tự động",
   "docker.feature2": "Trích xuất màu",

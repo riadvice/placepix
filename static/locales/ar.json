@@ -232,7 +232,6 @@
 
   "docker.title": "نشر Docker بسطر واحد",
   "docker.desc": "شغّل PlacePix في ثوانٍ بأمر Docker واحد. لا حاجة للتكوين.",
-  "docker.note": "صورة Docker قادمة قريبًا إلى Docker Hub. قم بتركيب دليل الصور للبدء.",
   "docker.features": "الميزات:",
   "docker.feature1": "مسح الصور التلقائي",
   "docker.feature2": "استخراج الألوان",

@@ -232,7 +232,6 @@
 
   "docker.title": "单行 Docker 部署",
   "docker.desc": "使用单个 Docker 命令在几秒钟内运行 PlacePix。无需配置。",
-  "docker.note": "Docker 镜像即将登陆 Docker Hub。挂载您的图片目录即可开始。",
   "docker.features": "功能:",
   "docker.feature1": "自动图片扫描",
   "docker.feature2": "颜色提取",

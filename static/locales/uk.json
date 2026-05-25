@@ -232,7 +232,6 @@
 
   "docker.title": "Docker Deploy в один рядок",
   "docker.desc": "Запустіть PlacePix за секунди за допомогою однієї команди Docker. Конфігурація не потрібна.",
-  "docker.note": "Docker образ скоро з'явиться на Docker Hub. Змонтуйте каталог зображень для початку.",
   "docker.features": "Функції:",
   "docker.feature1": "Автоматичне сканування зображень",
   "docker.feature2": "Витягування кольорів",

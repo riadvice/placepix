@@ -232,7 +232,6 @@
 
   "docker.title": "Deploy Docker Satu Baris",
   "docker.desc": "Jalankan PlacePix dalam hitungan detik dengan satu perintah Docker. Tidak perlu konfigurasi.",
-  "docker.note": "Gambar Docker akan segera hadir di Docker Hub. Mount direktori gambar Anda untuk memulai.",
   "docker.features": "Fitur:",
   "docker.feature1": "Pemindaian gambar otomatis",
   "docker.feature2": "Ekstraksi warna",

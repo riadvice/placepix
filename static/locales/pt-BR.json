@@ -232,7 +232,6 @@
 
   "docker.title": "Deploy Docker em uma linha",
   "docker.desc": "Execute o PlacePix em segundos com um único comando Docker. Sem configuração necessária.",
-  "docker.note": "Imagem Docker chegando em breve ao Docker Hub. Monte seu diretório de imagens para começar.",
   "docker.features": "Recursos:",
   "docker.feature1": "Varredura automática de imagens",
   "docker.feature2": "Extração de cores",

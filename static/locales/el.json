@@ -232,7 +232,6 @@
 
   "docker.title": "Docker Deploy σε μία γραμμή",
   "docker.desc": "Εκτελέστε το PlacePix σε δευτερόλεπτα με μία εντολή Docker. Δεν απαιτείται ρύθμιση.",
-  "docker.note": "Η εικόνα Docker έρχεται σύντομα στο Docker Hub. Προσαρτήστε τον κατάλογο εικόνων για να ξεκινήσετε.",
   "docker.features": "Χαρακτηριστικά:",
   "docker.feature1": "Αυτόματη σάρωση εικόνων",
   "docker.feature2": "Εξαγωγή χρωμάτων",

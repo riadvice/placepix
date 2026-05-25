@@ -232,7 +232,6 @@
 
   "docker.title": "Tek Satırlı Docker Dağıtımı",
   "docker.desc": "Tek bir Docker komutuyla saniyeler içinde PlacePix'i çalıştırın. Yapılandırma gerekmez.",
-  "docker.note": "Docker imajı yakında Docker Hub'a gelecek. Başlamak için görüntüler dizininizi bağlayın.",
   "docker.features": "Özellikler:",
   "docker.feature1": "Otomatik görüntü taraması",
   "docker.feature2": "Renk çıkarma",

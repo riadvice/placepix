@@ -232,7 +232,6 @@
 
   "docker.title": "Docker Deploy in één regel",
   "docker.desc": "Start PlacePix in seconden met één Docker-commando. Geen configuratie nodig.",
-  "docker.note": "Docker-image komt binnenkort naar Docker Hub. Koppel uw afbeeldingenmap om te beginnen.",
   "docker.features": "Kenmerken:",
   "docker.feature1": "Automatische afbeeldingsscanning",
   "docker.feature2": "Kleurextractie",
