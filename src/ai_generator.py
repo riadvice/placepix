@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import io
 import logging
 import re
 import time
@@ -13,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from PIL import Image
 
 from src.config import settings
 
@@ -62,22 +60,6 @@ def _slugify(text: str) -> str:
     text = re.sub(r"\s+", "-", text)
     text = re.sub(r"-+", "-", text)
     return text[:80].strip("-")
-
-
-def _extract_tags_from_prompt(prompt: str) -> list[str]:
-    """Simple keyword extraction from prompt (zero-cost alternative to AI)."""
-    stop_words = {
-        "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
-        "of", "with", "by", "from", "up", "about", "into", "through", "during",
-        "before", "after", "above", "below", "between", "among", "is", "are",
-        "was", "were", "be", "been", "being", "have", "has", "had", "do",
-        "does", "did", "will", "would", "could", "should", "may", "might",
-        "must", "shall", "can", "need", "dare", "ought", "used", "this", "that",
-        "these", "those", "i", "you", "he", "she", "it", "we", "they", "me",
-        "him", "her", "us", "them", "my", "your", "his", "its", "our", "their",
-    }
-    words = re.findall(r"[a-z]+", prompt.lower())
-    return [w for w in words if w not in stop_words and len(w) > 2][:10]
 
 
 @dataclass
