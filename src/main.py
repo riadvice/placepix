@@ -1437,10 +1437,7 @@ async def serve_raw_by_path(
 # ── Web UI ──────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> Any:
-    import time
-    t0 = time.perf_counter()
     categories = manager.list_categories()
-    render_time = f"{(time.perf_counter() - t0) * 1000:.1f}"
     return render_template(
         "index.html",
         {
@@ -1450,7 +1447,6 @@ async def index(request: Request) -> Any:
             "upload_enabled": settings.upload_enabled and _upload_writable,
             "ai_generation_enabled": settings.ai_generation_enabled,
             "git_version": _git_version,
-            "render_time": render_time,
             "privacy_policy_url": settings.privacy_policy_url,
             "gdpr_statement_url": settings.gdpr_statement_url,
             "cookie_policy_url": settings.cookie_policy_url,
