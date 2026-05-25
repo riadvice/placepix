@@ -233,8 +233,8 @@
   "docker.title": "Docker Deploy σε μία γραμμή",
   "docker.desc": "Εκτελέστε το PlacePix σε δευτερόλεπτα με μία εντολή Docker. Δεν απαιτείται ρύθμιση.",
   "docker.features": "Χαρακτηριστικά:",
-  "docker.feature1": "Αυτόματη σάρωση εικόνων",
+  "docker.feature1": "Έξυπνη σάρωση + Υποστήριξη S3",
   "docker.feature2": "Εξαγωγή χρωμάτων",
-  "docker.feature3": "Όλα τα φίλτρα εικόνων",
-  "docker.feature4": "Ελέγχους υγείας"
+  "docker.feature3": "Μηδενική ρύθμιση",
+  "docker.feature4": "Ενσωματωμένος δημιουργός URL"
 }

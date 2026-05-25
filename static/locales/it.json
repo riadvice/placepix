@@ -233,8 +233,8 @@
   "docker.title": "Deploy Docker in una riga",
   "docker.desc": "Esegui PlacePix in pochi secondi con un singolo comando Docker. Nessuna configurazione necessaria.",
   "docker.features": "Caratteristiche:",
-  "docker.feature1": "Scansione automatica delle immagini",
+  "docker.feature1": "Scansione Intelligente + Supporto S3",
   "docker.feature2": "Estrazione dei colori",
-  "docker.feature3": "Tutti i filtri immagine",
-  "docker.feature4": "Controlli di salute"
+  "docker.feature3": "Configurazione Zero",
+  "docker.feature4": "Generatore URL Integrato"
 }

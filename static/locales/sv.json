@@ -233,8 +233,8 @@
   "docker.title": "Docker Deploy på en rad",
   "docker.desc": "Kör PlacePix på sekunder med ett enda Docker-kommando. Ingen konfiguration krävs.",
   "docker.features": "Funktioner:",
-  "docker.feature1": "Automatisk bildskanning",
+  "docker.feature1": "Smart Scan + S3-stöd",
   "docker.feature2": "Färgextraktion",
-  "docker.feature3": "Alla bildfilter",
-  "docker.feature4": "Hälsokontroller"
+  "docker.feature3": "Noll Konfiguration",
+  "docker.feature4": "Inbyggd URL-generator"
 }

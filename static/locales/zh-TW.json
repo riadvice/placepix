@@ -233,8 +233,8 @@
   "docker.title": "單行 Docker 部署",
   "docker.desc": "使用單一 Docker 命令在幾秒內運行 PlacePix。無需配置。",
   "docker.features": "功能:",
-  "docker.feature1": "自動圖片掃描",
+  "docker.feature1": "智能掃描 + S3 支援",
   "docker.feature2": "顏色提取",
-  "docker.feature3": "所有圖片濾鏡",
-  "docker.feature4": "健康檢查"
+  "docker.feature3": "零配置",
+  "docker.feature4": "嵌入式 URL 生成器"
 }

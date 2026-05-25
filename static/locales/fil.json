@@ -233,8 +233,8 @@
   "docker.title": "Isang Linyang Docker Deploy",
   "docker.desc": "Patakbuhin ang PlacePix sa ilang segundo gamit ang isang Docker command. Walang kailangang configuration.",
   "docker.features": "Mga Feature:",
-  "docker.feature1": "Auto image scanning",
+  "docker.feature1": "Smart Scan + S3 Support",
   "docker.feature2": "Color extraction",
-  "docker.feature3": "Lahat ng image filters",
-  "docker.feature4": "Health checks"
+  "docker.feature3": "Zero Configuration",
+  "docker.feature4": "Embedded URL Builder"
 }

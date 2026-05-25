@@ -233,8 +233,8 @@
   "docker.title": "원라인 Docker 배포",
   "docker.desc": "단일 Docker 명령으로 몇 초 만에 PlacePix를 실행하세요. 구성이 필요하지 않습니다.",
   "docker.features": "기능:",
-  "docker.feature1": "자동 이미지 스캔",
+  "docker.feature1": "스마트 스캔 + S3 지원",
   "docker.feature2": "색상 추출",
-  "docker.feature3": "모든 이미지 필터",
-  "docker.feature4": "상태 확인"
+  "docker.feature3": "제로 구성",
+  "docker.feature4": "임베디드 URL 빌더"
 }

@@ -233,8 +233,8 @@
   "docker.title": "एक लाइन Docker डिप्लॉय",
   "docker.desc": "एक डॉकर कमांड के साथ सेकंड में PlacePix चलाएं। कोई कॉन्फ़िगरेशन की आवश्यकता नहीं।",
   "docker.features": "विशेषताएं:",
-  "docker.feature1": "स्वचालित छवि स्कैनिंग",
+  "docker.feature1": "स्मार्ट स्कैन + S3 सपोर्ट",
   "docker.feature2": "रंग निष्कर्षण",
-  "docker.feature3": "सभी छवि फ़िल्टर",
-  "docker.feature4": "स्वास्थ्य जांच"
+  "docker.feature3": "जीरो कॉन्फ़िगरेशन",
+  "docker.feature4": "एम्बेडेड URL बिल्डर"
 }

@@ -233,8 +233,8 @@
   "docker.title": "Déploiement Docker en une ligne",
   "docker.desc": "Lancez PlacePix en quelques secondes avec une seule commande Docker. Aucune configuration requise.",
   "docker.features": "Fonctionnalités :",
-  "docker.feature1": "Scan automatique des images",
+  "docker.feature1": "Scan Intelligent + Support S3",
   "docker.feature2": "Extraction des couleurs",
-  "docker.feature3": "Tous les filtres d'image",
-  "docker.feature4": "Vérifications de santé"
+  "docker.feature3": "Zéro Configuration",
+  "docker.feature4": "Générateur d'URL Intégré"
 }

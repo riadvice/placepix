@@ -233,8 +233,8 @@
   "docker.title": "Docker Deploy in één regel",
   "docker.desc": "Start PlacePix in seconden met één Docker-commando. Geen configuratie nodig.",
   "docker.features": "Kenmerken:",
-  "docker.feature1": "Automatische afbeeldingsscanning",
+  "docker.feature1": "Slimme Scan + S3 Ondersteuning",
   "docker.feature2": "Kleurextractie",
-  "docker.feature3": "Alle afbeeldingsfilters",
-  "docker.feature4": "Gezondheidscontroles"
+  "docker.feature3": "Nul Configuratie",
+  "docker.feature4": "Ingebouwde URL Generator"
 }

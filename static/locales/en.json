@@ -254,8 +254,8 @@
   "docker.title": "One-Line Docker Deploy",
   "docker.desc": "Get PlacePix running in seconds with a single Docker command. No configuration needed.",
   "docker.features": "Features:",
-  "docker.feature1": "Auto image scanning",
+  "docker.feature1": "Smart Scan + S3 Support",
   "docker.feature2": "Color extraction",
-  "docker.feature3": "All image filters",
-  "docker.feature4": "Health checks"
+  "docker.feature3": "Zero Configuration",
+  "docker.feature4": "Embedded URL Builder"
 }

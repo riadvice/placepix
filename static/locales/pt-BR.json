@@ -233,8 +233,8 @@
   "docker.title": "Deploy Docker em uma linha",
   "docker.desc": "Execute o PlacePix em segundos com um único comando Docker. Sem configuração necessária.",
   "docker.features": "Recursos:",
-  "docker.feature1": "Varredura automática de imagens",
+  "docker.feature1": "Varredura Inteligente + Suporte S3",
   "docker.feature2": "Extração de cores",
-  "docker.feature3": "Todos os filtros de imagem",
-  "docker.feature4": "Verificações de saúde"
+  "docker.feature3": "Configuração Zero",
+  "docker.feature4": "Construtor de URL Integrado"
 }

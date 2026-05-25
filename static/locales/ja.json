@@ -233,8 +233,8 @@
   "docker.title": "ワンラインDockerデプロイ",
   "docker.desc": "単一のDockerコマンドで数秒でPlacePixを実行。設定は不要です。",
   "docker.features": "機能:",
-  "docker.feature1": "自動画像スキャン",
+  "docker.feature1": "スマートスキャン + S3対応",
   "docker.feature2": "色抽出",
-  "docker.feature3": "すべての画像フィルター",
-  "docker.feature4": "ヘルスチェック"
+  "docker.feature3": "ゼロ設定",
+  "docker.feature4": "組み込みURLビルダー"
 }

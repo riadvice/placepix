@@ -233,8 +233,8 @@
   "docker.title": "Wdrożenie Docker w jednej linii",
   "docker.desc": "Uruchom PlacePix w kilka sekund jednym poleceniem Docker. Konfiguracja nie jest wymagana.",
   "docker.features": "Funkcje:",
-  "docker.feature1": "Automatyczne skanowanie obrazów",
+  "docker.feature1": "Inteligentne Skanowanie + Obsługa S3",
   "docker.feature2": "Ekstrakcja kolorów",
-  "docker.feature3": "Wszystkie filtry obrazów",
-  "docker.feature4": "Kontrole zdrowia"
+  "docker.feature3": "Zero Konfiguracja",
+  "docker.feature4": "Osadzony Builder URL"
 }

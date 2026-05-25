@@ -233,8 +233,8 @@
   "docker.title": "Tek Satırlı Docker Dağıtımı",
   "docker.desc": "Tek bir Docker komutuyla saniyeler içinde PlacePix'i çalıştırın. Yapılandırma gerekmez.",
   "docker.features": "Özellikler:",
-  "docker.feature1": "Otomatik görüntü taraması",
+  "docker.feature1": "Akıllı Tarama + S3 Desteği",
   "docker.feature2": "Renk çıkarma",
-  "docker.feature3": "Tüm görüntü filtreleri",
-  "docker.feature4": "Sağlık kontrolleri"
+  "docker.feature3": "Sıfır Yapılandırma",
+  "docker.feature4": "Gömülü URL Oluşturucu"
 }

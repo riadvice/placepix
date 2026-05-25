@@ -233,8 +233,8 @@
   "docker.title": "Docker Deploy в один рядок",
   "docker.desc": "Запустіть PlacePix за секунди за допомогою однієї команди Docker. Конфігурація не потрібна.",
   "docker.features": "Функції:",
-  "docker.feature1": "Автоматичне сканування зображень",
+  "docker.feature1": "Розумне сканування + Підтримка S3",
   "docker.feature2": "Витягування кольорів",
-  "docker.feature3": "Усі фільтри зображень",
-  "docker.feature4": "Перевірки здоров'я"
+  "docker.feature3": "Нульова конфігурація",
+  "docker.feature4": "Вбудований генератор URL"
 }

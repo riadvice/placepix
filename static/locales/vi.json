@@ -233,8 +233,8 @@
   "docker.title": "Triển khai Docker một dòng",
   "docker.desc": "Chạy PlacePix trong vài giây với một lệnh Docker duy nhất. Không cần cấu hình.",
   "docker.features": "Tính năng:",
-  "docker.feature1": "Quét hình ảnh tự động",
+  "docker.feature1": "Quét Thông Minh + Hỗ Trợ S3",
   "docker.feature2": "Trích xuất màu",
-  "docker.feature3": "Tất cả bộ lọc hình ảnh",
-  "docker.feature4": "Kiểm tra sức khỏe"
+  "docker.feature3": "Cấu hình Zero",
+  "docker.feature4": "Trình tạo URL Nhúng"
 }

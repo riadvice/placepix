@@ -233,8 +233,8 @@
   "docker.title": "نشر Docker بسطر واحد",
   "docker.desc": "شغّل PlacePix في ثوانٍ بأمر Docker واحد. لا حاجة للتكوين.",
   "docker.features": "الميزات:",
-  "docker.feature1": "مسح الصور التلقائي",
+  "docker.feature1": "مسح ذكي + دعم S3",
   "docker.feature2": "استخراج الألوان",
-  "docker.feature3": "جميع فلاتر الصور",
-  "docker.feature4": "فحوصات الصحة"
+  "docker.feature3": "تكوين صفر",
+  "docker.feature4": "منشئ URL مدمج"
 }

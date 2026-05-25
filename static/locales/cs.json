@@ -233,8 +233,8 @@
   "docker.title": "Docker nasazení na jednom řádku",
   "docker.desc": "Spusťte PlacePix za pár sekund jedním Docker příkazem. Není vyžadována konfigurace.",
   "docker.features": "Funkce:",
-  "docker.feature1": "Automatické skenování obrázků",
+  "docker.feature1": "Chytré skenování + Podpora S3",
   "docker.feature2": "Extrakce barev",
-  "docker.feature3": "Všechny filtry obrázků",
-  "docker.feature4": "Kontroly zdraví"
+  "docker.feature3": "Nulová konfigurace",
+  "docker.feature4": "Integrovaný generátor URL"
 }

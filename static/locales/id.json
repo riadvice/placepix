@@ -233,8 +233,8 @@
   "docker.title": "Deploy Docker Satu Baris",
   "docker.desc": "Jalankan PlacePix dalam hitungan detik dengan satu perintah Docker. Tidak perlu konfigurasi.",
   "docker.features": "Fitur:",
-  "docker.feature1": "Pemindaian gambar otomatis",
+  "docker.feature1": "Pemindaian Cerdas + Dukungan S3",
   "docker.feature2": "Ekstraksi warna",
-  "docker.feature3": "Semua filter gambar",
-  "docker.feature4": "Pemeriksaan kesehatan"
+  "docker.feature3": "Konfigurasi Nol",
+  "docker.feature4": "URL Builder Terintegrasi"
 }

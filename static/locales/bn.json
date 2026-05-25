@@ -233,8 +233,8 @@
   "docker.title": "এক লাইনের Docker ডিপ্লয়",
   "docker.desc": "একটি একক Docker কমান্ড দিয়ে সেকেন্ডে PlacePix চালান। কোনো কনফিগারেশন প্রয়োজন নেই।",
   "docker.features": "বৈশিষ্ট্য:",
-  "docker.feature1": "স্বয়ংক্রিয় ইমেজ স্ক্যান",
+  "docker.feature1": "স্মার্ট স্ক্যান + S3 সাপোর্ট",
   "docker.feature2": "রঙ নিষ্কাশন",
-  "docker.feature3": "সব ইমেজ ফিল্টার",
-  "docker.feature4": "স্বাস্থ্য পরীক্ষা"
+  "docker.feature3": "জিরো কনফিগারেশন",
+  "docker.feature4": "এমবেডেড URL বিল্ডার"
 }

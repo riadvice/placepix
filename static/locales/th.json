@@ -233,8 +233,8 @@
   "docker.title": "Docker Deploy หนึ่งบรรทัด",
   "docker.desc": "เรียกใช้ PlacePix ในไม่กี่วินาทีด้วยคำสั่ง Docker เดียว ไม่ต้องการการกำหนดค่า",
   "docker.features": "คุณสมบัติ:",
-  "docker.feature1": "สแกนรูปภาพอัตโนมัติ",
+  "docker.feature1": "สแกนอัจฉริยะ + รองรับ S3",
   "docker.feature2": "การแยกสี",
-  "docker.feature3": "ฟิลเตอร์รูปภาพทั้งหมด",
-  "docker.feature4": "การตรวจสอบสุขภาพ"
+  "docker.feature3": "การตั้งค่าศูนย์",
+  "docker.feature4": "URL Builder แบบฝังตัว"
 }
