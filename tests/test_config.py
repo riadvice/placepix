@@ -28,7 +28,7 @@ def test_settings_defaults():
 
 def test_bind_host_with_port():
     """Test bind_host property with port."""
-    settings = Settings(host="0.0.0.0:8080")
+    settings = Settings(host="0.0.0.0:3000")
     assert settings.bind_host == "0.0.0.0"
 
 
