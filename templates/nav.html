@@ -1,7 +1,14 @@
 <link rel="stylesheet" href="/static/css/styles.css">
 
-<nav>
+<nav id="site-nav">
     <a href="/" class="logo"><img src="/static/logo.svg" alt=""><span>PlacePix</span></a>
+    <button id="nav-toggle" class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+        </svg>
+    </button>
     <div class="nav-links">
         <a href="/#categories" data-i18n="nav.categories">Categories</a>
         <a href="/images" data-i18n="nav.explorer">Explorer</a>

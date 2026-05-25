@@ -137,6 +137,15 @@ body.i18n-ready .skeleton { display: none !important; }
   gap: 4px;
 }
 
+@media (max-width: 480px) {
+  .lang-dropdown {
+    min-width: min(92vw, 340px);
+  }
+  .lang-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .lang-item {
   display: flex;
   align-items: center;
@@ -321,6 +330,30 @@ nav .nav-links {
   font-size: 0.875em;
 }
 
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.nav-toggle:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, .08);
+}
+
+.nav-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
 nav .nav-links a {
   color: var(--text-secondary);
   text-decoration: none;
@@ -383,10 +416,70 @@ header p {
     padding: 16px;
   }
 
+  nav#site-nav {
+    flex-wrap: wrap;
+  }
+
+  nav#site-nav > .nav-toggle {
+    margin-left: auto;
+  }
+
   nav .nav-links {
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    align-self: flex-end;
+  }
+
+  nav .nav-links {
+    display: none !important;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  nav.nav-mobile-open .nav-links {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  nav .nav-links a,
+  nav .nav-links span,
+  nav .nav-links .dropdown {
+    padding: 10px 10px;
+    border-radius: 10px;
+  }
+
+  nav .nav-links a:hover,
+  nav .nav-links span:hover {
+    background: var(--background);
+  }
+
+  .dropdown-menu {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    margin-top: 0;
+    box-shadow: none;
+    border-radius: 10px;
+    padding: 8px 0;
+  }
+
+  .dropdown:hover .dropdown-menu {
+    display: none;
+  }
+
+  nav.nav-mobile-open .dropdown-menu {
+    display: block;
   }
 }
 
@@ -1031,6 +1124,12 @@ button {
 .cat-card:hover .copy-btn,
 .copy-btn.show {
   opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .copy-btn {
+    opacity: 1;
+  }
 }
 
 .copy-btn.copied {
