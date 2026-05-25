@@ -25,6 +25,8 @@
   
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="canonical" href="https://placepix.riadvice.com/">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
+  <link rel="stylesheet" href="/static/css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
   {% if ga_tracking_id %}
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_id }}"></script>
@@ -124,31 +126,78 @@
         <span class="font-bold text-xl tracking-tight text-stone-800">PlacePix</span>
       </div>
       <div class="flex items-center gap-6 text-sm">
-        <a href="#categories" class="text-stone-500 hover:text-accent transition">Categories</a>
-        <a href="/images" class="text-stone-500 hover:text-accent transition">Explorer</a>
-        <a href="/palette" class="text-stone-500 hover:text-accent transition">Palette</a>
-        <a href="/url-builder" class="text-stone-500 hover:text-accent transition">URL Builder</a>
-        <div class="dropdown">
-          <span class="dropdown-toggle text-stone-500 hover:text-accent font-medium transition">Features ▾</span>
+        <a href="#categories" class="text-stone-500 hover:text-accent transition" data-i18n="nav.categories">Categories</a>
+        <a href="/images" class="text-stone-500 hover:text-accent transition" data-i18n="nav.explorer">Explorer</a>
+        <a href="/palette" class="text-stone-500 hover:text-accent transition" data-i18n="nav.palette">Palette</a>
+        <a href="/url-builder" class="text-stone-500 hover:text-accent transition" data-i18n="nav.url_builder">URL Builder</a>
+        <div class="dropdown" id="features-dropdown">
+          <span class="dropdown-toggle text-stone-500 hover:text-accent font-medium transition" data-i18n="nav.features">Features ▾</span>
           <div class="dropdown-menu">
-            <a href="/#smart-crop">Smart Crop</a>
-            <a href="/#aspect-ratios">Aspect Ratios</a>
-            <a href="/#filters">Filters & Effects</a>
-            <a href="/#overlays">Overlays</a>
-            <a href="/#presets">Presets</a>
-            <a href="/#api">API Reference</a>
+            <a href="/#smart-crop" data-i18n="nav.features.smart_crop">Smart Crop</a>
+            <a href="/#aspect-ratios" data-i18n="nav.features.aspect_ratios">Aspect Ratios</a>
+            <a href="/#filters" data-i18n="nav.features.filters">Filters &amp; Effects</a>
+            <a href="/#overlays" data-i18n="nav.features.overlays">Overlays</a>
+            <a href="/#presets" data-i18n="nav.features.presets">Presets</a>
+            <a href="/#svg" data-i18n="nav.features.svg">SVG Placeholders</a>
+            <a href="/#gradient" data-i18n="nav.features.gradient">Gradient Placeholders</a>
+            <a href="/#color-search" data-i18n="nav.features.color_search">Color Search</a>
+            <a href="/#figma" data-i18n="nav.features.figma">Figma Integration</a>
+            <a href="/#api" data-i18n="nav.features.api_ref">API Reference</a>
           </div>
         </div>
         {% if upload_enabled %}
-        <a href="#upload" class="text-stone-500 hover:text-accent transition">Upload</a>
+        <a href="#upload" class="text-stone-500 hover:text-accent transition" data-i18n="nav.upload">Upload</a>
         {% endif %}
-        <a href="#api" class="text-stone-500 hover:text-accent transition">API</a>
-        <a href="/docs" target="_blank" class="bg-gradient-to-r from-amber-700 to-orange-700 text-white px-4 py-2 rounded-lg hover:from-amber-800 hover:to-orange-800 transition font-semibold shadow-md shadow-amber-900/20">Docs</a>
+        <a href="#api" class="text-stone-500 hover:text-accent transition" data-i18n="nav.api">API</a>
+        <a href="/docs" target="_blank" class="bg-gradient-to-r from-amber-700 to-orange-700 text-white px-4 py-2 rounded-lg hover:from-amber-800 hover:to-orange-800 transition font-semibold shadow-md shadow-amber-900/20" data-i18n="nav.docs">Docs</a>
         <a href="https://github.com/riadvice/placepix" target="_blank" class="text-stone-500 hover:text-accent transition" title="GitHub">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
           </svg>
         </a>
+
+        <!-- Language Selector -->
+        <div class="lang-selector" id="lang-selector" style="position:relative;display:inline-block;">
+          <button class="lang-trigger" id="lang-trigger" aria-haspopup="true" aria-expanded="false"
+            style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:5px 10px;border-radius:8px;border:1px solid #e7e5e4;background:#fff;color:#1c1917;font-size:.85rem;font-weight:500;white-space:nowrap;"
+            onclick="(function(){var dd=document.getElementById('lang-dropdown');var open=dd.classList.toggle('lang-dd-open');document.getElementById('lang-trigger').setAttribute('aria-expanded',open);})()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="lang-trigger-label">English</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="lang-dropdown" role="listbox"
+            style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e7e5e4;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.13);padding:12px;z-index:9999;min-width:380px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+              <div class="lang-item" data-lang="ar" role="option" onclick="i18n.setLanguage('ar')"><span class="fi fi-sa"></span> العربية</div>
+              <div class="lang-item" data-lang="bn" role="option" onclick="i18n.setLanguage('bn')"><span class="fi fi-bd"></span> বাংলা</div>
+              <div class="lang-item" data-lang="zh-CN" role="option" onclick="i18n.setLanguage('zh-CN')"><span class="fi fi-cn"></span> 中文 (简体)</div>
+              <div class="lang-item" data-lang="zh-TW" role="option" onclick="i18n.setLanguage('zh-TW')"><span class="fi fi-tw"></span> 中文 (繁體)</div>
+              <div class="lang-item" data-lang="cs" role="option" onclick="i18n.setLanguage('cs')"><span class="fi fi-cz"></span> Čeština</div>
+              <div class="lang-item" data-lang="nl" role="option" onclick="i18n.setLanguage('nl')"><span class="fi fi-nl"></span> Nederlands</div>
+              <div class="lang-item" data-lang="en" role="option" onclick="i18n.setLanguage('en')"><span class="fi fi-gb"></span> English</div>
+              <div class="lang-item" data-lang="fil" role="option" onclick="i18n.setLanguage('fil')"><span class="fi fi-ph"></span> Filipino</div>
+              <div class="lang-item" data-lang="fr" role="option" onclick="i18n.setLanguage('fr')"><span class="fi fi-fr"></span> Français</div>
+              <div class="lang-item" data-lang="de" role="option" onclick="i18n.setLanguage('de')"><span class="fi fi-de"></span> Deutsch</div>
+              <div class="lang-item" data-lang="el" role="option" onclick="i18n.setLanguage('el')"><span class="fi fi-gr"></span> Ελληνικά</div>
+              <div class="lang-item" data-lang="hi" role="option" onclick="i18n.setLanguage('hi')"><span class="fi fi-in"></span> हिन्दी</div>
+              <div class="lang-item" data-lang="id" role="option" onclick="i18n.setLanguage('id')"><span class="fi fi-id"></span> Bahasa Indonesia</div>
+              <div class="lang-item" data-lang="it" role="option" onclick="i18n.setLanguage('it')"><span class="fi fi-it"></span> Italiano</div>
+              <div class="lang-item" data-lang="ja" role="option" onclick="i18n.setLanguage('ja')"><span class="fi fi-jp"></span> 日本語</div>
+              <div class="lang-item" data-lang="ko" role="option" onclick="i18n.setLanguage('ko')"><span class="fi fi-kr"></span> 한국어</div>
+              <div class="lang-item" data-lang="no" role="option" onclick="i18n.setLanguage('no')"><span class="fi fi-no"></span> Norsk</div>
+              <div class="lang-item" data-lang="pl" role="option" onclick="i18n.setLanguage('pl')"><span class="fi fi-pl"></span> Polski</div>
+              <div class="lang-item" data-lang="pt-BR" role="option" onclick="i18n.setLanguage('pt-BR')"><span class="fi fi-br"></span> Português (Brasil)</div>
+              <div class="lang-item" data-lang="pt-PT" role="option" onclick="i18n.setLanguage('pt-PT')"><span class="fi fi-pt"></span> Português (Portugal)</div>
+              <div class="lang-item" data-lang="ru" role="option" onclick="i18n.setLanguage('ru')"><span class="fi fi-ru"></span> Русский</div>
+              <div class="lang-item" data-lang="es" role="option" onclick="i18n.setLanguage('es')"><span class="fi fi-es"></span> Español</div>
+              <div class="lang-item" data-lang="sv" role="option" onclick="i18n.setLanguage('sv')"><span class="fi fi-se"></span> Svenska</div>
+              <div class="lang-item" data-lang="th" role="option" onclick="i18n.setLanguage('th')"><span class="fi fi-th"></span> ไทย</div>
+              <div class="lang-item" data-lang="tr" role="option" onclick="i18n.setLanguage('tr')"><span class="fi fi-tr"></span> Türkçe</div>
+              <div class="lang-item" data-lang="uk" role="option" onclick="i18n.setLanguage('uk')"><span class="fi fi-ua"></span> Українська</div>
+              <div class="lang-item" data-lang="vi" role="option" onclick="i18n.setLanguage('vi')"><span class="fi fi-vn"></span> Tiếng Việt</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
@@ -160,8 +209,8 @@
     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-stone-900/20 to-transparent"></div>
     <div class="absolute bottom-0 left-0 right-0 p-8">
       <div class="max-w-7xl mx-auto">
-        <h1 class="text-5xl font-bold text-white mb-3">PlacePix <span class="block text-3xl font-normal mt-1">Self-Hosted Placeholder Image Service</span></h1>
-        <p class="text-stone-200 text-lg max-w-2xl">Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.</p>
+        <h1 class="text-5xl font-bold text-white mb-3">PlacePix <span class="block text-3xl font-normal mt-1" data-i18n="hero.subtitle">Self-Hosted Placeholder Image Service</span></h1>
+        <p class="text-stone-200 text-lg max-w-2xl" data-i18n="hero.description">Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.</p>
         <p class="text-sm text-stone-400 mt-4">{{ total }} images across {{ categories|length }} categories</p>
       </div>
     </div>
@@ -169,27 +218,27 @@
 
   <!-- Features -->
   <section id="smart-crop" class="max-w-7xl mx-auto px-4 pt-12 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Smart Crop</h2>
-    <p class="text-stone-500 mb-6">Intelligent face-aware cropping. PlacePix detects faces and centers them in the crop area automatically.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.smart_crop">Smart Crop</h2>
+    <p class="text-stone-500 mb-6" data-i18n="section.smart_crop.desc">Intelligent face-aware cropping. PlacePix detects faces and centers them in the crop area automatically.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <img src="/400/300/people?seed=smart1&fit=smart" alt="Smart crop" class="w-full h-48 object-cover">
+        <img src="/400/300/{{ (categories|random).name if categories else 'all' }}?seed=smart1&fit=smart" alt="Smart crop" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Face Detection</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="smart_crop.face_detection">Face Detection</p>
           <code class="text-xs font-mono text-stone-500 break-all">?fit=smart</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <img src="/400/300/people?seed=smart2&fit=crop" alt="Standard crop" class="w-full h-48 object-cover">
+        <img src="/400/300/{{ (categories|random).name if categories else 'all' }}?seed=smart2&fit=crop" alt="Standard crop" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Standard Center Crop</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="smart_crop.center_crop">Standard Center Crop</p>
           <code class="text-xs font-mono text-stone-500 break-all">?fit=crop</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <img src="/400/300/people?seed=smart3&fit=cover" alt="Cover" class="w-full h-48 object-cover">
+        <img src="/400/300/{{ (categories|random).name if categories else 'all' }}?seed=smart3&fit=cover" alt="Cover" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Cover Fill</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="smart_crop.cover_fill">Cover Fill</p>
           <code class="text-xs font-mono text-stone-500 break-all">?fit=cover</code>
         </div>
       </div>
@@ -197,27 +246,27 @@
   </section>
 
   <section id="aspect-ratios" class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Aspect Ratios</h2>
-    <p class="text-stone-500 mb-6">Pick from common aspect ratios and let PlacePix compute the exact dimensions.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.aspect_ratios">Aspect Ratios</h2>
+    <p class="text-stone-500 mb-6" data-i18n="section.aspect_ratios.desc">Pick from common aspect ratios and let PlacePix compute the exact dimensions.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/ratio/16:9/400/nature?seed=ratio1" alt="16:9" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">16:9 Widescreen</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="ratio.widescreen">16:9 Widescreen</p>
           <code class="text-xs font-mono text-stone-500 break-all">/ratio/16:9/400</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/ratio/1:1/400/nature?seed=ratio2" alt="1:1" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">1:1 Square</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="ratio.square">1:1 Square</p>
           <code class="text-xs font-mono text-stone-500 break-all">/ratio/1:1/400</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/ratio/9:16/400/nature?seed=ratio3" alt="9:16" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">9:16 Portrait</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="ratio.portrait">9:16 Portrait</p>
           <code class="text-xs font-mono text-stone-500 break-all">/ratio/9:16/400</code>
         </div>
       </div>
@@ -225,27 +274,27 @@
   </section>
 
   <section id="overlays" class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Overlays</h2>
-    <p class="text-stone-500 mb-6">Add custom text labels and watermarks directly onto your images.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.overlays">Overlays</h2>
+    <p class="text-stone-500 mb-6" data-i18n="section.overlays.desc">Add custom text labels and watermarks directly onto your images.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=overlay1&text=Hello+World" alt="Text overlay" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Text Label</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="overlay.text_label">Text Label</p>
           <code class="text-xs font-mono text-stone-500 break-all">?text=Hello+World</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=overlay2&text=Demo&border=4,ffffff" alt="Border" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Border</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="overlay.border">Border</p>
           <code class="text-xs font-mono text-stone-500 break-all">?border=4,ffffff</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=overlay3&watermark=1" alt="Watermark" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Watermark</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="overlay.watermark">Watermark</p>
           <code class="text-xs font-mono text-stone-500 break-all">?watermark=1</code>
         </div>
       </div>
@@ -253,27 +302,27 @@
   </section>
 
   <section id="presets" class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Presets</h2>
-    <p class="text-stone-500 mb-6">One-click preset dimensions for popular social and screen sizes.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.presets">Presets</h2>
+    <p class="text-stone-500 mb-6" data-i18n="section.presets.desc">One-click preset dimensions for popular social and screen sizes.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/preset/instagram-square/nature?seed=preset1" alt="Instagram" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Instagram Square</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.instagram_square">Instagram Square</p>
           <code class="text-xs font-mono text-stone-500 break-all">/preset/instagram-square</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/preset/youtube-thumbnail/nature?seed=preset2" alt="YouTube" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">YouTube Thumbnail</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.youtube_thumbnail">YouTube Thumbnail</p>
           <code class="text-xs font-mono text-stone-500 break-all">/preset/youtube-thumbnail</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/preset/mobile/nature?seed=preset3" alt="Mobile" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Mobile</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.mobile">Mobile</p>
           <code class="text-xs font-mono text-stone-500 break-all">/preset/mobile</code>
         </div>
       </div>
@@ -289,11 +338,11 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
       </div>
-      <p class="text-stone-700 font-semibold text-lg">Drag & drop images here</p>
-      <p class="text-sm text-stone-400 mt-1">or click to browse files</p>
+      <p class="text-stone-700 font-semibold text-lg" data-i18n="upload.drag_drop">Drag &amp; drop images here</p>
+      <p class="text-sm text-stone-400 mt-1" data-i18n="upload.or_browse">or click to browse files</p>
       <input type="file" id="file-input" class="hidden" multiple accept="image/*">
       <div class="mt-4 inline-flex items-center gap-2">
-        <label class="text-sm text-stone-500">Category:</label>
+        <label class="text-sm text-stone-500" data-i18n="upload.category_label">Category:</label>
         <select id="upload-category" class="border border-border-subtle rounded-lg px-3 py-2 text-sm bg-surface text-stone-700 focus:ring-2 focus:ring-accent focus:border-accent">
           <option value="">__root (no category)</option>
           {% for cat in categories %}
@@ -310,8 +359,8 @@
   <section id="categories" class="max-w-7xl mx-auto px-4 {% if not upload_enabled %}pt-12{% endif %} pb-12">
     <div class="flex items-end justify-between mb-8">
       <div>
-        <h2 class="text-3xl font-bold text-stone-800">Categories</h2>
-        <p class="text-stone-500 mt-1">Click any size to get a random image from that category</p>
+        <h2 class="text-3xl font-bold text-stone-800" data-i18n="section.categories">Categories</h2>
+        <p class="text-stone-500 mt-1" data-i18n="categories.desc">Click any size to get a random image from that category</p>
       </div>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -357,8 +406,8 @@
     <div class="bg-surface border border-border-subtle rounded-2xl p-8 shadow-lg">
       <div class="flex flex-col md:flex-row gap-8 items-center">
         <div class="flex-1">
-          <h2 class="text-2xl font-bold text-stone-800 mb-3">Random Image Generator</h2>
-          <p class="text-stone-500 mb-6">Grab any size from any category — or let PlacePix pick one for you.</p>
+          <h2 class="text-2xl font-bold text-stone-800 mb-3" data-i18n="section.random">Random Image Generator</h2>
+          <p class="text-stone-500 mb-6" data-i18n="random.desc">Grab any size from any category — or let PlacePix pick one for you.</p>
           <div class="flex flex-wrap gap-3">
             <a href="/400/300" class="bg-accent text-white px-5 py-2.5 rounded-lg font-medium hover:bg-accent-hover transition shadow-sm">400 × 300</a>
             <a href="/800/600" class="bg-stone-100 px-5 py-2.5 rounded-lg font-medium hover:bg-stone-200 transition text-stone-700">800 × 600</a>
@@ -375,8 +424,8 @@
 
   <!-- SVG Placeholder -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">SVG Placeholder Generator</h2>
-    <p class="text-stone-500 mb-6">Zero-processing wireframe placeholders. Perfect for layouts and mockups.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.svg">SVG Placeholder Generator</h2>
+    <p class="text-stone-500 mb-6" data-i18n="section.svg.desc">Zero-processing wireframe placeholders. Perfect for layouts and mockups.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/svg/400/300?bg=e7e5e4&fg=78716c" alt="Default" class="w-full h-48 object-cover">
@@ -409,27 +458,27 @@
 
   <!-- Gradient Placeholders -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Gradient Placeholder Generator</h2>
-    <p class="text-stone-500 mb-6">Generate linear or radial gradient images on the fly. Perfect for backgrounds and overlays.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.gradient">Gradient Placeholder Generator</h2>
+    <p class="text-stone-500 mb-6" data-i18n="section.gradient.desc">Generate linear or radial gradient images on the fly. Perfect for backgrounds and overlays.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/gradient/400/300/3b82f6/10b981" alt="Linear gradient" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Linear Gradient</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="gradient.linear">Linear Gradient</p>
           <code class="text-xs font-mono text-stone-500 break-all">/gradient/400/300/3b82f6/10b981</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/gradient/400/300/e11d48/f59e0b?angle=45" alt="Angled gradient" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">45° Angle</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="gradient.angle">45° Angle</p>
           <code class="text-xs font-mono text-stone-500 break-all">?angle=45</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/gradient/400/300/1e293b/64748b?gradient_type=radial" alt="Radial gradient" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Radial Gradient</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="gradient.radial">Radial Gradient</p>
           <code class="text-xs font-mono text-stone-500 break-all">?gradient_type=radial</code>
         </div>
       </div>
@@ -437,7 +486,7 @@
     <div class="mt-6 bg-muted rounded-xl p-4 border border-border-subtle">
       <p class="text-sm text-stone-600 font-mono mb-2">Parameters:</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-stone-500">
-        <div><code class="text-accent font-mono">/gradient/{w}x{h}/{from}/{to}</code> — gradient endpoint</div>
+        <div><code class="text-accent font-mono">/gradient/{w}/{h}/{from}/{to}</code> — gradient endpoint</div>
         <div><code class="text-accent font-mono">?angle=45</code> — linear angle (0-360)</div>
         <div><code class="text-accent font-mono">?gradient_type=radial</code> — radial from center</div>
       </div>
@@ -446,48 +495,48 @@
 
   <!-- Filters & Effects -->
   <section id="filters" class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Filters & Effects</h2>
-    <p class="text-stone-500 mb-6">Apply filters and color adjustments to any image on the fly.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.filters">Filters &amp; Effects</h2>
+    <p class="text-stone-500 mb-6" data-i18n="section.filters.desc">Apply filters and color adjustments to any image on the fly.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;sepia=1" alt="Sepia" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Sepia Tone</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.sepia">Sepia Tone</p>
           <code class="text-xs font-mono text-stone-500 break-all">?sepia=1</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;tint=d97706" alt="Amber Tint" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Amber Tint</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.tint">Amber Tint</p>
           <code class="text-xs font-mono text-stone-500 break-all">?tint=d97706</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;brightness=1.3&amp;contrast=1.2" alt="Brighten" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Brighten &amp; Contrast</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.brighten">Brighten &amp; Contrast</p>
           <code class="text-xs font-mono text-stone-500 break-all">?brightness=1.3&amp;contrast=1.2</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;saturation=2.0" alt="Saturation" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">High Saturation</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.saturation">High Saturation</p>
           <code class="text-xs font-mono text-stone-500 break-all">?saturation=2.0</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;grayscale=1" alt="Grayscale" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Grayscale</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.grayscale">Grayscale</p>
           <code class="text-xs font-mono text-stone-500 break-all">?grayscale=1</code>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;tint=e11d48&amp;brightness=0.8&amp;contrast=1.3" alt="Dramatic" class="w-full h-48 object-cover">
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Dramatic Red</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.dramatic">Dramatic Red</p>
           <code class="text-xs font-mono text-stone-500 break-all">?tint=e11d48&amp;brightness=0.8&amp;contrast=1.3</code>
         </div>
       </div>
@@ -507,15 +556,15 @@
 
   <!-- Search by Color -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Search by Dominant Color</h2>
-    <p class="text-stone-500 mb-6">Find images that match your brand palette. Every image is scanned for its top 3 dominant colors.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.color_search">Search by Dominant Color</h2>
+    <p class="text-stone-500 mb-6" data-i18n="color_search.desc">Find images that match your brand palette. Every image is scanned for its top 3 dominant colors.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <a href="/color/d97706/400/300" target="_blank">
           <img src="/color/d97706/400/300" alt="Amber match" class="w-full h-48 object-cover">
         </a>
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Amber</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="color.amber">Amber</p>
           <code class="text-xs font-mono text-stone-500 break-all">/color/d97706/400/300</code>
         </div>
       </div>
@@ -524,7 +573,7 @@
           <img src="/color/10b981/400/300" alt="Green match" class="w-full h-48 object-cover">
         </a>
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Green</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="color.green">Green</p>
           <code class="text-xs font-mono text-stone-500 break-all">/color/10b981/400/300</code>
         </div>
       </div>
@@ -533,7 +582,7 @@
           <img src="/color/e11d48/400/300" alt="Red match" class="w-full h-48 object-cover">
         </a>
         <div class="p-4">
-          <p class="font-semibold text-sm text-stone-700 mb-1">Red</p>
+          <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="color.red">Red</p>
           <code class="text-xs font-mono text-stone-500 break-all">/color/e11d48/400/300</code>
         </div>
       </div>
@@ -551,10 +600,10 @@
 
   <!-- API Usage -->
   <section id="api" class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">API Reference</h2>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.api">API Reference</h2>
     <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
       <div class="bg-muted px-6 py-4 border-b border-border-subtle">
-        <p class="text-sm text-stone-500">All endpoints support CORS and return images with long-term cache headers.</p>
+        <p class="text-sm text-stone-500" data-i18n="api.cors_note">All endpoints support CORS and return images with long-term cache headers.</p>
       </div>
       <div class="divide-y divide-border-subtle">
         <div class="px-6 py-4 hover:bg-muted/50 transition">
@@ -562,31 +611,31 @@
             <span class="bg-accent text-white text-xs font-bold px-2 py-1 rounded">GET</span>
             <code class="text-sm font-mono text-stone-800">/{width}/{height}/{category}</code>
           </div>
-          <p class="text-sm text-stone-500 mt-1 pl-12">Random image from a category</p>
+          <p class="text-sm text-stone-500 mt-1 pl-12" data-i18n="api.random_category">Random image from a category</p>
         </div>
         <div class="px-6 py-4 hover:bg-muted/50 transition">
           <div class="flex items-center gap-3">
             <span class="bg-accent text-white text-xs font-bold px-2 py-1 rounded">GET</span>
             <code class="text-sm font-mono text-stone-800">/{width}/{height}</code>
           </div>
-          <p class="text-sm text-stone-500 mt-1 pl-12">Random image from all categories</p>
+          <p class="text-sm text-stone-500 mt-1 pl-12" data-i18n="api.random_all">Random image from all categories</p>
         </div>
         <div class="px-6 py-4 hover:bg-muted/50 transition">
           <div class="flex items-center gap-3">
             <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">GET</span>
             <code class="text-sm font-mono text-stone-800">/health</code>
           </div>
-          <p class="text-sm text-stone-500 mt-1 pl-12">Health check (liveness probe for Docker/K8s)</p>
+          <p class="text-sm text-stone-500 mt-1 pl-12" data-i18n="api.health">Health check (liveness probe for Docker/K8s)</p>
         </div>
         <div class="px-6 py-4 hover:bg-muted/50 transition">
           <div class="flex items-center gap-3">
             <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">GET</span>
             <code class="text-sm font-mono text-stone-800">/ready</code>
           </div>
-          <p class="text-sm text-stone-500 mt-1 pl-12">Readiness check (returns 503 until images loaded)</p>
+          <p class="text-sm text-stone-500 mt-1 pl-12" data-i18n="api.ready">Readiness check (returns 503 until images loaded)</p>
         </div>
         <div class="px-6 py-4 bg-muted/30">
-          <p class="text-sm font-semibold text-stone-700 mb-2">Query Parameters</p>
+          <p class="text-sm font-semibold text-stone-700 mb-2" data-i18n="api.query_params">Query Parameters</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
             <div class="flex gap-2"><code class="text-accent font-mono">?grayscale=1</code><span class="text-stone-500">Grayscale</span></div>
             <div class="flex gap-2"><code class="text-accent font-mono">?blur=2</code><span class="text-stone-500">Gaussian blur (1-10)</span></div>
@@ -605,11 +654,11 @@
 
   <!-- Figma Integration -->
   <section class="max-w-7xl mx-auto px-4 pb-12">
-    <h2 class="text-2xl font-bold text-stone-800 mb-6">Figma Integration</h2>
-    <p class="text-stone-500 mb-6">Embed live PlacePix images directly in your Figma designs using iframe embeds.</p>
+    <h2 class="text-2xl font-bold text-stone-800 mb-6" data-i18n="section.figma">Figma Integration</h2>
+    <p class="text-stone-500 mb-6" data-i18n="figma.desc">Embed live PlacePix images directly in your Figma designs using iframe embeds.</p>
     <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
       <div class="p-6">
-        <p class="text-sm text-stone-600 mb-4">Paste this iframe code into Figma as an embedded URL:</p>
+        <p class="text-sm text-stone-600 mb-4" data-i18n="figma.paste_note">Paste this iframe code into Figma as an embedded URL:</p>
         <div class="bg-stone-900 rounded-lg p-4 overflow-x-auto">
           <code class="text-sm text-green-400 font-mono whitespace-nowrap">
             &lt;iframe src="https://your-placepix-instance.com/800/600/nature?seed=figma" width="800" height="600" frameborder="0"&gt;&lt;/iframe&gt;
@@ -635,22 +684,22 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         <!-- About -->
         <div>
-          <p class="text-stone-300 text-sm font-medium mb-2">PlacePix</p>
-          <p class="text-stone-400 text-xs">Self-hosted placeholder image service with resizing, filters, and text overlays.</p>
+          <p class="text-stone-300 text-sm font-medium mb-2" data-i18n="footer.about">PlacePix</p>
+          <p class="text-stone-400 text-xs" data-i18n="footer.about_desc">Self-hosted placeholder image service with resizing, filters, and text overlays.</p>
         </div>
         <!-- Links -->
         <div>
-          <p class="text-stone-300 text-sm font-medium mb-2">Links</p>
+          <p class="text-stone-300 text-sm font-medium mb-2" data-i18n="footer.links">Links</p>
           <div class="flex flex-col gap-1">
-            <a href="https://github.com/riadvice/placepix" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition">GitHub Repository</a>
-            <a href="https://github.com/riadvice/placepix/issues" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition">Report an Issue</a>
+            <a href="https://github.com/riadvice/placepix" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition" data-i18n="footer.github">GitHub Repository</a>
+            <a href="https://github.com/riadvice/placepix/issues" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition" data-i18n="footer.report_issue">Report an Issue</a>
             <a href="https://riadvice.com" target="_blank" class="text-stone-400 text-xs hover:text-amber-400 transition">RIADVICE</a>
           </div>
         </div>
         <!-- License -->
         <div>
-          <p class="text-stone-300 text-sm font-medium mb-2">License</p>
-          <p class="text-stone-400 text-xs">MIT License — Open source and free to use</p>
+          <p class="text-stone-300 text-sm font-medium mb-2" data-i18n="footer.license">License</p>
+          <p class="text-stone-400 text-xs" data-i18n="footer.license_desc">MIT License — Open source and free to use</p>
           <p class="text-stone-500 text-xs mt-1">Inspired by <a href="https://picsum.photos/" class="text-amber-400 hover:underline" target="_blank">picsum.photos</a> and <a href="https://lorem.space/" class="text-amber-400 hover:underline" target="_blank">lorem.space</a></p>
         </div>
       </div>
@@ -711,5 +760,22 @@
       setTimeout(() => location.reload(), 1000);
     }
   </script>
+  <script>
+    document.addEventListener('click', function(e) {
+      var sel = document.getElementById('lang-selector');
+      var dd  = document.getElementById('lang-dropdown');
+      if (sel && dd && !sel.contains(e.target)) {
+        dd.classList.remove('lang-dd-open');
+        var btn = document.getElementById('lang-trigger');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+      var featSel = document.getElementById('features-dropdown');
+      if (featSel && !featSel.contains(e.target)) {
+        var menu = featSel.querySelector('.dropdown-menu');
+        if (menu) menu.style.display = 'none';
+      }
+    });
+  </script>
+  <script src="/static/js/i18n.js"></script>
 </body>
 </html>

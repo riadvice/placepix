@@ -1,0 +1,15 @@
+{# Image card partial - receives: entry #}
+{% set thumb_url = "/id/" ~ entry.id ~ "/200/150" %}
+{% set view_url = "/id/" ~ entry.id ~ "/800/600" %}
+{% set info_url = "/api/info/id/" ~ entry.id %}
+<div class="card">
+    <a href="{{ view_url }}" target="_blank"><img src="{{ thumb_url }}" alt="{{ entry.filename }}" loading="lazy"></a>
+    <div class="info">
+        <div class="id">ID: <a href="{{ view_url }}" target="_blank">{{ entry.id }}</a></div>
+        <div class="meta">{{ entry.category }} / {{ entry.filename }}</div>
+        <div class="links">
+            <a href="{{ view_url }}" target="_blank">view</a>
+            <a href="{{ info_url }}" target="_blank">info</a>
+        </div>
+    </div>
+</div>

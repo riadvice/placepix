@@ -24,6 +24,8 @@
     <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
     
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="canonical" href="https://placepix.riadvice.com/url-builder">
     {% if ga_tracking_id %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_id }}"></script>
@@ -744,59 +746,106 @@
                 <span>PlacePix</span>
             </a>
             <div class="nav-links">
-                <a href="/#categories">Categories</a>
-                <a href="/images">Explorer</a>
-                <a href="/palette">Palette</a>
-                <a href="/url-builder" style="color: var(--primary); font-weight: 600;">URL Builder</a>
-                <div class="dropdown">
-                    <span class="dropdown-toggle" style="color: var(--text-secondary);">Features ▾</span>
+                <a href="/#categories" data-i18n="nav.categories">Categories</a>
+                <a href="/images" data-i18n="nav.explorer">Explorer</a>
+                <a href="/palette" data-i18n="nav.palette">Palette</a>
+                <a href="/url-builder" style="color: var(--primary); font-weight: 600;" data-i18n="nav.url_builder">URL Builder</a>
+                <div class="dropdown" id="features-dropdown">
+                    <span class="dropdown-toggle" style="color: var(--text-secondary);" data-i18n="nav.features">Features ▾</span>
                     <div class="dropdown-menu">
-                        <a href="/#smart-crop">Smart Crop</a>
-                        <a href="/#aspect-ratios">Aspect Ratios</a>
-                        <a href="/#filters">Filters & Effects</a>
-                        <a href="/#overlays">Overlays</a>
-                        <a href="/#presets">Presets</a>
+                        <a href="/#smart-crop" data-i18n="nav.features.smart_crop">Smart Crop</a>
+                        <a href="/#aspect-ratios" data-i18n="nav.features.aspect_ratios">Aspect Ratios</a>
+                        <a href="/#filters" data-i18n="nav.features.filters">Filters &amp; Effects</a>
+                        <a href="/#overlays" data-i18n="nav.features.overlays">Overlays</a>
+                        <a href="/#presets" data-i18n="nav.features.presets">Presets</a>
+                        <a href="/#svg">SVG Placeholders</a>
+                        <a href="/#gradient">Gradient Placeholders</a>
+                        <a href="/#color-search">Color Search</a>
+                        <a href="/#figma">Figma Integration</a>
                         <a href="/#api">API Reference</a>
                     </div>
                 </div>
                 {% if upload_enabled %}
-                <a href="/#upload">Upload</a>
+                <a href="/#upload" data-i18n="nav.upload">Upload</a>
                 {% endif %}
-                <a href="/#api">API</a>
-                <a href="/docs" target="_blank" class="btn-docs">Docs</a>
+                <a href="/#api" data-i18n="nav.api">API</a>
+                <a href="/docs" target="_blank" class="btn-docs" data-i18n="nav.docs">Docs</a>
                 <a href="https://github.com/riadvice/placepix" target="_blank" title="GitHub">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
                     </svg>
                 </a>
+
+                <!-- Language Selector -->
+                <div style="position:relative;display:inline-block;" id="lang-selector">
+                  <button id="lang-trigger" aria-haspopup="true" aria-expanded="false"
+                    style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-primary);font-size:.85rem;font-weight:500;white-space:nowrap;"
+                    onclick="(function(){var dd=document.getElementById('lang-dropdown');var open=dd.classList.toggle('lang-dd-open');document.getElementById('lang-trigger').setAttribute('aria-expanded',open);})()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span id="lang-trigger-label">English</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <div id="lang-dropdown" role="listbox"
+                    style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.13);padding:12px;z-index:9999;min-width:380px;">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+                      <div class="lang-item" data-lang="ar" role="option" onclick="i18n.setLanguage('ar')"><span class="fi fi-sa"></span> العربية</div>
+                      <div class="lang-item" data-lang="bn" role="option" onclick="i18n.setLanguage('bn')"><span class="fi fi-bd"></span> বাংলা</div>
+                      <div class="lang-item" data-lang="zh-CN" role="option" onclick="i18n.setLanguage('zh-CN')"><span class="fi fi-cn"></span> 中文 (简体)</div>
+                      <div class="lang-item" data-lang="zh-TW" role="option" onclick="i18n.setLanguage('zh-TW')"><span class="fi fi-tw"></span> 中文 (繁體)</div>
+                      <div class="lang-item" data-lang="cs" role="option" onclick="i18n.setLanguage('cs')"><span class="fi fi-cz"></span> Čeština</div>
+                      <div class="lang-item" data-lang="nl" role="option" onclick="i18n.setLanguage('nl')"><span class="fi fi-nl"></span> Nederlands</div>
+                      <div class="lang-item" data-lang="en" role="option" onclick="i18n.setLanguage('en')"><span class="fi fi-gb"></span> English</div>
+                      <div class="lang-item" data-lang="fil" role="option" onclick="i18n.setLanguage('fil')"><span class="fi fi-ph"></span> Filipino</div>
+                      <div class="lang-item" data-lang="fr" role="option" onclick="i18n.setLanguage('fr')"><span class="fi fi-fr"></span> Français</div>
+                      <div class="lang-item" data-lang="de" role="option" onclick="i18n.setLanguage('de')"><span class="fi fi-de"></span> Deutsch</div>
+                      <div class="lang-item" data-lang="el" role="option" onclick="i18n.setLanguage('el')"><span class="fi fi-gr"></span> Ελληνικά</div>
+                      <div class="lang-item" data-lang="hi" role="option" onclick="i18n.setLanguage('hi')"><span class="fi fi-in"></span> हिन्दी</div>
+                      <div class="lang-item" data-lang="id" role="option" onclick="i18n.setLanguage('id')"><span class="fi fi-id"></span> Bahasa Indonesia</div>
+                      <div class="lang-item" data-lang="it" role="option" onclick="i18n.setLanguage('it')"><span class="fi fi-it"></span> Italiano</div>
+                      <div class="lang-item" data-lang="ja" role="option" onclick="i18n.setLanguage('ja')"><span class="fi fi-jp"></span> 日本語</div>
+                      <div class="lang-item" data-lang="ko" role="option" onclick="i18n.setLanguage('ko')"><span class="fi fi-kr"></span> 한국어</div>
+                      <div class="lang-item" data-lang="no" role="option" onclick="i18n.setLanguage('no')"><span class="fi fi-no"></span> Norsk</div>
+                      <div class="lang-item" data-lang="pl" role="option" onclick="i18n.setLanguage('pl')"><span class="fi fi-pl"></span> Polski</div>
+                      <div class="lang-item" data-lang="pt-BR" role="option" onclick="i18n.setLanguage('pt-BR')"><span class="fi fi-br"></span> Português (Brasil)</div>
+                      <div class="lang-item" data-lang="pt-PT" role="option" onclick="i18n.setLanguage('pt-PT')"><span class="fi fi-pt"></span> Português (Portugal)</div>
+                      <div class="lang-item" data-lang="ru" role="option" onclick="i18n.setLanguage('ru')"><span class="fi fi-ru"></span> Русский</div>
+                      <div class="lang-item" data-lang="es" role="option" onclick="i18n.setLanguage('es')"><span class="fi fi-es"></span> Español</div>
+                      <div class="lang-item" data-lang="sv" role="option" onclick="i18n.setLanguage('sv')"><span class="fi fi-se"></span> Svenska</div>
+                      <div class="lang-item" data-lang="th" role="option" onclick="i18n.setLanguage('th')"><span class="fi fi-th"></span> ไทย</div>
+                      <div class="lang-item" data-lang="tr" role="option" onclick="i18n.setLanguage('tr')"><span class="fi fi-tr"></span> Türkçe</div>
+                      <div class="lang-item" data-lang="uk" role="option" onclick="i18n.setLanguage('uk')"><span class="fi fi-ua"></span> Українська</div>
+                      <div class="lang-item" data-lang="vi" role="option" onclick="i18n.setLanguage('vi')"><span class="fi fi-vn"></span> Tiếng Việt</div>
+                    </div>
+                  </div>
+                </div>
             </div>
         </div>
     </nav>
     
     <div class="container">
         <header>
-            <h1>URL Builder — Interactive Placeholder Image Constructor</h1>
-            <p>Build your perfect placeholder image URL with our interactive constructor</p>
+            <h1 data-i18n="url_builder.title">URL Builder — Interactive Placeholder Image Constructor</h1>
+            <p data-i18n="url_builder.subtitle">Build your perfect placeholder image URL with our interactive constructor</p>
         </header>
         
         <div class="content">
             <!-- Left Panel: URL Constructor -->
             <div class="panel">
-                <h2>URL Constructor</h2>
+                <h2 data-i18n="url_builder.panel_left">URL Constructor</h2>
                 
                 <!-- Endpoint Selection -->
                 <div class="form-group">
-                    <label>Endpoint Type</label>
+                    <label data-i18n="url_builder.endpoint_type">Endpoint Type</label>
                     <div class="endpoint-tabs">
-                        <button class="endpoint-tab active" data-endpoint="random">Random</button>
-                        <button class="endpoint-tab" data-endpoint="id">By ID</button>
-                        <button class="endpoint-tab" data-endpoint="ratio">Aspect Ratio</button>
-                        <button class="endpoint-tab" data-endpoint="preset">Preset</button>
-                        <button class="endpoint-tab" data-endpoint="solid">Solid Color</button>
-                        <button class="endpoint-tab" data-endpoint="color-match">Color Match</button>
-                        <button class="endpoint-tab" data-endpoint="svg">SVG</button>
-                        <button class="endpoint-tab" data-endpoint="gradient">Gradient</button>
-                        <button class="endpoint-tab" data-endpoint="lucky">I'm Feeling Lucky</button>
+                        <button class="endpoint-tab active" data-endpoint="random" data-i18n="url_builder.endpoint.random">Random</button>
+                        <button class="endpoint-tab" data-endpoint="id" data-i18n="url_builder.endpoint.id">By ID</button>
+                        <button class="endpoint-tab" data-endpoint="ratio" data-i18n="url_builder.endpoint.ratio">Aspect Ratio</button>
+                        <button class="endpoint-tab" data-endpoint="preset" data-i18n="url_builder.endpoint.preset">Preset</button>
+                        <button class="endpoint-tab" data-endpoint="solid" data-i18n="url_builder.endpoint.solid">Solid Color</button>
+                        <button class="endpoint-tab" data-endpoint="color-match" data-i18n="url_builder.endpoint.color_match">Color Match</button>
+                        <button class="endpoint-tab" data-endpoint="svg" data-i18n="url_builder.endpoint.svg">SVG</button>
+                        <button class="endpoint-tab" data-endpoint="gradient" data-i18n="url_builder.endpoint.gradient">Gradient</button>
+                        <button class="endpoint-tab" data-endpoint="lucky" data-i18n="url_builder.endpoint.lucky">I'm Feeling Lucky</button>
                     </div>
                 </div>
                 
@@ -1145,17 +1194,17 @@
             
             <!-- Right Panel: Preview & Output -->
             <div class="panel sticky">
-                <h2>Generated URL & Preview</h2>
+                <h2 data-i18n="url_builder.panel_right">Generated URL &amp; Preview</h2>
                 
                 <div class="url-output" id="url-output">
                     <div>GET /500/300</div>
                 </div>
                 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="copyURL()">Copy URL</button>
-                    <button class="btn-secondary" onclick="openInNewTab()">Open</button>
-                    <button class="btn-primary" onclick="loadPreview()">Preview</button>
-                    <button class="btn-secondary" onclick="showQRCode()">QR Code</button>
+                    <button class="btn-primary" onclick="copyURL()" data-i18n="url_builder.btn.copy">Copy URL</button>
+                    <button class="btn-secondary" onclick="openInNewTab()" data-i18n="url_builder.btn.open">Open</button>
+                    <button class="btn-primary" onclick="loadPreview()" data-i18n="url_builder.btn.preview">Preview</button>
+                    <button class="btn-secondary" onclick="showQRCode()" data-i18n="url_builder.btn.qr">QR Code</button>
                 </div>
                 
                 <div id="preview-container" class="preview-container">
@@ -1176,31 +1225,31 @@
                 </div>
                 
                 <div class="section" style="margin-top: 30px;">
-                    <h3>Quick Features Reference</h3>
+                    <h3 data-i18n="url_builder.features.title">Quick Features Reference</h3>
                     <div class="feature-list">
                         <div class="feature-card">
-                            <h4>Smart Crop</h4>
-                            <p>AI face detection for intelligent cropping</p>
+                            <h4 data-i18n="url_builder.feature.smart_crop">Smart Crop</h4>
+                            <p data-i18n="url_builder.feature.smart_crop_desc">AI face detection for intelligent cropping</p>
                         </div>
                         <div class="feature-card">
-                            <h4>Aspect Ratios</h4>
-                            <p>16:9, 4:3, 1:1, and more</p>
+                            <h4 data-i18n="url_builder.feature.aspect_ratios">Aspect Ratios</h4>
+                            <p data-i18n="url_builder.feature.aspect_ratios_desc">16:9, 4:3, 1:1, and more</p>
                         </div>
                         <div class="feature-card">
-                            <h4>Color Effects</h4>
-                            <p>Tint, sepia, grayscale</p>
+                            <h4 data-i18n="url_builder.feature.color_effects">Color Effects</h4>
+                            <p data-i18n="url_builder.feature.color_effects_desc">Tint, sepia, grayscale</p>
                         </div>
                         <div class="feature-card">
-                            <h4>Image Effects</h4>
-                            <p>Blur, noise, pixelate</p>
+                            <h4 data-i18n="url_builder.feature.image_effects">Image Effects</h4>
+                            <p data-i18n="url_builder.feature.image_effects_desc">Blur, noise, pixelate</p>
                         </div>
                         <div class="feature-card">
-                            <h4>Presets</h4>
-                            <p>Social media & ad sizes</p>
+                            <h4 data-i18n="url_builder.feature.presets">Presets</h4>
+                            <p data-i18n="url_builder.feature.presets_desc">Social media &amp; ad sizes</p>
                         </div>
                         <div class="feature-card">
-                            <h4>Borders</h4>
-                            <p>Custom borders & padding</p>
+                            <h4 data-i18n="url_builder.feature.borders">Borders</h4>
+                            <p data-i18n="url_builder.feature.borders_desc">Custom borders &amp; padding</p>
                         </div>
                     </div>
                 </div>
@@ -1313,7 +1362,7 @@
                     const bgColor = document.getElementById('bg-color').value.replace('#', '');
                     const fgColor = document.getElementById('fg-color').value.replace('#', '');
                     const solidText = document.getElementById('solid-text').value;
-                    url = `/solid/${solidWidth}x${solidHeight}/${bgColor}/${fgColor}`;
+                    url = `/solid/${solidWidth}/${solidHeight}/${bgColor}/${fgColor}`;
                     if (solidText) params.push(`text=${encodeURIComponent(solidText)}`);
                     supportsFormat = false;
                     break;
@@ -1655,6 +1704,27 @@
         loadTheme();
         loadCategories();
         updateURL();
+
+        // Close lang dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var sel = document.getElementById('lang-selector');
+            var dd  = document.getElementById('lang-dropdown');
+            if (sel && dd && !sel.contains(e.target)) {
+                dd.classList.remove('lang-dd-open');
+                var btn = document.getElementById('lang-trigger');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+    <script src="/static/js/i18n.js"></script>
+    <script>
+        document.addEventListener('click', function(e) {
+            var featSel = document.getElementById('features-dropdown');
+            if (featSel && !featSel.contains(e.target)) {
+                var menu = featSel.querySelector('.dropdown-menu');
+                if (menu) menu.style.display = 'none';
+            }
+        });
     </script>
     
     <!-- Dark Mode Toggle Button -->
@@ -1665,20 +1735,20 @@
     <!-- QR Code Modal -->
     <div class="qr-modal" id="qr-modal" onclick="if(event.target === this) closeQRModal()">
         <div class="qr-content">
-            <h3>Scan QR Code</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 16px;">Scan to open this URL on your mobile device</p>
+            <h3 data-i18n="qr.title">Scan QR Code</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="qr.subtitle">Scan to open this URL on your mobile device</p>
             <canvas id="qr-canvas"></canvas>
-            <button class="qr-close" onclick="closeQRModal()">Close</button>
+            <button class="qr-close" onclick="closeQRModal()" data-i18n="qr.close">Close</button>
         </div>
     </div>
     
     <!-- Keyboard Shortcuts Hint -->
     <div class="shortcuts-hint">
-        <strong>Shortcuts:</strong>
-        <kbd>Ctrl</kbd>+<kbd>P</kbd> Preview
-        <kbd>Ctrl</kbd>+<kbd>U</kbd> Copy
-        <kbd>Ctrl</kbd>+<kbd>Q</kbd> QR
-        <kbd>Ctrl</kbd>+<kbd>D</kbd> Dark
+        <strong data-i18n="shortcuts.label">Shortcuts:</strong>
+        <kbd>Ctrl</kbd>+<kbd>P</kbd> <span data-i18n="shortcuts.preview">Preview</span>
+        <kbd>Ctrl</kbd>+<kbd>U</kbd> <span data-i18n="shortcuts.copy">Copy</span>
+        <kbd>Ctrl</kbd>+<kbd>Q</kbd> <span data-i18n="shortcuts.qr">QR</span>
+        <kbd>Ctrl</kbd>+<kbd>D</kbd> <span data-i18n="shortcuts.dark">Dark</span>
     </div>
 </body>
 </html>

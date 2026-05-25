@@ -25,6 +25,8 @@
     
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="canonical" href="https://placepix.riadvice.com/palette">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <style>
         :root { --bg: #f8fafc; --card: #fff; --text: #1e293b; --muted: #64748b; --accent: #3b82f6; --border: #e2e8f0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -73,18 +75,33 @@
 </head>
 <body>
     {% include "nav.html" %}
-    <h1>Color Palette — Browse Images by Dominant Color</h1>
+    <h1 data-i18n="palette.title">Color Palette — Browse Images by Dominant Color</h1>
     <p class="subtitle">{{ total }} dominant colors &mdash; click any to preview matching images</p>
     <div class="controls">
         <form class="search-bar" method="get" action="/palette">
             <input type="hidden" name="category" value="{{ safe_category }}">
-            <input type="text" name="search" placeholder="Search hex color (e.g. 3b82f6)" value="{{ safe_search }}">
-            <button type="submit">Search</button>
+            <input type="text" name="search" placeholder="Search hex color (e.g. 3b82f6)" value="{{ safe_search }}" data-i18n="palette.search_placeholder" data-i18n-attr="placeholder">
+            <button type="submit" data-i18n="palette.search_btn">Search</button>
         </form>
-        <div class="cat-row">{{ cat_buttons|safe }}</div>
+        <div class="cat-row">
+            <a class="cat-btn {% if not category %}active{% endif %}" href="/palette?search={{ safe_search }}">All</a>
+            {% for cat, dot_color in hue_cats %}
+                <a class="cat-btn {% if category == cat %}active{% endif %}" href="/palette?category={{ cat }}&search={{ safe_search }}">
+                    <span class="dot" style="background: {{ dot_color }}; {% if cat in ('White', 'Gray') %}border: 1px solid #cbd5e1;{% endif %}"></span>{{ cat }}
+                </a>
+            {% endfor %}
+        </div>
     </div>
-    {{ scan_banner|safe }}
-    <div class="grid">{{ swatches|safe }}</div>
-    {{ pager|safe }}
+    {% if scanning %}
+        <div class="scan-banner">Color scan in progress — new colors will appear shortly.</div>
+    {% endif %}
+    <div class="grid">
+        {% for item in colors %}
+            {% include "_color_swatch.html" %}
+        {% endfor %}
+    </div>
+    {% set base_url = "/palette?search=" ~ safe_search ~ ("&category=" ~ safe_category if safe_category else "") %}
+    {% include "_pagination.html" %}
+    <script src="/static/js/i18n.js"></script>
 </body>
 </html>

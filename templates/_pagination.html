@@ -1,0 +1,67 @@
+{# Pagination partial - receives: page, total_pages, base_url #}
+{% if total_pages > 1 %}
+<div class="pager">
+    {# Previous link #}
+    {% if page > 1 %}
+        <a class="page-link" href="{{ base_url }}{% if '?' in base_url %}&{% else %}?{% endif %}page={{ page - 1 }}">Previous</a>
+    {% else %}
+        <span class="page-link disabled">Previous</span>
+    {% endif %}
+
+    {# Page numbers #}
+    {% if total_pages <= 7 %}
+        {# Show all pages #}
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <span class="page-link active">{{ p }}</span>
+            {% else %}
+                <a class="page-link" href="{{ base_url }}{% if '?' in base_url %}&{% else %}?{% endif %}page={{ p }}">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {# Smart pagination with ellipsis #}
+        
+        {# First page #}
+        {% if page == 1 %}
+            <span class="page-link active">1</span>
+        {% else %}
+            <a class="page-link" href="{{ base_url }}{% if '?' in base_url %}&{% else %}?{% endif %}page=1">1</a>
+        {% endif %}
+
+        {# Ellipsis after first page #}
+        {% if page > 3 %}
+            <span class="page-link disabled">...</span>
+        {% endif %}
+
+        {# Pages around current #}
+        {% set start = [2, page - 1] | max %}
+        {% set end = [total_pages - 1, page + 1] | min %}
+        {% for p in range(start, end + 1) %}
+            {% if p == page %}
+                <span class="page-link active">{{ p }}</span>
+            {% else %}
+                <a class="page-link" href="{{ base_url }}{% if '?' in base_url %}&{% else %}?{% endif %}page={{ p }}">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {# Ellipsis before last page #}
+        {% if page < total_pages - 2 %}
+            <span class="page-link disabled">...</span>
+        {% endif %}
+
+        {# Last page #}
+        {% if page == total_pages %}
+            <span class="page-link active">{{ total_pages }}</span>
+        {% else %}
+            <a class="page-link" href="{{ base_url }}{% if '?' in base_url %}&{% else %}?{% endif %}page={{ total_pages }}">{{ total_pages }}</a>
+        {% endif %}
+    {% endif %}
+
+    {# Next link #}
+    {% if page < total_pages %}
+        <a class="page-link" href="{{ base_url }}{% if '?' in base_url %}&{% else %}?{% endif %}page={{ page + 1 }}">Next</a>
+    {% else %}
+        <span class="page-link disabled">Next</span>
+    {% endif %}
+</div>
+{% endif %}

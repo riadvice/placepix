@@ -11,7 +11,7 @@ import os
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Annotated
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
 
@@ -84,6 +84,14 @@ def _get_git_version() -> str:
 
 _git_version = _get_git_version()
 
+# ── Color palette categories (name → dot color) ───────────────────
+HUE_CATEGORIES: list[tuple[str, str]] = [
+    ("Red", "#ef4444"), ("Orange", "#f97316"), ("Yellow", "#eab308"),
+    ("Green", "#22c55e"), ("Cyan", "#06b6d4"), ("Blue", "#3b82f6"),
+    ("Purple", "#a855f7"), ("Pink", "#ec4899"), ("Brown", "#a0522d"),
+    ("White", "#f8fafc"), ("Gray", "#94a3b8"), ("Black", "#0f172a"),
+]
+
 # ── Request Coalescing (thundering herd protection) ─────────────────
 # Deduplicate identical in-flight image processing requests
 _inflight: dict[str, asyncio.Event] = {}
@@ -110,15 +118,6 @@ async def _release_inflight(key: str) -> None:
 
 # ── Setup ───────────────────────────────────────────────────────────
 app = FastAPI(title="PlacePix", version="1.0.0")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET", "HEAD", "OPTIONS", "POST"],
-    allow_headers=["*"],
-    expose_headers=["ETag", "Last-Modified", "Content-Length", "Cache-Control"],
-    max_age=86400,
-)
 
 # Seed images if enabled
 if settings.seed_enabled:
@@ -230,7 +229,16 @@ logger.info("Metrics tracking enabled")
 metrics_tracker = MetricsTracker()
 
 # Templates
-templates = Jinja2Templates(directory="templates")
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+jinja_env = Environment(
+    loader=FileSystemLoader("templates"),
+    autoescape=select_autoescape(['html', 'xml']),
+    cache_size=0  # Disable caching to avoid unhashable type errors
+)
+def render_template(name: str, context: dict) -> HTMLResponse:
+    template = jinja_env.get_template(name)
+    content = template.render(**context)
+    return HTMLResponse(content)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 logger.info("Static files mounted at /static")
 
@@ -296,6 +304,16 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
 if metrics_tracker:
     app.add_middleware(MetricsMiddleware)
+
+# CORSMiddleware must be last in the chain for security
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "HEAD", "OPTIONS", "POST"],
+    allow_headers=["*"],
+    expose_headers=["ETag", "Last-Modified", "Content-Length", "Cache-Control"],
+    max_age=86400,
+)
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
@@ -771,8 +789,8 @@ async def serve_by_id(
     lqip: bool = False,
     watermark: str = "",
     base64: bool = False,
-    if_none_match: str | None = Header(default=None),
-    if_modified_since: str | None = Header(default=None),
+    if_none_match: Annotated[str | None, Header()] = None,
+    if_modified_since: Annotated[str | None, Header()] = None,
 ) -> Response:
     logger.debug(f"Serving image by ID #{image_id} at {width}x{height}")
     entry = manager.get_by_id(image_id)
@@ -820,8 +838,8 @@ async def serve_by_ratio(
     lqip: bool = False,
     watermark: str = "",
     base64: bool = False,
-    if_none_match: str | None = Header(default=None),
-    if_modified_since: str | None = Header(default=None),
+    if_none_match: Annotated[str | None, Header()] = None,
+    if_modified_since: Annotated[str | None, Header()] = None,
 ) -> Response:
     """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
     logger.debug(f"Serving image by ratio: {ratio} at height {height}")
@@ -879,8 +897,8 @@ async def serve_by_preset(
     lqip: bool = False,
     watermark: str = "",
     base64: bool = False,
-    if_none_match: str | None = Header(default=None),
-    if_modified_since: str | None = Header(default=None),
+    if_none_match: Annotated[str | None, Header()] = None,
+    if_modified_since: Annotated[str | None, Header()] = None,
 ) -> Response:
     """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
     logger.debug(f"Serving image by preset: {preset_name}")
@@ -1092,8 +1110,8 @@ async def serve_image(
     lqip: bool = False,
     watermark: str = "",
     base64: bool = False,
-    if_none_match: str | None = Header(default=None),
-    if_modified_since: str | None = Header(default=None),
+    if_none_match: Annotated[str | None, Header()] = None,
+    if_modified_since: Annotated[str | None, Header()] = None,
 ) -> Response:
     cat_display = category or "all"
     seed_display = seed or "random"
@@ -1142,8 +1160,8 @@ async def serve_by_color(
     lqip: bool = False,
     watermark: str = "",
     base64: bool = False,
-    if_none_match: str | None = Header(default=None),
-    if_modified_since: str | None = Header(default=None),
+    if_none_match: Annotated[str | None, Header()] = None,
+    if_modified_since: Annotated[str | None, Header()] = None,
 ) -> Response:
     logger.debug(f"Serving image by color: {hex_color} at {width}x{height}")
     entry = manager.pick_by_color(hex_color)
@@ -1225,8 +1243,8 @@ def _serve_raw(
 @app.head("/api/raw/id/{image_id:int}")
 async def serve_raw_by_id(
     image_id: int,
-    if_none_match: str | None = Header(default=None),
-    if_modified_since: str | None = Header(default=None),
+    if_none_match: Annotated[str | None, Header()] = None,
+    if_modified_since: Annotated[str | None, Header()] = None,
 ) -> Response:
     """Serve the original unprocessed image by ID."""
     entry = manager.get_by_id(image_id)
@@ -1240,8 +1258,8 @@ async def serve_raw_by_id(
 async def serve_raw_by_path(
     category: str,
     filename: str,
-    if_none_match: str | None = Header(default=None),
-    if_modified_since: str | None = Header(default=None),
+    if_none_match: Annotated[str | None, Header()] = None,
+    if_modified_since: Annotated[str | None, Header()] = None,
 ) -> Response:
     """Serve the original unprocessed image by category and filename."""
     entry = manager.get_entry(category, filename)
@@ -1257,8 +1275,7 @@ async def index(request: Request) -> Any:
     t0 = time.perf_counter()
     categories = manager.list_categories()
     render_time = f"{(time.perf_counter() - t0) * 1000:.1f}"
-    return templates.TemplateResponse(
-        request,
+    return render_template(
         "index.html",
         {
             "categories": categories,
@@ -1274,8 +1291,7 @@ async def index(request: Request) -> Any:
 @app.get("/url-builder", response_class=HTMLResponse)
 async def url_builder(request: Request) -> Any:
     """Interactive URL builder and feature explorer."""
-    return templates.TemplateResponse(
-        request,
+    return render_template(
         "url-builder.html",
         {
             "ga_tracking_id": settings.ga_tracking_id,
@@ -1433,76 +1449,13 @@ async def image_explorer(page: int = 1) -> Response:
     total_pages = max((total + per_page - 1) // per_page, 1)
     page = max(1, min(page, total_pages))
 
-    cards = ""
-    for entry in entries:
-        thumb_url = f"/id/{entry.id}/200/150"
-        view_url = f"/id/{entry.id}/800/600"
-        info_url = f"/api/info/id/{entry.id}"
-        cards += f"""
-        <div class="card">
-            <a href="{view_url}" target="_blank"><img src="{thumb_url}" alt="{entry.filename}" loading="lazy"></a>
-            <div class="info">
-                <div class="id">ID: <a href="{view_url}" target="_blank">{entry.id}</a></div>
-                <div class="meta">{entry.category} / {entry.filename}</div>
-                <div class="links">
-                    <a href="{view_url}" target="_blank">view</a>
-                    <a href="{info_url}" target="_blank">info</a>
-                </div>
-            </div>
-        </div>
-        """
-
-    # Smart pagination - show limited page numbers with ellipsis
-    def get_smart_pagination(current: int, total: int) -> str:
-        if total <= 7:
-            # Show all pages if 7 or fewer
-            return "".join(
-                f'<span class="page-link active">{p}</span>' if p == current
-                else f'<a class="page-link" href="/images?page={p}">{p}</a>'
-                for p in range(1, total + 1)
-            )
-        
-        pages = []
-        # Always show first page
-        pages.append(f'<span class="page-link active">1</span>' if current == 1 else f'<a class="page-link" href="/images?page=1">1</a>')
-        
-        # Show ellipsis if gap after first page
-        if current > 3:
-            pages.append('<span class="page-link disabled">...</span>')
-        
-        # Show pages around current
-        start = max(2, current - 1)
-        end = min(total - 1, current + 1)
-        for p in range(start, end + 1):
-            if p == current:
-                pages.append(f'<span class="page-link active">{p}</span>')
-            else:
-                pages.append(f'<a class="page-link" href="/images?page={p}">{p}</a>')
-        
-        # Show ellipsis if gap before last page
-        if current < total - 2:
-            pages.append('<span class="page-link disabled">...</span>')
-        
-        # Always show last page
-        pages.append(f'<span class="page-link active">{total}</span>' if current == total else f'<a class="page-link" href="/images?page={total}">{total}</a>')
-        
-        return "".join(pages)
-    
-    prev_link = f'<a class="page-link" href="/images?page={page - 1}">Previous</a>' if page > 1 else '<span class="page-link disabled">Previous</span>'
-    next_link = f'<a class="page-link" href="/images?page={page + 1}">Next</a>' if page < total_pages else '<span class="page-link disabled">Next</span>'
-    page_numbers = get_smart_pagination(page, total_pages)
-
-    return templates.TemplateResponse(
+    return render_template(
         "explorer.html",
         {
-            "request": None,
             "total": total,
             "page": page,
             "total_pages": total_pages,
-            "cards": cards,
-            "prev_link": prev_link,
-            "page_numbers": page_numbers,
-            "next_link": next_link,
+            "entries": entries,
             "upload_enabled": settings.upload_enabled,
             "upload_writable": _upload_writable,
         }
@@ -1531,101 +1484,18 @@ async def color_palette(
     end = start + per_page
     colors = all_colors[start:end]
 
-    swatches = ""
-    for item in colors:
-        hex_color = item["hex"]
-        count = item["count"]
-        sample_images = ""
-        for sid in item["sample_ids"][:2]:
-            sample_images += f'<img src="/id/{sid}/100/75" alt="" loading="lazy">'
-        swatches += f"""
-        <div class="swatch">
-            <a href="/color/{hex_color.lstrip('#')}/400/300" target="_blank">
-                <div class="color-block" style="background: {hex_color};"></div>
-            </a>
-            <div class="color-info">
-                <code class="hex">{hex_color}</code>
-                <span class="count">{count} image{"s" if count > 1 else ""}</span>
-            </div>
-            <div class="samples">{sample_images}</div>
-        </div>
-        """
-
-    # Category filters with colored dot badges
-    hue_cats = [
-        ("Red", "#ef4444"), ("Orange", "#f97316"), ("Yellow", "#eab308"),
-        ("Green", "#22c55e"), ("Cyan", "#06b6d4"), ("Blue", "#3b82f6"),
-        ("Purple", "#a855f7"), ("Pink", "#ec4899"), ("Brown", "#a0522d"),
-        ("White", "#f8fafc"), ("Gray", "#94a3b8"), ("Black", "#0f172a"),
-    ]
-    cat_buttons = ""
-    for cat, dot_color in hue_cats:
-        active = "active" if category == cat else ""
-        border = "border: 1px solid #cbd5e1;" if cat in ("White", "Gray") else ""
-        cat_buttons += f'<a class="cat-btn {active}" href="/palette?category={cat}&search={safe_search}"><span class="dot" style="background: {dot_color}; {border}"></span>{cat}</a>'
-    all_active = "" if category else "active"
-    cat_buttons = f'<a class="cat-btn {all_active}" href="/palette?search={safe_search}">All</a>' + cat_buttons
-
-    # Smart pagination - show limited page numbers with ellipsis
-    def get_smart_pagination(current: int, total: int, base_url: str) -> str:
-        if total <= 7:
-            # Show all pages if 7 or fewer
-            return "".join(
-                f'<span class="page-link active">{p}</span>' if p == current
-                else f'<a class="page-link" href="{base_url}&page={p}">{p}</a>'
-                for p in range(1, total + 1)
-            )
-        
-        pages = []
-        # Always show first page
-        pages.append(f'<span class="page-link active">1</span>' if current == 1 else f'<a class="page-link" href="{base_url}&page=1">1</a>')
-        
-        # Show ellipsis if gap after first page
-        if current > 3:
-            pages.append('<span class="page-link disabled">...</span>')
-        
-        # Show pages around current
-        start = max(2, current - 1)
-        end = min(total - 1, current + 1)
-        for p in range(start, end + 1):
-            if p == current:
-                pages.append(f'<span class="page-link active">{p}</span>')
-            else:
-                pages.append(f'<a class="page-link" href="{base_url}&page={p}">{p}</a>')
-        
-        # Show ellipsis if gap before last page
-        if current < total - 2:
-            pages.append('<span class="page-link disabled">...</span>')
-        
-        # Always show last page
-        pages.append(f'<span class="page-link active">{total}</span>' if current == total else f'<a class="page-link" href="{base_url}&page={total}">{total}</a>')
-        
-        return "".join(pages)
-    
-    base = f"/palette?search={safe_search}"
-    if safe_category:
-        base += f"&category={safe_category}"
-    prev_link = f'<a class="page-link" href="{base}&page={page - 1}">Previous</a>' if page > 1 else '<span class="page-link disabled">Previous</span>'
-    next_link = f'<a class="page-link" href="{base}&page={page + 1}">Next</a>' if page < total_pages else '<span class="page-link disabled">Next</span>'
-    page_numbers = get_smart_pagination(page, total_pages, base)
-
-    pager = f'<div class="pager">{prev_link}{page_numbers}{next_link}</div>' if total_pages > 1 else ""
-
-    scan_banner = ""
-    if manager._scanning_colors:
-        scan_banner = '<div class="scan-banner">Color scan in progress — new colors will appear shortly.</div>'
-
-    return templates.TemplateResponse(
+    return render_template(
         "palette.html",
         {
-            "request": None,
             "total": total,
+            "page": page,
+            "total_pages": total_pages,
             "safe_category": safe_category,
             "safe_search": safe_search,
-            "cat_buttons": cat_buttons,
-            "scan_banner": scan_banner,
-            "swatches": swatches,
-            "pager": pager,
+            "category": category,
+            "colors": colors,
+            "hue_cats": HUE_CATEGORIES,
+            "scanning": manager._scanning_colors,
             "upload_enabled": settings.upload_enabled,
             "upload_writable": _upload_writable,
         }
