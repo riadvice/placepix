@@ -910,3 +910,45 @@ button {
   color: var(--text-secondary);
   margin-bottom: 16px;
 }
+
+/* ============================================
+   Copy Button Styles
+   ============================================ */
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copy-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.copy-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cat-card:hover .copy-btn,
+.copy-btn.show {
+  opacity: 1;
+}
+
+.copy-btn.copied {
+  background: var(--success);
+  opacity: 1;
+}
