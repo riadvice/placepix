@@ -26,7 +26,9 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="canonical" href="https://placepix.riadvice.com/url-builder">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     {% if ga_tracking_id %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_id }}"></script>
     <script>
@@ -494,13 +496,17 @@
             <!-- Right Panel: Preview & Output -->
             <div class="panel sticky">
                 <h2 data-i18n="url_builder.panel_right">Generated URL &amp; Preview</h2>
-                
-                <div class="url-output" id="url-output">
-                    <div>GET /500/300</div>
+
+                <div class="url-output-wrapper">
+                    <div class="url-output" id="url-output">
+                        <div>/500/300</div>
+                    </div>
+                    <button class="url-copy-btn" onclick="copyURL()" title="Copy URL">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    </button>
                 </div>
-                
+
                 <div class="button-group">
-                    <button class="btn-primary" onclick="copyURL()" data-i18n="url_builder.btn.copy">Copy URL</button>
                     <button class="btn-secondary" onclick="openInNewTab()" data-i18n="url_builder.btn.open">Open</button>
                     <button class="btn-primary" onclick="loadPreview()" data-i18n="url_builder.btn.preview">Preview</button>
                     <button class="btn-secondary" onclick="showQRCode()" data-i18n="url_builder.btn.qr">QR Code</button>
@@ -764,24 +770,31 @@
                 url += '?' + params.join('&');
             }
             
-            document.getElementById('url-output').innerHTML = `<div>GET ${url}</div>`;
+            document.getElementById('url-output').innerHTML = `<div>${window.location.origin}${url}</div>`;
         }
         
         function copyURL() {
-            const url = document.getElementById('url-output').textContent.replace('GET ', '');
-            const fullURL = window.location.origin + url;
-            navigator.clipboard.writeText(fullURL).then(() => {
-                alert('URL copied to clipboard!');
+            const url = document.getElementById('url-output').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                Toastify({
+                    text: "URL copied to clipboard!",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    style: {
+                        background: "linear-gradient(to right, #b45309, #d97706)",
+                    }
+                }).showToast();
             });
         }
         
         function openInNewTab() {
-            const url = document.getElementById('url-output').textContent.replace('GET ', '');
+            const url = document.getElementById('url-output').textContent;
             window.open(url, '_blank');
         }
-        
+
         function loadPreview() {
-            let url = document.getElementById('url-output').textContent.replace('GET ', '');
+            let url = document.getElementById('url-output').textContent;
             const preview = document.getElementById('preview');
             const container = document.getElementById('preview-container');
             const sizeDisplay = document.getElementById('image-size');
@@ -920,56 +933,45 @@
         
         // QR Code Generation
         function showQRCode() {
-            const url = window.location.origin + document.getElementById('url-output').textContent.replace('GET ', '');
+            const url = document.getElementById('url-output').textContent;
             const modal = document.getElementById('qr-modal');
             const canvas = document.getElementById('qr-canvas');
-            
-            // Generate QR code using qrcodejs library (lightweight alternative)
-            // For now, use a simple implementation
-            generateQRCode(canvas, url);
+
+            // Clear previous QR code
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Generate real QR code using qrcode library
+            QRCode.toCanvas(canvas, url, {
+                width: 256,
+                margin: 2,
+                color: {
+                    dark: '#1c1917',
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if (error) {
+                    console.error(error);
+                    Toastify({
+                        text: "Failed to generate QR code",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "linear-gradient(to right, #dc2626, #ef4444)",
+                        }
+                    }).showToast();
+                }
+            });
+
             modal.classList.add('active');
         }
-        
-        function closeQRModal() {
-            document.getElementById('qr-modal').classList.remove('active');
-        }
-        
-        // Simple QR Code generator (basic implementation)
-        function generateQRCode(canvas, text) {
-            const ctx = canvas.getContext('2d');
-            const size = 256;
-            canvas.width = size;
-            canvas.height = size;
-            
-            // Clear canvas
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, size, size);
-            
-            // Draw QR-like pattern (simplified - in production use qrcode.js library)
-            ctx.fillStyle = '#000000';
-            const cellSize = size / 25;
-            
-            // Create a simple pattern based on URL hash
-            const hash = text.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0);
-            const random = (seed) => {
-                const x = Math.sin(seed++) * 10000;
-                return x - Math.floor(x);
-            };
-            
-            for (let y = 0; y < 25; y++) {
-                for (let x = 0; x < 25; x++) {
-                    if (random(hash + y * 25 + x) > 0.5) {
-                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                    }
-                }
+
+        function closeQRModal(event) {
+            if (event) {
+                event.stopPropagation();
             }
-            
-            // Add text below
-            ctx.fillStyle = '#666';
-            ctx.font = '10px monospace';
-            ctx.textAlign = 'center';
-            const shortUrl = text.length > 40 ? text.substring(0, 37) + '...' : text;
-            ctx.fillText(shortUrl, size / 2, size - 5);
+            document.getElementById('qr-modal').classList.remove('active');
         }
         
         // Keyboard Shortcuts
@@ -1032,12 +1034,17 @@
     </button>
     
     <!-- QR Code Modal -->
-    <div class="qr-modal" id="qr-modal" onclick="if(event.target === this) closeQRModal()">
-        <div class="qr-content">
+    <div class="qr-modal" id="qr-modal" onclick="if(event.target === this) closeQRModal(event)">
+        <div class="qr-content" onclick="event.stopPropagation()">
+            <button class="qr-close-x" onclick="closeQRModal(event)" title="Close">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
             <h3 data-i18n="qr.title">Scan QR Code</h3>
             <p class="qr-subtitle" data-i18n="qr.subtitle">Scan to open this URL on your mobile device</p>
-            <canvas id="qr-canvas"></canvas>
-            <button class="qr-close" onclick="closeQRModal()" data-i18n="qr.close">Close</button>
+            <div class="qr-canvas-wrapper">
+                <canvas id="qr-canvas"></canvas>
+            </div>
+            <button class="qr-close" onclick="closeQRModal(event)" data-i18n="qr.close">Close</button>
         </div>
     </div>
     
@@ -1049,5 +1056,6 @@
         <kbd>Ctrl</kbd>+<kbd>Q</kbd> <span data-i18n="shortcuts.qr">QR</span>
         <kbd>Ctrl</kbd>+<kbd>D</kbd> <span data-i18n="shortcuts.dark">Dark</span>
     </div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 </html>

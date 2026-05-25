@@ -27,6 +27,7 @@
   <link rel="canonical" href="https://placepix.riadvice.com/">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
   <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   {% if ga_tracking_id %}
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_id }}"></script>
@@ -721,19 +722,21 @@
       event.stopPropagation();
       const url = window.location.origin + '/' + category;
       navigator.clipboard.writeText(url).then(() => {
-        const btn = event.target.closest('.copy-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.innerHTML = originalText;
-          btn.classList.remove('copied');
-        }, 2000);
+        Toastify({
+          text: "URL copied to clipboard!",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          style: {
+            background: "linear-gradient(to right, #b45309, #d97706)",
+          }
+        }).showToast();
       }).catch(err => {
         console.error('Failed to copy:', err);
       });
     }
   </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="/static/js/i18n.js"></script>
 </body>
 </html>
