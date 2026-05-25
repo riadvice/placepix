@@ -135,23 +135,36 @@
   }
 
   /**
+   * Reveal the body (called after translations applied, or on timeout).
+   */
+  function _reveal() {
+    document.body.classList.add('i18n-ready');
+  }
+
+  /**
    * Initialize: detect language and apply on DOM ready.
    */
   async function init() {
-    // Show loading state
-    document.body.classList.add('i18n-loading');
-    
+    // Safety: always reveal within 2s even if fetch fails
+    const safetyTimer = setTimeout(_reveal, 2000);
+
     _currentLang = _detect();
-    // English is the default — still apply so data-i18n keys resolve
-    const data = await _fetch(_currentLang);
-    const fallback = (_currentLang !== DEFAULT_LANG && Object.keys(data).length < 5)
-      ? await _fetch(DEFAULT_LANG)
-      : data;
-    _apply(fallback.length === undefined && Object.keys(fallback).length >= 5 ? fallback : data);
-    
-    // Remove loading state with fade
-    document.body.classList.remove('i18n-loading');
-    document.body.classList.add('i18n-loaded');
+
+    if (_currentLang === DEFAULT_LANG) {
+      // English — no fetch needed, just reveal
+      const data = await _fetch(DEFAULT_LANG);
+      _apply(data);
+    } else {
+      const data = await _fetch(_currentLang);
+      if (Object.keys(data).length >= 5) {
+        _apply(data);
+      } else {
+        _apply(await _fetch(DEFAULT_LANG));
+      }
+    }
+
+    clearTimeout(safetyTimer);
+    _reveal();
   }
 
   // Language metadata: flag ISO code + native name

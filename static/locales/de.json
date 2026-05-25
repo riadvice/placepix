@@ -140,7 +140,7 @@
   "url_builder.label.width": "Breite",
   "url_builder.label.height": "Höhe",
   "url_builder.label.category": "Kategorie",
-  "url_builder.label.seed": "Seed",
+  "url_builder.label.seed": "Startwert",
   "url_builder.label.target_color": "Zielfarbe",
   "url_builder.label.image_id": "Bild-ID",
   "url_builder.label.aspect_ratio": "Seitenverhältnis",

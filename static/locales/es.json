@@ -140,7 +140,7 @@
   "url_builder.label.width": "Ancho",
   "url_builder.label.height": "Alto",
   "url_builder.label.category": "Categoría",
-  "url_builder.label.seed": "Seed",
+  "url_builder.label.seed": "Semilla",
   "url_builder.label.target_color": "Color objetivo",
   "url_builder.label.image_id": "ID de imagen",
   "url_builder.label.aspect_ratio": "Proporción de aspecto",

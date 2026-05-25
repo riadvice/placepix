@@ -140,7 +140,7 @@
   "url_builder.label.width": "Ширина",
   "url_builder.label.height": "Высота",
   "url_builder.label.category": "Категория",
-  "url_builder.label.seed": "Seed",
+  "url_builder.label.seed": "Зерно",
   "url_builder.label.target_color": "Целевой цвет",
   "url_builder.label.image_id": "ID изображения",
   "url_builder.label.aspect_ratio": "Соотношение сторон",

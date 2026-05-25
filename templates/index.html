@@ -55,67 +55,6 @@
       }
     }
   </script>
-  <style>
-    .drop-zone {
-      border: 2px dashed #d6d3d1;
-      transition: all 0.2s;
-    }
-    .drop-zone.dragover {
-      border-color: #b45309;
-      background: rgba(180, 83, 9, 0.04);
-    }
-    .hero-img {
-      animation: fadeIn 1s ease-in;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(1.02); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .cat-card:hover .cat-img {
-      transform: scale(1.05);
-    }
-    .cat-img {
-      transition: transform 0.4s ease;
-    }
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: #fff;
-      border: 1px solid #e7e5e4;
-      border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.1);
-      padding: 14px 0 6px;
-      min-width: 180px;
-      z-index: 100;
-      margin-top: -8px;
-    }
-    .dropdown-menu a {
-      display: block;
-      padding: 8px 16px;
-      color: #1c1917;
-      text-decoration: none;
-      font-size: 13px;
-      white-space: nowrap;
-      transition: background .15s;
-    }
-    .dropdown-menu a:hover {
-      background: #f5f5f4;
-      color: #b45309;
-    }
-    .dropdown:hover .dropdown-menu {
-      display: block;
-    }
-    .dropdown-toggle {
-      cursor: pointer;
-      font-size: 13px;
-    }
-  </style>
 </head>
 <body class="bg-surface-light min-h-screen">
   <!-- Navigation -->
@@ -157,17 +96,15 @@
         </a>
 
         <!-- Language Selector -->
-        <div class="lang-selector" id="lang-selector" style="position:relative;display:inline-block;">
+        <div class="lang-selector" id="lang-selector">
           <button class="lang-trigger" id="lang-trigger" aria-haspopup="true" aria-expanded="false"
-            style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:5px 10px;border-radius:8px;border:1px solid #e7e5e4;background:#fff;color:#1c1917;font-size:.85rem;font-weight:500;white-space:nowrap;"
             onclick="(function(){var dd=document.getElementById('lang-dropdown');var open=dd.classList.toggle('lang-dd-open');document.getElementById('lang-trigger').setAttribute('aria-expanded',open);})()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             <span id="lang-trigger-label">English</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div id="lang-dropdown" role="listbox"
-            style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e7e5e4;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.13);padding:12px;z-index:9999;min-width:380px;">
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+          <div class="lang-dropdown" id="lang-dropdown" role="listbox">
+            <div class="lang-grid">
               <div class="lang-item" data-lang="ar" role="option" onclick="i18n.setLanguage('ar')"><span class="fi fi-sa"></span> العربية</div>
               <div class="lang-item" data-lang="bn" role="option" onclick="i18n.setLanguage('bn')"><span class="fi fi-bd"></span> বাংলা</div>
               <div class="lang-item" data-lang="zh-CN" role="option" onclick="i18n.setLanguage('zh-CN')"><span class="fi fi-cn"></span> 中文 (简体)</div>
