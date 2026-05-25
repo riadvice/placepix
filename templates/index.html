@@ -438,7 +438,9 @@
     <p class="text-stone-500 mb-6" data-i18n="section.presets.desc">One-click preset dimensions for popular social and screen sizes.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <img src="/preset/instagram-square/nature?seed=preset1" alt="Instagram" class="w-full h-48 object-cover">
+        <div class="aspect-square">
+          <img src="/preset/instagram-square/nature?seed=preset1" alt="Instagram" class="w-full h-full object-cover">
+        </div>
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.instagram_square">Instagram Square</p>
           <div class="code-copy-wrapper">
@@ -450,7 +452,9 @@
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <img src="/preset/youtube-thumbnail/nature?seed=preset2" alt="YouTube" class="w-full h-48 object-cover">
+        <div class="aspect-video">
+          <img src="/preset/youtube-thumbnail/nature?seed=preset2" alt="YouTube" class="w-full h-full object-cover">
+        </div>
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.youtube_thumbnail">YouTube Thumbnail</p>
           <div class="code-copy-wrapper">
@@ -462,7 +466,9 @@
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <img src="/preset/mobile/nature?seed=preset3" alt="Mobile" class="w-full h-48 object-cover">
+        <div class="aspect-[9/16]">
+          <img src="/preset/mobile/nature?seed=preset3" alt="Mobile" class="w-full h-full object-cover">
+        </div>
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.mobile">Mobile</p>
           <div class="code-copy-wrapper">
