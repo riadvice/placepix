@@ -332,17 +332,20 @@ nav .nav-links a.active {
 }
 
 .btn-docs {
-  background: var(--primary);
+  background: linear-gradient(to right, #b45309, #ea580c);
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 600;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 6px -1px rgba(180, 83, 9, 0.2);
+  transition: all 0.2s ease;
 }
 
 nav .nav-links .btn-docs:hover {
-  background: var(--primary-dark);
+  background: linear-gradient(to right, #92400e, #c2410c);
   color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(180, 83, 9, 0.3);
 }
 
 header {
