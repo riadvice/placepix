@@ -85,6 +85,7 @@ class ImageEntry:
     category: str
     id: int = 0
     s3_key: str = ""
+    ai: bool = False
 
 
 @dataclass
@@ -146,15 +147,35 @@ class ImageManager:
             else:
                 cat = random.choice(cats)
         else:
-            cat = self._categories.get(category)
-            if cat is None:
-                return None
+            # 1. Check AI-generated pool first
+            ai_cat = self._categories.get(f"ai-generated/{category}")
+            if ai_cat is not None and ai_cat.entries:
+                cat = ai_cat
+            else:
+                # 2. Fallback to regular category
+                cat = self._categories.get(category)
+                if cat is None:
+                    return None
 
         if not cat.entries:
             return None
 
         if seed is not None:
             # deterministic per category+seed
+            hash_input = f"{seed}:{cat.name}"
+            idx = int(hashlib.sha256(hash_input.encode()).hexdigest(), 16) % len(cat.entries)
+            return cat.entries[idx]
+
+        return random.choice(cat.entries)
+
+    def pick_ai(self, category: str | None = None, seed: str | None = None) -> ImageEntry | None:
+        """Pick only from AI-generated pool for a category. Returns None if no AI images."""
+        ai_cat_name = f"ai-generated/{category}" if category else "ai-generated"
+        cat = self._categories.get(ai_cat_name)
+        if cat is None or not cat.entries:
+            return None
+
+        if seed is not None:
             hash_input = f"{seed}:{cat.name}"
             idx = int(hashlib.sha256(hash_input.encode()).hexdigest(), 16) % len(cat.entries)
             return cat.entries[idx]
@@ -328,6 +349,23 @@ class ImageManager:
                 continue
 
             if item.is_dir():
+                # Handle ai-generated directory specially
+                if item.name == "ai-generated":
+                    for sub_item in item.iterdir():
+                        if sub_item.name.startswith(".") or sub_item.name in self.IGNORE_FILES:
+                            continue
+                        if sub_item.is_dir():
+                            ai_entries, ai_meta, next_id = self._scan_subdir(sub_item, manifest, next_id, ai=True)
+                            ai_cat_name = f"ai-generated/{sub_item.name}"
+                            if ai_entries:
+                                new_categories[ai_cat_name] = Category(
+                                    name=ai_cat_name,
+                                    meta=ai_meta,
+                                    entries=ai_entries,
+                                )
+                                total += len(ai_entries)
+                    continue
+
                 entries, meta, next_id = self._scan_subdir(item, manifest, next_id)
                 if entries:
                     if item.name in new_categories:
@@ -503,7 +541,11 @@ class ImageManager:
                     relative_key = key[len(prefix):] if prefix else key
                     parts = relative_key.split("/")
                     if len(parts) > 1 and parts[0]:
-                        cat_name = parts[0]
+                        # Handle ai-generated/nature/... structure
+                        if parts[0] == "ai-generated" and len(parts) > 2:
+                            cat_name = f"ai-generated/{parts[1]}"
+                        else:
+                            cat_name = parts[0]
                         filename = parts[-1]
                     else:
                         cat_name = self.ROOT_KEY
@@ -527,6 +569,7 @@ class ImageManager:
                         category=cat_name,
                         id=manifest[manifest_key],
                         s3_key=key,
+                        ai=cat_name.startswith("ai-generated/"),
                     ))
         except Exception as e:
             logger.error(f"S3 scan failed: {e}")
@@ -535,21 +578,30 @@ class ImageManager:
 
         return new_categories, next_id
 
-    def _scan_subdir(self, subdir: Path, manifest: dict[str, int], next_id: int) -> tuple[list[ImageEntry], CategoryMeta, int]:
+    def _scan_subdir(self, subdir: Path, manifest: dict[str, int], next_id: int, ai: bool = False) -> tuple[list[ImageEntry], CategoryMeta, int]:
         entries: list[ImageEntry] = []
+        # For AI images, include the ai-generated prefix in the key to avoid collisions
+        if ai:
+            key_prefix = f"ai-generated/{subdir.name}"
+            cat_name = f"ai-generated/{subdir.name}"
+        else:
+            key_prefix = subdir.name
+            cat_name = subdir.name
+
         for child in subdir.iterdir():
             if child.name.startswith(".") or child.name in self.IGNORE_FILES:
                 continue
             if child.is_file() and child.suffix.lower() in self.VALID_EXTS:
-                key = f"{subdir.name}/{child.name}"
+                key = f"{key_prefix}/{child.name}"
                 if key not in manifest:
                     manifest[key] = next_id
                     next_id += 1
                 entries.append(ImageEntry(
                     path=child,
                     filename=child.name,
-                    category=subdir.name,
+                    category=cat_name,
                     id=manifest[key],
+                    ai=ai,
                 ))
 
         meta = self._read_meta(subdir)

@@ -33,6 +33,7 @@ try:
 except Exception:
     _APSCHEDULER_AVAILABLE = False
 
+from src.ai_generator import check_rate_limit, generate_image
 from src.config import settings
 from src.image_manager import ImageEntry, ImageManager
 from src.image_processor import ImageProcessor
@@ -1282,6 +1283,7 @@ async def index(request: Request) -> Any:
             "total": manager.total,
             "ga_tracking_id": settings.ga_tracking_id,
             "upload_enabled": settings.upload_enabled and _upload_writable,
+            "ai_generation_enabled": settings.ai_generation_enabled,
             "git_version": _git_version,
             "render_time": render_time,
         },
@@ -1540,6 +1542,91 @@ async def upload_image(
         "filename": file.filename,
         "category": category or "__root",
         "path": str(dest),
+    })
+
+
+# ── AI Image Generation ────────────────────────────────────────────
+from pydantic import BaseModel
+
+class AIGenerateRequest(BaseModel):
+    prompt: str
+    negative_prompt: str = ""
+    category: str = ""
+    width: int = 1024
+    height: int = 768
+    seed: int | None = None
+    steps: int | None = None
+    cfg_scale: float | None = None
+
+@app.post("/api/ai-generate")
+async def ai_generate(
+    request: Request,
+    body: AIGenerateRequest,
+) -> JSONResponse:
+    """Generate an AI image via OVHcloud AI Endpoints (experimental)."""
+    if not settings.ai_generation_enabled:
+        raise HTTPException(
+            status_code=503,
+            detail="AI generation is experimental and currently disabled. Set AI_GENERATION_ENABLED=true to enable.",
+        )
+
+    # Rate limiting: 1 generation per second per IP
+    client_ip = request.client.host if request.client else "unknown"
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+
+    allowed, retry_after = await check_rate_limit(client_ip)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded: 1 generation per second per IP. Please wait.",
+            headers={"Retry-After": str(int(retry_after) + 1)},
+        )
+
+    # Validate prompt
+    prompt = body.prompt.strip()
+    if not prompt:
+        raise HTTPException(status_code=400, detail="prompt is required")
+    if len(prompt) > 500:
+        raise HTTPException(status_code=400, detail="prompt too long (max 500 chars)")
+
+    category = (body.category or "__root").strip().replace("/", "_")
+    if not category:
+        category = "__root"
+
+    # Run generation in a thread (it's blocking I/O + network)
+    result = await asyncio.to_thread(
+        generate_image,
+        prompt=prompt,
+        category=category,
+        negative_prompt=body.negative_prompt,
+        width=body.width,
+        height=body.height,
+        seed=body.seed,
+        steps=body.steps,
+        cfg_scale=body.cfg_scale,
+    )
+
+    if not result.success:
+        raise HTTPException(status_code=503, detail=result.error)
+
+    # Trigger rescan so the new image is immediately available
+    manager.rescan()
+
+    # Find the newly created entry to get its ID
+    entry = manager.get_by_filename(result.filename)
+    image_id = entry.id if entry else 0
+
+    return JSONResponse({
+        "experimental": True,
+        "id": image_id,
+        "category": result.category,
+        "filename": result.filename,
+        "path": str(result.path) if result.path else None,
+        "s3_key": result.s3_key,
+        "ai": True,
+        "prompt": result.prompt,
     })
 
 

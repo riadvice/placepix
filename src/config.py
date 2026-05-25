@@ -57,6 +57,15 @@ class Settings(BaseSettings):
     s3_prefix: str = Field(default="")
     s3_region: str = Field(default="")
 
+    # AI generation via OVHcloud AI Endpoints (experimental)
+    ai_generation_enabled: bool = Field(default=False)
+    ovh_ai_endpoints_token: str = Field(default="")
+    ovh_ai_endpoints_url: str = Field(default="https://endpoints.ai.cloud.ovh.net/v1")
+    ai_s3_upload_enabled: bool = Field(default=False)
+    ai_max_images_per_category: int = Field(default=100)
+    ai_default_steps: int = Field(default=30)
+    ai_default_cfg_scale: float = Field(default=7.0)
+
     @property
     def bind_host(self) -> str:
         return self.host.rsplit(":", 1)[0] if ":" in self.host else self.host
