@@ -123,15 +123,18 @@
     _currentLang = lang;
     localStorage.setItem(STORAGE_KEY, lang);
 
+    // Close dropdown immediately on selection, before async fetch
+    const dd = document.getElementById('lang-dropdown');
+    if (dd) dd.classList.remove('lang-dd-open');
+    const btn = document.getElementById('lang-trigger');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+
     let data = await _fetch(lang);
     // If locale file is essentially empty or missing keys, fall back to English
     if (!data || Object.keys(data).length < 5) {
       data = await _fetch(DEFAULT_LANG);
     }
     _apply(data);
-    // Close dropdown if open
-    const dd = document.getElementById('lang-dropdown');
-    if (dd) dd.classList.remove('lang-dd-open');
   }
 
   /**
@@ -145,8 +148,8 @@
    * Initialize: detect language and apply on DOM ready.
    */
   async function init() {
-    // Safety: always reveal within 2s even if fetch fails
-    const safetyTimer = setTimeout(_reveal, 2000);
+    // Safety: always reveal within 800ms even if fetch fails (locale files are tiny)
+    const safetyTimer = setTimeout(_reveal, 800);
 
     _currentLang = _detect();
 

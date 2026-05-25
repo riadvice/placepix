@@ -43,9 +43,39 @@ body {
   line-height: 1.6;
 }
 
-/* i18n: hide body until translations are applied to prevent flash of English */
-body { opacity: 0; }
-body.i18n-ready { opacity: 1; transition: opacity 0.25s ease-in; }
+/* ============================================
+   i18n Loading: skeleton screen pattern
+   - [data-i18n] text is invisible until translations apply
+   - .skeleton shimmers as placeholder in the meantime
+   - After i18n-ready: text appears, skeletons hide
+   ============================================ */
+body:not(.i18n-ready) [data-i18n]:not([data-i18n-attr]) {
+  color: transparent;
+  /* keep layout, just hide the English text */
+  position: relative;
+}
+body.i18n-ready { transition: none; }
+body.i18n-ready .skeleton { display: none !important; }
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  border-radius: 4px;
+  display: inline-block;
+  pointer-events: none;
+}
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-text  { height: .85em; width: 3em; vertical-align: middle; }
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+}
 
 /* ============================================
    Language Selector Styles
@@ -85,6 +115,7 @@ body.i18n-ready { opacity: 1; transition: opacity 0.25s ease-in; }
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
+  left: auto;
   background: var(--card, #fff);
   border: 1px solid var(--border, #e2e8f0);
   border-radius: 12px;
@@ -93,6 +124,8 @@ body.i18n-ready { opacity: 1; transition: opacity 0.25s ease-in; }
   z-index: 9999;
   min-width: 380px;
 }
+/* RTL: flip to open left-aligned so it doesn't clip off screen */
+[dir="rtl"] .lang-dropdown { right: auto; left: 0; }
 
 .lang-dropdown.lang-dd-open {
   display: block;
