@@ -244,8 +244,8 @@
       <input type="file" id="file-input" class="hidden" multiple accept="image/*">
       <div class="mt-4 inline-flex items-center gap-2">
         <label class="text-sm text-stone-500" data-i18n="upload.category_label">Category:</label>
-        <select id="upload-category" class="border border-border-subtle rounded-lg px-3 py-2 text-sm bg-surface text-stone-700 focus:ring-2 focus:ring-accent focus:border-accent">
-          <option value="">__root (no category)</option>
+        <select id="upload-category" class="border border-border-subtle rounded-lg px-3 py-2 text-sm bg-surface text-stone-700 focus:ring-2 focus:ring-accent focus:border-accent" required>
+          <option value="" disabled selected>Select a category</option>
           {% for cat in categories %}
           <option value="{{ cat.name }}">{{ cat.display_name or cat.name }}</option>
           {% endfor %}

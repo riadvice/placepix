@@ -21,18 +21,26 @@ fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
 async function handleFiles(files) {
   if (!files.length) return;
+  
+  const category = categorySelect.value;
+  if (!category) {
+    statusEl.classList.remove('hidden');
+    statusEl.textContent = 'Please select a category before uploading';
+    statusEl.className = 'mt-3 text-sm text-center font-medium text-red-500';
+    return;
+  }
+  
   statusEl.classList.remove('hidden');
   const uploadingText = i18n.get('upload.uploading') || 'Uploading {count} file(s)...';
   statusEl.textContent = uploadingText.replace('{count}', files.length);
   statusEl.className = 'mt-3 text-sm text-center font-medium text-stone-500';
 
   let uploaded = 0;
-  const category = categorySelect.value;
 
   for (const file of files) {
     const formData = new FormData();
     formData.append('file', file);
-    if (category) formData.append('category', category);
+    formData.append('category', category);
 
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });

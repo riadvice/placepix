@@ -1690,10 +1690,12 @@ async def upload_image(
         logger.warning("Upload failed: no filename provided")
         raise HTTPException(status_code=400, detail="no file provided")
 
-    target_dir = settings.images_dir
-    if category:
-        target_dir = target_dir / category
-        target_dir.mkdir(parents=True, exist_ok=True)
+    if not category:
+        logger.warning("Upload blocked: category is required (root uploads are not allowed)")
+        raise HTTPException(status_code=400, detail="category is required")
+
+    target_dir = settings.images_dir / category
+    target_dir.mkdir(parents=True, exist_ok=True)
 
     dest = target_dir / file.filename
     content = await file.read()
