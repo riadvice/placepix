@@ -1286,6 +1286,9 @@ async def index(request: Request) -> Any:
             "ai_generation_enabled": settings.ai_generation_enabled,
             "git_version": _git_version,
             "render_time": render_time,
+            "privacy_policy_url": settings.privacy_policy_url,
+            "gdpr_statement_url": settings.gdpr_statement_url,
+            "cookie_policy_url": settings.cookie_policy_url,
         },
     )
 
@@ -1298,6 +1301,9 @@ async def url_builder(request: Request) -> Any:
         {
             "ga_tracking_id": settings.ga_tracking_id,
             "upload_enabled": settings.upload_enabled and _upload_writable,
+            "privacy_policy_url": settings.privacy_policy_url,
+            "gdpr_statement_url": settings.gdpr_statement_url,
+            "cookie_policy_url": settings.cookie_policy_url,
         },
     )
 

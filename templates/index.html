@@ -896,7 +896,7 @@
   <!-- Footer -->
   <footer class="bg-stone-900 text-white py-8 mt-auto border-t border-stone-700">
     <div class="max-w-7xl mx-auto px-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
         <!-- About -->
         <div>
           <p class="text-stone-300 text-sm font-medium mb-2" data-i18n="footer.about">PlacePix</p>
@@ -914,6 +914,23 @@
             {% endif %}
           </div>
         </div>
+        {% if privacy_policy_url or gdpr_statement_url or cookie_policy_url %}
+        <!-- Legal -->
+        <div>
+          <p class="text-stone-300 text-sm font-medium mb-2" data-i18n="footer.legal">Legal</p>
+          <div class="flex flex-col gap-1">
+            {% if privacy_policy_url %}
+            <a href="{{ privacy_policy_url }}" target="_blank" class="text-stone-400 text-xs hover:text-sky-400 transition">Privacy Policy</a>
+            {% endif %}
+            {% if gdpr_statement_url %}
+            <a href="{{ gdpr_statement_url }}" target="_blank" class="text-stone-400 text-xs hover:text-sky-400 transition">GDPR Statement</a>
+            {% endif %}
+            {% if cookie_policy_url %}
+            <a href="{{ cookie_policy_url }}" target="_blank" class="text-stone-400 text-xs hover:text-sky-400 transition">Cookie Policy</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
         <!-- License -->
         <div>
           <p class="text-stone-300 text-sm font-medium mb-2" data-i18n="footer.license">License</p>
@@ -1054,6 +1071,10 @@
               acceptAllBtn: 'Accept',
               acceptNecessaryBtn: 'Reject',
               showPreferencesBtn: 'Manage preferences'
+              {% if privacy_policy_url or gdpr_statement_url or cookie_policy_url %}
+              ,
+              footer: '{% if privacy_policy_url %}<a href="{{ privacy_policy_url }}" target="_blank">Privacy Policy</a>{% endif %}{% if gdpr_statement_url %}{% if privacy_policy_url %} · {% endif %}<a href="{{ gdpr_statement_url }}" target="_blank">GDPR Statement</a>{% endif %}{% if cookie_policy_url %}{% if privacy_policy_url or gdpr_statement_url %} · {% endif %}<a href="{{ cookie_policy_url }}" target="_blank">Cookie Policy</a>{% endif %}'
+              {% endif %}
             },
             preferencesModal: {
               title: 'Cookie preferences',
@@ -1094,18 +1115,21 @@
         }
       },
       onFirstConsent: function() {
+        localStorage.setItem('cookieconsent_timestamp', new Date().toISOString());
         updateGtagConsent();
         if (CookieConsent.acceptedCategory('analytics')) {
           loadGA4();
         }
       },
       onConsent: function() {
+        localStorage.setItem('cookieconsent_timestamp', new Date().toISOString());
         updateGtagConsent();
         if (CookieConsent.acceptedCategory('analytics')) {
           loadGA4();
         }
       },
       onChange: function() {
+        localStorage.setItem('cookieconsent_timestamp', new Date().toISOString());
         updateGtagConsent();
         if (CookieConsent.acceptedCategory('analytics')) {
           loadGA4();

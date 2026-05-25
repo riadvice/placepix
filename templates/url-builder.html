@@ -667,6 +667,10 @@
                             acceptAllBtn: 'Accept',
                             acceptNecessaryBtn: 'Reject',
                             showPreferencesBtn: 'Manage preferences'
+                            {% if privacy_policy_url or gdpr_statement_url or cookie_policy_url %}
+                            ,
+                            footer: '{% if privacy_policy_url %}<a href="{{ privacy_policy_url }}" target="_blank">Privacy Policy</a>{% endif %}{% if gdpr_statement_url %}{% if privacy_policy_url %} · {% endif %}<a href="{{ gdpr_statement_url }}" target="_blank">GDPR Statement</a>{% endif %}{% if cookie_policy_url %}{% if privacy_policy_url or gdpr_statement_url %} · {% endif %}<a href="{{ cookie_policy_url }}" target="_blank">Cookie Policy</a>{% endif %}'
+                            {% endif %}
                         },
                         preferencesModal: {
                             title: 'Cookie preferences',
@@ -707,18 +711,21 @@
                 }
             },
             onFirstConsent: function() {
+                localStorage.setItem('cookieconsent_timestamp', new Date().toISOString());
                 updateGtagConsent();
                 if (CookieConsent.acceptedCategory('analytics')) {
                     loadGA4();
                 }
             },
             onConsent: function() {
+                localStorage.setItem('cookieconsent_timestamp', new Date().toISOString());
                 updateGtagConsent();
                 if (CookieConsent.acceptedCategory('analytics')) {
                     loadGA4();
                 }
             },
             onChange: function() {
+                localStorage.setItem('cookieconsent_timestamp', new Date().toISOString());
                 updateGtagConsent();
                 if (CookieConsent.acceptedCategory('analytics')) {
                     loadGA4();
