@@ -13,11 +13,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender-dev \
     libgomp1 \
+    && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY pyproject.toml .
-RUN pip install --no-cache-dir -e .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -e .
 
 # Copy application code (images/ is mounted at runtime, never copied)
 COPY src/ ./src/
