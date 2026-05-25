@@ -221,5 +221,12 @@
   "shortcuts.preview": "Önizleme",
   "shortcuts.copy": "Kopyala",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Koyu"
+  "shortcuts.dark": "Koyu",
+
+  "notification.copied": "URL panoya kopyalandı!",
+  "notification.qr_error": "QR kod oluşturulamadı",
+  "upload.uploading": "{count} dosya yükleniyor...",
+  "upload.uploaded": "{uploaded}/{total} dosya yüklendi. Yeniden yükleniyor...",
+  "upload.copy_error": "Kopyalama başarısız:",
+  "console.load_categories_error": "Kategoriler yüklenemedi:"
 }

@@ -221,5 +221,12 @@
   "shortcuts.preview": "Попередній перегляд",
   "shortcuts.copy": "Копіювати",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Темний"
+  "shortcuts.dark": "Темний",
+
+  "notification.copied": "URL скопійовано в буфер обміну!",
+  "notification.qr_error": "Не вдалося створити QR-код",
+  "upload.uploading": "Завантаження {count} файлу(ів)...",
+  "upload.uploaded": "Завантажено {uploaded}/{total} файлів. Перезавантаження...",
+  "upload.copy_error": "Не вдалося скопіювати:",
+  "console.load_categories_error": "Не вдалося завантажити категорії:"
 }

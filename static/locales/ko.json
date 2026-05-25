@@ -221,5 +221,12 @@
   "shortcuts.preview": "미리보기",
   "shortcuts.copy": "복사",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "다크"
+  "shortcuts.dark": "다크",
+
+  "notification.copied": "URL이 클립보드에 복사되었습니다!",
+  "notification.qr_error": "QR 코드 생성 실패",
+  "upload.uploading": "{count}개 파일 업로드 중...",
+  "upload.uploaded": "{uploaded}/{total}개 파일 업로드됨. 다시 로드 중...",
+  "upload.copy_error": "복사 실패:",
+  "console.load_categories_error": "카테고리 로드 실패:"
 }

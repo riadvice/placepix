@@ -221,5 +221,12 @@
   "shortcuts.preview": "Προεπισκόπηση",
   "shortcuts.copy": "Αντιγραφή",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Σκούρο"
+  "shortcuts.dark": "Σκούρο",
+
+  "notification.copied": "Το URL αντιγράφηκε στο πρόχειρο!",
+  "notification.qr_error": "Απέτυχε η δημιουργία κωδικού QR",
+  "upload.uploading": "Μεταφόρτωση {count} αρχείου(ων)...",
+  "upload.uploaded": "Μεταφορτώθηκαν {uploaded}/{total} αρχεία. Επαναφόρτωση...",
+  "upload.copy_error": "Αποτυχία αντιγραφής:",
+  "console.load_categories_error": "Αποτυχία φόρτωσης κατηγοριών:"
 }

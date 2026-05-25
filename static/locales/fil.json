@@ -221,5 +221,12 @@
   "shortcuts.preview": "Silipin",
   "shortcuts.copy": "Kopyahin",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Madilim"
+  "shortcuts.dark": "Madilim",
+
+  "notification.copied": "Nakopya ang URL sa clipboard!",
+  "notification.qr_error": "Nabigo ang pagbuo ng QR code",
+  "upload.uploading": "Uploading {count} file(s)...",
+  "upload.uploaded": "Na-upload {uploaded}/{total} files. Reload...",
+  "upload.copy_error": "Nabigo ang pagkopya:",
+  "console.load_categories_error": "Nabigo ang pag-load ng categories:"
 }

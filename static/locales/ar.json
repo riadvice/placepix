@@ -221,5 +221,12 @@
   "shortcuts.preview": "معاينة",
   "shortcuts.copy": "نسخ",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "داكن"
+  "shortcuts.dark": "داكن",
+
+  "notification.copied": "تم نسخ الرابط إلى الحافظة!",
+  "notification.qr_error": "فشل إنشاء رمز QR",
+  "upload.uploading": "جاري رفع {count} ملف(ات)...",
+  "upload.uploaded": "تم رفع {uploaded}/{total} ملف. إعادة التحميل...",
+  "upload.copy_error": "فشل النسخ:",
+  "console.load_categories_error": "فشل تحميل الفئات:"
 }

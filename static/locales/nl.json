@@ -221,5 +221,12 @@
   "shortcuts.preview": "Voorbeeld",
   "shortcuts.copy": "Kopiëren",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Donker"
+  "shortcuts.dark": "Donker",
+
+  "notification.copied": "URL gekopieerd naar klembord!",
+  "notification.qr_error": "QR-code genereren mislukt",
+  "upload.uploading": "{count} bestand(en) uploaden...",
+  "upload.uploaded": "{uploaded}/{total} bestanden geüpload. Herladen...",
+  "upload.copy_error": "Kopiëren mislukt:",
+  "console.load_categories_error": "Categorieën laden mislukt:"
 }

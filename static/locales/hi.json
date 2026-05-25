@@ -221,5 +221,12 @@
   "shortcuts.preview": "पूर्वावलोकन",
   "shortcuts.copy": "कॉपी करें",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "डार्क"
+  "shortcuts.dark": "डार्क",
+
+  "notification.copied": "URL क्लिपबोर्ड पर कॉपी हो गया!",
+  "notification.qr_error": "QR कोड बनाने में विफल",
+  "upload.uploading": "{count} फ़ाइल(ें) अपलोड हो रही है...",
+  "upload.uploaded": "{uploaded}/{total} फ़ाइलें अपलोड हुईं। पुनः लोड हो रहा है...",
+  "upload.copy_error": "कॉपी करने में विफल:",
+  "console.load_categories_error": "श्रेणियां लोड करने में विफल:"
 }

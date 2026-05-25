@@ -242,5 +242,12 @@
   "shortcuts.preview": "Preview",
   "shortcuts.copy": "Copy",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Dark"
+  "shortcuts.dark": "Dark",
+
+  "notification.copied": "URL copied to clipboard!",
+  "notification.qr_error": "Failed to generate QR code",
+  "upload.uploading": "Uploading {count} file(s)...",
+  "upload.uploaded": "Uploaded {uploaded}/{total} files. Reloading...",
+  "upload.copy_error": "Failed to copy:",
+  "console.load_categories_error": "Failed to load categories:"
 }

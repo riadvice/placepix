@@ -221,5 +221,12 @@
   "shortcuts.preview": "প্রিভিউ",
   "shortcuts.copy": "কপি",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "ডার্ক"
+  "shortcuts.dark": "ডার্ক",
+
+  "notification.copied": "URL ক্লিপবোর্ডে কপি হয়েছে!",
+  "notification.qr_error": "QR কোড তৈরি করতে ব্যর্থ",
+  "upload.uploading": "{count} ফাইল আপলোড হচ্ছে...",
+  "upload.uploaded": "{uploaded}/{total} ফাইল আপলোড হয়েছে। পুনরায় লোড হচ্ছে...",
+  "upload.copy_error": "কপি করতে ব্যর্থ:",
+  "console.load_categories_error": "ক্যাটাগরি লোড করতে ব্যর্থ:"
 }

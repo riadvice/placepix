@@ -221,5 +221,12 @@
   "shortcuts.preview": "預覽",
   "shortcuts.copy": "複製",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "深色"
+  "shortcuts.dark": "深色",
+
+  "notification.copied": "URL已複製到剪貼簿!",
+  "notification.qr_error": "生成 QR 碼失敗",
+  "upload.uploading": "正在上傳 {count} 個檔案...",
+  "upload.uploaded": "已上傳 {uploaded}/{total} 個檔案。重新載入...",
+  "upload.copy_error": "複製失敗:",
+  "console.load_categories_error": "載入類別失敗:"
 }

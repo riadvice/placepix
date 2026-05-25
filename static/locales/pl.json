@@ -221,5 +221,12 @@
   "shortcuts.preview": "Podgląd",
   "shortcuts.copy": "Kopiuj",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Ciemny"
+  "shortcuts.dark": "Ciemny",
+
+  "notification.copied": "URL skopiowany do schowka!",
+  "notification.qr_error": "Nie udało się wygenerować kodu QR",
+  "upload.uploading": "Wysyłanie {count} pliku(ów)...",
+  "upload.uploaded": "Wysłano {uploaded}/{total} plików. Przeładowywanie...",
+  "upload.copy_error": "Kopiowanie nieudane:",
+  "console.load_categories_error": "Nie udało się załadować kategorii:"
 }

@@ -221,5 +221,12 @@
   "shortcuts.preview": "Vorschau",
   "shortcuts.copy": "Kopieren",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Dunkel"
+  "shortcuts.dark": "Dunkel",
+
+  "notification.copied": "URL in die Zwischenablage kopiert!",
+  "notification.qr_error": "QR-Code konnte nicht generiert werden",
+  "upload.uploading": "{count} Datei(en) werden hochgeladen...",
+  "upload.uploaded": "{uploaded}/{total} Dateien hochgeladen. Neu laden...",
+  "upload.copy_error": "Kopieren fehlgeschlagen:",
+  "console.load_categories_error": "Kategorien konnten nicht geladen werden:"
 }

@@ -201,8 +201,15 @@
     'vi':    { flag: 'vn', native: 'Tiếng Việt' },
   };
 
+  /**
+   * Public: get translation by key
+   */
+  function get(key) {
+    return _translations[key] || key;
+  }
+
   // Expose globally
-  window.i18n = { init, setLanguage, LANG_META, SUPPORTED };
+  window.i18n = { init, setLanguage, get, LANG_META, SUPPORTED };
 
   // Auto-init when DOM is ready
   if (document.readyState === 'loading') {

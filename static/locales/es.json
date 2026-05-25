@@ -221,5 +221,12 @@
   "shortcuts.preview": "Vista previa",
   "shortcuts.copy": "Copiar",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Oscuro"
+  "shortcuts.dark": "Oscuro",
+
+  "notification.copied": "URL copiada al portapapeles!",
+  "notification.qr_error": "Error al generar código QR",
+  "upload.uploading": "Subiendo {count} archivo(s)...",
+  "upload.uploaded": "{uploaded}/{total} archivos subidos. Recargando...",
+  "upload.copy_error": "Error al copiar:",
+  "console.load_categories_error": "Error al cargar categorías:"
 }

@@ -82,10 +82,5 @@
       var btn = document.getElementById('lang-trigger');
       if (btn) btn.setAttribute('aria-expanded', 'false');
     }
-    var featSel = document.getElementById('features-dropdown');
-    if (featSel && !featSel.contains(e.target)) {
-      var menu = featSel.querySelector('.dropdown-menu');
-      if (menu) menu.style.display = 'none';
-    }
   });
 </script>

@@ -221,5 +221,12 @@
   "shortcuts.preview": "Anteprima",
   "shortcuts.copy": "Copia",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Scuro"
+  "shortcuts.dark": "Scuro",
+
+  "notification.copied": "URL copiato negli appunti!",
+  "notification.qr_error": "Impossibile generare il codice QR",
+  "upload.uploading": "Caricamento di {count} file...",
+  "upload.uploaded": "{uploaded}/{total} file caricati. Ricaricamento...",
+  "upload.copy_error": "Copia non riuscita:",
+  "console.load_categories_error": "Caricamento categorie non riuscito:"
 }

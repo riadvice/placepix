@@ -221,5 +221,12 @@
   "shortcuts.preview": "Förhandsgranska",
   "shortcuts.copy": "Kopiera",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Mörk"
+  "shortcuts.dark": "Mörk",
+
+  "notification.copied": "URL kopierad till urklipp!",
+  "notification.qr_error": "Kunde inte generera QR-kod",
+  "upload.uploading": "Laddar upp {count} fil(er)...",
+  "upload.uploaded": "{uploaded}/{total} filer uppladdade. Laddar om...",
+  "upload.copy_error": "Kopiering misslyckades:",
+  "console.load_categories_error": "Kunde inte ladda kategorier:"
 }

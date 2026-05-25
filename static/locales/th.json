@@ -221,5 +221,12 @@
   "shortcuts.preview": "ดูตัวอย่าง",
   "shortcuts.copy": "คัดลอก",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "มืด"
+  "shortcuts.dark": "มืด",
+
+  "notification.copied": "คัดลอก URL ไปยังคลิปบอร์ดแล้ว!",
+  "notification.qr_error": "ไม่สามารถสร้าง QR Code ได้",
+  "upload.uploading": "กำลังอัปโหลด {count} ไฟล์...",
+  "upload.uploaded": "อัปโหลดแล้ว {uploaded}/{total} ไฟล์ กำลังโหลดใหม่...",
+  "upload.copy_error": "คัดลอกไม่สำเร็จ:",
+  "console.load_categories_error": "โหลดหมวดหมู่ไม่สำเร็จ:"
 }

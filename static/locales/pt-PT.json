@@ -221,5 +221,12 @@
   "shortcuts.preview": "Pré-visualizar",
   "shortcuts.copy": "Copiar",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Escuro"
+  "shortcuts.dark": "Escuro",
+
+  "notification.copied": "URL copiada para a área de transferência!",
+  "notification.qr_error": "Falha ao gerar código QR",
+  "upload.uploading": "A enviar {count} ficheiro(s)...",
+  "upload.uploaded": "{uploaded}/{total} ficheiros enviados. A recarregar...",
+  "upload.copy_error": "Falha ao copiar:",
+  "console.load_categories_error": "Falha ao carregar categorias:"
 }

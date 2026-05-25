@@ -163,21 +163,36 @@
         <img src="/400/300/{{ (categories|random).name if categories else 'all' }}?seed=smart1&fit=smart" alt="Smart crop" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="smart_crop.face_detection">Face Detection</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?fit=smart</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?fit=smart</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?fit=smart')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/{{ (categories|random).name if categories else 'all' }}?seed=smart2&fit=crop" alt="Standard crop" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="smart_crop.center_crop">Standard Center Crop</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?fit=crop</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?fit=crop</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?fit=crop')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/{{ (categories|random).name if categories else 'all' }}?seed=smart3&fit=cover" alt="Cover" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="smart_crop.cover_fill">Cover Fill</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?fit=cover</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?fit=cover</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?fit=cover')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -191,21 +206,36 @@
         <img src="/ratio/16:9/400/nature?seed=ratio1" alt="16:9" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="ratio.widescreen">16:9 Widescreen</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/ratio/16:9/400</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/ratio/16:9/400</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/ratio/16:9/400')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/ratio/1:1/400/nature?seed=ratio2" alt="1:1" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="ratio.square">1:1 Square</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/ratio/1:1/400</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/ratio/1:1/400</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/ratio/1:1/400')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/ratio/9:16/400/nature?seed=ratio3" alt="9:16" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="ratio.portrait">9:16 Portrait</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/ratio/9:16/400</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/ratio/9:16/400</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/ratio/9:16/400')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -219,21 +249,36 @@
         <img src="/400/300/nature?seed=overlay1&text=Hello+World" alt="Text overlay" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="overlay.text_label">Text Label</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?text=Hello+World</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?text=Hello+World</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?text=Hello+World')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=overlay2&text=Demo&border=4,ffffff" alt="Border" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="overlay.border">Border</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?border=4,ffffff</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?border=4,ffffff</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?border=4,ffffff')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=overlay3&watermark=1" alt="Watermark" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="overlay.watermark">Watermark</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?watermark=1</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?watermark=1</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?watermark=1')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -247,21 +292,36 @@
         <img src="/preset/instagram-square/nature?seed=preset1" alt="Instagram" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.instagram_square">Instagram Square</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/preset/instagram-square</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/preset/instagram-square</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/preset/instagram-square')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/preset/youtube-thumbnail/nature?seed=preset2" alt="YouTube" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.youtube_thumbnail">YouTube Thumbnail</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/preset/youtube-thumbnail</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/preset/youtube-thumbnail</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/preset/youtube-thumbnail')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/preset/mobile/nature?seed=preset3" alt="Mobile" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="preset.mobile">Mobile</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/preset/mobile</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/preset/mobile</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/preset/mobile')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -372,19 +432,34 @@
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/svg/400/300?bg=e7e5e4&fg=78716c" alt="Default" class="w-full h-48 object-cover">
         <div class="p-4">
-          <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=e7e5e4&fg=78716c</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=e7e5e4&fg=78716c</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/svg/400/300?bg=e7e5e4&fg=78716c')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/svg/400/300?bg=1c1917&fg=d97706&text=Hero" alt="Custom text" class="w-full h-48 object-cover">
         <div class="p-4">
-          <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=1c1917&fg=d97706&text=Hero</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=1c1917&fg=d97706&text=Hero</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/svg/400/300?bg=1c1917&fg=d97706&text=Hero')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/svg/400/300?bg=d97706&fg=ffffff&text=CTA" alt="Amber CTA" class="w-full h-48 object-cover">
         <div class="p-4">
-          <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=d97706&fg=ffffff&text=CTA</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/svg/400/300?bg=d97706&fg=ffffff&text=CTA</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/svg/400/300?bg=d97706&fg=ffffff&text=CTA')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -407,21 +482,36 @@
         <img src="/gradient/400/300/3b82f6/10b981" alt="Linear gradient" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="gradient.linear">Linear Gradient</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/gradient/400/300/3b82f6/10b981</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/gradient/400/300/3b82f6/10b981</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/gradient/400/300/3b82f6/10b981')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/gradient/400/300/e11d48/f59e0b?angle=45" alt="Angled gradient" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="gradient.angle">45° Angle</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?angle=45</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?angle=45</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?angle=45')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/gradient/400/300/1e293b/64748b?gradient_type=radial" alt="Radial gradient" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="gradient.radial">Radial Gradient</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?gradient_type=radial</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?gradient_type=radial</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?gradient_type=radial')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -444,42 +534,72 @@
         <img src="/400/300/nature?seed=colors&amp;sepia=1" alt="Sepia" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.sepia">Sepia Tone</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?sepia=1</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?sepia=1</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?sepia=1')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;tint=d97706" alt="Amber Tint" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.tint">Amber Tint</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?tint=d97706</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?tint=d97706</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?tint=d97706')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;brightness=1.3&amp;contrast=1.2" alt="Brighten" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.brighten">Brighten &amp; Contrast</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?brightness=1.3&amp;contrast=1.2</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?brightness=1.3&amp;contrast=1.2</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?brightness=1.3&amp;contrast=1.2')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;saturation=2.0" alt="Saturation" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.saturation">High Saturation</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?saturation=2.0</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?saturation=2.0</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?saturation=2.0')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;grayscale=1" alt="Grayscale" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.grayscale">Grayscale</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?grayscale=1</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?grayscale=1</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?grayscale=1')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <img src="/400/300/nature?seed=colors&amp;tint=e11d48&amp;brightness=0.8&amp;contrast=1.3" alt="Dramatic" class="w-full h-48 object-cover">
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="filter.dramatic">Dramatic Red</p>
-          <code class="text-xs font-mono text-stone-500 break-all">?tint=e11d48&amp;brightness=0.8&amp;contrast=1.3</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">?tint=e11d48&amp;brightness=0.8&amp;contrast=1.3</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?tint=e11d48&amp;brightness=0.8&amp;contrast=1.3')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -507,7 +627,12 @@
         </a>
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="color.amber">Amber</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/color/d97706/400/300</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/color/d97706/400/300</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/color/d97706/400/300')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
@@ -516,7 +641,12 @@
         </a>
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="color.green">Green</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/color/10b981/400/300</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/color/10b981/400/300</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/color/10b981/400/300')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
@@ -525,7 +655,12 @@
         </a>
         <div class="p-4">
           <p class="font-semibold text-sm text-stone-700 mb-1" data-i18n="color.red">Red</p>
-          <code class="text-xs font-mono text-stone-500 break-all">/color/e11d48/400/300</code>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-stone-500 break-all">/color/e11d48/400/300</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '/color/e11d48/400/300')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -655,88 +790,14 @@
     </div>
   </footer>
 
-  <script>
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const categorySelect = document.getElementById('upload-category');
-    const statusEl = document.getElementById('upload-status');
-
-    dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      handleFiles(e.dataTransfer.files);
-    });
-    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-    async function handleFiles(files) {
-      if (!files.length) return;
-      statusEl.classList.remove('hidden');
-      statusEl.textContent = `Uploading ${files.length} file(s)...`;
-      statusEl.className = 'mt-3 text-sm text-center font-medium text-stone-500';
-
-      let uploaded = 0;
-      const category = categorySelect.value;
-
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
-        if (category) formData.append('category', category);
-
-        try {
-          const res = await fetch('/api/upload', { method: 'POST', body: formData });
-          if (res.ok) uploaded++;
-        } catch (err) {
-          console.error('Upload failed:', err);
-        }
-      }
-
-      statusEl.textContent = `Uploaded ${uploaded}/${files.length} files. Reloading...`;
-      statusEl.className = 'mt-3 text-sm text-center font-medium text-accent';
-      setTimeout(() => location.reload(), 1000);
-    }
-  </script>
-  <script>
-    document.addEventListener('click', function(e) {
-      var sel = document.getElementById('lang-selector');
-      var dd  = document.getElementById('lang-dropdown');
-      if (sel && dd && !sel.contains(e.target)) {
-        dd.classList.remove('lang-dd-open');
-        var btn = document.getElementById('lang-trigger');
-        if (btn) btn.setAttribute('aria-expanded', 'false');
-      }
-      var featSel = document.getElementById('features-dropdown');
-      if (featSel && !featSel.contains(e.target)) {
-        var menu = featSel.querySelector('.dropdown-menu');
-        if (menu) menu.style.display = 'none';
-      }
-    });
-
-    function copyCategoryURL(category, event) {
-      event.stopPropagation();
-      const url = window.location.origin + '/' + category;
-      navigator.clipboard.writeText(url).then(() => {
-        Toastify({
-          text: "URL copied to clipboard!",
-          duration: 3000,
-          gravity: "top",
-          position: "right",
-          style: {
-            background: "linear-gradient(to right, #b45309, #d97706)",
-          }
-        }).showToast();
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-      });
-    }
-  </script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/index.js"></script>
+
+  <!-- Dark Mode Toggle Button -->
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode (Ctrl+D)">
+    🌙
+  </button>
 </body>
 </html>

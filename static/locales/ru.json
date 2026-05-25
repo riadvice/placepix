@@ -221,5 +221,12 @@
   "shortcuts.preview": "Предпросмотр",
   "shortcuts.copy": "Копировать",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Тёмный"
+  "shortcuts.dark": "Тёмный",
+
+  "notification.copied": "URL скопирован в буфер обмена!",
+  "notification.qr_error": "Не удалось создать QR-код",
+  "upload.uploading": "Загрузка {count} файла(ов)...",
+  "upload.uploaded": "Загружено {uploaded}/{total} файлов. Перезагрузка...",
+  "upload.copy_error": "Не удалось скопировать:",
+  "console.load_categories_error": "Не удалось загрузить категории:"
 }

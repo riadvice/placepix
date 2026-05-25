@@ -221,5 +221,12 @@
   "shortcuts.preview": "Xem trước",
   "shortcuts.copy": "Sao chép",
   "shortcuts.qr": "QR",
-  "shortcuts.dark": "Tối"
+  "shortcuts.dark": "Tối",
+
+  "notification.copied": "URL đã được sao chép vào bộ nhớ tạm!",
+  "notification.qr_error": "Không thể tạo mã QR",
+  "upload.uploading": "Đang tải lên {count} tệp...",
+  "upload.uploaded": "Đã tải lên {uploaded}/{total} tệp. Đang tải lại...",
+  "upload.copy_error": "Sao chép thất bại:",
+  "console.load_categories_error": "Không thể tải danh mục:"
 }
