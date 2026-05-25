@@ -2,11 +2,11 @@
    CSS Variables
    ============================================ */
 :root {
-  --primary: #b45309;
-  --primary-dark: #92400e;
-  --primary-light: #d97706;
+  --primary: #0ea5e9;
+  --primary-dark: #0284c7;
+  --primary-light: #38bdf8;
   --secondary: #78716c;
-  --accent: #d97706;
+  --accent: #38bdf8;
   --success: #22c55e;
   --background: #fafaf9;
   --surface: #ffffff;
@@ -92,9 +92,9 @@ body.i18n-ready .skeleton { display: none !important; }
   cursor: pointer;
   padding: 5px 10px;
   border-radius: 8px;
-  border: 1px solid var(--border, #e2e8f0);
-  background: var(--card, #fff);
-  color: var(--text, #1e293b);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
   font-size: .85rem;
   font-weight: 500;
   white-space: nowrap;
@@ -102,8 +102,8 @@ body.i18n-ready .skeleton { display: none !important; }
 }
 
 .lang-trigger:hover {
-  border-color: #b45309;
-  box-shadow: 0 0 0 3px rgba(180, 83, 9, .08);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, .08);
 }
 
 .lang-trigger svg {
@@ -116,8 +116,8 @@ body.i18n-ready .skeleton { display: none !important; }
   top: calc(100% + 6px);
   right: 0;
   left: auto;
-  background: var(--card, #fff);
-  border: 1px solid var(--border, #e2e8f0);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, .13);
   padding: 12px;
@@ -145,22 +145,22 @@ body.i18n-ready .skeleton { display: none !important; }
   border-radius: 7px;
   cursor: pointer;
   font-size: .8rem;
-  color: var(--text, #1e293b);
+  color: var(--text-primary);
   transition: background .12s;
   white-space: nowrap;
   border: 1px solid transparent;
 }
 
 .lang-item:hover {
-  background: #fef3c7;
-  border-color: #f59e0b;
+  background: var(--background);
+  border-color: var(--primary-light);
 }
 
 .lang-item.lang-active {
-  background: #fff7ed;
-  border-color: #b45309;
+  background: var(--background);
+  border-color: var(--primary);
   font-weight: 600;
-  color: #b45309;
+  color: var(--primary);
 }
 
 .lang-item .fi {
@@ -177,8 +177,8 @@ body.i18n-ready .skeleton { display: none !important; }
 }
 
 .drop-zone.dragover {
-  border-color: #b45309;
-  background: rgba(180, 83, 9, 0.04);
+  border-color: var(--primary);
+  background: rgba(14, 165, 233, 0.04);
 }
 
 /* ============================================
@@ -223,8 +223,8 @@ body.i18n-ready .skeleton { display: none !important; }
   position: absolute;
   top: 100%;
   left: 0;
-  background: #fff;
-  border: 1px solid #e7e5e4;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, .1);
   padding: 14px 0 6px;
@@ -236,7 +236,7 @@ body.i18n-ready .skeleton { display: none !important; }
 .dropdown-menu a {
   display: block;
   padding: 8px 16px;
-  color: #1c1917;
+  color: var(--text-primary);
   text-decoration: none;
   font-size: 13px;
   white-space: nowrap;
@@ -244,8 +244,8 @@ body.i18n-ready .skeleton { display: none !important; }
 }
 
 .dropdown-menu a:hover {
-  background: #f5f5f4;
-  color: #b45309;
+  background: var(--background);
+  color: var(--primary);
 }
 
 .dropdown:hover .dropdown-menu {
@@ -277,8 +277,13 @@ nav {
 }
 
 [data-theme="dark"] nav {
-  background: rgba(9, 9, 11, 0.8);
+  background: rgba(9, 9, 11, 0.8) !important;
   border-bottom: 1px solid rgba(63, 63, 70, 0.6);
+}
+
+[data-theme="dark"] nav a,
+[data-theme="dark"] nav span {
+  color: var(--text-primary);
 }
 
 nav .nav-container {
@@ -332,20 +337,20 @@ nav .nav-links a.active {
 }
 
 .btn-docs {
-  background: linear-gradient(to right, #b45309, #ea580c);
+  background: linear-gradient(to right, #0284c7, #0ea5e9);
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 600;
-  box-shadow: 0 4px 6px -1px rgba(180, 83, 9, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
   transition: all 0.2s ease;
 }
 
 nav .nav-links .btn-docs:hover {
-  background: linear-gradient(to right, #92400e, #c2410c);
+  background: linear-gradient(to right, #0369a1, #0284c7);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 6px 8px -1px rgba(180, 83, 9, 0.3);
+  box-shadow: 0 6px 8px -1px rgba(14, 165, 233, 0.3);
 }
 
 header {
@@ -418,12 +423,12 @@ header p {
   }
 
   .panel.sticky::-webkit-scrollbar-thumb {
-    background: #d97706;
+    background: var(--primary);
     border-radius: 4px;
   }
 
   .panel.sticky::-webkit-scrollbar-thumb:hover {
-    background: #f59e0b;
+    background: var(--primary-light);
   }
 }
 
@@ -487,7 +492,7 @@ header p {
 .form-group select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
 .form-group small {
@@ -1069,6 +1074,21 @@ button {
   background: var(--background);
   color: var(--primary);
   opacity: 1;
+}
+
+/* Light color for copy buttons on dark backgrounds */
+.bg-slate-800 .code-copy-btn,
+.bg-sky-900 .code-copy-btn,
+.bg-black .code-copy-btn {
+  color: white;
+  opacity: 1;
+}
+
+.bg-slate-800 .code-copy-btn:hover,
+.bg-sky-900 .code-copy-btn:hover,
+.bg-black .code-copy-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .code-copy-btn svg {

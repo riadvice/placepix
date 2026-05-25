@@ -73,7 +73,7 @@
   "section.filters": "Filters & Effects",
   "section.filters.desc": "Apply filters and color adjustments to any image on the fly.",
   "filter.sepia": "Sepia Tone",
-  "filter.tint": "Amber Tint",
+  "filter.tint": "Sky Tint",
   "filter.brighten": "Brighten & Contrast",
   "filter.saturation": "High Saturation",
   "filter.grayscale": "Grayscale",
@@ -82,7 +82,7 @@
 
   "section.color_search": "Search by Dominant Color",
   "color_search.desc": "Find images that match your brand palette. Every image is scanned for its top 3 dominant colors.",
-  "color.amber": "Amber",
+  "color.sky": "Sky",
   "color.green": "Green",
   "color.red": "Red",
   "color_search.how": "How it works:",

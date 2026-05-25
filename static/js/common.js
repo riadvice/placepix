@@ -23,7 +23,7 @@ function copyCategoryURL(category, event) {
       position: "center",
       offset: { x: 0, y: 60 },
       style: {
-        background: "linear-gradient(to right, #b45309, #d97706)",
+        background: "linear-gradient(to right, #0284c7, #0ea5e9)",
       }
     }).showToast();
   }).catch(err => {
@@ -33,8 +33,9 @@ function copyCategoryURL(category, event) {
 
 // Copy code snippet to clipboard
 function copyCode(button, code) {
-  const fullUrl = window.location.origin + code;
-  navigator.clipboard.writeText(fullUrl).then(() => {
+  // If it's a Docker command, copy as-is without URL prefix
+  const textToCopy = code.startsWith('docker') ? code : window.location.origin + code;
+  navigator.clipboard.writeText(textToCopy).then(() => {
     const originalIcon = button.innerHTML;
     button.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
     setTimeout(() => {
@@ -47,7 +48,7 @@ function copyCode(button, code) {
       position: "center",
       offset: { x: 0, y: 60 },
       style: {
-        background: "linear-gradient(to right, #b45309, #d97706)",
+        background: "linear-gradient(to right, #0284c7, #0ea5e9)",
       }
     }).showToast();
   }).catch(err => {

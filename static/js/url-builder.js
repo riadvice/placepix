@@ -187,7 +187,7 @@ function updateURL() {
     if (saturation != 100) params.push(`saturation=${(saturation/100).toFixed(1)}`);
     
     const tint = document.getElementById('tint').value;
-    if (tint && tint !== '#b45309') params.push(`tint=${encodeURIComponent(tint.replace('#', ''))}`);
+    if (tint && tint !== '#0ea5e9') params.push(`tint=${encodeURIComponent(tint.replace('#', ''))}`);
     
     const text = document.getElementById('text').value;
     if (text) params.push(`text=${encodeURIComponent(text)}`);
@@ -210,7 +210,7 @@ function copyURL() {
             position: "center",
             offset: { x: 0, y: 60 },
             style: {
-                background: "linear-gradient(to right, #b45309, #d97706)",
+                background: "linear-gradient(to right, #0284c7, #0ea5e9)",
             }
         }).showToast();
     });
