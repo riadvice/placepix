@@ -232,3 +232,206 @@ def test_quality_affects_file_size():
         
         # Higher quality should produce larger files
         assert len(high_quality) > len(low_quality)
+
+
+def test_invert_effect(client: TestClient):
+    """Test invert effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?invert=true")
+    assert response.status_code == 200
+
+
+def test_posterize_effect(client: TestClient):
+    """Test posterize effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?posterize=4")
+    assert response.status_code == 200
+
+
+def test_solarize_effect(client: TestClient):
+    """Test solarize effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?solarize=128")
+    assert response.status_code == 200
+
+
+def test_duotone_effect(client: TestClient):
+    """Test duotone effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?duotone=ff0000,0000ff")
+    assert response.status_code == 200
+
+
+def test_sharpen_effect(client: TestClient):
+    """Test sharpen effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?sharpen=1.5")
+    assert response.status_code == 200
+
+
+def test_emboss_effect(client: TestClient):
+    """Test emboss effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?emboss=true")
+    assert response.status_code == 200
+
+
+def test_halftone_effect(client: TestClient):
+    """Test halftone effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?halftone=4")
+    assert response.status_code == 200
+
+
+def test_edges_sobel(client: TestClient):
+    """Test edge detection with Sobel."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?edges=sobel")
+    assert response.status_code == 200
+
+
+def test_edges_canny(client: TestClient):
+    """Test edge detection with Canny."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?edges=canny")
+    assert response.status_code == 200
+
+
+def test_oil_painting_effect(client: TestClient):
+    """Test oil painting effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?oil_painting=true")
+    assert response.status_code == 200
+
+
+def test_pencil_sketch_effect(client: TestClient):
+    """Test pencil sketch effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?pencil_sketch=true")
+    assert response.status_code == 200
+
+
+def test_cartoon_effect(client: TestClient):
+    """Test cartoon effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?cartoon=true")
+    assert response.status_code == 200
+
+
+def test_vignette_effect(client: TestClient):
+    """Test vignette effect."""
+    image_id = _get_image_id(client)
+    response = client.get(f"/id/{image_id}/500/500?vignette=0.5")
+    assert response.status_code == 200
+
+
+def test_invert_processor_method():
+    """Test invert in processor."""
+    from pathlib import Path
+    from PIL import Image
+    from src.image_processor import ImageProcessor
+    import tempfile
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_img_path = Path(tmpdir) / "test.jpg"
+        img = Image.new("RGB", (100, 100), color=(128, 128, 128))
+        img.save(test_img_path)
+        
+        processor = ImageProcessor()
+        result = processor.process(test_img_path, width=100, height=100, invert=True)
+        assert len(result) > 0
+
+
+def test_posterize_processor_method():
+    """Test posterize in processor."""
+    from pathlib import Path
+    from PIL import Image
+    from src.image_processor import ImageProcessor
+    import tempfile
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_img_path = Path(tmpdir) / "test.jpg"
+        img = Image.new("RGB", (100, 100), color=(128, 128, 128))
+        img.save(test_img_path)
+        
+        processor = ImageProcessor()
+        result = processor.process(test_img_path, width=100, height=100, posterize=4)
+        assert len(result) > 0
+
+
+def test_duotone_processor_method():
+    """Test duotone in processor."""
+    from pathlib import Path
+    from PIL import Image
+    from src.image_processor import ImageProcessor
+    import tempfile
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_img_path = Path(tmpdir) / "test.jpg"
+        img = Image.new("RGB", (100, 100), color=(128, 128, 128))
+        img.save(test_img_path)
+        
+        processor = ImageProcessor()
+        result = processor.process(test_img_path, width=100, height=100, duotone="ff0000,0000ff")
+        assert len(result) > 0
+
+
+def test_sharpen_processor_method():
+    """Test sharpen in processor."""
+    from pathlib import Path
+    from PIL import Image
+    from src.image_processor import ImageProcessor
+    import tempfile
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_img_path = Path(tmpdir) / "test.jpg"
+        img = Image.new("RGB", (100, 100), color=(128, 128, 128))
+        img.save(test_img_path)
+        
+        processor = ImageProcessor()
+        result = processor.process(test_img_path, width=100, height=100, sharpen=1.5)
+        assert len(result) > 0
+
+
+def test_emboss_processor_method():
+    """Test emboss in processor."""
+    from pathlib import Path
+    from PIL import Image
+    from src.image_processor import ImageProcessor
+    import tempfile
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_img_path = Path(tmpdir) / "test.jpg"
+        img = Image.new("RGB", (100, 100), color=(128, 128, 128))
+        img.save(test_img_path)
+        
+        processor = ImageProcessor()
+        result = processor.process(test_img_path, width=100, height=100, emboss=True)
+        assert len(result) > 0
+
+
+def test_vignette_processor_method():
+    """Test vignette in processor."""
+    from pathlib import Path
+    from PIL import Image
+    from src.image_processor import ImageProcessor
+    import tempfile
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_img_path = Path(tmpdir) / "test.jpg"
+        img = Image.new("RGB", (100, 100), color=(128, 128, 128))
+        img.save(test_img_path)
+        
+        processor = ImageProcessor()
+        result = processor.process(test_img_path, width=100, height=100, vignette=0.5)
+        assert len(result) > 0
+
+
+def test_new_filters_combined(client: TestClient):
+    """Test multiple new filters combined."""
+    image_id = _get_image_id(client)
+    response = client.get(
+        f"/id/{image_id}/500/500?"
+        "invert=true&posterize=4&sharpen=1.0&vignette=0.3"
+    )
+    assert response.status_code == 200

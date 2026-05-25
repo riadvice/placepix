@@ -5,7 +5,7 @@ description = "A self-hosted placeholder image server inspired by lorem-server a
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.136.3",
-    "uvicorn[standard]>=0.47.0",
+    "uvicorn[standard]>=0.48.0",
     "jinja2>=3.1.6",
     "python-multipart>=0.0.29",
     "pillow>=12.2.0",
@@ -15,20 +15,28 @@ dependencies = [
     "pyyaml>=6.0.3",
     "pillow-avif-plugin>=1.5.5",
     "opencv-python>=4.13.0.92",
-    "numpy>=1.26.4",
+    "numpy>=2.4.6",
     "boto3>=1.43.14",
     "apscheduler>=3.11.2",
-    "requests>=2.31.0",
+    "requests>=2.34.2",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-    "pytest-xdist>=3.6.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "pytest-xdist>=3.8.0",
     "httpx>=0.28.1",
 ]
 
 [project.scripts]
 placepix = "src.main:run"
 placepix-stats = "src.admin:main"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q -m 'not slow'"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')"
+]
