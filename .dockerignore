@@ -3,22 +3,33 @@
 .gitignore
 .gitattributes
 
-# Tests
-tests/
-.pytest_cache/
-htmlcov/
-.coverage
-*.cover
-
 # Python
-__pycache__/
+__pycache__
 *.py[cod]
 *$py.class
 *.so
 .Python
-*.egg-info/
-dist/
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
 
 # IDE
 .vscode/
@@ -27,27 +38,44 @@ build/
 *.swo
 *~
 
-# Documentation
-README.md
-IMPLEMENTATION_SUMMARY.md
-*.md
+# OS
+.DS_Store
+Thumbs.db
 
-# CI/CD
-.github/
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Documentation
+*.md
+docs/
 
 # Environment
 .env
-.env.example
-
-# Cache
-.cache/
+.env.*
+.envrc
 
 # Docker
-Dockerfile
-docker-compose.yml
+Dockerfile*
+docker-compose*.yml
 .dockerignore
 
-# Development
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Logs
 *.log
-.DS_Store
-Thumbs.db
+
+# Data (mounted at runtime)
+images/
+data/
+.cache/
+
+# Backup files
+*.bak
+*.backup
