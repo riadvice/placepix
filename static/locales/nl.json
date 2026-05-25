@@ -228,5 +228,14 @@
   "upload.uploading": "{count} bestand(en) uploaden...",
   "upload.uploaded": "{uploaded}/{total} bestanden geüpload. Herladen...",
   "upload.copy_error": "Kopiëren mislukt:",
-  "console.load_categories_error": "Categorieën laden mislukt:"
+  "console.load_categories_error": "Categorieën laden mislukt:",
+
+  "docker.title": "Docker Deploy in één regel",
+  "docker.desc": "Start PlacePix in seconden met één Docker-commando. Geen configuratie nodig.",
+  "docker.note": "Docker-image komt binnenkort naar Docker Hub. Koppel uw afbeeldingenmap om te beginnen.",
+  "docker.features": "Kenmerken:",
+  "docker.feature1": "Automatische afbeeldingsscanning",
+  "docker.feature2": "Kleurextractie",
+  "docker.feature3": "Alle afbeeldingsfilters",
+  "docker.feature4": "Gezondheidscontroles"
 }

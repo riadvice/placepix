@@ -228,5 +228,14 @@
   "upload.uploading": "{count} ফাইল আপলোড হচ্ছে...",
   "upload.uploaded": "{uploaded}/{total} ফাইল আপলোড হয়েছে। পুনরায় লোড হচ্ছে...",
   "upload.copy_error": "কপি করতে ব্যর্থ:",
-  "console.load_categories_error": "ক্যাটাগরি লোড করতে ব্যর্থ:"
+  "console.load_categories_error": "ক্যাটাগরি লোড করতে ব্যর্থ:",
+
+  "docker.title": "এক লাইনের Docker ডিপ্লয়",
+  "docker.desc": "একটি একক Docker কমান্ড দিয়ে সেকেন্ডে PlacePix চালান। কোনো কনফিগারেশন প্রয়োজন নেই।",
+  "docker.note": "Docker ইমেজ শীঘ্রই Docker Hub-এ আসবে। শুরু করতে আপনার ইমেজ ডিরেক্টরি মাউন্ট করুন।",
+  "docker.features": "বৈশিষ্ট্য:",
+  "docker.feature1": "স্বয়ংক্রিয় ইমেজ স্ক্যান",
+  "docker.feature2": "রঙ নিষ্কাশন",
+  "docker.feature3": "সব ইমেজ ফিল্টার",
+  "docker.feature4": "স্বাস্থ্য পরীক্ষা"
 }

@@ -228,5 +228,14 @@
   "upload.uploading": "A enviar {count} ficheiro(s)...",
   "upload.uploaded": "{uploaded}/{total} ficheiros enviados. A recarregar...",
   "upload.copy_error": "Falha ao copiar:",
-  "console.load_categories_error": "Falha ao carregar categorias:"
+  "console.load_categories_error": "Falha ao carregar categorias:",
+
+  "docker.title": "Deploy Docker numa linha",
+  "docker.desc": "Execute o PlacePix em segundos com um único comando Docker. Sem configuração necessária.",
+  "docker.note": "Imagem Docker chegando em breve ao Docker Hub. Monte o seu diretório de imagens para começar.",
+  "docker.features": "Funcionalidades:",
+  "docker.feature1": "Digitalização automática de imagens",
+  "docker.feature2": "Extração de cores",
+  "docker.feature3": "Todos os filtros de imagem",
+  "docker.feature4": "Verificações de saúde"
 }

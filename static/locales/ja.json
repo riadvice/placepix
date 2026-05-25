@@ -228,5 +228,14 @@
   "upload.uploading": "{count}個のファイルをアップロード中...",
   "upload.uploaded": "{uploaded}/{total}個のファイルをアップロードしました。再読み込み中...",
   "upload.copy_error": "コピーに失敗しました:",
-  "console.load_categories_error": "カテゴリの読み込みに失敗しました:"
+  "console.load_categories_error": "カテゴリの読み込みに失敗しました:",
+
+  "docker.title": "ワンラインDockerデプロイ",
+  "docker.desc": "単一のDockerコマンドで数秒でPlacePixを実行。設定は不要です。",
+  "docker.note": "Dockerイメージは近日Docker Hubに登場予定。画像ディレクトリをマウントして開始。",
+  "docker.features": "機能:",
+  "docker.feature1": "自動画像スキャン",
+  "docker.feature2": "色抽出",
+  "docker.feature3": "すべての画像フィルター",
+  "docker.feature4": "ヘルスチェック"
 }

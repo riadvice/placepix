@@ -228,5 +228,14 @@
   "upload.uploading": "Mengunggah {count} file...",
   "upload.uploaded": "{uploaded}/{total} file diunggah. Memuat ulang...",
   "upload.copy_error": "Gagal menyalin:",
-  "console.load_categories_error": "Gagal memuat kategori:"
+  "console.load_categories_error": "Gagal memuat kategori:",
+
+  "docker.title": "Deploy Docker Satu Baris",
+  "docker.desc": "Jalankan PlacePix dalam hitungan detik dengan satu perintah Docker. Tidak perlu konfigurasi.",
+  "docker.note": "Gambar Docker akan segera hadir di Docker Hub. Mount direktori gambar Anda untuk memulai.",
+  "docker.features": "Fitur:",
+  "docker.feature1": "Pemindaian gambar otomatis",
+  "docker.feature2": "Ekstraksi warna",
+  "docker.feature3": "Semua filter gambar",
+  "docker.feature4": "Pemeriksaan kesehatan"
 }

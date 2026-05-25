@@ -228,5 +228,14 @@
   "upload.uploading": "Laster opp {count} fil(er)...",
   "upload.uploaded": "{uploaded}/{total} filer lastet opp. Laster på nytt...",
   "upload.copy_error": "Kopiering mislyktes:",
-  "console.load_categories_error": "Kunne ikke laste kategorier:"
+  "console.load_categories_error": "Kunne ikke laste kategorier:",
+
+  "docker.title": "Docker Deploy på én linje",
+  "docker.desc": "Kjør PlacePix på sekunder med én Docker-kommando. Ingen konfigurasjon nødvendig.",
+  "docker.note": "Docker-bilde kommer snart til Docker Hub. Monter bildemappen din for å begynne.",
+  "docker.features": "Funksjoner:",
+  "docker.feature1": "Automatisk bildeskan",
+  "docker.feature2": "Fargeutvinning",
+  "docker.feature3": "Alle bildefiltre",
+  "docker.feature4": "Helsesjekker"
 }

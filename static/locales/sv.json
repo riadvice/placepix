@@ -228,5 +228,14 @@
   "upload.uploading": "Laddar upp {count} fil(er)...",
   "upload.uploaded": "{uploaded}/{total} filer uppladdade. Laddar om...",
   "upload.copy_error": "Kopiering misslyckades:",
-  "console.load_categories_error": "Kunde inte ladda kategorier:"
+  "console.load_categories_error": "Kunde inte ladda kategorier:",
+
+  "docker.title": "Docker Deploy på en rad",
+  "docker.desc": "Kör PlacePix på sekunder med ett enda Docker-kommando. Ingen konfiguration krävs.",
+  "docker.note": "Docker-avbild kommer snart till Docker Hub. Montera din bildkatalog för att börja.",
+  "docker.features": "Funktioner:",
+  "docker.feature1": "Automatisk bildskanning",
+  "docker.feature2": "Färgextraktion",
+  "docker.feature3": "Alla bildfilter",
+  "docker.feature4": "Hälsokontroller"
 }

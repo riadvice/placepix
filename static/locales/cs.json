@@ -228,5 +228,14 @@
   "upload.uploading": "Nahrávání {count} souboru(ů)...",
   "upload.uploaded": "Nahráno {uploaded}/{total} souborů. Znovu načítání...",
   "upload.copy_error": "Kopírování selhalo:",
-  "console.load_categories_error": "Načítání kategorií selhalo:"
+  "console.load_categories_error": "Načítání kategorií selhalo:",
+
+  "docker.title": "Docker nasazení na jednom řádku",
+  "docker.desc": "Spusťte PlacePix za pár sekund jedním Docker příkazem. Není vyžadována konfigurace.",
+  "docker.note": "Docker obraz brzy dorazí na Docker Hub. Připojte adresář s obrázky pro začátek.",
+  "docker.features": "Funkce:",
+  "docker.feature1": "Automatické skenování obrázků",
+  "docker.feature2": "Extrakce barev",
+  "docker.feature3": "Všechny filtry obrázků",
+  "docker.feature4": "Kontroly zdraví"
 }

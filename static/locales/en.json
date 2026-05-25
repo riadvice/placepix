@@ -249,5 +249,14 @@
   "upload.uploading": "Uploading {count} file(s)...",
   "upload.uploaded": "Uploaded {uploaded}/{total} files. Reloading...",
   "upload.copy_error": "Failed to copy:",
-  "console.load_categories_error": "Failed to load categories:"
+  "console.load_categories_error": "Failed to load categories:",
+
+  "docker.title": "One-Line Docker Deploy",
+  "docker.desc": "Get PlacePix running in seconds with a single Docker command. No configuration needed.",
+  "docker.note": "Docker image coming soon to Docker Hub. Mount your images directory to get started.",
+  "docker.features": "Features:",
+  "docker.feature1": "Auto image scanning",
+  "docker.feature2": "Color extraction",
+  "docker.feature3": "All image filters",
+  "docker.feature4": "Health checks"
 }

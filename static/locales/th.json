@@ -228,5 +228,14 @@
   "upload.uploading": "กำลังอัปโหลด {count} ไฟล์...",
   "upload.uploaded": "อัปโหลดแล้ว {uploaded}/{total} ไฟล์ กำลังโหลดใหม่...",
   "upload.copy_error": "คัดลอกไม่สำเร็จ:",
-  "console.load_categories_error": "โหลดหมวดหมู่ไม่สำเร็จ:"
+  "console.load_categories_error": "โหลดหมวดหมู่ไม่สำเร็จ:",
+
+  "docker.title": "Docker Deploy หนึ่งบรรทัด",
+  "docker.desc": "เรียกใช้ PlacePix ในไม่กี่วินาทีด้วยคำสั่ง Docker เดียว ไม่ต้องการการกำหนดค่า",
+  "docker.note": "Docker image จะมาเร็วๆ ที่ Docker Hub ต่อเชื่อมไดเรกทอรีรูปภาพของคุณเพื่อเริ่มต้น",
+  "docker.features": "คุณสมบัติ:",
+  "docker.feature1": "สแกนรูปภาพอัตโนมัติ",
+  "docker.feature2": "การแยกสี",
+  "docker.feature3": "ฟิลเตอร์รูปภาพทั้งหมด",
+  "docker.feature4": "การตรวจสอบสุขภาพ"
 }

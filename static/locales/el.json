@@ -228,5 +228,14 @@
   "upload.uploading": "Μεταφόρτωση {count} αρχείου(ων)...",
   "upload.uploaded": "Μεταφορτώθηκαν {uploaded}/{total} αρχεία. Επαναφόρτωση...",
   "upload.copy_error": "Αποτυχία αντιγραφής:",
-  "console.load_categories_error": "Αποτυχία φόρτωσης κατηγοριών:"
+  "console.load_categories_error": "Αποτυχία φόρτωσης κατηγοριών:",
+
+  "docker.title": "Docker Deploy σε μία γραμμή",
+  "docker.desc": "Εκτελέστε το PlacePix σε δευτερόλεπτα με μία εντολή Docker. Δεν απαιτείται ρύθμιση.",
+  "docker.note": "Η εικόνα Docker έρχεται σύντομα στο Docker Hub. Προσαρτήστε τον κατάλογο εικόνων για να ξεκινήσετε.",
+  "docker.features": "Χαρακτηριστικά:",
+  "docker.feature1": "Αυτόματη σάρωση εικόνων",
+  "docker.feature2": "Εξαγωγή χρωμάτων",
+  "docker.feature3": "Όλα τα φίλτρα εικόνων",
+  "docker.feature4": "Ελέγχους υγείας"
 }

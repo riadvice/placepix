@@ -228,5 +228,14 @@
   "upload.uploading": "{count}개 파일 업로드 중...",
   "upload.uploaded": "{uploaded}/{total}개 파일 업로드됨. 다시 로드 중...",
   "upload.copy_error": "복사 실패:",
-  "console.load_categories_error": "카테고리 로드 실패:"
+  "console.load_categories_error": "카테고리 로드 실패:",
+
+  "docker.title": "원라인 Docker 배포",
+  "docker.desc": "단일 Docker 명령으로 몇 초 만에 PlacePix를 실행하세요. 구성이 필요하지 않습니다.",
+  "docker.note": "Docker 이미지가 곧 Docker Hub에 출시됩니다. 이미지 디렉토리를 마운트하여 시작하세요.",
+  "docker.features": "기능:",
+  "docker.feature1": "자동 이미지 스캔",
+  "docker.feature2": "색상 추출",
+  "docker.feature3": "모든 이미지 필터",
+  "docker.feature4": "상태 확인"
 }

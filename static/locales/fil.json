@@ -228,5 +228,14 @@
   "upload.uploading": "Uploading {count} file(s)...",
   "upload.uploaded": "Na-upload {uploaded}/{total} files. Reload...",
   "upload.copy_error": "Nabigo ang pagkopya:",
-  "console.load_categories_error": "Nabigo ang pag-load ng categories:"
+  "console.load_categories_error": "Nabigo ang pag-load ng categories:",
+
+  "docker.title": "Isang Linyang Docker Deploy",
+  "docker.desc": "Patakbuhin ang PlacePix sa ilang segundo gamit ang isang Docker command. Walang kailangang configuration.",
+  "docker.note": "Docker image ay darating sa Docker Hub. I-mount ang iyong images directory para magsimula.",
+  "docker.features": "Mga Feature:",
+  "docker.feature1": "Auto image scanning",
+  "docker.feature2": "Color extraction",
+  "docker.feature3": "Lahat ng image filters",
+  "docker.feature4": "Health checks"
 }
