@@ -426,6 +426,26 @@
                         <label for="sepia">Sepia</label>
                     </div>
                     <div class="checkbox-group">
+                        <input type="checkbox" id="invert">
+                        <label for="invert">Invert</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="emboss">
+                        <label for="emboss">Emboss</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="oil_painting">
+                        <label for="oil_painting">Oil Painting</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="pencil_sketch">
+                        <label for="pencil_sketch">Pencil Sketch</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="cartoon">
+                        <label for="cartoon">Cartoon</label>
+                    </div>
+                    <div class="checkbox-group">
                         <input type="checkbox" id="lqip">
                         <label for="lqip">LQIP (Low Quality)</label>
                     </div>
@@ -446,6 +466,50 @@
                         <label>Pixelate (0-50)</label>
                         <input type="range" id="pixelate" min="0" max="50" value="0">
                         <small>Current: <span id="pixelate-value">0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Posterize (0-8)</label>
+                        <input type="range" id="posterize" min="0" max="8" value="0">
+                        <small>Current: <span id="posterize-value">0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Solarize (0-255)</label>
+                        <input type="range" id="solarize" min="0" max="255" value="0">
+                        <small>Current: <span id="solarize-value">0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Duotone <small>(hex colors, e.g., #ff0000,#0000ff)</small></label>
+                        <input type="text" id="duotone" placeholder="#ff0000,#0000ff">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Sharpen (0.0-5.0)</label>
+                        <input type="range" id="sharpen" min="0" max="50" value="0" step="1">
+                        <small>Current: <span id="sharpen-value">0.0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Halftone (2-16)</label>
+                        <input type="range" id="halftone" min="0" max="16" value="0">
+                        <small>Current: <span id="halftone-value">0</span></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Edges <small>(sobel or canny)</small></label>
+                        <select id="edges">
+                            <option value="">Disabled</option>
+                            <option value="sobel">Sobel</option>
+                            <option value="canny">Canny</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Vignette (0.0-1.0)</label>
+                        <input type="range" id="vignette" min="0" max="100" value="0" step="1">
+                        <small>Current: <span id="vignette-value">0.0</span></small>
                     </div>
                 </div>
                 

@@ -375,6 +375,18 @@ def _cache_path(
     lqip: bool = False,
     watermark: str = "",
     watermark_config: dict | None = None,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> Path:
     """Build a deterministic flat cache file path using SHA256 hash."""
     hash_input: dict[str, Any] = {
@@ -398,6 +410,18 @@ def _cache_path(
         "quality": quality,
         "lqip": lqip,
         "watermark": watermark,
+        "invert": invert,
+        "posterize": posterize,
+        "solarize": solarize,
+        "duotone": duotone,
+        "sharpen": sharpen,
+        "emboss": emboss,
+        "halftone": halftone,
+        "edges": edges,
+        "oil_painting": oil_painting,
+        "pencil_sketch": pencil_sketch,
+        "cartoon": cartoon,
+        "vignette": vignette,
     }
     if watermark_config:
         hash_input["watermark_config"] = {
@@ -507,6 +531,18 @@ def _build_process_key(
     lqip: bool,
     watermark: str,
     watermark_config: dict | None,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> str:
     """Build a deterministic key for request coalescing (no filesystem side effects)."""
     hash_input: dict[str, Any] = {
@@ -530,6 +566,18 @@ def _build_process_key(
         "quality": quality,
         "lqip": lqip,
         "watermark": watermark,
+        "invert": invert,
+        "posterize": posterize,
+        "solarize": solarize,
+        "duotone": duotone,
+        "sharpen": sharpen,
+        "emboss": emboss,
+        "halftone": halftone,
+        "edges": edges,
+        "oil_painting": oil_painting,
+        "pencil_sketch": pencil_sketch,
+        "cartoon": cartoon,
+        "vignette": vignette,
     }
     if watermark_config:
         hash_input["watermark_config"] = {
@@ -568,10 +616,23 @@ async def _serve_entry(
     quality: int = 85,
     lqip: bool = False,
     watermark: str = "",
+    watermark_config: dict | None = None,
     if_none_match: str | None = None,
     if_modified_since: str | None = None,
     is_random: bool = False,
     as_base64: bool = False,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> Response:
     """Process and serve a single image entry with coalescing and base64 support."""
     # Validate size
@@ -612,7 +673,8 @@ async def _serve_entry(
             entry, width, height, output_format, grayscale, blur, text, fit,
             tint, brightness, contrast, saturation, sepia,
             border, padding, noise, pixelate, quality, lqip, watermark,
-            watermark_config,
+            watermark_config, invert, posterize, solarize, duotone, sharpen,
+            emboss, halftone, edges, oil_painting, pencil_sketch, cartoon, vignette,
         )
         cached = _read_cached(cache_path)
         if cached is not None:
@@ -638,7 +700,8 @@ async def _serve_entry(
         entry, width, height, output_format, grayscale, blur, text, fit,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        watermark_config,
+        watermark_config, invert, posterize, solarize, duotone, sharpen,
+        emboss, halftone, edges, oil_painting, pencil_sketch, cartoon, vignette,
     )
 
     # Request coalescing: wait if another identical request is already processing
@@ -694,6 +757,18 @@ async def _serve_entry(
             lqip=lqip,
             watermark=watermark,
             watermark_config=watermark_config,
+            invert=invert,
+            posterize=posterize,
+            solarize=solarize,
+            duotone=duotone,
+            sharpen=sharpen,
+            emboss=emboss,
+            halftone=halftone,
+            edges=edges,
+            oil_painting=oil_painting,
+            pencil_sketch=pencil_sketch,
+            cartoon=cartoon,
+            vignette=vignette,
         )
 
         # Cache if enabled
@@ -792,6 +867,18 @@ async def serve_by_id(
     base64: bool = False,
     if_none_match: Annotated[str | None, Header()] = None,
     if_modified_since: Annotated[str | None, Header()] = None,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> Response:
     logger.debug(f"Serving image by ID #{image_id} at {width}x{height}")
     entry = manager.get_by_id(image_id)
@@ -802,7 +889,13 @@ async def serve_by_id(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random=False, as_base64=base64,
+        watermark_config=None,
+        if_none_match=if_none_match, if_modified_since=if_modified_since,
+        is_random=is_random, as_base64=as_base64,
+        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
+        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
+        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        vignette=vignette,
     )
 
 
@@ -841,6 +934,18 @@ async def serve_by_ratio(
     base64: bool = False,
     if_none_match: Annotated[str | None, Header()] = None,
     if_modified_since: Annotated[str | None, Header()] = None,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> Response:
     """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
     logger.debug(f"Serving image by ratio: {ratio} at height {height}")
@@ -862,7 +967,13 @@ async def serve_by_ratio(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random, as_base64=base64,
+        watermark_config=None,
+        if_none_match=if_none_match, if_modified_since=if_modified_since,
+        is_random=is_random, as_base64=as_base64,
+        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
+        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
+        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        vignette=vignette,
     )
 
 
@@ -900,6 +1011,18 @@ async def serve_by_preset(
     base64: bool = False,
     if_none_match: Annotated[str | None, Header()] = None,
     if_modified_since: Annotated[str | None, Header()] = None,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> Response:
     """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
     logger.debug(f"Serving image by preset: {preset_name}")
@@ -922,7 +1045,13 @@ async def serve_by_preset(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random, as_base64=base64,
+        watermark_config=None,
+        if_none_match=if_none_match, if_modified_since=if_modified_since,
+        is_random=is_random, as_base64=as_base64,
+        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
+        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
+        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        vignette=vignette,
     )
 
 
@@ -1113,6 +1242,18 @@ async def serve_image(
     base64: bool = False,
     if_none_match: Annotated[str | None, Header()] = None,
     if_modified_since: Annotated[str | None, Header()] = None,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> Response:
     cat_display = category or "all"
     seed_display = seed or "random"
@@ -1130,7 +1271,13 @@ async def serve_image(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random, as_base64=base64,
+        watermark_config=None,
+        if_none_match=if_none_match, if_modified_since=if_modified_since,
+        is_random=is_random, as_base64=as_base64,
+        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
+        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
+        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        vignette=vignette,
     )
 
 
@@ -1163,6 +1310,18 @@ async def serve_by_color(
     base64: bool = False,
     if_none_match: Annotated[str | None, Header()] = None,
     if_modified_since: Annotated[str | None, Header()] = None,
+    invert: bool = False,
+    posterize: int = 0,
+    solarize: int = 0,
+    duotone: str = "",
+    sharpen: float = 0.0,
+    emboss: bool = False,
+    halftone: int = 0,
+    edges: str = "",
+    oil_painting: bool = False,
+    pencil_sketch: bool = False,
+    cartoon: bool = False,
+    vignette: float = 0.0,
 ) -> Response:
     logger.debug(f"Serving image by color: {hex_color} at {width}x{height}")
     entry = manager.pick_by_color(hex_color)
@@ -1173,7 +1332,13 @@ async def serve_by_color(
         entry, width, height, ext, grayscale, blur, text, fit, format,
         tint, brightness, contrast, saturation, sepia,
         border, padding, noise, pixelate, quality, lqip, watermark,
-        if_none_match, if_modified_since, is_random=True, as_base64=base64,
+        watermark_config=None,
+        if_none_match=if_none_match, if_modified_since=if_modified_since,
+        is_random=True, as_base64=as_base64,
+        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
+        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
+        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        vignette=vignette,
     )
 
 

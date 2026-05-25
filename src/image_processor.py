@@ -63,6 +63,18 @@ class ImageProcessor:
         lqip: bool = False,
         watermark: str = "",
         watermark_config: dict | None = None,
+        invert: bool = False,
+        posterize: int = 0,
+        solarize: int = 0,
+        duotone: str = "",
+        sharpen: float = 0.0,
+        emboss: bool = False,
+        halftone: int = 0,
+        edges: str = "",
+        oil_painting: bool = False,
+        pencil_sketch: bool = False,
+        cartoon: bool = False,
+        vignette: float = 0.0,
     ) -> bytes:
         with Image.open(image_path) as img:
             img = img.convert("RGB")
@@ -84,6 +96,50 @@ class ImageProcessor:
 
             if tint:
                 img = self._apply_tint(img, tint)
+
+            # Color effects
+            if invert:
+                img = self._apply_invert(img)
+
+            if posterize > 0:
+                img = self._apply_posterize(img, posterize)
+
+            if solarize > 0:
+                img = self._apply_solarize(img, solarize)
+
+            if duotone:
+                # Parse duotone colors: "color1,color2"
+                colors = duotone.split(",")
+                if len(colors) == 2:
+                    img = self._apply_duotone(img, colors[0], colors[1])
+
+            # Texture effects
+            if sharpen > 0:
+                img = self._apply_sharpen(img, sharpen)
+
+            if emboss:
+                img = self._apply_emboss(img)
+
+            if halftone > 0:
+                img = self._apply_halftone(img, halftone)
+
+            # Edge detection
+            if edges:
+                img = self._apply_edges(img, edges)
+
+            # Artistic effects
+            if oil_painting:
+                img = self._apply_oil_painting(img)
+
+            if pencil_sketch:
+                img = self._apply_pencil_sketch(img)
+
+            if cartoon:
+                img = self._apply_cartoon(img)
+
+            # Lighting effects
+            if vignette > 0:
+                img = self._apply_vignette(img, vignette)
 
             if blur > 0:
                 img = img.filter(ImageFilter.GaussianBlur(radius=blur))
@@ -538,3 +594,198 @@ class ImageProcessor:
         else:
             # Default to bottom-right
             return (img_width - wm_width - padding, img_height - wm_height - padding)
+    
+    def _apply_invert(self, img: Image.Image) -> Image.Image:
+        """Invert image colors."""
+        return ImageOps.invert(img)
+    
+    def _apply_posterize(self, img: Image.Image, levels: int) -> Image.Image:
+        """Reduce color palette to N levels (1-8 bits)."""
+        if levels < 1 or levels > 8:
+            levels = 4
+        # Posterize takes bits to keep (inverse of levels)
+        bits = 9 - levels  # levels=1 -> bits=8, levels=8 -> bits=1
+        return ImageOps.posterize(img, bits)
+    
+    def _apply_solarize(self, img: Image.Image, threshold: int) -> Image.Image:
+        """Solarize image (invert pixels above threshold)."""
+        threshold = max(0, min(threshold, 255))
+        return ImageOps.solarize(img, threshold)
+    
+    def _apply_duotone(self, img: Image.Image, color1_hex: str, color2_hex: str) -> Image.Image:
+        """Map grayscale to two hex colors."""
+        def parse_hex(h: str) -> tuple[int, int, int]:
+            h = h.lstrip("#")
+            if len(h) == 3:
+                h = "".join(c * 2 for c in h)
+            if len(h) != 6 or not all(c in "0123456789abcdefABCDEF" for c in h):
+                return (0, 0, 0)
+            return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+        
+        c1 = parse_hex(color1_hex)
+        c2 = parse_hex(color2_hex)
+        
+        # Convert to grayscale
+        gray = img.convert("L")
+        
+        # Create duotone image
+        duotone = Image.new("RGB", img.size)
+        pixels = duotone.load()
+        gray_pixels = gray.load()
+        
+        for y in range(img.height):
+            for x in range(img.width):
+                g = gray_pixels[x, y]
+                # Interpolate between color1 and color2 based on grayscale value
+                ratio = g / 255.0
+                r = int(c1[0] * (1 - ratio) + c2[0] * ratio)
+                g_val = int(c1[1] * (1 - ratio) + c2[1] * ratio)
+                b = int(c1[2] * (1 - ratio) + c2[2] * ratio)
+                pixels[x, y] = (r, g_val, b)
+        
+        return duotone
+    
+    def _apply_sharpen(self, img: Image.Image, amount: float) -> Image.Image:
+        """Sharpen image using unsharp mask."""
+        if amount <= 0:
+            return img
+        # Clamp amount to reasonable range
+        amount = min(amount, 3.0)
+        return img.filter(ImageFilter.UnsharpMask(radius=2, percent=int(amount * 100), threshold=3))
+    
+    def _apply_emboss(self, img: Image.Image) -> Image.Image:
+        """Apply emboss effect (3D relief)."""
+        return img.filter(ImageFilter.EMBOSS)
+    
+    def _apply_halftone(self, img: Image.Image, dot_size: int) -> Image.Image:
+        """Apply halftone dot pattern effect."""
+        if dot_size < 2:
+            dot_size = 4
+        
+        # Convert to grayscale
+        gray = img.convert("L")
+        
+        # Create halftone image
+        halftone = Image.new("RGB", img.size, (255, 255, 255))
+        draw = ImageDraw.Draw(halftone)
+        
+        for y in range(0, img.height, dot_size):
+            for x in range(0, img.width, dot_size):
+                # Get average brightness in this block
+                block = gray.crop((x, y, min(x + dot_size, img.width), min(y + dot_size, img.height)))
+                brightness = sum(block.getdata()) / (block.width * block.height)
+                
+                # Calculate dot radius based on brightness
+                radius = (dot_size / 2) * (1 - brightness / 255)
+                if radius > 0:
+                    center_x = x + dot_size / 2
+                    center_y = y + dot_size / 2
+                    draw.ellipse(
+                        [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
+                        fill=(0, 0, 0)
+                    )
+        
+        return halftone
+    
+    def _apply_edges(self, img: Image.Image, method: str) -> Image.Image:
+        """Apply edge detection (sobel or canny)."""
+        if not _OPENCV_AVAILABLE:
+            return img
+        
+        img_array = np.array(img)
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+        
+        if method == "canny":
+            edges = cv2.Canny(gray, 100, 200)
+        else:  # sobel (default)
+            sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+            sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+            edges = np.sqrt(sobelx**2 + sobely**2)
+            edges = np.clip(edges, 0, 255).astype(np.uint8)
+        
+        # Convert back to RGB
+        edges_rgb = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGB)
+        return Image.fromarray(edges_rgb)
+    
+    def _apply_oil_painting(self, img: Image.Image) -> Image.Image:
+        """Apply oil painting effect using OpenCV stylization."""
+        if not _OPENCV_AVAILABLE:
+            return img
+        
+        img_array = np.array(img)
+        # cv2.stylization is available in newer OpenCV versions
+        try:
+            stylized = cv2.stylization(img_array, sigma_s=60, sigma_r=0.45)
+            return Image.fromarray(stylized)
+        except Exception:
+            # Fallback: bilateral filter for smoothing
+            smoothed = cv2.bilateralFilter(img_array, 15, 80, 80)
+            return Image.fromarray(smoothed)
+    
+    def _apply_pencil_sketch(self, img: Image.Image) -> Image.Image:
+        """Apply pencil sketch effect using OpenCV."""
+        if not _OPENCV_AVAILABLE:
+            return img
+        
+        img_array = np.array(img)
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+        
+        try:
+            # cv2.pencilSketch returns (gray_sketch, color_sketch)
+            gray_sketch, _ = cv2.pencilSketch(gray, sigma_s=60, sigma_r=0.07, shade_factor=0.05)
+            # Convert to RGB
+            sketch_rgb = cv2.cvtColor(gray_sketch, cv2.COLOR_GRAY2RGB)
+            return Image.fromarray(sketch_rgb)
+        except Exception:
+            # Fallback: edge detection + inversion
+            edges = cv2.Canny(gray, 50, 150)
+            edges_rgb = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGB)
+            return Image.fromarray(edges_rgb)
+    
+    def _apply_cartoon(self, img: Image.Image) -> Image.Image:
+        """Apply cartoon effect using OpenCV."""
+        if not _OPENCV_AVAILABLE:
+            return img
+        
+        img_array = np.array(img)
+        
+        # Bilateral filter for color quantization
+        color = cv2.bilateralFilter(img_array, 15, 250, 250)
+        
+        # Edge detection
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+        edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
+        edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGB)
+        
+        # Combine color and edges
+        cartoon = cv2.bitwise_and(color, edges)
+        return Image.fromarray(cartoon)
+    
+    def _apply_vignette(self, img: Image.Image, intensity: float) -> Image.Image:
+        """Apply vignette effect (darken edges)."""
+        if intensity <= 0:
+            return img
+        
+        intensity = min(intensity, 1.0)
+        
+        # Create radial gradient mask
+        w, h = img.size
+        y, x = np.ogrid[:h, :w]
+        center_x, center_y = w / 2, h / 2
+        
+        # Calculate distance from center
+        dx = x - center_x
+        dy = y - center_y
+        dist = np.sqrt(dx * dx + dy * dy)
+        max_dist = np.sqrt(center_x**2 + center_y**2)
+        
+        # Create vignette mask (darken edges)
+        mask = 1 - (dist / max_dist) * intensity
+        mask = np.clip(mask, 0, 1)
+        
+        # Apply mask to each channel
+        img_array = np.array(img).astype(np.float32)
+        for i in range(3):
+            img_array[:, :, i] *= mask
+        
+        return Image.fromarray(np.clip(img_array, 0, 255).astype(np.uint8))

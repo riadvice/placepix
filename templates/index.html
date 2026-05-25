@@ -438,7 +438,7 @@
     <p class="text-stone-500 mb-6" data-i18n="section.presets.desc">One-click preset dimensions for popular social and screen sizes.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <div class="aspect-square">
+        <div class="aspect-square max-h-64">
           <img src="/preset/instagram-square/nature?seed=preset1" alt="Instagram" class="w-full h-full object-cover">
         </div>
         <div class="p-4">
@@ -452,7 +452,7 @@
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <div class="aspect-video">
+        <div class="aspect-video max-h-64">
           <img src="/preset/youtube-thumbnail/nature?seed=preset2" alt="YouTube" class="w-full h-full object-cover">
         </div>
         <div class="p-4">
@@ -466,7 +466,7 @@
         </div>
       </div>
       <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
-        <div class="aspect-[9/16]">
+        <div class="aspect-[9/16] max-h-64">
           <img src="/preset/mobile/nature?seed=preset3" alt="Mobile" class="w-full h-full object-cover">
         </div>
         <div class="p-4">
@@ -746,9 +746,69 @@
           </div>
         </div>
       </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;invert=true" alt="Invert" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Invert Colors</p>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-accent break-all">?invert=true</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?invert=true')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;posterize=4" alt="Posterize" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Posterize</p>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-accent break-all">?posterize=4</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?posterize=4')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;sharpen=1.5" alt="Sharpen" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Sharpen</p>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-accent break-all">?sharpen=1.5</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?sharpen=1.5')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;emboss=true" alt="Emboss" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Emboss</p>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-accent break-all">?emboss=true</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?emboss=true')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <img src="/400/300/nature?seed=colors&amp;vignette=0.5" alt="Vignette" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-semibold text-sm text-stone-700 mb-1">Vignette</p>
+          <div class="code-copy-wrapper">
+            <code class="text-xs font-mono text-accent break-all">?vignette=0.5</code>
+            <button class="code-copy-btn" onclick="copyCode(this, '?vignette=0.5')" title="Copy">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="mt-6 bg-muted rounded-xl p-4 border border-border-subtle">
-      <p class="text-sm text-stone-600 font-mono mb-2">Parameters:</p>
+      <p class="text-sm text-stone-600 font-mono mb-2">Color Parameters:</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-stone-500">
         <div><code class="text-accent font-mono">?tint=d97706</code> — hex color overlay</div>
         <div><code class="text-accent font-mono">?brightness=1.3</code> — 0.0 to 2.0</div>
@@ -756,6 +816,22 @@
         <div><code class="text-accent font-mono">?saturation=2.0</code> — 0.0 to 2.0</div>
         <div><code class="text-accent font-mono">?sepia=1</code> — warm sepia tone</div>
         <div><code class="text-accent font-mono">?grayscale=1</code> — black &amp; white</div>
+        <div><code class="text-accent font-mono">?invert=true</code> — invert colors</div>
+        <div><code class="text-accent font-mono">?posterize=4</code> — color levels (1-8)</div>
+        <div><code class="text-accent font-mono">?solarize=128</code> — threshold (0-255)</div>
+        <div><code class="text-accent font-mono">?duotone=ff0000,0000ff</code> — two-color map</div>
+      </div>
+      <p class="text-sm text-stone-600 font-mono mb-2 mt-4">Effect Parameters:</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-stone-500">
+        <div><code class="text-accent font-mono">?sharpen=1.5</code> — sharpen amount</div>
+        <div><code class="text-accent font-mono">?emboss=true</code> — 3D relief effect</div>
+        <div><code class="text-accent font-mono">?halftone=4</code> — dot pattern</div>
+        <div><code class="text-accent font-mono">?edges=sobel</code> — edge detection</div>
+        <div><code class="text-accent font-mono">?edges=canny</code> — Canny edges</div>
+        <div><code class="text-accent font-mono">?oil_painting=true</code> — oil painting style</div>
+        <div><code class="text-accent font-mono">?pencil_sketch=true</code> — pencil sketch</div>
+        <div><code class="text-accent font-mono">?cartoon=true</code> — cartoon effect</div>
+        <div><code class="text-accent font-mono">?vignette=0.5</code> — darken edges (0-1)</div>
       </div>
     </div>
   </section>

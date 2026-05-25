@@ -18,13 +18,13 @@ document.querySelectorAll('.endpoint-tab').forEach(tab => {
 });
 
 // Range value updates
-['quality', 'blur', 'noise', 'pixelate', 'brightness', 'contrast', 'saturation'].forEach(id => {
+['quality', 'blur', 'noise', 'pixelate', 'brightness', 'contrast', 'saturation', 'posterize', 'solarize', 'sharpen', 'halftone', 'vignette'].forEach(id => {
     const input = document.getElementById(id);
     const display = document.getElementById(id + '-value');
     
     input.addEventListener('input', () => {
         let value = input.value;
-        if (['brightness', 'contrast', 'saturation'].includes(id)) {
+        if (['brightness', 'contrast', 'saturation', 'sharpen', 'vignette'].includes(id)) {
             value = (value / 100).toFixed(1);
         }
         display.textContent = value;
@@ -152,6 +152,11 @@ function updateURL() {
     // Add query parameters
     if (document.getElementById('grayscale').checked) params.push('grayscale=true');
     if (document.getElementById('sepia').checked) params.push('sepia=true');
+    if (document.getElementById('invert').checked) params.push('invert=true');
+    if (document.getElementById('emboss').checked) params.push('emboss=true');
+    if (document.getElementById('oil_painting').checked) params.push('oil_painting=true');
+    if (document.getElementById('pencil_sketch').checked) params.push('pencil_sketch=true');
+    if (document.getElementById('cartoon').checked) params.push('cartoon=true');
     if (document.getElementById('lqip').checked) params.push('lqip=true');
     if (document.getElementById('watermark').checked) params.push('watermark=true');
     if (document.getElementById('base64').checked) params.push('base64=true');
@@ -164,6 +169,27 @@ function updateURL() {
     
     const pixelate = document.getElementById('pixelate').value;
     if (pixelate > 0) params.push(`pixelate=${pixelate}`);
+    
+    const posterize = document.getElementById('posterize').value;
+    if (posterize > 0) params.push(`posterize=${posterize}`);
+    
+    const solarize = document.getElementById('solarize').value;
+    if (solarize > 0) params.push(`solarize=${solarize}`);
+    
+    const duotone = document.getElementById('duotone').value;
+    if (duotone) params.push(`duotone=${encodeURIComponent(duotone)}`);
+    
+    const sharpen = document.getElementById('sharpen').value;
+    if (sharpen > 0) params.push(`sharpen=${(sharpen/100).toFixed(1)}`);
+    
+    const halftone = document.getElementById('halftone').value;
+    if (halftone > 0) params.push(`halftone=${halftone}`);
+    
+    const edges = document.getElementById('edges').value;
+    if (edges) params.push(`edges=${edges}`);
+    
+    const vignette = document.getElementById('vignette').value;
+    if (vignette > 0) params.push(`vignette=${(vignette/100).toFixed(1)}`);
     
     const quality = document.getElementById('quality').value;
     if (quality != 85) params.push(`quality=${quality}`);
