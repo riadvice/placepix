@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     # Cache TTL / cleanup (default: 336 hours = 2 weeks, cleanup every 12 hours)
     cache_ttl_hours: int = Field(default=336)
     cache_cleanup_interval_minutes: int = Field(default=720)
+    cache_max_size_mb: int = Field(default=1024)
+
+    # Processing concurrency limit per worker
+    max_concurrent_processing: int = Field(default=4)
 
     # Logging
     log_level: str = Field(default="INFO")

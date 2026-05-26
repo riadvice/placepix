@@ -8,7 +8,10 @@ import io
 import json
 import logging
 import os
+import shutil
+import signal
 import time
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Annotated
@@ -85,6 +88,51 @@ def _get_git_version() -> str:
 
 _git_version = _get_git_version()
 
+
+# ── Startup Validation ──────────────────────────────────────────────
+def _validate_startup() -> None:
+    """Validate critical paths and settings on startup."""
+    errors: list[str] = []
+
+    # Check directories
+    dirs = [
+        (settings.images_dir, "read"),
+        (settings.data_dir, "write"),
+        (settings.cache_dir, "write"),
+    ]
+    for path, mode in dirs:
+        if mode == "read" and not os.access(path, os.R_OK):
+            errors.append(f"Directory not readable: {path}")
+        if mode == "write" and not os.access(path, os.W_OK):
+            errors.append(f"Directory not writable: {path}")
+
+    # Check watermark image if configured
+    if settings.watermark_enabled and settings.watermark_image:
+        wm_path = Path(settings.watermark_image)
+        if not wm_path.exists():
+            errors.append(f"Watermark image not found: {wm_path}")
+
+    # Check font path for text overlays
+    font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+    if not font_path.exists():
+        logger.warning("System font not found; text overlays may use fallback font")
+
+    # Validate S3 settings if enabled
+    if settings.s3_enabled:
+        if not settings.s3_endpoint:
+            errors.append("S3_ENABLED is true but S3_ENDPOINT is not set")
+        if not settings.s3_bucket:
+            errors.append("S3_ENABLED is true but S3_BUCKET is not set")
+        if not settings.s3_access_key or not settings.s3_secret_key:
+            errors.append("S3_ENABLED is true but S3_ACCESS_KEY or S3_SECRET_KEY is not set")
+
+    if errors:
+        for err in errors:
+            logger.error(f"Startup validation failed: {err}")
+        raise SystemExit(f"Startup validation failed with {len(errors)} error(s). Check logs.")
+    logger.info("Startup validation passed")
+
+
 # ── Color palette categories (name → dot color) ───────────────────
 HUE_CATEGORIES: list[tuple[str, str]] = [
     ("Red", "#ef4444"), ("Orange", "#f97316"), ("Yellow", "#eab308"),
@@ -117,6 +165,32 @@ async def _release_inflight(key: str) -> None:
             event.set()
 
 
+# ── Shared S3 client (reused across requests) ──────────────────────
+_s3_client = None
+
+
+def _get_s3_client() -> Any:
+    """Return a cached boto3 S3 client instance."""
+    global _s3_client
+    if _s3_client is not None:
+        return _s3_client
+    if not _BOTO3_AVAILABLE:
+        raise RuntimeError("boto3 is not installed")
+    _s3_client = boto3.client(
+        "s3",
+        endpoint_url=settings.s3_endpoint,
+        aws_access_key_id=settings.s3_access_key,
+        aws_secret_access_key=settings.s3_secret_key,
+        region_name=settings.s3_region or "auto",
+        config=Config(signature_version="s3v4"),
+    )
+    return _s3_client
+
+
+# ── Processing concurrency limit ────────────────────────────────────
+_processing_sem = asyncio.Semaphore(settings.max_concurrent_processing)
+
+
 # ── Setup ───────────────────────────────────────────────────────────
 app = FastAPI(title="PlacePix", version="1.0.0")
 
@@ -147,44 +221,103 @@ else:
     logger.info("File watcher skipped (not leader worker)")
     _observer = None
 
-# Cache cleaner class for TTL-based cleanup
+# Cache cleaner class for TTL-based cleanup + size limit
 class CacheCleaner:
-    """Remove cached files older than a configurable TTL."""
+    """Remove cached files older than a configurable TTL and enforce a size limit."""
 
-    def __init__(self, cache_dir: Path, ttl_hours: int) -> None:
+    def __init__(self, cache_dir: Path, ttl_hours: int, max_size_mb: int = 0) -> None:
         self.cache_dir = cache_dir
         self.ttl_hours = ttl_hours
+        self.max_size_mb = max_size_mb
+        self.max_size_bytes = max_size_mb * 1024 * 1024 if max_size_mb > 0 else 0
 
-    def run(self) -> None:
-        if self.ttl_hours <= 0:
-            return
-        cutoff = time.time() - (self.ttl_hours * 3600)
-        removed = 0
-        freed_bytes = 0
+    def _get_cache_size(self) -> int:
+        total = 0
         for subdir in self.cache_dir.iterdir():
-            if not subdir.is_dir() or len(subdir.name) != 2:
+            if not subdir.is_dir():
                 continue
             for file_path in subdir.iterdir():
-                if not file_path.is_file():
-                    continue
-                try:
-                    mtime = file_path.stat().st_mtime
-                    if mtime < cutoff:
-                        freed_bytes += file_path.stat().st_size
-                        file_path.unlink()
-                        removed += 1
-                except Exception:
-                    pass
-            # Remove empty subdirs
+                if file_path.is_file():
+                    try:
+                        total += file_path.stat().st_size
+                    except Exception:
+                        pass
+        return total
+
+    def _evict_by_size(self) -> tuple[int, int]:
+        """Evict oldest files until cache is under size limit."""
+        removed = 0
+        freed_bytes = 0
+        files: list[tuple[Path, float]] = []
+        for subdir in self.cache_dir.iterdir():
+            if not subdir.is_dir():
+                continue
+            for file_path in subdir.iterdir():
+                if file_path.is_file():
+                    try:
+                        mtime = file_path.stat().st_mtime
+                        files.append((file_path, mtime))
+                    except Exception:
+                        pass
+        # Sort by mtime (oldest first)
+        files.sort(key=lambda x: x[1])
+        current_size = self._get_cache_size()
+        for file_path, _ in files:
+            if current_size <= self.max_size_bytes:
+                break
             try:
-                if not any(subdir.iterdir()):
-                    subdir.rmdir()
+                size = file_path.stat().st_size
+                file_path.unlink()
+                freed_bytes += size
+                current_size -= size
+                removed += 1
             except Exception:
                 pass
-        if removed:
-            logger.info(
-                f"Cache cleanup: removed {removed} stale files, freed {freed_bytes / 1024 / 1024:.2f} MB"
-            )
+        return removed, freed_bytes
+
+    def run(self) -> None:
+        # TTL-based cleanup
+        if self.ttl_hours > 0:
+            cutoff = time.time() - (self.ttl_hours * 3600)
+            removed = 0
+            freed_bytes = 0
+            for subdir in self.cache_dir.iterdir():
+                if not subdir.is_dir() or len(subdir.name) != 2:
+                    continue
+                for file_path in subdir.iterdir():
+                    if not file_path.is_file():
+                        continue
+                    try:
+                        mtime = file_path.stat().st_mtime
+                        if mtime < cutoff:
+                            freed_bytes += file_path.stat().st_size
+                            file_path.unlink()
+                            removed += 1
+                    except Exception:
+                        pass
+                # Remove empty subdirs
+                try:
+                    if not any(subdir.iterdir()):
+                        subdir.rmdir()
+                except Exception:
+                    pass
+            if removed:
+                logger.info(
+                    f"Cache TTL cleanup: removed {removed} stale files, freed {freed_bytes / 1024 / 1024:.2f} MB"
+                )
+
+        # Size-based LRU eviction
+        if self.max_size_bytes > 0:
+            current_size = self._get_cache_size()
+            if current_size > self.max_size_bytes:
+                logger.info(
+                    f"Cache size {current_size / 1024 / 1024:.2f} MB exceeds limit {self.max_size_mb} MB, evicting oldest files"
+                )
+                removed, freed = self._evict_by_size()
+                if removed:
+                    logger.info(
+                        f"Cache size cleanup: removed {removed} files, freed {freed / 1024 / 1024:.2f} MB"
+                    )
 
 # Scheduler (only start in leader worker)
 _scheduler = None
@@ -196,7 +329,7 @@ if manager._is_leader and _APSCHEDULER_AVAILABLE:
             f"Starting cache cleanup scheduler (TTL: {settings.cache_ttl_hours}h, "
             f"interval: {settings.cache_cleanup_interval_minutes}m)"
         )
-        _cache_cleaner = CacheCleaner(settings.cache_dir, settings.cache_ttl_hours)
+        _cache_cleaner = CacheCleaner(settings.cache_dir, settings.cache_ttl_hours, settings.cache_max_size_mb)
         _scheduler.add_job(
             _cache_cleaner.run,
             "interval",
@@ -228,6 +361,30 @@ if settings.upload_enabled:
 # Metrics tracker (always enabled)
 logger.info("Metrics tracking enabled")
 metrics_tracker = MetricsTracker()
+
+
+# ── Lifespan (startup / shutdown hooks) ─────────────────────────────
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Validate config on startup and gracefully release resources on shutdown."""
+    _validate_startup()
+    yield
+    # Shutdown
+    logger.info("Shutting down PlacePix")
+    if _scheduler is not None:
+        logger.info("Stopping background scheduler")
+        _scheduler.shutdown(wait=False)
+    if manager._is_leader and hasattr(manager, '_leader_lock_file') and manager._leader_lock_file:
+        logger.info("Releasing leader lock")
+        manager._release_leader_lock()
+    if _observer is not None:
+        logger.info("Stopping file watcher")
+        _observer.stop()
+        _observer.join(timeout=2)
+    logger.info("Shutdown complete")
+
+
+app.router.lifespan_context = lifespan
 
 # Templates
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -391,6 +548,10 @@ def _cache_path(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> Path:
     """Build a deterministic flat cache file path using SHA256 hash."""
     hash_input: dict[str, Any] = {
@@ -426,6 +587,10 @@ def _cache_path(
         "pencil_sketch": pencil_sketch,
         "cartoon": cartoon,
         "vignette": vignette,
+        "radius": radius,
+        "text_pos": text_pos,
+        "text_color": text_color,
+        "text_bg": text_bg,
     }
     if watermark_config:
         hash_input["watermark_config"] = {
@@ -494,14 +659,7 @@ def _resolve_image_source(entry: ImageEntry) -> Path | io.BytesIO:
     if entry.s3_key and _BOTO3_AVAILABLE and settings.s3_enabled:
         logger.debug(f"Loading S3 image: {entry.s3_key}")
         try:
-            client = boto3.client(
-                "s3",
-                endpoint_url=settings.s3_endpoint,
-                aws_access_key_id=settings.s3_access_key,
-                aws_secret_access_key=settings.s3_secret_key,
-                region_name=settings.s3_region or "auto",
-                config=Config(signature_version="s3v4"),
-            )
+            client = _get_s3_client()
             response = client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
             return io.BytesIO(response["Body"].read())
         except Exception as e:
@@ -547,6 +705,10 @@ def _build_process_key(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> str:
     """Build a deterministic key for request coalescing (no filesystem side effects)."""
     hash_input: dict[str, Any] = {
@@ -582,6 +744,10 @@ def _build_process_key(
         "pencil_sketch": pencil_sketch,
         "cartoon": cartoon,
         "vignette": vignette,
+        "radius": radius,
+        "text_pos": text_pos,
+        "text_color": text_color,
+        "text_bg": text_bg,
     }
     if watermark_config:
         hash_input["watermark_config"] = {
@@ -637,6 +803,10 @@ async def _serve_entry(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> Response:
     """Process and serve a single image entry with coalescing and base64 support."""
     # Validate size
@@ -679,6 +849,7 @@ async def _serve_entry(
             border, padding, noise, pixelate, quality, lqip, watermark,
             watermark_config, invert, posterize, solarize, duotone, sharpen,
             emboss, halftone, edges, oil_painting, pencil_sketch, cartoon, vignette,
+            radius, text_pos, text_color, text_bg,
         )
         cached = _read_cached(cache_path)
         if cached is not None:
@@ -706,6 +877,7 @@ async def _serve_entry(
         border, padding, noise, pixelate, quality, lqip, watermark,
         watermark_config, invert, posterize, solarize, duotone, sharpen,
         emboss, halftone, edges, oil_painting, pencil_sketch, cartoon, vignette,
+        radius, text_pos, text_color, text_bg,
     )
 
     # Request coalescing: wait if another identical request is already processing
@@ -737,43 +909,48 @@ async def _serve_entry(
         # Resolve image source
         image_source = _resolve_image_source(entry)
 
-        # Process image
+        # Process image (limit concurrency to prevent CPU/memory thrashing)
         logger.debug(f"Processing image: {entry.filename} -> {width}x{height} {output_format}")
-        processed = processor.process(
-            image_path=image_source,
-            width=width,
-            height=height,
-            grayscale=grayscale,
-            blur=blur,
-            text=text,
-            fit=fit,
-            output_format=output_format,
-            tint=tint,
-            brightness=brightness,
-            contrast=contrast,
-            saturation=saturation,
-            sepia=sepia,
-            border=border,
-            padding=padding,
-            noise=noise,
-            pixelate=pixelate,
-            quality=quality,
-            lqip=lqip,
-            watermark=watermark,
-            watermark_config=watermark_config,
-            invert=invert,
-            posterize=posterize,
-            solarize=solarize,
-            duotone=duotone,
-            sharpen=sharpen,
-            emboss=emboss,
-            halftone=halftone,
-            edges=edges,
-            oil_painting=oil_painting,
-            pencil_sketch=pencil_sketch,
-            cartoon=cartoon,
-            vignette=vignette,
-        )
+        async with _processing_sem:
+            processed = processor.process(
+                image_path=image_source,
+                width=width,
+                height=height,
+                grayscale=grayscale,
+                blur=blur,
+                text=text,
+                fit=fit,
+                output_format=output_format,
+                tint=tint,
+                brightness=brightness,
+                contrast=contrast,
+                saturation=saturation,
+                sepia=sepia,
+                border=border,
+                padding=padding,
+                noise=noise,
+                pixelate=pixelate,
+                quality=quality,
+                lqip=lqip,
+                watermark=watermark,
+                watermark_config=watermark_config,
+                invert=invert,
+                posterize=posterize,
+                solarize=solarize,
+                duotone=duotone,
+                sharpen=sharpen,
+                emboss=emboss,
+                halftone=halftone,
+                edges=edges,
+                oil_painting=oil_painting,
+                pencil_sketch=pencil_sketch,
+                cartoon=cartoon,
+                vignette=vignette,
+                radius=radius,
+                text_pos=text_pos,
+                text_color=text_color,
+                text_bg=text_bg,
+            )
 
         # Cache if enabled
         if settings.cache and cache_path is not None:
@@ -883,6 +1060,10 @@ async def serve_by_id(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> Response:
     logger.debug(f"Serving image by ID #{image_id} at {width}x{height}")
     entry = manager.get_by_id(image_id)
@@ -900,6 +1081,7 @@ async def serve_by_id(
         sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
         oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
         vignette=vignette,
+        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
     )
 
 
@@ -950,6 +1132,10 @@ async def serve_by_ratio(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> Response:
     """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
     logger.debug(f"Serving image by ratio: {ratio} at height {height}")
@@ -978,6 +1164,7 @@ async def serve_by_ratio(
         sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
         oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
         vignette=vignette,
+        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
     )
 
 
@@ -1027,6 +1214,10 @@ async def serve_by_preset(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> Response:
     """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
     logger.debug(f"Serving image by preset: {preset_name}")
@@ -1056,6 +1247,7 @@ async def serve_by_preset(
         sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
         oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
         vignette=vignette,
+        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
     )
 
 
@@ -1258,6 +1450,10 @@ async def serve_image(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> Response:
     cat_display = category or "all"
     seed_display = seed or "random"
@@ -1282,6 +1478,7 @@ async def serve_image(
         sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
         oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
         vignette=vignette,
+        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
     )
 
 
@@ -1326,6 +1523,10 @@ async def serve_by_color(
     pencil_sketch: bool = False,
     cartoon: bool = False,
     vignette: float = 0.0,
+    radius: int = 0,
+    text_pos: str = "center",
+    text_color: str = "ffffff",
+    text_bg: str = "000000",
 ) -> Response:
     logger.debug(f"Serving image by color: {hex_color} at {width}x{height}")
     entry = manager.pick_by_color(hex_color)
@@ -1343,6 +1544,7 @@ async def serve_by_color(
         sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
         oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
         vignette=vignette,
+        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
     )
 
 
@@ -1582,6 +1784,44 @@ async def api_color_match(hex_color: str) -> JSONResponse:
     })
 
 
+@app.get("/api/blurhash/{image_id:int}")
+async def get_blurhash(image_id: int) -> JSONResponse:
+    """Generate a blurhash string for an image."""
+    try:
+        import blurhash
+    except ImportError:
+        raise HTTPException(status_code=501, detail="blurhash library not installed")
+
+    entry = manager.get_by_id(image_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+
+    try:
+        source = _resolve_image_source(entry)
+        from PIL import Image
+        with Image.open(source) as img:
+            img = img.convert("RGB")
+            # Downsize to ~32x32 for blurhash encoding
+            img.thumbnail((32, 32), Image.Resampling.LANCZOS)
+            # Encode to blurhash
+            hash_str = blurhash.encode(
+                img,
+                x_components=4,
+                y_components=3,
+            )
+        return JSONResponse({
+            "blurhash": hash_str,
+            "width": entry.width if hasattr(entry, "width") else None,
+            "height": entry.height if hasattr(entry, "height") else None,
+            "id": entry.id,
+            "category": entry.category,
+            "filename": entry.filename,
+        })
+    except Exception as e:
+        logger.error(f"Blurhash generation failed for image {image_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"blurhash generation failed: {e}")
+
+
 # ── Favicon ───────────────────────────────────────────────────────
 @app.get("/favicon.svg")
 async def favicon() -> Response:
@@ -1594,8 +1834,44 @@ async def favicon() -> Response:
 # ── Health & Readiness (Docker/Kubernetes) ─────────────────────────
 @app.get("/health")
 async def health() -> JSONResponse:
-    """Health check endpoint (liveness probe)."""
-    return JSONResponse({"status": "ok"})
+    """Health check endpoint with disk and directory checks."""
+    checks: dict[str, Any] = {"status": "ok"}
+
+    # Disk space
+    try:
+        total, used, free = shutil.disk_usage(str(settings.cache_dir))
+        checks["disk"] = {
+            "total_gb": round(total / (1024 ** 3), 2),
+            "free_gb": round(free / (1024 ** 3), 2),
+            "free_percent": round((free / total) * 100, 1),
+        }
+        if free < 500 * 1024 * 1024:  # < 500 MB free
+            checks["status"] = "warning"
+            checks["disk"]["warning"] = "Low disk space"
+    except Exception as e:
+        checks["disk"] = {"error": str(e)}
+
+    # Directory checks
+    checks["directories"] = {
+        "images_readable": os.access(settings.images_dir, os.R_OK),
+        "data_writable": os.access(settings.data_dir, os.W_OK),
+        "cache_writable": os.access(settings.cache_dir, os.W_OK),
+    }
+    if not all(checks["directories"].values()):
+        checks["status"] = "warning"
+
+    # S3 connectivity (if enabled)
+    if settings.s3_enabled and _BOTO3_AVAILABLE:
+        try:
+            client = _get_s3_client()
+            client.head_bucket(Bucket=settings.s3_bucket)
+            checks["s3"] = {"connected": True}
+        except Exception as e:
+            checks["s3"] = {"connected": False, "error": str(e)}
+            checks["status"] = "warning"
+
+    status_code = 200 if checks["status"] == "ok" else 503
+    return JSONResponse(checks, status_code=status_code)
 
 
 @app.get("/ready")

@@ -298,9 +298,15 @@ class ImageManager:
             try:
                 fcntl.flock(self._leader_lock_file.fileno(), fcntl.LOCK_UN)
                 self._leader_lock_file.close()
-                logger.info(f"Worker {os.getpid()} released leader lock")
+                try:
+                    logger.info(f"Worker {os.getpid()} released leader lock")
+                except Exception:
+                    pass
             except Exception as e:
-                logger.warning(f"Failed to release leader lock: {e}")
+                try:
+                    logger.warning(f"Failed to release leader lock: {e}")
+                except Exception:
+                    pass
 
     def _load_colors(self) -> dict[int, list[str]]:
         if self._colors_path.exists():
@@ -400,9 +406,8 @@ class ImageManager:
                     ))
                     total += 1
 
-        # Only scan S3 on first rescan (startup) in each worker
-        logger.debug(f"S3 scan check: enabled={settings.s3_enabled}, boto3={_BOTO3_AVAILABLE}, endpoint={bool(settings.s3_endpoint)}, bucket={bool(settings.s3_bucket)}, already_scanned={self._s3_scanned}")
-        if settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned:
+        # Only scan S3 in the leader worker to avoid redundant ListObjects calls
+        if self._is_leader and settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned:
             logger.info(f"Scanning S3 bucket: {settings.s3_bucket}")
             s3_categories, next_id = self._scan_s3(manifest, next_id)
             for cat_name, category in s3_categories.items():
@@ -414,7 +419,14 @@ class ImageManager:
             self._s3_scanned = True
             logger.info(f"S3 scan complete: found {len(s3_categories)} categories")
         else:
-            logger.debug("S3 scan skipped (disabled, not configured, or already scanned)")
+            reason = []
+            if not self._is_leader:
+                reason.append("not leader")
+            if self._s3_scanned:
+                reason.append("already scanned")
+            if not (settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket):
+                reason.append("S3 not configured")
+            logger.debug(f"S3 scan skipped ({', '.join(reason) if reason else 'disabled'})")
 
         colors = self._load_colors()
 

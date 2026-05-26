@@ -75,6 +75,10 @@ class ImageProcessor:
         pencil_sketch: bool = False,
         cartoon: bool = False,
         vignette: float = 0.0,
+        radius: int = 0,
+        text_pos: str = "center",
+        text_color: str = "ffffff",
+        text_bg: str = "000000",
     ) -> bytes:
         with Image.open(image_path) as img:
             img = img.convert("RGB")
@@ -172,8 +176,11 @@ class ImageProcessor:
             if watermark and watermark_config:
                 img = self._apply_watermark(img, watermark, watermark_config)
 
+            if radius > 0:
+                img = self._apply_radius(img, radius)
+
             if text:
-                img = self._add_text(img, text)
+                img = self._add_text(img, text, text_pos, text_color, text_bg)
 
             buffer = io.BytesIO()
             fmt = self._normalize_format(output_format)
@@ -245,7 +252,14 @@ class ImageProcessor:
 
         return img.resize((width, height), Image.Resampling.LANCZOS)
 
-    def _add_text(self, img: Image.Image, text: str) -> Image.Image:
+    def _add_text(
+        self,
+        img: Image.Image,
+        text: str,
+        position: str = "center",
+        text_color: str = "ffffff",
+        text_bg: str = "000000",
+    ) -> Image.Image:
         draw = ImageDraw.Draw(img)
 
         # Calculate font size based on image dimensions
@@ -260,25 +274,70 @@ class ImageProcessor:
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        x = (img.width - text_width) // 2
-        y = (img.height - text_height) // 2
-
-        # Draw semi-transparent background
         pad_x = font_size // 2
         pad_y = font_size // 4
+
+        # Parse colors
+        def _parse_color(hex_str: str, default: tuple[int, int, int]) -> tuple[int, int, int]:
+            h = hex_str.lstrip("#")
+            if len(h) == 3:
+                h = "".join(c * 2 for c in h)
+            if len(h) == 6 and all(c in "0123456789abcdefABCDEF" for c in h):
+                return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+            return default
+
+        tc = _parse_color(text_color, (255, 255, 255))
+        bg = _parse_color(text_bg, (0, 0, 0))
+
+        # Calculate position
+        position = position.lower()
+        margin = font_size
+        if position == "top-left":
+            x, y = margin, margin
+        elif position == "top-right":
+            x, y = img.width - text_width - margin, margin
+        elif position == "bottom-left":
+            x, y = margin, img.height - text_height - margin
+        elif position == "bottom-right":
+            x, y = img.width - text_width - margin, img.height - text_height - margin
+        else:  # center
+            x = (img.width - text_width) // 2
+            y = (img.height - text_height) // 2
+
+        # Draw semi-transparent background
         overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
         overlay_draw = ImageDraw.Draw(overlay)
         overlay_draw.rectangle(
             [x - pad_x, y - pad_y, x + text_width + pad_x, y + text_height + pad_y],
-            fill=(0, 0, 0, 128),
+            fill=(*bg, 128),
         )
         img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
 
-        # Draw white text centered
+        # Draw text
         draw = ImageDraw.Draw(img)
-        draw.text((x, y), text, fill=(255, 255, 255), font=font)
+        draw.text((x, y), text, fill=tc, font=font)
 
         return img
+
+    def _apply_radius(self, img: Image.Image, radius: int) -> Image.Image:
+        """Apply rounded corners to image."""
+        radius = max(0, min(radius, min(img.width, img.height) // 2))
+        if radius == 0:
+            return img
+
+        # Create rounded mask
+        mask = Image.new("L", img.size, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.rounded_rectangle([0, 0, img.width, img.height], radius=radius, fill=255)
+
+        # Apply mask
+        img_rgba = img.convert("RGBA")
+        img_rgba.putalpha(mask)
+
+        # Composite onto white background for formats that don't support alpha
+        bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
+        result = Image.alpha_composite(bg, img_rgba)
+        return result.convert("RGB")
 
     def _apply_sepia(self, img: Image.Image) -> Image.Image:
         """Apply a sepia tone filter."""

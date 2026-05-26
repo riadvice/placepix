@@ -1,15 +1,15 @@
 {# Color swatch partial - receives: item #}
 {% set hex_color = item.hex %}
 {% set count = item.count %}
-<div class="swatch">
+<div class="palette-swatch">
     <a href="/color/{{ hex_color.lstrip('#') }}/400/300" target="_blank">
-        <div class="color-block" style="background: {{ hex_color }};"></div>
+        <div class="palette-color-block" style="background: {{ hex_color }};"></div>
     </a>
-    <div class="color-info">
-        <code class="hex">{{ hex_color }}</code>
-        <span class="count">{{ count }} image{% if count > 1 %}s{% endif %}</span>
+    <div class="palette-color-info">
+        <code class="palette-hex">{{ hex_color }}</code>
+        <span class="palette-count">{{ count }} image{% if count > 1 %}s{% endif %}</span>
     </div>
-    <div class="samples">
+    <div class="palette-samples">
         {% for sid in item.sample_ids[:2] %}
             <img src="/id/{{ sid }}/100/75" alt="" loading="lazy">
         {% endfor %}
