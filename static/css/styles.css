@@ -285,13 +285,34 @@ nav {
   z-index: 50;
 }
 
+.nav-bg-light {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.skeleton-text {
+  width: 48px;
+  height: 0.85em;
+  vertical-align: middle;
+}
+
+.endpoint-config {
+  display: none;
+}
+
+.endpoint-config.active {
+  display: block;
+}
+
 [data-theme="dark"] nav {
   background: rgba(9, 9, 11, 0.8) !important;
   border-bottom: 1px solid rgba(63, 63, 70, 0.6);
 }
 
-[data-theme="dark"] nav a,
-[data-theme="dark"] nav span {
+[data-theme="dark"] nav .logo span {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .dropdown-toggle {
   color: var(--text-primary);
 }
 
@@ -384,6 +405,14 @@ nav .nav-links .btn-docs:hover {
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 6px 8px -1px rgba(14, 165, 233, 0.3);
+}
+
+nav .nav-links a[href="/docs"] {
+  color: white !important;
+}
+
+nav .nav-links a[href="/docs"]:hover {
+  color: white !important;
 }
 
 header {
@@ -677,20 +706,64 @@ header p {
   display: block;
 }
 
+.preview-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.preview-container.loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -20px;
+  margin-left: -20px;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  z-index: 10;
+}
+
+.preview-container.loading .preview-image {
+  opacity: 0.3;
+  filter: grayscale(100%);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.preview-container:not(.loading) .preview-image {
+  opacity: 1;
+  filter: grayscale(0%);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .preview-image {
-  width: 100%;
+  max-width: 100%;
+  height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: zoom-in;
   transition: transform 0.3s;
 }
 
-.preview-image:hover {
-  transform: scale(1.02);
+.preview-container.loading .preview-image {
+  cursor: default;
+  pointer-events: none;
 }
 
 .image-info {
-  display: flex;
+  display: none;
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
@@ -700,6 +773,14 @@ header p {
   font-size: 13px;
   color: var(--text-secondary);
   border: 1px solid var(--border);
+}
+
+.preview-container.show .image-info {
+  display: flex;
+}
+
+.preview-image:hover {
+  transform: scale(1.02);
 }
 
 .image-info span {
@@ -855,6 +936,167 @@ button {
   background: var(--background);
   border-color: var(--primary-light);
   color: var(--primary);
+}
+
+/* ============================================
+   Vertical Endpoint Sidebar
+   ============================================ */
+.url-builder-layout {
+  position: relative;
+}
+
+.endpoint-sidebar-fixed {
+  position: fixed;
+  left: 20px;
+  top: 80px;
+  width: 60px;
+  z-index: 100;
+}
+
+.endpoint-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+
+.endpoint-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.endpoint-sidebar-item i {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+}
+
+.endpoint-sidebar-item span:not(.tooltip) {
+  display: none;
+}
+
+.endpoint-sidebar-item.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.endpoint-sidebar-item.active::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: white;
+  border-radius: 2px;
+}
+
+.endpoint-sidebar-item.active i {
+  color: white;
+}
+
+.endpoint-sidebar-item:hover:not(.active) {
+  background: var(--background);
+  border-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.endpoint-sidebar-item .tooltip {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+  padding: 6px 10px;
+  background: var(--text-primary);
+  color: var(--surface);
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.endpoint-sidebar-item:hover .tooltip {
+  opacity: 1;
+}
+
+/* ============================================
+   Social Network Brand Colors
+   ============================================ */
+.fab.fa-instagram,
+.fab.fa-instagram:hover {
+  color: #E4405F;
+}
+
+.fab.fa-youtube,
+.fab.fa-youtube:hover {
+  color: #FF0000;
+}
+
+.fab.fa-facebook,
+.fab.fa-facebook:hover {
+  color: #1877F2;
+}
+
+.fab.fa-x-twitter,
+.fab.fa-x-twitter:hover {
+  color: #000000;
+}
+
+.fab.fa-linkedin,
+.fab.fa-linkedin:hover {
+  color: #0A66C2;
+}
+
+.fab.fa-tiktok,
+.fab.fa-tiktok:hover {
+  color: #000000;
+}
+
+/* ============================================
+   Size Overlay Badge
+   ============================================ */
+.size-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  z-index: 5;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .size-badge {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
 }
 
 /* ============================================

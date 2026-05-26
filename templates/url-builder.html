@@ -49,7 +49,6 @@
         }
       }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     {% if ga_tracking_id %}
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -87,30 +86,71 @@
 </head>
 <body data-theme="light">
     {% include "nav.html" %}
-    
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="content">
-            <!-- Left Panel: URL Constructor -->
-            <div class="panel">
-                <h2 data-i18n="url_builder.panel_left">URL Constructor</h2>
-                
-                <!-- Endpoint Selection -->
-                <div class="form-group">
-                    <label data-i18n="url_builder.endpoint_type">Endpoint Type</label>
-                    <div class="endpoint-tabs">
-                        <button class="endpoint-tab active" data-endpoint="random" data-i18n="url_builder.endpoint.random">Random</button>
-                        <button class="endpoint-tab" data-endpoint="id" data-i18n="url_builder.endpoint.id">By ID</button>
-                        <button class="endpoint-tab" data-endpoint="ratio" data-i18n="url_builder.endpoint.ratio">Aspect Ratio</button>
-                        <button class="endpoint-tab" data-endpoint="preset" data-i18n="url_builder.endpoint.preset">Preset</button>
-                        <button class="endpoint-tab" data-endpoint="solid" data-i18n="url_builder.endpoint.solid">Solid Color</button>
-                        <button class="endpoint-tab" data-endpoint="color-match" data-i18n="url_builder.endpoint.color_match">Color Match</button>
-                        <button class="endpoint-tab" data-endpoint="svg" data-i18n="url_builder.endpoint.svg">SVG</button>
-                        <button class="endpoint-tab" data-endpoint="gradient" data-i18n="url_builder.endpoint.gradient">Gradient</button>
-                        <button class="endpoint-tab" data-endpoint="avatar" data-i18n="url_builder.endpoint.avatar">Avatar</button>
-                        <button class="endpoint-tab" data-endpoint="lucky" data-i18n="url_builder.endpoint.lucky">I'm Feeling Lucky</button>
-                    </div>
+
+    <div class="url-builder-layout">
+        <!-- Sticky Left Sidebar -->
+        <div class="endpoint-sidebar-fixed">
+            <div class="endpoint-sidebar">
+                <div class="endpoint-sidebar-item active" data-endpoint="random">
+                    <i class="fa-solid fa-random"></i>
+                    <span data-i18n="url_builder.endpoint.random">Random</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.random">Random</span>
                 </div>
-                
+                <div class="endpoint-sidebar-item" data-endpoint="id">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <span data-i18n="url_builder.endpoint.id">By ID</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.id">By ID</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="ratio">
+                    <i class="fa-solid fa-expand"></i>
+                    <span data-i18n="url_builder.endpoint.ratio">Aspect Ratio</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.ratio">Aspect Ratio</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="preset">
+                    <i class="fa-solid fa-th-large"></i>
+                    <span data-i18n="url_builder.endpoint.preset">Preset</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.preset">Preset</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="solid">
+                    <i class="fa-solid fa-palette"></i>
+                    <span data-i18n="url_builder.endpoint.solid">Solid Color</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.solid">Solid Color</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="color-match">
+                    <i class="fa-solid fa-eye-dropper"></i>
+                    <span data-i18n="url_builder.endpoint.color_match">Color Match</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.color_match">Color Match</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="svg">
+                    <i class="fa-solid fa-vector-square"></i>
+                    <span data-i18n="url_builder.endpoint.svg">SVG</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.svg">SVG</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="gradient">
+                    <i class="fa-solid fa-fill-drip"></i>
+                    <span data-i18n="url_builder.endpoint.gradient">Gradient</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.gradient">Gradient</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="avatar">
+                    <i class="fa-solid fa-user-circle"></i>
+                    <span data-i18n="url_builder.endpoint.avatar">Avatar</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.avatar">Avatar</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="lucky">
+                    <i class="fa-solid fa-dice"></i>
+                    <span data-i18n="url_builder.endpoint.lucky">I'm Feeling Lucky</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.lucky">I'm Feeling Lucky</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="content">
+                <!-- Left Panel: URL Constructor -->
+                <div class="panel">
+                    <h2 data-i18n="url_builder.panel_left">URL Constructor</h2>
+
                 <!-- Endpoint-specific fields -->
                 <div id="endpoint-fields">
                     <!-- Random endpoint -->
@@ -143,7 +183,7 @@
                     </div>
                     
                     <!-- ID endpoint -->
-                    <div class="endpoint-config" data-endpoint="id" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="id">
                         <div class="form-group">
                             <label>Image ID</label>
                             <input type="number" id="image-id" value="1" min="1">
@@ -159,7 +199,7 @@
                     </div>
                     
                     <!-- Ratio endpoint -->
-                    <div class="endpoint-config" data-endpoint="ratio" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="ratio">
                         <div class="form-group">
                             <label>Aspect Ratio</label>
                             <select id="ratio">
@@ -192,7 +232,7 @@
                     </div>
                     
                     <!-- Preset endpoint -->
-                    <div class="endpoint-config" data-endpoint="preset" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="preset">
                         <div class="form-group">
                             <label>Preset</label>
                             <select id="preset">
@@ -226,7 +266,7 @@
                     </div>
                     
                     <!-- Solid color endpoint -->
-                    <div class="endpoint-config" data-endpoint="solid" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="solid">
                         <div class="form-group">
                             <label>Width</label>
                             <input type="number" id="solid-width" value="500" min="8" max="2000">
@@ -251,7 +291,7 @@
                     </div>
                     
                     <!-- Color Match endpoint -->
-                    <div class="endpoint-config" data-endpoint="color-match" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="color-match">
                         <div class="form-group">
                             <label>Target Color (hex)</label>
                             <input type="color" id="match-color" value="#3b82f6">
@@ -268,7 +308,7 @@
                     </div>
                     
                     <!-- SVG endpoint -->
-                    <div class="endpoint-config" data-endpoint="svg" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="svg">
                         <div class="form-group">
                             <label>Width</label>
                             <input type="number" id="svg-width" value="500" min="1" max="5000">
@@ -293,7 +333,7 @@
                     </div>
                     
                     <!-- Gradient endpoint -->
-                    <div class="endpoint-config" data-endpoint="gradient" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="gradient">
                         <div class="form-group">
                             <label>Width</label>
                             <input type="number" id="grad-width" value="500" min="1" max="5000">
@@ -313,7 +353,7 @@
                     </div>
                     
                     <!-- Avatar endpoint -->
-                    <div class="endpoint-config" data-endpoint="avatar" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="avatar">
                         <div class="form-group">
                             <label>Size</label>
                             <input type="text" id="avatar-size" value="100" placeholder="e.g., 100 or 100x150">
@@ -362,7 +402,7 @@
                     </div>
                     
                     <!-- Lucky / Random redirect endpoint -->
-                    <div class="endpoint-config" data-endpoint="lucky" style="display: none;">
+                    <div class="endpoint-config" data-endpoint="lucky">
                         <div class="form-group">
                             <label>Category <small>(optional)</small></label>
                             <select id="random-category">
@@ -585,16 +625,17 @@
                     <button class="btn-primary" onclick="loadPreview()" data-i18n="url_builder.btn.preview">Preview</button>
                     <button class="btn-secondary" onclick="showQRCode()" data-i18n="url_builder.btn.qr">QR Code</button>
                 </div>
-                
+
                 <div id="preview-container" class="preview-container">
                     <img id="preview" class="preview-image" alt="Preview" onclick="zoomImage()">
+                    <div id="size-badge" class="size-badge" style="display: none;"></div>
                     <div class="image-info">
                         <span>
-                            <strong>Size:</strong> 
+                            <strong>Dimension:</strong>
                             <span id="image-size">Loading...</span>
                         </span>
                         <span>
-                            <strong>File Size:</strong> 
+                            <strong>File Size:</strong>
                             <span id="file-size">Loading...</span>
                         </span>
                         <span class="preview-hint">
@@ -635,6 +676,7 @@
             </div>
         </div>
     </div>
+    </div>
     
     <!-- Zoom Modal -->
     <div id="zoom-modal" class="zoom-modal" onclick="closeZoom()">
@@ -647,7 +689,7 @@
     </div>
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
     <script src="/static/js/i18n.js"></script>
     <script src="/static/js/common.js"></script>
     <script src="/static/js/url-builder.js"></script>
@@ -680,7 +722,6 @@
         <kbd>Ctrl</kbd>+<kbd>Q</kbd> <span data-i18n="shortcuts.qr">QR</span>
         <kbd>Ctrl</kbd>+<kbd>D</kbd> <span data-i18n="shortcuts.dark">Dark</span>
     </div>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     {% if ga_tracking_id %}
     <script src="https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@3.0.1/dist/cookieconsent.umd.js"></script>

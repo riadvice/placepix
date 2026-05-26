@@ -86,7 +86,7 @@
 </head>
 <body class="bg-surface-light min-h-screen">
   <!-- Navigation -->
-  <nav id="site-nav" class="backdrop-blur border-b border-border-subtle/60 sticky top-0 z-50" style="background: rgba(255, 255, 255, 0.8);">
+  <nav id="site-nav" class="backdrop-blur border-b border-border-subtle/60 sticky top-0 z-50 nav-bg-light">
     <div class="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
       <a href="/" class="flex items-center gap-3 hover:opacity-80 transition">
         <img src="/static/logo.svg" alt="PlacePix" class="w-8 h-8">
@@ -135,7 +135,7 @@
           <button class="lang-trigger" id="lang-trigger" aria-haspopup="true" aria-expanded="false"
             onclick="(function(){var dd=document.getElementById('lang-dropdown');var open=dd.classList.toggle('lang-dd-open');document.getElementById('lang-trigger').setAttribute('aria-expanded',open);})()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span id="lang-trigger-label"><span class="skeleton skeleton-text" style="width:48px;height:.85em;vertical-align:middle;"></span></span>
+            <span id="lang-trigger-label"><span class="skeleton skeleton-text"></span></span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="lang-dropdown" id="lang-dropdown" role="listbox">

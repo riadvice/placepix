@@ -42,11 +42,7 @@ from src.observer import start_watching
 from src.seed import seed_images
 from src.avatar_generator import AvatarGenerator
 
-try:
-    from PIL import Image, ImageDraw, ImageFont
-    _PIL_AVAILABLE = True
-except Exception:
-    _PIL_AVAILABLE = False
+from PIL import Image, ImageDraw, ImageFont
 
 # ── Logging Setup ───────────────────────────────────────────────────
 def setup_logging():

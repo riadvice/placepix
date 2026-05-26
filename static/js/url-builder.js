@@ -2,20 +2,60 @@
 
 let currentEndpoint = 'random';
 
-// Endpoint switching
-document.querySelectorAll('.endpoint-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.endpoint-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentEndpoint = tab.dataset.endpoint;
-        
-        document.querySelectorAll('.endpoint-config').forEach(config => {
-            config.style.display = config.dataset.endpoint === currentEndpoint ? 'block' : 'none';
+// Initialize endpoint switching - update for vertical sidebar
+function initEndpointSidebar() {
+    document.querySelectorAll('.endpoint-sidebar-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Remove active from all sidebar items
+            document.querySelectorAll('.endpoint-sidebar-item').forEach(i => i.classList.remove('active'));
+            // Add active to clicked item
+            item.classList.add('active');
+            // Update current endpoint
+            currentEndpoint = item.dataset.endpoint;
+
+            // Show/hide config sections
+            document.querySelectorAll('.endpoint-config').forEach(config => {
+                if (config.dataset.endpoint === currentEndpoint) {
+                    config.style.display = 'block';
+                    config.classList.add('active');
+                } else {
+                    config.style.display = 'none';
+                    config.classList.remove('active');
+                }
+            });
+
+            updateURL();
         });
-        
-        updateURL();
     });
-});
+
+    // Set initial active state based on currentEndpoint
+    document.querySelectorAll('.endpoint-sidebar-item').forEach(item => {
+        if (item.dataset.endpoint === currentEndpoint) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
+    // Show initial config section
+    document.querySelectorAll('.endpoint-config').forEach(config => {
+        if (config.dataset.endpoint === currentEndpoint) {
+            config.style.display = 'block';
+            config.classList.add('active');
+        } else {
+            config.style.display = 'none';
+            config.classList.remove('active');
+        }
+    });
+}
+
+// Initialize sidebar after DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEndpointSidebar);
+} else {
+    initEndpointSidebar();
+}
 
 // Range value updates
 ['quality', 'blur', 'noise', 'pixelate', 'brightness', 'contrast', 'saturation', 'posterize', 'solarize', 'sharpen', 'halftone', 'vignette'].forEach(id => {
@@ -37,6 +77,41 @@ document.querySelectorAll('input, select').forEach(element => {
     element.addEventListener('change', updateURL);
     element.addEventListener('input', updateURL);
 });
+
+// Size badge detection
+function updateSizeBadge() {
+    const preview = document.getElementById('preview');
+    const sizeBadge = document.getElementById('size-badge');
+
+    if (!preview.src || preview.naturalWidth === 0) {
+        sizeBadge.style.display = 'none';
+        return;
+    }
+
+    const displayedWidth = preview.clientWidth;
+    const naturalWidth = preview.naturalWidth;
+
+    // Show badge if image is scaled down significantly (>5% difference)
+    if (naturalWidth > displayedWidth * 1.05) {
+        sizeBadge.textContent = `Actual: ${preview.naturalWidth} × ${preview.naturalHeight}`;
+        sizeBadge.style.display = 'block';
+    } else {
+        sizeBadge.style.display = 'none';
+    }
+}
+
+// Update size badge when preview loads
+const originalLoadPreview = loadPreview;
+loadPreview = function() {
+    originalLoadPreview();
+    const preview = document.getElementById('preview');
+    preview.onload = function() {
+        updateSizeBadge();
+    };
+};
+
+// Update size badge on window resize
+window.addEventListener('resize', updateSizeBadge);
 
 function updateURL() {
     let url = '';
@@ -290,13 +365,15 @@ function loadPreview() {
     }
     
     // Show loading state
+    container.classList.add('loading');
     sizeDisplay.textContent = 'Loading...';
     fileSizeDisplay.textContent = 'Loading...';
-    
+
     // Create a new image to get dimensions
     const img = new Image();
     img.onload = function() {
         preview.src = url;
+        container.classList.remove('loading');
         container.classList.add('show');
         sizeDisplay.textContent = `${img.naturalWidth} × ${img.naturalHeight}px`;
         
@@ -319,6 +396,7 @@ function loadPreview() {
             });
     };
     img.onerror = function() {
+        container.classList.remove('loading');
         sizeDisplay.textContent = 'Error loading';
         fileSizeDisplay.textContent = '-';
     };
@@ -326,6 +404,9 @@ function loadPreview() {
 }
 
 function zoomImage() {
+    const container = document.getElementById('preview-container');
+    if (container.classList.contains('loading')) return;
+
     const preview = document.getElementById('preview');
     const modal = document.getElementById('zoom-modal');
     const zoomImg = document.getElementById('zoom-image');
@@ -397,7 +478,7 @@ function showQRCode() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Generate real QR code using qrcode library
+    // Generate QR code using qrcode library
     QRCode.toCanvas(canvas, url, {
         width: 256,
         margin: 2,
@@ -433,27 +514,44 @@ function closeQRModal(event) {
 
 // Keyboard Shortcuts
 document.addEventListener('keydown', function(e) {
+    // Don't trigger shortcuts if user is typing in an input field
+    const activeElement = document.activeElement;
+    if (activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.tagName === 'SELECT' ||
+        activeElement.isContentEditable
+    )) {
+        return;
+    }
+
     // Ctrl/Cmd + P: Preview
     if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        const zoomModal = document.getElementById('zoom-modal');
+        if (zoomModal && zoomModal.classList.contains('active')) return;
         e.preventDefault();
+        e.stopPropagation();
         loadPreview();
     }
-    
+
     // Ctrl/Cmd + U: Copy URL
     if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
         e.preventDefault();
+        e.stopPropagation();
         copyURL();
     }
-    
+
     // Ctrl/Cmd + Q: Show QR Code
     if ((e.ctrlKey || e.metaKey) && e.key === 'q') {
         e.preventDefault();
+        e.stopPropagation();
         showQRCode();
     }
-    
+
     // Ctrl/Cmd + D: Toggle Dark Mode
     if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
         e.preventDefault();
+        e.stopPropagation();
         toggleTheme();
     }
 });

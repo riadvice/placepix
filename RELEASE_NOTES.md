@@ -27,6 +27,8 @@
 
 #### UI & UX
 - **Enhanced URL builder** - Improved interactive URL constructor with real-time preview
+- **URL builder sidebar redesign** - Replaced horizontal tabs with vertical icon sidebar styled like design apps (Photoshop/Figma), featuring floating fixed positioning, icon-only menu with tooltips, white vertical indicator for active item, and smooth transitions
+- **Preview improvements** - Added size overlay badge showing actual dimensions when image is scaled, loading state with grayed image and fade transition, centered loader and image, and changed "Size" label to "Dimension"
 - **Explorer improvements** - Better image browsing and filtering UI
 - **GDPR compliance** - Added legal links to footer and cookie consent
 - **Social network icons** - Added Font Awesome icons to preset dimension capsules for Instagram, YouTube, Facebook, X, LinkedIn, TikTok, and Screens
