@@ -129,18 +129,19 @@ eval "$(pyenv init - bash 2>/dev/null || pyenv init -)"'
   done
 fi
 
-# Create or update venv
+# Create or update venv using uv
 if [[ ! -d "$VENV_DIR" ]]; then
-  log "Creating Python venv at $VENV_DIR"
-  "$PYTHON_CMD" -m venv "$VENV_DIR"
+  log "Creating Python venv at $VENV_DIR using uv"
+  # First install uv globally if not available
+  if ! command -v uv >/dev/null 2>&1; then
+    log "Installing uv globally"
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
+  uv venv "$VENV_DIR"
 else
   ok "Venv already exists at $VENV_DIR"
 fi
-
-# Activate venv and install dependencies
-log "Installing/updating dependencies"
-"$VENV_DIR/bin/pip" install --upgrade pip
-"$VENV_DIR/bin/pip" install uv
 
 # Use uv to install project dependencies
 log "Installing project dependencies with uv"
