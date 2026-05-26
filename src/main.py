@@ -895,7 +895,7 @@ async def serve_by_id(
         border, padding, noise, pixelate, quality, lqip, watermark,
         watermark_config=None,
         if_none_match=if_none_match, if_modified_since=if_modified_since,
-        is_random=is_random, as_base64=base64,
+        is_random=False, as_base64=base64,
         invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
         sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
         oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
