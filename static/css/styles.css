@@ -885,23 +885,12 @@ button {
   background: var(--primary);
   color: white;
   box-shadow: var(--shadow-sm);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: var(--shadow-sm);
-  }
-  50% {
-    box-shadow: 0 0 0 4px rgba(28, 25, 23, 0.1);
-  }
 }
 
 .btn-primary:hover {
   background: var(--primary-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
-  animation: none;
 }
 
 .btn-primary:active {

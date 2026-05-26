@@ -2,7 +2,7 @@
 
 ## Released versions
 
-- [v0.2 - Work In Progress](#v02)
+- [v0.2 - 2026-05-26](#v02)
 - [v0.1 - 2026-05-25](#v01)
 
 ## v0.2
