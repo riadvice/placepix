@@ -48,6 +48,8 @@ Thumbs.db
 htmlcov/
 .tox/
 .hypothesis/
+tests/
+test_*.py
 
 # Documentation
 *.md
@@ -79,3 +81,10 @@ data/
 # Backup files
 *.bak
 *.backup
+
+# Dev setup script (not for production)
+dev.sh
+
+# Scripts
+scripts/
+*.sh
