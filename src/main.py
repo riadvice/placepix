@@ -40,6 +40,13 @@ from src.image_processor import ImageProcessor
 from src.metrics import MetricsTracker
 from src.observer import start_watching
 from src.seed import seed_images
+from src.avatar_generator import AvatarGenerator
+
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    _PIL_AVAILABLE = True
+except Exception:
+    _PIL_AVAILABLE = False
 
 # ── Logging Setup ───────────────────────────────────────────────────
 def setup_logging():
@@ -106,9 +113,31 @@ def _validate_startup() -> None:
             errors.append(f"Watermark image not found: {wm_path}")
 
     # Check font path for text overlays
-    font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
-    if not font_path.exists():
-        logger.warning("System font not found; text overlays may use fallback font")
+    font_found = False
+    if settings.font_dir_path:
+        # Check custom font directory
+        if settings.font_dir_path.exists():
+            if any(settings.font_dir_path.glob("*.ttf")) or any(settings.font_dir_path.glob("*.ttc")):
+                font_found = True
+            else:
+                logger.warning(f"Custom font directory configured but no fonts found in {settings.font_dir_path}")
+    
+    # Check system fonts as fallback
+    if not font_found:
+        system_font_dirs = [
+            "/usr/share/fonts/truetype",
+            "/usr/share/fonts",
+            "/System/Library/Fonts",
+            "/Windows/Fonts",
+        ]
+        for font_dir in system_font_dirs:
+            if Path(font_dir).exists():
+                if any(Path(font_dir).rglob("*.ttf")):
+                    font_found = True
+                    break
+        
+        if not font_found:
+            logger.warning("No system fonts found; text overlays may use fallback font")
 
     # Validate S3 settings if enabled
     if settings.s3_enabled:
@@ -503,6 +532,43 @@ def _parse_aspect_ratio(ratio_str: str, height: int) -> tuple[int, int]:
         return width, height
     except (ValueError, ZeroDivisionError):
         return 0, 0
+
+
+def _load_font(font_size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Load font with fallback: custom dir -> any system font -> default."""
+    # Try custom font directory first
+    if settings.font_dir_path:
+        custom_dir = settings.font_dir_path
+        if custom_dir.exists():
+            # Look for any .ttf or .ttc font file
+            for font_path in custom_dir.glob("*.ttf"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+            for font_path in custom_dir.glob("*.ttc"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+
+    # Try to find any available system font
+    system_font_dirs = [
+        "/usr/share/fonts/truetype",
+        "/usr/share/fonts",
+        "/System/Library/Fonts",
+        "/Windows/Fonts",
+    ]
+    for font_dir in system_font_dirs:
+        if Path(font_dir).exists():
+            for font_path in Path(font_dir).rglob("*.ttf"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+
+    # Fallback to default
+    return ImageFont.load_default()
 
 
 def _cache_path(
@@ -1277,10 +1343,7 @@ async def solid_color_placeholder(
     if text:
         draw = ImageDraw.Draw(img)
         font_size = max(12, min(width, height) // 10)
-        try:
-            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-        except Exception:
-            font = ImageFont.load_default()
+        font = _load_font(font_size)
         
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
@@ -1392,6 +1455,96 @@ async def gradient_placeholder(
             "Content-Disposition": f'inline; filename="{filename}"',
             "Cache-Control": "public, max-age=2592000, immutable",
             "ETag": _generate_etag(gradient_bytes),
+        },
+    )
+
+
+# ── Letter Avatar ────────────────────────────────────────────────────
+_avatar_generator = AvatarGenerator()
+
+
+@app.get("/avatar/{size}/{name}")
+@app.get("/avatar/{size}/{name}.{ext}")
+async def avatar_image(
+    size: str,
+    name: str,
+    ext: str = "",
+    circle: bool = False,
+    border: int = 0,
+    border_color: str = "ffffff",
+    bg: str = "",
+    fg: str = "ffffff",
+    single: bool = False,
+    uppercase: bool = True,
+    palette: str = "flatui",
+) -> Response:
+    """Generate a letter-based avatar image (PNG/SVG)."""
+    output_format = ext.lstrip(".").lower() or "png"
+
+    # Validate palette early
+    try:
+        AvatarGenerator._resolve_palette(palette)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # SVG path
+    if output_format == "svg":
+        svg = _avatar_generator.generate_svg(
+            name=name,
+            size_str=size,
+            circle=circle,
+            border=border,
+            border_color=border_color,
+            bg=bg,
+            fg=fg,
+            single=single,
+            uppercase=uppercase,
+            palette=palette,
+        )
+        return Response(
+            content=svg,
+            media_type="image/svg+xml",
+            headers={
+                "Cache-Control": "public, max-age=2592000, stale-while-revalidate=60, immutable",
+            },
+        )
+
+    # Image path (PNG/JPEG/WebP)
+    if output_format not in ("png", "jpeg", "jpg", "webp"):
+        output_format = "png"
+
+    png_bytes = _avatar_generator.generate_png(
+        name=name,
+        size_str=size,
+        circle=circle,
+        border=border,
+        border_color=border_color,
+        bg=bg,
+        fg=fg,
+        single=single,
+        uppercase=uppercase,
+        palette=palette,
+    )
+
+    if output_format == "png":
+        content = png_bytes
+    else:
+        with Image.open(io.BytesIO(png_bytes)) as img:
+            buffer = io.BytesIO()
+            fmt = "JPEG" if output_format in ("jpeg", "jpg") else output_format.upper()
+            img.save(buffer, format=fmt, optimize=True)
+            content = buffer.getvalue()
+
+    content_type = f"image/{output_format}"
+    filename = f"avatar-{name}.{output_format}"
+
+    return Response(
+        content=content,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f'inline; filename="{filename}"',
+            "Cache-Control": "public, max-age=2592000, immutable",
+            "ETag": _generate_etag(content),
         },
     )
 
@@ -1537,19 +1690,6 @@ async def serve_by_color(
         vignette=vignette,
         radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
     )
-
-
-# ── Random from all (no dimensions) ────────────────────────────────
-@app.get("/random")
-@app.get("/random/{category}")
-async def random_image(category: str = "", color: str = "") -> RedirectResponse:
-    if color:
-        entry = manager.pick_by_color(color, category or None)
-    else:
-        entry = manager.pick(category or None)
-    if entry is None:
-        raise HTTPException(status_code=404, detail="category not found")
-    return RedirectResponse(url=f"/500/500/{entry.category}?seed={os.urandom(4).hex()}")
 
 
 # ── Raw image serving ───────────────────────────────────────────────

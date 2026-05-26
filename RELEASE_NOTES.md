@@ -21,6 +21,9 @@
 - **Custom text colors** - `text_color` and `text_bg` parameters for customizable text and background colors
 - **Blurhash generation** - New `/api/blurhash/{image_id}` endpoint to generate blurhash strings
 - **12 new computer vision filters** - Pencil sketch, cartoon, oil painting, halftone, emboss, sharpen, vignette, invert, brightness, contrast, saturation, duotone, posterize, solarize
+- **Avatar generator** - New `/avatar/{size}/{name}` endpoint for letter-based avatars with 6 color palettes (flatui, material, pastel, neon, cool, warm), circle/square shapes, borders, and SVG/PNG output
+- **Font loading improvements** - Removed hardcoded DejaVu font dependency; now uses any available system font (.ttf/.ttc) with fallback to PIL default
+- **Custom font directory support** - New `FONT_DIR` setting allows users to mount custom fonts for text overlays
 
 #### UI & UX
 - **Enhanced URL builder** - Improved interactive URL constructor with real-time preview

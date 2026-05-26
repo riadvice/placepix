@@ -131,6 +131,31 @@ function updateURL() {
             break;
         }
             
+        case 'avatar': {
+            const avatarSize = document.getElementById('avatar-size').value;
+            const avatarName = document.getElementById('avatar-name').value;
+            const avatarPalette = document.getElementById('avatar-palette').value;
+            const avatarCircle = document.getElementById('avatar-circle').checked;
+            const avatarSingle = document.getElementById('avatar-single').checked;
+            const avatarBg = document.getElementById('avatar-bg').value;
+            const avatarFg = document.getElementById('avatar-fg').value.replace('#', '');
+            const avatarBorder = document.getElementById('avatar-border').value;
+            const avatarBorderColor = document.getElementById('avatar-border-color').value.replace('#', '');
+            url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
+            if (avatarPalette && avatarPalette !== 'flatui') params.push(`palette=${avatarPalette}`);
+            if (avatarCircle) params.push('circle=true');
+            if (avatarSingle) params.push('single=true');
+            if (avatarBorder > 0) {
+                params.push(`border=${avatarBorder}`);
+                params.push(`border_color=${avatarBorderColor}`);
+            }
+            // Only pass bg if user has explicitly changed it from default (#667eea)
+            if (avatarBg && avatarBg !== '#667eea') params.push(`bg=${avatarBg.replace('#', '')}`);
+            if (avatarFg && avatarFg !== 'ffffff') params.push(`fg=${avatarFg}`);
+            supportsFormat = true;
+            break;
+        }
+            
         case 'lucky': {
             const luckyCategory = document.getElementById('random-category').value;
             const luckyColor = document.getElementById('random-color').value;

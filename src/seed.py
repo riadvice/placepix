@@ -6,6 +6,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from src.config import settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -16,6 +18,43 @@ SEED_CATEGORIES = [
     ("abstract", "Abstract", "Colorful abstract patterns"),
     ("food", "Food", "Delicious food photography"),
 ]
+
+
+def _load_font(font_size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Load font with fallback: custom dir -> any system font -> default."""
+    # Try custom font directory first
+    if settings.font_dir_path:
+        custom_dir = settings.font_dir_path
+        if custom_dir.exists():
+            # Look for any .ttf or .ttc font file
+            for font_path in custom_dir.glob("*.ttf"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+            for font_path in custom_dir.glob("*.ttc"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+
+    # Try to find any available system font
+    system_font_dirs = [
+        "/usr/share/fonts/truetype",
+        "/usr/share/fonts",
+        "/System/Library/Fonts",
+        "/Windows/Fonts",
+    ]
+    for font_dir in system_font_dirs:
+        if Path(font_dir).exists():
+            for font_path in Path(font_dir).rglob("*.ttf"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+
+    # Fallback to default
+    return ImageFont.load_default()
 
 
 def _random_gradient(width: int, height: int) -> Image.Image:
@@ -40,10 +79,7 @@ def _random_gradient(width: int, height: int) -> Image.Image:
 def _add_sample_text(img: Image.Image, text: str) -> Image.Image:
     draw = ImageDraw.Draw(img)
     font_size = min(img.width, img.height) // 10
-    try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-    except Exception:
-        font = ImageFont.load_default()
+    font = _load_font(font_size)
 
     bbox = draw.textbbox((0, 0), text, font=font)
     text_width = bbox[2] - bbox[0]

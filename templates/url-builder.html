@@ -30,6 +30,25 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@3.0.1/dist/cookieconsent.css">
     <link rel="canonical" href="https://placepix.riadvice.com/url-builder">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1c1917',
+              accent: '#0ea5e9',
+              'accent-hover': '#38bdf8',
+              secondary: '#78716c',
+              surface: '#ffffff',
+              'surface-light': '#fafaf9',
+              muted: '#f5f5f4',
+              'border-subtle': '#e7e5e4',
+            }
+          }
+        }
+      }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     {% if ga_tracking_id %}
     <script>
@@ -69,12 +88,7 @@
 <body data-theme="light">
     {% include "nav.html" %}
     
-    <div class="container">
-        <header>
-            <h1 data-i18n="url_builder.title">URL Builder — Interactive Placeholder Image Constructor</h1>
-            <p data-i18n="url_builder.subtitle">Build your perfect placeholder image URL with our interactive constructor</p>
-        </header>
-        
+    <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="content">
             <!-- Left Panel: URL Constructor -->
             <div class="panel">
@@ -92,6 +106,7 @@
                         <button class="endpoint-tab" data-endpoint="color-match" data-i18n="url_builder.endpoint.color_match">Color Match</button>
                         <button class="endpoint-tab" data-endpoint="svg" data-i18n="url_builder.endpoint.svg">SVG</button>
                         <button class="endpoint-tab" data-endpoint="gradient" data-i18n="url_builder.endpoint.gradient">Gradient</button>
+                        <button class="endpoint-tab" data-endpoint="avatar" data-i18n="url_builder.endpoint.avatar">Avatar</button>
                         <button class="endpoint-tab" data-endpoint="lucky" data-i18n="url_builder.endpoint.lucky">I'm Feeling Lucky</button>
                     </div>
                 </div>
@@ -294,6 +309,55 @@
                         <div class="form-group">
                             <label>To Color</label>
                             <input type="color" id="grad-to" value="#764ba2">
+                        </div>
+                    </div>
+                    
+                    <!-- Avatar endpoint -->
+                    <div class="endpoint-config" data-endpoint="avatar" style="display: none;">
+                        <div class="form-group">
+                            <label>Size</label>
+                            <input type="text" id="avatar-size" value="100" placeholder="e.g., 100 or 100x150">
+                            <small>Single number for square, or widthxheight</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="avatar-name" value="John Doe" placeholder="e.g., John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Palette</label>
+                            <select id="avatar-palette">
+                                <option value="flatui">Flat UI (default)</option>
+                                <option value="material">Material Design</option>
+                                <option value="pastel">Pastel</option>
+                                <option value="neon">Neon</option>
+                                <option value="cool">Cool</option>
+                                <option value="warm">Warm</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="avatar-circle">
+                            <label for="avatar-circle">Circular</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="avatar-single">
+                            <label for="avatar-single">Single Letter Only</label>
+                        </div>
+                        <div class="form-group">
+                            <label>Background Color <small>(optional, auto by default)</small></label>
+                            <input type="color" id="avatar-bg" value="#667eea">
+                            <small>Leave as-is for auto-generated color based on name</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Text Color</label>
+                            <input type="color" id="avatar-fg" value="#ffffff">
+                        </div>
+                        <div class="form-group">
+                            <label>Border Width</label>
+                            <input type="number" id="avatar-border" value="0" min="0" max="20">
+                        </div>
+                        <div class="form-group">
+                            <label>Border Color</label>
+                            <input type="color" id="avatar-border-color" value="#ffffff">
                         </div>
                     </div>
                     

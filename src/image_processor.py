@@ -7,6 +7,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
+from src.config import settings
+
 try:
     import pillow_avif  # noqa: F401
     _AVIF_AVAILABLE = True
@@ -18,6 +20,43 @@ try:
     _OPENCV_AVAILABLE = True
 except Exception:
     _OPENCV_AVAILABLE = False
+
+
+def _load_font(font_size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Load font with fallback: custom dir -> any system font -> default."""
+    # Try custom font directory first
+    if settings.font_dir_path:
+        custom_dir = settings.font_dir_path
+        if custom_dir.exists():
+            # Look for any .ttf or .ttc font file
+            for font_path in custom_dir.glob("*.ttf"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+            for font_path in custom_dir.glob("*.ttc"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+
+    # Try to find any available system font
+    system_font_dirs = [
+        "/usr/share/fonts/truetype",
+        "/usr/share/fonts",
+        "/System/Library/Fonts",
+        "/Windows/Fonts",
+    ]
+    for font_dir in system_font_dirs:
+        if Path(font_dir).exists():
+            for font_path in Path(font_dir).rglob("*.ttf"):
+                try:
+                    return ImageFont.truetype(str(font_path), font_size)
+                except Exception:
+                    continue
+
+    # Fallback to default
+    return ImageFont.load_default()
 
 
 class ImageProcessor:
@@ -264,10 +303,7 @@ class ImageProcessor:
 
         # Calculate font size based on image dimensions
         font_size = max(12, min(img.width, img.height) // 10)
-        try:
-            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-        except Exception:
-            font = ImageFont.load_default()
+        font = _load_font(font_size)
 
         # Get text bounding box
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -529,10 +565,7 @@ class ImageProcessor:
             wm_img = Image.new("RGBA", img.size, (255, 255, 255, 0))
             draw = ImageDraw.Draw(wm_img)
             font_size = max(12, int(img.width * 0.03))
-            try:
-                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-            except Exception:
-                font = ImageFont.load_default()
+            font = _load_font(font_size)
             
             bbox = draw.textbbox((0, 0), watermark_text, font=font)
             text_width = bbox[2] - bbox[0]

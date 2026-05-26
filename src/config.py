@@ -75,6 +75,9 @@ class Settings(BaseSettings):
     ai_default_steps: int = Field(default=30)
     ai_default_cfg_scale: float = Field(default=7.0)
 
+    # Custom fonts directory (optional, for text overlays)
+    font_dir: str = Field(default="")
+
     @property
     def bind_host(self) -> str:
         return self.host.rsplit(":", 1)[0] if ":" in self.host else self.host
@@ -98,6 +101,12 @@ class Settings(BaseSettings):
     @property
     def cache_dir(self) -> Path:
         return Path(".cache").resolve()
+
+    @property
+    def font_dir_path(self) -> Path | None:
+        if self.font_dir:
+            return Path(self.font_dir).resolve()
+        return None
 
 
 settings = Settings()
