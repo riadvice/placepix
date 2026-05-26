@@ -11,7 +11,7 @@
 
 - **Version Number**: 0.2
 - **Release Date**: Work In Progress
-- **General Overview**: Performance improvements, new image effects, and enhanced image processing features
+- **General Overview**: Performance improvements, new image effects, and revamped "URL Builder" UI.
 
 ### ✨ New Features
 
@@ -27,7 +27,7 @@
 
 #### UI & UX
 - **Enhanced URL builder** - Improved interactive URL constructor with real-time preview
-- **URL builder sidebar redesign** - Replaced horizontal tabs with vertical icon sidebar styled like design apps (Photoshop/Figma), featuring floating fixed positioning, icon-only menu with tooltips, white vertical indicator for active item, and smooth transitions
+- **URL builder sidebar redesign** - Replaced horizontal tabs with vertical icon sidebar styled like design apps, featuring floating fixed positioning, icon-only menu with tooltips, white vertical indicator for active item, and smooth transitions
 - **Preview improvements** - Added size overlay badge showing actual dimensions when image is scaled, loading state with grayed image and fade transition, centered loader and image, and changed "Size" label to "Dimension"
 - **Explorer improvements** - Better image browsing and filtering UI
 - **GDPR compliance** - Added legal links to footer and cookie consent

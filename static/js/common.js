@@ -55,6 +55,7 @@ function copyCategoryURL(category, event) {
 function copyCode(button, code) {
   // If it's a Docker command, copy as-is without URL prefix
   const textToCopy = code.startsWith('docker') ? code : window.location.origin + code;
+  const isDockerCommand = code.startsWith('docker');
   navigator.clipboard.writeText(textToCopy).then(() => {
     const originalIcon = button.innerHTML;
     button.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
@@ -62,7 +63,7 @@ function copyCode(button, code) {
       button.innerHTML = originalIcon;
     }, 1500);
     Toastify({
-      text: i18n.get('notification.copied') || "URL copied to clipboard!",
+      text: isDockerCommand ? (i18n.get('notification.command_copied') || "Command copied to clipboard!") : (i18n.get('notification.copied') || "URL copied to clipboard!"),
       duration: 3000,
       gravity: "top",
       position: "center",

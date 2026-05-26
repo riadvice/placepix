@@ -14,14 +14,20 @@ function initEndpointSidebar() {
             // Update current endpoint
             currentEndpoint = item.dataset.endpoint;
 
-            // Show/hide config sections
+            // Show/hide config sections with animation
             document.querySelectorAll('.endpoint-config').forEach(config => {
                 if (config.dataset.endpoint === currentEndpoint) {
                     config.style.display = 'block';
-                    config.classList.add('active');
+                    // Small delay to allow display:block to take effect before adding active class
+                    setTimeout(() => config.classList.add('active'), 10);
                 } else {
-                    config.style.display = 'none';
                     config.classList.remove('active');
+                    // Wait for transition to complete before hiding
+                    setTimeout(() => {
+                        if (!config.classList.contains('active')) {
+                            config.style.display = 'none';
+                        }
+                    }, 300);
                 }
             });
 
@@ -105,140 +111,178 @@ const originalLoadPreview = loadPreview;
 loadPreview = function() {
     originalLoadPreview();
     const preview = document.getElementById('preview');
-    preview.onload = function() {
-        updateSizeBadge();
-    };
+    preview.onload = () => updateSizeBadge();
 };
 
 // Update size badge on window resize
 window.addEventListener('resize', updateSizeBadge);
 
+// Helper function to add optional category to URL
+function addCategoryToUrl(baseUrl, category) {
+    return category ? `${baseUrl}/${category}` : baseUrl;
+}
+
+// Helper function to add optional seed and color match parameters
+function addSeedAndColorParams(params, seed, colorMatch, defaultColor = '#3b82f6') {
+    if (seed) params.push(`seed=${encodeURIComponent(seed)}`);
+    if (colorMatch && colorMatch !== defaultColor) params.push(`color=${encodeURIComponent(colorMatch.replace('#', ''))}`);
+}
+
+// Endpoint URL builders
+function buildRandomURL(params) {
+    const width = document.getElementById('width').value;
+    const height = document.getElementById('height').value;
+    const category = document.getElementById('category').value;
+    const seed = document.getElementById('seed').value;
+    const colorMatch = document.getElementById('random-color-match').value;
+    let url = addCategoryToUrl(`/${width}/${height}`, category);
+    addSeedAndColorParams(params, seed, colorMatch);
+    return url;
+}
+
+function buildIdURL(params) {
+    const id = document.getElementById('image-id').value;
+    const idWidth = document.getElementById('id-width').value;
+    const idHeight = document.getElementById('id-height').value;
+    return `/id/${id}/${idWidth}/${idHeight}`;
+}
+
+function buildRatioURL(params) {
+    const ratio = document.getElementById('ratio').value;
+    const ratioHeight = document.getElementById('ratio-height').value;
+    const ratioCategory = document.getElementById('ratio-category').value;
+    const ratioSeed = document.getElementById('ratio-seed').value;
+    const ratioColor = document.getElementById('ratio-color-match').value;
+    let url = addCategoryToUrl(`/ratio/${ratio}/${ratioHeight}`, ratioCategory);
+    addSeedAndColorParams(params, ratioSeed, ratioColor);
+    return url;
+}
+
+function buildPresetURL(params) {
+    const preset = document.getElementById('preset').value;
+    const presetCategory = document.getElementById('preset-category').value;
+    const presetSeed = document.getElementById('preset-seed').value;
+    const presetColor = document.getElementById('preset-color-match').value;
+    let url = addCategoryToUrl(`/preset/${preset}`, presetCategory);
+    addSeedAndColorParams(params, presetSeed, presetColor);
+    return url;
+}
+
+function buildSolidURL(params) {
+    const solidWidth = document.getElementById('solid-width').value;
+    const solidHeight = document.getElementById('solid-height').value;
+    const bgColor = document.getElementById('bg-color').value.replace('#', '');
+    const fgColor = document.getElementById('fg-color').value.replace('#', '');
+    const solidText = document.getElementById('solid-text').value;
+    let url = `/solid/${solidWidth}/${solidHeight}/${bgColor}/${fgColor}`;
+    if (solidText) params.push(`text=${encodeURIComponent(solidText)}`);
+    return { url, supportsFormat: false };
+}
+
+function buildColorMatchURL(params) {
+    const matchColor = document.getElementById('match-color').value.replace('#', '');
+    const matchWidth = document.getElementById('match-width').value;
+    const matchHeight = document.getElementById('match-height').value;
+    return `/color/${matchColor}/${matchWidth}/${matchHeight}`;
+}
+
+function buildSvgURL(params) {
+    const svgWidth = document.getElementById('svg-width').value;
+    const svgHeight = document.getElementById('svg-height').value;
+    const svgBg = document.getElementById('svg-bg').value.replace('#', '');
+    const svgFg = document.getElementById('svg-fg').value.replace('#', '');
+    const svgText = document.getElementById('svg-text').value;
+    let url = `/svg/${svgWidth}/${svgHeight}`;
+    params.push(`bg=${svgBg}`);
+    params.push(`fg=${svgFg}`);
+    if (svgText) params.push(`text=${encodeURIComponent(svgText)}`);
+    return { url, supportsFormat: false };
+}
+
+function buildGradientURL(params) {
+    const gradWidth = document.getElementById('grad-width').value;
+    const gradHeight = document.getElementById('grad-height').value;
+    const gradFrom = document.getElementById('grad-from').value.replace('#', '');
+    const gradTo = document.getElementById('grad-to').value.replace('#', '');
+    return `/gradient/${gradWidth}x${gradHeight}/${gradFrom}/${gradTo}`;
+}
+
+function buildAvatarURL(params) {
+    const avatarSize = document.getElementById('avatar-size').value;
+    const avatarName = document.getElementById('avatar-name').value;
+    const avatarPalette = document.getElementById('avatar-palette').value;
+    const avatarCircle = document.getElementById('avatar-circle').checked;
+    const avatarSingle = document.getElementById('avatar-single').checked;
+    const avatarBg = document.getElementById('avatar-bg').value;
+    const avatarFg = document.getElementById('avatar-fg').value.replace('#', '');
+    const avatarBorder = document.getElementById('avatar-border').value;
+    const avatarBorderColor = document.getElementById('avatar-border-color').value.replace('#', '');
+    let url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
+    if (avatarPalette && avatarPalette !== 'flatui') params.push(`palette=${avatarPalette}`);
+    if (avatarCircle) params.push('circle=true');
+    if (avatarSingle) params.push('single=true');
+    if (avatarBorder > 0) {
+        params.push(`border=${avatarBorder}`);
+        params.push(`border_color=${avatarBorderColor}`);
+    }
+    if (avatarBg && avatarBg !== '#667eea') params.push(`bg=${avatarBg.replace('#', '')}`);
+    if (avatarFg && avatarFg !== 'ffffff') params.push(`fg=${avatarFg}`);
+    return { url, supportsFormat: true };
+}
+
+function buildLuckyURL(params) {
+    const luckyCategory = document.getElementById('random-category').value;
+    const luckyColor = document.getElementById('random-color').value;
+    let url = `/random/${luckyCategory}`;
+    if (luckyColor && luckyColor !== '#3b82f6') params.push(`color=${encodeURIComponent(luckyColor.replace('#', ''))}`);
+    return { url, supportsFormat: false };
+}
+
 function updateURL() {
     let url = '';
     const params = [];
     let supportsFormat = true;
-    
-    // Build base URL based on endpoint
+
+    // Build base URL based on endpoint using refactored functions
     switch(currentEndpoint) {
-        case 'random': {
-            const width = document.getElementById('width').value;
-            const height = document.getElementById('height').value;
-            const category = document.getElementById('category').value;
-            const seed = document.getElementById('seed').value;
-            const colorMatch = document.getElementById('random-color-match').value;
-            url = `/${width}/${height}${category ? '/' + category : ''}`;
-            if (seed) params.push(`seed=${encodeURIComponent(seed)}`);
-            if (colorMatch && colorMatch !== '#3b82f6') params.push(`color=${encodeURIComponent(colorMatch.replace('#', ''))}`);
+        case 'random':
+            url = buildRandomURL(params);
             break;
-        }
-            
-        case 'id': {
-            const id = document.getElementById('image-id').value;
-            const idWidth = document.getElementById('id-width').value;
-            const idHeight = document.getElementById('id-height').value;
-            url = `/id/${id}/${idWidth}/${idHeight}`;
+        case 'id':
+            url = buildIdURL(params);
             break;
-        }
-            
-        case 'ratio': {
-            const ratio = document.getElementById('ratio').value;
-            const ratioHeight = document.getElementById('ratio-height').value;
-            const ratioCategory = document.getElementById('ratio-category').value;
-            const ratioSeed = document.getElementById('ratio-seed').value;
-            const ratioColor = document.getElementById('ratio-color-match').value;
-            url = `/ratio/${ratio}/${ratioHeight}${ratioCategory ? '/' + ratioCategory : ''}`;
-            if (ratioSeed) params.push(`seed=${encodeURIComponent(ratioSeed)}`);
-            if (ratioColor && ratioColor !== '#3b82f6') params.push(`color=${encodeURIComponent(ratioColor.replace('#', ''))}`);
+        case 'ratio':
+            url = buildRatioURL(params);
             break;
-        }
-            
-        case 'preset': {
-            const preset = document.getElementById('preset').value;
-            const presetCategory = document.getElementById('preset-category').value;
-            const presetSeed = document.getElementById('preset-seed').value;
-            const presetColor = document.getElementById('preset-color-match').value;
-            url = `/preset/${preset}${presetCategory ? '/' + presetCategory : ''}`;
-            if (presetSeed) params.push(`seed=${encodeURIComponent(presetSeed)}`);
-            if (presetColor && presetColor !== '#3b82f6') params.push(`color=${encodeURIComponent(presetColor.replace('#', ''))}`);
+        case 'preset':
+            url = buildPresetURL(params);
             break;
-        }
-            
-        case 'solid': {
-            const solidWidth = document.getElementById('solid-width').value;
-            const solidHeight = document.getElementById('solid-height').value;
-            const bgColor = document.getElementById('bg-color').value.replace('#', '');
-            const fgColor = document.getElementById('fg-color').value.replace('#', '');
-            const solidText = document.getElementById('solid-text').value;
-            url = `/solid/${solidWidth}/${solidHeight}/${bgColor}/${fgColor}`;
-            if (solidText) params.push(`text=${encodeURIComponent(solidText)}`);
-            supportsFormat = false;
+        case 'solid':
+            const solidResult = buildSolidURL(params);
+            url = solidResult.url;
+            supportsFormat = solidResult.supportsFormat;
             break;
-        }
-            
-        case 'color-match': {
-            const matchColor = document.getElementById('match-color').value.replace('#', '');
-            const matchWidth = document.getElementById('match-width').value;
-            const matchHeight = document.getElementById('match-height').value;
-            url = `/color/${matchColor}/${matchWidth}/${matchHeight}`;
+        case 'color-match':
+            url = buildColorMatchURL(params);
             break;
-        }
-            
-        case 'svg': {
-            const svgWidth = document.getElementById('svg-width').value;
-            const svgHeight = document.getElementById('svg-height').value;
-            const svgBg = document.getElementById('svg-bg').value.replace('#', '');
-            const svgFg = document.getElementById('svg-fg').value.replace('#', '');
-            const svgText = document.getElementById('svg-text').value;
-            url = `/svg/${svgWidth}/${svgHeight}`;
-            params.push(`bg=${svgBg}`);
-            params.push(`fg=${svgFg}`);
-            if (svgText) params.push(`text=${encodeURIComponent(svgText)}`);
-            supportsFormat = false;
+        case 'svg':
+            const svgResult = buildSvgURL(params);
+            url = svgResult.url;
+            supportsFormat = svgResult.supportsFormat;
             break;
-        }
-            
-        case 'gradient': {
-            const gradWidth = document.getElementById('grad-width').value;
-            const gradHeight = document.getElementById('grad-height').value;
-            const gradFrom = document.getElementById('grad-from').value.replace('#', '');
-            const gradTo = document.getElementById('grad-to').value.replace('#', '');
-            url = `/gradient/${gradWidth}x${gradHeight}/${gradFrom}/${gradTo}`;
+        case 'gradient':
+            url = buildGradientURL(params);
             break;
-        }
-            
-        case 'avatar': {
-            const avatarSize = document.getElementById('avatar-size').value;
-            const avatarName = document.getElementById('avatar-name').value;
-            const avatarPalette = document.getElementById('avatar-palette').value;
-            const avatarCircle = document.getElementById('avatar-circle').checked;
-            const avatarSingle = document.getElementById('avatar-single').checked;
-            const avatarBg = document.getElementById('avatar-bg').value;
-            const avatarFg = document.getElementById('avatar-fg').value.replace('#', '');
-            const avatarBorder = document.getElementById('avatar-border').value;
-            const avatarBorderColor = document.getElementById('avatar-border-color').value.replace('#', '');
-            url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
-            if (avatarPalette && avatarPalette !== 'flatui') params.push(`palette=${avatarPalette}`);
-            if (avatarCircle) params.push('circle=true');
-            if (avatarSingle) params.push('single=true');
-            if (avatarBorder > 0) {
-                params.push(`border=${avatarBorder}`);
-                params.push(`border_color=${avatarBorderColor}`);
-            }
-            // Only pass bg if user has explicitly changed it from default (#667eea)
-            if (avatarBg && avatarBg !== '#667eea') params.push(`bg=${avatarBg.replace('#', '')}`);
-            if (avatarFg && avatarFg !== 'ffffff') params.push(`fg=${avatarFg}`);
-            supportsFormat = true;
+        case 'avatar':
+            const avatarResult = buildAvatarURL(params);
+            url = avatarResult.url;
+            supportsFormat = avatarResult.supportsFormat;
             break;
-        }
-            
-        case 'lucky': {
-            const luckyCategory = document.getElementById('random-category').value;
-            const luckyColor = document.getElementById('random-color').value;
-            url = `/random/${luckyCategory}`;
-            if (luckyColor && luckyColor !== '#3b82f6') params.push(`color=${encodeURIComponent(luckyColor.replace('#', ''))}`);
-            supportsFormat = false;
+        case 'lucky':
+            const luckyResult = buildLuckyURL(params);
+            url = luckyResult.url;
+            supportsFormat = luckyResult.supportsFormat;
             break;
-        }
     }
     
     // Add format extension
