@@ -22,9 +22,6 @@ logger = logging.getLogger(__name__)
 
 VALID_CATEGORIES = {"White", "Black", "Gray", "Brown", "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Other"}
 
-# Global flag to ensure S3 scan happens only once across all workers
-_s3_scan_done = False
-
 import boto3
 from botocore.config import Config
 
@@ -110,7 +107,6 @@ class Category:
 
 
 class ImageManager:
-    ROOT_KEY = "__root"
     IGNORE_FILES = {".cache", ".DS_Store", "Thumbs.db"}
     VALID_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff"}
 
@@ -119,7 +115,6 @@ class ImageManager:
         self._total = 0
         self._colors: dict[int, list[str]] = {}
         self._scanning_colors = False
-        self._s3_scanned = False
         self._is_leader = self._acquire_leader_lock()
         self._rescan()
 
@@ -218,10 +213,11 @@ class ImageManager:
     def list_categories(self) -> list[dict[str, Any]]:
         result = []
         for name, cat in self._categories.items():
+            display_name = cat.meta.name or name
             result.append({
                 "name": name,
                 "count": len(cat.entries),
-                "display_name": cat.meta.name or name,
+                "display_name": display_name,
                 "description": cat.meta.description,
                 "author": cat.meta.author,
                 "tags": cat.meta.tags,
@@ -407,30 +403,9 @@ class ImageManager:
                             entries=entries,
                         )
                         total += len(entries)
-                elif item.suffix.lower() in self.VALID_EXTS:
-                    root = new_categories.get(self.ROOT_KEY)
-                    if root is None:
-                        meta = self._read_meta(images_dir)
-                        new_categories[self.ROOT_KEY] = Category(
-                            name=self.ROOT_KEY,
-                            meta=meta,
-                            entries=[],
-                        )
-                        root = new_categories[self.ROOT_KEY]
-                    key = f"{self.ROOT_KEY}/{item.name}"
-                    if key not in manifest:
-                        manifest[key] = next_id
-                        next_id += 1
-                    root.entries.append(ImageEntry(
-                        path=item,
-                        filename=item.name,
-                        category=self.ROOT_KEY,
-                        id=manifest[key],
-                    ))
-                    total += 1
 
-        # Only scan S3 in the leader worker to avoid redundant ListObjects calls
-        if self._is_leader and settings.s3_enabled and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned:
+        # Scan S3 if enabled (all workers need S3 images in memory)
+        if settings.s3_enabled and settings.s3_endpoint and settings.s3_bucket:
             logger.info(f"Scanning S3 bucket: {settings.s3_bucket}")
             s3_categories, next_id = self._scan_s3(manifest, next_id)
             for cat_name, category in s3_categories.items():
@@ -439,17 +414,9 @@ class ImageManager:
                 else:
                     new_categories[cat_name] = category
                 total += len(category.entries)
-            self._s3_scanned = True
             logger.info(f"S3 scan complete: found {len(s3_categories)} categories")
         else:
-            reason = []
-            if not self._is_leader:
-                reason.append("not leader")
-            if self._s3_scanned:
-                reason.append("already scanned")
-            if not (settings.s3_enabled and settings.s3_endpoint and settings.s3_bucket):
-                reason.append("S3 not configured")
-            logger.debug(f"S3 scan skipped ({', '.join(reason) if reason else 'disabled'})")
+            logger.debug("S3 scan skipped (S3 not configured)")
 
         colors = self._load_colors()
 
@@ -583,8 +550,8 @@ class ImageManager:
                             cat_name = parts[0]
                         filename = parts[-1]
                     else:
-                        cat_name = self.ROOT_KEY
-                        filename = basename
+                        # Skip images at root level (not in a category folder)
+                        continue
 
                     manifest_key = f"s3://{settings.s3_bucket}/{key}"
                     if manifest_key not in manifest:

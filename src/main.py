@@ -20,6 +20,7 @@ from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
 
 import boto3
 from botocore.config import Config
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -1539,7 +1540,8 @@ async def serve_by_color(
 
 
 # ── Random from all (no dimensions) ────────────────────────────────
-@app.get("/random/{category:path}")
+@app.get("/random")
+@app.get("/random/{category}")
 async def random_image(category: str = "", color: str = "") -> RedirectResponse:
     if color:
         entry = manager.pick_by_color(color, category or None)
