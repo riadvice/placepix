@@ -26,15 +26,17 @@
 - **Enhanced URL builder** - Improved interactive URL constructor with real-time preview
 - **Explorer improvements** - Better image browsing and filtering UI
 - **GDPR compliance** - Added legal links to footer and cookie consent
+- **Social network icons** - Added Font Awesome icons to preset dimension capsules for Instagram, YouTube, Facebook, X, LinkedIn, TikTok, and Screens
+- **Expanded localization** - Added 5 new languages: Danish, Malay, Hungarian, Bulgarian, and Romanian (total 31 languages)
 
 ### 🔧 Improvements
 
 #### Performance & Reliability
-- **Leader-only S3 scan** - Only the leader worker scans S3 bucket to avoid redundant operations
 - **S3 client reuse** - Singleton S3 client reused across all operations
 - **Cache size limit with LRU eviction** - New `cache_max_size_mb` setting with automatic LRU eviction
 - **Processing concurrency control** - Asyncio semaphore limits concurrent image processing
 - **Leader lock logging** - Defensive logging in lock release to handle closed streams
+- **S3 scanning improvements** - All workers now scan S3 for consistency; images at root level are skipped
 
 #### Infrastructure
 - **Docker configuration** - Improved Docker build and configuration
