@@ -23,6 +23,7 @@ test_images/
 # IDE
 .vscode/
 .idea/
+.windsurf/
 *.swp
 *.swo
 
