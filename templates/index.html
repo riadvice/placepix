@@ -91,7 +91,7 @@
         <img src="/static/logo.svg" alt="PlacePix" class="w-8 h-8">
         <span class="font-bold text-xl tracking-tight">PlacePix</span>
       </div>
-      <button id="nav-toggle" class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+      <button id="nav-toggle" class="nav-toggle" type="button" aria-label="Toggle navigation" data-i18n="aria.toggle_navigation" data-i18n-attr="aria-label" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="4" y1="6" x2="20" y2="6"></line>
           <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -252,7 +252,7 @@
       <div class="mt-4 inline-flex items-center gap-2">
         <label class="text-sm text-stone-500" data-i18n="upload.category_label">Category:</label>
         <select id="upload-category" class="border border-border-subtle rounded-lg px-3 py-2 text-sm bg-surface text-stone-700 focus:ring-2 focus:ring-accent focus:border-accent" required>
-          <option value="" disabled selected>Select a category</option>
+          <option value="" disabled selected data-i18n="upload.select_category">Select a category</option>
           {% for cat in categories %}
           <option value="{{ cat.name }}">{{ cat.display_name or cat.name }}</option>
           {% endfor %}
@@ -272,19 +272,19 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
         </svg>
         <div>
-          <h2 class="text-2xl font-bold text-violet-900">AI Image Generation</h2>
-          <p class="text-sm text-violet-700">Experimental — powered by OVHcloud AI Endpoints</p>
+          <h2 class="text-2xl font-bold text-violet-900" data-i18n="ai.title">AI Image Generation</h2>
+          <p class="text-sm text-violet-700" data-i18n="ai.experimental">Experimental — powered by OVHcloud AI Endpoints</p>
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="md:col-span-2">
-          <input type="text" id="ai-prompt" placeholder="Describe an image... (e.g. a cozy cabin in snowy woods)"
+          <input type="text" id="ai-prompt" placeholder="Describe an image... (e.g. a cozy cabin in snowy woods)" data-i18n="ai.placeholder" data-i18n-attr="placeholder"
                  class="w-full border border-violet-200 rounded-lg px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                  maxlength="500">
         </div>
         <div>
           <select id="ai-category" class="w-full border border-violet-200 rounded-lg px-3 py-3 text-sm bg-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500">
-            <option value="">__root (no category)</option>
+            <option value="" data-i18n="ai.no_category">__root (no category)</option>
             {% for cat in categories %}
             <option value="{{ cat.name }}">{{ cat.display_name or cat.name }}</option>
             {% endfor %}
@@ -293,17 +293,17 @@
       </div>
       <div class="flex items-center gap-4 mt-4">
         <button id="ai-generate-btn" onclick="generateAIImage()"
-                class="bg-violet-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-violet-700 transition shadow-sm">
+                class="bg-violet-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-violet-700 transition shadow-sm" data-i18n="ai.generate">
           Generate
         </button>
         <span id="ai-status" class="text-sm text-violet-700 font-medium hidden"></span>
       </div>
       <div id="ai-preview" class="mt-6 hidden">
-        <p class="text-sm text-violet-700 mb-2">Generated image:</p>
+        <p class="text-sm text-violet-700 mb-2" data-i18n="ai.generated_image">Generated image:</p>
         <img id="ai-preview-img" src="" alt="AI generated" class="rounded-xl border border-violet-200 max-h-64">
         <div class="mt-2 flex gap-2">
           <code id="ai-url" class="text-xs font-mono text-violet-600 bg-white px-3 py-1 rounded border border-violet-200"></code>
-          <button onclick="copyAIGeneratedURL()" class="text-xs bg-violet-100 text-violet-700 px-3 py-1 rounded hover:bg-violet-200 transition">Copy URL</button>
+          <button onclick="copyAIGeneratedURL()" class="text-xs bg-violet-100 text-violet-700 px-3 py-1 rounded hover:bg-violet-200 transition" data-i18n="ai.copy_url">Copy URL</button>
         </div>
       </div>
     </div>

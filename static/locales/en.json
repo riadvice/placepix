@@ -269,5 +269,20 @@
   "docker.feature1": "Smart Scan + S3 Support",
   "docker.feature2": "Color extraction",
   "docker.feature3": "Zero Configuration",
-  "docker.feature4": "Embedded URL Builder"
+  "docker.feature4": "Embedded URL Builder",
+
+  "aria.toggle_navigation": "Toggle navigation",
+  "ai.title": "AI Image Generation",
+  "ai.experimental": "Experimental — powered by OVHcloud AI Endpoints",
+  "ai.placeholder": "Describe an image... (e.g. a cozy cabin in snowy woods)",
+  "ai.generate": "Generate",
+  "ai.generated_image": "Generated image:",
+  "ai.copy_url": "Copy URL",
+  "ai.no_category": "__root (no category)",
+  "upload.select_category": "Select a category",
+  "url_builder.placeholder.seed": "e.g., myseed123",
+  "url_builder.placeholder.text": "Your text here",
+  "url_builder.placeholder.svg_text": "Default: {width}x{height}",
+  "url_builder.placeholder.duotone": "#ff0000,#0000ff",
+  "url_builder.placeholder.border": "e.g., 5 or 5,ff0000"
 }

@@ -18,12 +18,8 @@ from typing import Any, Annotated
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
 
-try:
-    import boto3
-    from botocore.config import Config
-    _BOTO3_AVAILABLE = True
-except Exception:
-    _BOTO3_AVAILABLE = False
+import boto3
+from botocore.config import Config
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -49,20 +45,16 @@ def setup_logging():
     """Configure logging with console output only."""
     log_format = "%(asctime)s | %(levelname)-8s | %(name)s | [PID:%(process)d] | %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
-    
-    # Create logger
+
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, settings.log_level.upper()))
-    
-    # Clear existing handlers
     logger.handlers.clear()
-    
-    # Console handler only
+
     console_handler = logging.StreamHandler()
     console_handler.setLevel(getattr(logging, settings.log_level.upper()))
     console_handler.setFormatter(logging.Formatter(log_format, date_format))
     logger.addHandler(console_handler)
-    
+
     return logger
 
 logger = setup_logging()
@@ -174,8 +166,6 @@ def _get_s3_client() -> Any:
     global _s3_client
     if _s3_client is not None:
         return _s3_client
-    if not _BOTO3_AVAILABLE:
-        raise RuntimeError("boto3 is not installed")
     _s3_client = boto3.client(
         "s3",
         endpoint_url=settings.s3_endpoint,
@@ -218,7 +208,7 @@ if manager._is_leader:
     logger.info("Starting file watcher for hot-reload")
     _observer = start_watching(manager)
 else:
-    logger.info("File watcher skipped (not leader worker)")
+    logger.info(f"File watcher skipped (not leader worker, is_leader={manager._is_leader})")
     _observer = None
 
 # Cache cleaner class for TTL-based cleanup + size limit
@@ -656,7 +646,7 @@ def _check_not_modified(
 
 def _resolve_image_source(entry: ImageEntry) -> Path | io.BytesIO:
     """Return local path or download S3 object into a BytesIO buffer."""
-    if entry.s3_key and _BOTO3_AVAILABLE and settings.s3_enabled:
+    if entry.s3_key and settings.s3_enabled:
         logger.debug(f"Loading S3 image: {entry.s3_key}")
         try:
             client = _get_s3_client()
@@ -1143,7 +1133,7 @@ async def serve_by_ratio(
     if width == 0 or height == 0:
         logger.warning(f"Invalid aspect ratio format: {ratio}")
         raise HTTPException(status_code=400, detail="invalid aspect ratio format")
-    
+
     if color:
         entry = manager.pick_by_color(color, category or None)
     else:
@@ -1151,7 +1141,7 @@ async def serve_by_ratio(
     if entry is None:
         logger.warning(f"Category not found for ratio: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
-    
+
     is_random = not seed
     return await _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
@@ -1224,9 +1214,9 @@ async def serve_by_preset(
     if preset_name not in PRESETS:
         logger.warning(f"Unknown preset: {preset_name}")
         raise HTTPException(status_code=404, detail=f"unknown preset: {preset_name}")
-    
+
     width, height = PRESETS[preset_name]
-    
+
     if color:
         entry = manager.pick_by_color(color, category or None)
     else:
@@ -1234,7 +1224,7 @@ async def serve_by_preset(
     if entry is None:
         logger.warning(f"Category not found for preset: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
-    
+
     is_random = not seed
     return await _serve_entry(
         entry, width, height, ext, grayscale, blur, text, fit, format,
@@ -1861,7 +1851,7 @@ async def health() -> JSONResponse:
         checks["status"] = "warning"
 
     # S3 connectivity (if enabled)
-    if settings.s3_enabled and _BOTO3_AVAILABLE:
+    if settings.s3_enabled:
         try:
             client = _get_s3_client()
             client.head_bucket(Bucket=settings.s3_bucket)

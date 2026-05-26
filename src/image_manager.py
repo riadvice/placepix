@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import random
+import time
 import fcntl
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -24,12 +25,8 @@ VALID_CATEGORIES = {"White", "Black", "Gray", "Brown", "Red", "Orange", "Yellow"
 # Global flag to ensure S3 scan happens only once across all workers
 _s3_scan_done = False
 
-try:
-    import boto3
-    from botocore.config import Config
-    _BOTO3_AVAILABLE = True
-except Exception:
-    _BOTO3_AVAILABLE = False
+import boto3
+from botocore.config import Config
 
 
 def _hex_to_rgb(hex_str: str) -> tuple[int, int, int] | None:
@@ -273,6 +270,8 @@ class ImageManager:
         lock_file = settings.data_dir / ".placepix_leader.lock"
         try:
             lock_file.touch(exist_ok=True)
+            
+            # First try to acquire lock with non-blocking mode
             f = open(lock_file, "w")
             try:
                 fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -284,9 +283,33 @@ class ImageManager:
                 # Register cleanup on exit
                 atexit.register(self._release_leader_lock)
                 return True
-            except (IOError, BlockingIOError):
+            except (IOError, BlockingIOError) as e:
                 f.close()
-                logger.debug(f"Worker {os.getpid()} did not acquire leader lock")
+                # Lock is held by another process
+                # Check if it's a stale lock (process doesn't exist or lock is too old)
+                try:
+                    stat = lock_file.stat()
+                    lock_age = time.time() - stat.st_mtime
+                    # If lock is older than 60 seconds, consider it stale
+                    if lock_age > 60:
+                        logger.warning(f"Found stale leader lock (age: {lock_age:.1f}s), attempting to break it")
+                        # Try to break the stale lock by acquiring it
+                        f2 = open(lock_file, "w")
+                        try:
+                            fcntl.flock(f2.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                            f2.write(str(os.getpid()))
+                            f2.flush()
+                            self._leader_lock_file = f2
+                            logger.info(f"Worker {os.getpid()} acquired leader lock after breaking stale lock")
+                            atexit.register(self._release_leader_lock)
+                            return True
+                        except (IOError, BlockingIOError):
+                            f2.close()
+                            logger.debug(f"Worker {os.getpid()} could not break stale lock")
+                except Exception as ex:
+                    logger.debug(f"Error checking stale lock: {ex}")
+                
+                logger.debug(f"Worker {os.getpid()} did not acquire leader lock (held by another process)")
                 return False
         except Exception as e:
             logger.warning(f"Failed to acquire leader lock: {e}")
@@ -407,7 +430,7 @@ class ImageManager:
                     total += 1
 
         # Only scan S3 in the leader worker to avoid redundant ListObjects calls
-        if self._is_leader and settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned:
+        if self._is_leader and settings.s3_enabled and settings.s3_endpoint and settings.s3_bucket and not self._s3_scanned:
             logger.info(f"Scanning S3 bucket: {settings.s3_bucket}")
             s3_categories, next_id = self._scan_s3(manifest, next_id)
             for cat_name, category in s3_categories.items():
@@ -424,7 +447,7 @@ class ImageManager:
                 reason.append("not leader")
             if self._s3_scanned:
                 reason.append("already scanned")
-            if not (settings.s3_enabled and _BOTO3_AVAILABLE and settings.s3_endpoint and settings.s3_bucket):
+            if not (settings.s3_enabled and settings.s3_endpoint and settings.s3_bucket):
                 reason.append("S3 not configured")
             logger.debug(f"S3 scan skipped ({', '.join(reason) if reason else 'disabled'})")
 
@@ -459,7 +482,7 @@ class ImageManager:
             # Initialize S3 client if needed for S3 images
             s3_client = None
             has_s3_images = any(e.s3_key for e in missing_entries)
-            if has_s3_images and _BOTO3_AVAILABLE and settings.s3_enabled:
+            if has_s3_images and settings.s3_enabled:
                 try:
                     s3_client = boto3.client(
                         "s3",

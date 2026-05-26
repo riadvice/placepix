@@ -12,7 +12,7 @@ pip install -e ".[dev]"
 ./run.sh
 
 # 3. Run tests
-./run_tests.sh
+./unit_tests.sh
 ```
 
 Linux users may need OpenCV system libraries:
