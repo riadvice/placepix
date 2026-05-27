@@ -2,8 +2,22 @@
 
 ## Released versions
 
+- [v0.3 - Work In Progress](#v03)
 - [v0.2 - 2026-05-26](#v02)
 - [v0.1 - 2026-05-25](#v01)
+
+## v0.3
+
+### 🚀 Introduction
+
+- **Version Number**: 0.3
+- **Release Date**: 2026-05-27
+- **General Overview**: Docker publishing improvements.
+
+### 🔧 Improvements
+
+#### Infrastructure
+- **Fixed `docker-publish.sh`** - Added explicit tag argument support, proper version sorting, and corrected `docker build` argument order to reliably update the `latest` tag on Docker Hub.
 
 ## v0.2
 
