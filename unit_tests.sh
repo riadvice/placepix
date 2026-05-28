@@ -66,7 +66,7 @@ if [ "$FAST_MODE" = true ]; then
     PYTEST_CMD="$PYTEST_CMD -q"
 else
     echo "🚀 Running tests with coverage..."
-    PYTEST_CMD="$PYTEST_CMD --cov=src --cov-report=term-missing --cov-fail-under=90"
+    PYTEST_CMD="$PYTEST_CMD --cov=src --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=90"
 fi
 
 # Run tests
