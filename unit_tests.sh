@@ -47,6 +47,13 @@ echo "🔧 Setting up test environment..."
 export ENV_FILE=".env.test"
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
+# Source venv if exists
+VENV_DIR="$(pwd)/.venv"
+if [[ -d "$VENV_DIR" ]]; then
+  echo "🐍 Activating local venv at $VENV_DIR"
+  source "$VENV_DIR/bin/activate"
+fi
+
 # Install test dependencies if not already installed
 echo "📦 Ensuring test dependencies are installed..."
 pip install pytest pytest-cov pytest-xdist --quiet

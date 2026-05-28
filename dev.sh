@@ -69,7 +69,7 @@ d }; /$end_marker/!d; }" "$file" <<< "$content"
 # ─── Main Setup ──────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 ROOT_DIR="$SCRIPT_DIR"
-VENV_DIR="$ROOT_DIR/venv"
+VENV_DIR="$ROOT_DIR/.venv"
 
 # Python version from pyproject.toml (requires-python >= 3.10)
 PYTHON_VERSION="${PYTHON_VERSION:-3.12.7}"

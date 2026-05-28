@@ -23,16 +23,19 @@ log()   { printf "${C_BLUE}${C_BOLD}[placepix]${C_RESET} %s\n" "$*"; }
 ok()    { printf "${C_GREEN}${C_BOLD}[ ok ]${C_RESET} %s\n" "$*"; }
 warn()  { printf "${C_YELLOW}${C_BOLD}[warn]${C_RESET} %s\n" "$*"; }
 
-# ─── Create venv ────────────────────────────────────────────────────
-if [[ ! -d "$VENV_DIR" ]]; then
+# ─── Source venv if exists ────────────────────────────────────────────
+if [[ -d "$VENV_DIR" ]]; then
+  source "$VENV_DIR/bin/activate"
+else
   log "Creating virtual environment at $VENV_DIR"
   "$PYTHON_BIN" -m venv "$VENV_DIR"
+  source "$VENV_DIR/bin/activate"
 fi
 
 # ─── Install / update deps ─────────────────────────────────────────
 log "Installing dependencies..."
-"$VENV_DIR/bin/pip" install -q --upgrade pip
-"$VENV_DIR/bin/pip" install -q -e "$SCRIPT_DIR"
+pip install -q --upgrade pip
+pip install -q -e "$SCRIPT_DIR"
 
 # ─── Launch ─────────────────────────────────────────────────────────
 ok "Dependencies ready"
@@ -57,8 +60,8 @@ fi
 
 if [[ "$WORKERS" -gt 1 ]]; then
   log "Running with $WORKERS workers (reload disabled)"
-  exec "$VENV_DIR/bin/python" -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --workers "$WORKERS" "$@"
+  exec python -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --workers "$WORKERS" "$@"
 else
   log "Running with auto-reload (single worker)"
-  exec "$VENV_DIR/bin/python" -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --reload --reload-dir src "$@"
+  exec python -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --reload --reload-dir src "$@"
 fi
