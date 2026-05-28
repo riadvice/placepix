@@ -27,6 +27,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY src/ ./src/
 COPY templates/ ./templates/
 COPY static/ ./static/
+COPY robots.txt ./
+COPY sitemap/ ./sitemap/
 
 # Ensure the mount point exists
 RUN mkdir -p /app/images /app/.cache /app/data
