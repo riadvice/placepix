@@ -12,6 +12,16 @@
   ---
 </div>
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Release](https://img.shields.io/github/v/release/riadvice/placepix)](https://github.com/riadvice/placepix/releases)
+[![Docker Pulls](https://img.shields.io/docker/pulls/riadvice/placepix?logo=docker)](https://hub.docker.com/r/riadvice/placepix)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009485?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?logo=opencv&logoColor=white)](https://opencv.org)
+[![Pillow](https://img.shields.io/badge/Pillow-9cf?logo=pillow&logoColor=white)](https://pillow.readthedocs.io)
+[![codecov](https://codecov.io/gh/riadvice/placepix/branch/master/graph/badge.svg)](https://codecov.io/gh/riadvice/placepix)
+[![Website](https://img.shields.io/website?up_message=online&down_message=offline&url=https%3A%2F%2Fplacepix.net)](https://placepix.net)
+
 ## Contents
 
 - [Features](#features)

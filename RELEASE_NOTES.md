@@ -33,6 +33,9 @@
 #### Infrastructure
 - **Fixed `docker-publish.sh`** - Added explicit tag argument support, proper version sorting, and corrected `docker build` argument order to reliably update the `latest` tag on Docker Hub.
 
+#### Open Source
+- **Codecov & badges** - Added test coverage reporting via Codecov and enhanced README with clickable tech stack badges
+
 ## v0.2
 
 ### 🚀 Introduction

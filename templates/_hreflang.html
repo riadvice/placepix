@@ -1,0 +1,6 @@
+{% if seo_enabled and site_url %}
+{% for loc in guide_locales %}
+    <link rel="alternate" hreflang="{{ loc }}" href="{{ site_url }}{{ request_path }}?lang={{ loc }}">
+{% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ site_url }}{{ request_path }}?lang=en">
+{% endif %}

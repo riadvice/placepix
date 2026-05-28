@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if is_rtl else 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +28,7 @@
     <meta name="twitter:description" content="Interactive URL constructor for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more.">
     {% if site_url %}<meta name="twitter:image" content="{{ site_url }}/static/logo.svg">{% endif %}
 
-    <link rel="canonical" href="{{ page_url }}">
+    <link rel="canonical" href="{{ site_url }}{{ request_path }}">
 
     <script type="application/ld+json">
     {

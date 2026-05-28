@@ -49,9 +49,13 @@
   }
 
   /**
-   * Detect language: localStorage first, then navigator preferences, then default.
+   * Detect language: URL param first, then localStorage, then navigator, then default.
    */
   function _detect() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlLang = urlParams.get('lang');
+    if (urlLang && SUPPORTED.includes(urlLang)) return urlLang;
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && SUPPORTED.includes(stored)) return stored;
 

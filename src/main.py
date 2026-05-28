@@ -415,12 +415,15 @@ jinja_env = Environment(
 def render_template(name: str, context: dict, request: Request | None = None) -> HTMLResponse:
     template = jinja_env.get_template(name)
     page_url = ""
+    request_path = ""
     if request is not None:
         page_url = str(request.url)
+        request_path = request.url.path
     merged = {
         "seo_enabled": settings.seo_enabled,
         "site_url": settings.site_url.rstrip("/") if settings.site_url else "",
         "page_url": page_url,
+        "request_path": request_path,
         **context,
     }
     content = template.render(**merged)
@@ -1851,7 +1854,9 @@ async def serve_raw_by_path(
 
 # ── Web UI ──────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request) -> Any:
+async def index(request: Request, lang: str = "en") -> Any:
+    if lang not in _GUIDE_LOCALES:
+        lang = "en"
     categories = manager.list_categories()
     return render_template(
         "index.html",
@@ -1865,14 +1870,21 @@ async def index(request: Request) -> Any:
             "privacy_policy_url": settings.privacy_policy_url,
             "gdpr_statement_url": settings.gdpr_statement_url,
             "cookie_policy_url": settings.cookie_policy_url,
+            "current_lang": lang,
+            "guide_locales": _GUIDE_LOCALES,
+            "is_rtl": lang in _RTL_LOCALES,
+            "locale_flags": _LOCALE_FLAGS,
+            "locale_names": _LOCALE_NAMES,
         },
         request=request,
     )
 
 
 @app.get("/url-builder", response_class=HTMLResponse)
-async def url_builder(request: Request) -> Any:
+async def url_builder(request: Request, lang: str = "en") -> Any:
     """Interactive URL builder and feature explorer."""
+    if lang not in _GUIDE_LOCALES:
+        lang = "en"
     return render_template(
         "url-builder.html",
         {
@@ -1881,6 +1893,11 @@ async def url_builder(request: Request) -> Any:
             "privacy_policy_url": settings.privacy_policy_url,
             "gdpr_statement_url": settings.gdpr_statement_url,
             "cookie_policy_url": settings.cookie_policy_url,
+            "current_lang": lang,
+            "guide_locales": _GUIDE_LOCALES,
+            "is_rtl": lang in _RTL_LOCALES,
+            "locale_flags": _LOCALE_FLAGS,
+            "locale_names": _LOCALE_NAMES,
         },
         request=request,
     )
@@ -2309,7 +2326,9 @@ async def readiness() -> JSONResponse:
 
 # ── Image Explorer ────────────────────────────────────────────────
 @app.get("/images")
-async def image_explorer(request: Request, page: int = 1) -> Response:
+async def image_explorer(request: Request, page: int = 1, lang: str = "en") -> Response:
+    if lang not in _GUIDE_LOCALES:
+        lang = "en"
     per_page = 20
     entries, total = manager.list_entries(page=page, per_page=per_page)
     total_pages = max((total + per_page - 1) // per_page, 1)
@@ -2324,6 +2343,11 @@ async def image_explorer(request: Request, page: int = 1) -> Response:
             "entries": entries,
             "upload_enabled": settings.upload_enabled,
             "upload_writable": _upload_writable,
+            "current_lang": lang,
+            "guide_locales": _GUIDE_LOCALES,
+            "is_rtl": lang in _RTL_LOCALES,
+            "locale_flags": _LOCALE_FLAGS,
+            "locale_names": _LOCALE_NAMES,
         },
         request=request,
     )
@@ -2337,7 +2361,10 @@ async def color_palette(
     per_page: int = 24,
     category: str = "",
     search: str = "",
+    lang: str = "en",
 ) -> Response:
+    if lang not in _GUIDE_LOCALES:
+        lang = "en"
     try:
         all_colors = manager.list_colors(category=category, search=search)
     except ValueError as e:
@@ -2366,6 +2393,11 @@ async def color_palette(
             "scanning": manager._scanning_colors,
             "upload_enabled": settings.upload_enabled,
             "upload_writable": _upload_writable,
+            "current_lang": lang,
+            "guide_locales": _GUIDE_LOCALES,
+            "is_rtl": lang in _RTL_LOCALES,
+            "locale_flags": _LOCALE_FLAGS,
+            "locale_names": _LOCALE_NAMES,
         },
         request=request,
     )

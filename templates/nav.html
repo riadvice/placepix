@@ -1,7 +1,7 @@
 <nav id="site-nav" class="backdrop-blur border-b border-border-subtle/60 sticky top-0 z-50 nav-bg-light">
   <div class="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
     <div class="flex items-center gap-3">
-      <a href="/" class="flex items-center gap-3">
+      <a href="/?lang={{ current_lang }}" class="flex items-center gap-3">
         <img src="/static/logo.svg" alt="PlacePix" class="w-8 h-8">
         <span class="font-bold text-xl tracking-tight">PlacePix</span>
       </a>
@@ -14,29 +14,29 @@
       </svg>
     </button>
     <div class="nav-links flex items-center gap-6 text-sm">
-      <a href="/#categories" class="hover:text-accent transition" data-i18n="nav.categories">Categories</a>
-      <a href="/images" class="hover:text-accent transition" data-i18n="nav.explorer">Explorer</a>
-      <a href="/palette" class="hover:text-accent transition" data-i18n="nav.palette">Palette</a>
-      <a href="/url-builder" class="hover:text-accent transition" data-i18n="nav.url_builder">URL Builder</a>
-      <a href="/guide" class="hover:text-accent transition" data-i18n="nav.guide">Guide</a>
+      <a href="/?lang={{ current_lang }}#categories" class="hover:text-accent transition" data-i18n="nav.categories">Categories</a>
+      <a href="/images?lang={{ current_lang }}" class="hover:text-accent transition" data-i18n="nav.explorer">Explorer</a>
+      <a href="/palette?lang={{ current_lang }}" class="hover:text-accent transition" data-i18n="nav.palette">Palette</a>
+      <a href="/url-builder?lang={{ current_lang }}" class="hover:text-accent transition" data-i18n="nav.url_builder">URL Builder</a>
+      <a href="/guide?lang={{ current_lang }}" class="hover:text-accent transition" data-i18n="nav.guide">Guide</a>
       <div class="dropdown" id="features-dropdown">
         <span class="dropdown-toggle hover:text-accent font-medium transition" data-i18n="nav.features">Features ▾</span>
         <div class="dropdown-menu">
-          <a href="/#smart-crop" data-i18n="nav.features.smart_crop">Smart Crop</a>
-          <a href="/#aspect-ratios" data-i18n="nav.features.aspect_ratios">Aspect Ratios</a>
-          <a href="/#filters" data-i18n="nav.features.filters">Filters &amp; Effects</a>
-          <a href="/#overlays" data-i18n="nav.features.overlays">Overlays</a>
-          <a href="/#presets" data-i18n="nav.features.presets">Presets</a>
-          <a href="/#svg" data-i18n="nav.features.svg">SVG Placeholders</a>
-          <a href="/#gradient" data-i18n="nav.features.gradient">Gradient Placeholders</a>
-          <a href="/#color-search" data-i18n="nav.features.color_search">Color Search</a>
-          <a href="/#figma" data-i18n="nav.features.figma">Figma Integration</a>
-          <a href="/url-builder" data-endpoint="avatar" data-i18n="nav.features.avatar">Letter Avatar</a>
-          <a href="/#api" data-i18n="nav.features.api_ref">API Reference</a>
+          <a href="/?lang={{ current_lang }}#smart-crop" data-i18n="nav.features.smart_crop">Smart Crop</a>
+          <a href="/?lang={{ current_lang }}#aspect-ratios" data-i18n="nav.features.aspect_ratios">Aspect Ratios</a>
+          <a href="/?lang={{ current_lang }}#filters" data-i18n="nav.features.filters">Filters &amp; Effects</a>
+          <a href="/?lang={{ current_lang }}#overlays" data-i18n="nav.features.overlays">Overlays</a>
+          <a href="/?lang={{ current_lang }}#presets" data-i18n="nav.features.presets">Presets</a>
+          <a href="/?lang={{ current_lang }}#svg" data-i18n="nav.features.svg">SVG Placeholders</a>
+          <a href="/?lang={{ current_lang }}#gradient" data-i18n="nav.features.gradient">Gradient Placeholders</a>
+          <a href="/?lang={{ current_lang }}#color-search" data-i18n="nav.features.color_search">Color Search</a>
+          <a href="/?lang={{ current_lang }}#figma" data-i18n="nav.features.figma">Figma Integration</a>
+          <a href="/url-builder?lang={{ current_lang }}" data-endpoint="avatar" data-i18n="nav.features.avatar">Letter Avatar</a>
+          <a href="/?lang={{ current_lang }}#api" data-i18n="nav.features.api_ref">API Reference</a>
         </div>
       </div>
-      {% if upload_enabled and upload_writable %}<a href="/#upload" class="hover:text-accent transition" data-i18n="nav.upload">Upload</a>{% endif %}
-      <a href="/#api" class="hover:text-accent transition" data-i18n="nav.api">API</a>
+      {% if upload_enabled and upload_writable %}<a href="/?lang={{ current_lang }}#upload" class="hover:text-accent transition" data-i18n="nav.upload">Upload</a>{% endif %}
+      <a href="/?lang={{ current_lang }}#api" class="hover:text-accent transition" data-i18n="nav.api">API</a>
       <a href="/docs" target="_blank" class="bg-gradient-to-r from-sky-600 to-sky-500 text-white px-4 py-2 rounded-lg hover:from-sky-700 hover:to-sky-600 transition font-semibold shadow-md shadow-sky-900/20" data-i18n="nav.docs">Docs</a>
       {% if ga_tracking_id %}
       <a href="javascript:void(0)" onclick="CookieConsent.showPreferences()" class="hover:text-accent transition" data-i18n="nav.cookie_preferences">Cookie Preferences</a>
