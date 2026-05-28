@@ -436,17 +436,28 @@ logger.info("Static files mounted at /static")
 
 _MINIMAL_ROBOTS = "User-agent: *\nAllow: /\n\nDisallow: /admin\n"
 
-@app.get("/robots.txt", response_class=Response)
+@app.get("/robots.txt", response_class=Response, include_in_schema=False)
 async def robots_txt() -> Response:
     """Return full robots.txt when SEO is enabled, minimal otherwise."""
     if settings.seo_enabled:
-        content = Path("robots.txt").read_text(encoding="utf-8")
+        robots_path = Path("robots.txt")
+        if robots_path.exists():
+            content = robots_path.read_text(encoding="utf-8")
+            # Replace hardcoded sitemap URL with dynamic site_url
+            if settings.site_url:
+                content = re.sub(
+                    r"Sitemap: https://[^/]+/sitemap/",
+                    f"Sitemap: {settings.site_url.rstrip('/')}/sitemap/",
+                    content
+                )
+        else:
+            content = _MINIMAL_ROBOTS
     else:
         content = _MINIMAL_ROBOTS
     return Response(content=content, media_type="text/plain")
 
 
-@app.get("/llms.txt", response_class=Response)
+@app.get("/llms.txt", response_class=Response, include_in_schema=False)
 async def llms_txt() -> Response:
     """Return llms.txt only when SEO / AI discoverability is enabled."""
     if not settings.seo_enabled:
@@ -457,7 +468,13 @@ async def llms_txt() -> Response:
     return Response(content=path.read_text(encoding="utf-8"), media_type="text/plain")
 
 
-@app.get("/sitemap/sitemap-index.xml", response_class=Response)
+@app.get("/sitemap.xml", response_class=RedirectResponse, include_in_schema=False)
+async def sitemap_redirect() -> RedirectResponse:
+    """Redirect standard /sitemap.xml to /sitemap/sitemap-index.xml."""
+    return RedirectResponse(url="/sitemap/sitemap-index.xml", status_code=301)
+
+
+@app.get("/sitemap/sitemap-index.xml", response_class=Response, include_in_schema=False)
 async def sitemap_index() -> Response:
     """Return sitemap index only when SEO is enabled."""
     if not settings.seo_enabled:
@@ -468,7 +485,7 @@ async def sitemap_index() -> Response:
     return Response(content=path.read_text(encoding="utf-8"), media_type="application/xml")
 
 
-@app.get("/sitemap/{filename}", response_class=Response)
+@app.get("/sitemap/{filename}", response_class=Response, include_in_schema=False)
 async def sitemap_file(filename: str) -> Response:
     """Return language sitemap only when SEO is enabled."""
     if not settings.seo_enabled:
