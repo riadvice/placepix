@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if is_rtl else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1c1917">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <title>{{ guide.title }}</title>
+{% if seo_enabled %}
+    <meta name="description" content="{{ guide.meta.description }}">
+    <meta name="keywords" content="{{ guide.meta.keywords }}">
+    <meta name="author" content="{{ guide.meta.author }}">
+    <meta name="robots" content="{{ guide.meta.robots }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ page_url }}">
+    <meta property="og:title" content="{{ guide.og.title }}">
+    <meta property="og:description" content="{{ guide.og.description }}">
+    {% if site_url %}<meta property="og:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ page_url }}">
+    <meta name="twitter:title" content="{{ guide.twitter.title }}">
+    <meta name="twitter:description" content="{{ guide.twitter.description }}">
+    {% if site_url %}<meta name="twitter:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
+    <link rel="canonical" href="{{ page_url }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "TechArticle",
+          "name": "{{ guide.jsonld.name }}",
+          "description": "{{ guide.jsonld.description }}",
+          "url": "{{ page_url }}",
+          "image": "{{ site_url }}/static/logo.svg",
+          "author": {
+            "@type": "Organization",
+            "name": "RIADVICE",
+            "url": "https://riadvice.com"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "RIADVICE",
+            "url": "https://riadvice.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "{{ site_url }}/static/logo.svg"
+            }
+          },
+          "proficiencyLevel": "{{ guide.jsonld.proficiency }}",
+          "dependencies": "{{ guide.jsonld.dependencies }}"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {% for faq in guide.jsonld.faqs %}
+            {
+              "@type": "Question",
+              "name": "{{ faq.question }}",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "{{ faq.answer|e }}"
+              }
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ]
+        }
+      ]
+    }
+    </script>
+{% endif %}
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1c1917',
+              accent: '#0ea5e9',
+              'accent-hover': '#38bdf8',
+              secondary: '#78716c',
+              surface: '#ffffff',
+              'surface-light': '#fafaf9',
+              muted: '#f5f5f4',
+              'border-subtle': '#e7e5e4',
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/static/css/guide.css">
+</head>
+<body data-theme="light">
+    {% include "nav.html" %}
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <article>
+            <header class="mb-10">
+                <h1 class="text-3xl sm:text-4xl font-bold text-stone-800 mb-3">{{ guide.header.title }}</h1>
+                <p class="text-stone-500 text-lg">{{ guide.header.subtitle }}</p>
+                <div class="flex items-center justify-center gap-3 mt-4 text-sm text-stone-400">
+                    <span>{{ guide.header.author_label }} <a href="https://riadvice.com" target="_blank" rel="noopener noreferrer" class="text-stone-600 hover:underline">RIADVICE</a></span>
+                    <span>&bull;</span>
+                    <span>{{ guide.header.updated_label }}</span>
+                    <span>&bull;</span>
+                    <span><i class="fab fa-github"></i> <a href="https://github.com/riadvice/placepix" target="_blank" class="text-accent hover:underline">{{ guide.header.github_label }}</a></span>
+                </div>
+            </header>
+
+            <!-- Language Switcher -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6 text-sm">
+                {% for loc in guide_locales %}
+                <a href="/guide?lang={{ loc }}" class="inline-flex items-center gap-1.5 px-2 py-1 rounded {% if current_lang == loc %}bg-accent text-white{% else %}bg-muted text-stone-600 hover:bg-stone-200{% endif %}">
+                    <span class="fi fi-{{ locale_flags.get(loc, 'xx') }}"></span>
+                    <span>{{ locale_names.get(loc, loc) }}</span>
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- Table of Contents -->
+            <nav aria-label="Guide contents" class="bg-muted rounded-xl p-6 mb-10">
+                <h2 class="font-bold text-stone-800 mb-3">{{ guide.toc_title }}</h2>
+                <ol class="guide-toc grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    {% for section in guide.sections %}
+                    <li><a href="#{{ section.heading|lower|replace(' ', '-')|replace('&', 'and')|replace('?', '')|replace(':', '')|replace('.', '') }}">{{ loop.index }}. {{ section.heading }}</a></li>
+                    {% endfor %}
+                </ol>
+            </nav>
+
+            {% for section in guide.sections %}
+            <section id="{{ section.heading|lower|replace(' ', '-')|replace('&', 'and')|replace('?', '')|replace(':', '')|replace('.', '') }}" class="guide-section">
+                <h2 class="guide-h2">{{ section.heading }}</h2>
+                {{ section.html|safe }}
+            </section>
+            {% endfor %}
+        </article>
+    </main>
+
+    <script src="/static/js/i18n.js"></script>
+    <script src="/static/js/common.js"></script>
+
+    <!-- Dark Mode Toggle Button -->
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode (Ctrl+D)">
+        \u1F319
+    </button>
+</body>
+</html>

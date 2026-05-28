@@ -1,0 +1,118 @@
+User-agent: *
+Allow: /
+
+# ── AI Crawlers (explicitly allowed) ────────────────────────────
+
+# OpenAI (ChatGPT, GPT-4, o1, Search)
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic (Claude)
+# Note: Claude-Web and anthropic-ai are legacy tokens.
+# Current fleet: ClaudeBot, Claude-SearchBot, Claude-User.
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+
+# Google (Gemini, Bard, AI Overviews, Vertex AI)
+User-agent: Google-Extended
+Allow: /
+User-agent: Google-CloudVertexBot
+Allow: /
+
+# Apple (Siri, Spotlight, Apple Intelligence)
+User-agent: Applebot
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+# Meta (Llama, Meta AI)
+User-agent: Meta-ExternalAgent
+Allow: /
+User-agent: FacebookBot
+Allow: /
+
+# Microsoft (Copilot, Bing AI)
+User-agent: Bingbot
+Allow: /
+
+# Perplexity (AI search)
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# Common Crawl (training datasets, academic research)
+User-agent: CCBot
+Allow: /
+
+# ByteDance / TikTok
+User-agent: Bytespider
+Allow: /
+
+# Amazon (Alexa, Amazon Nova)
+User-agent: Amazonbot
+Allow: /
+
+# DeepSeek
+User-agent: DeepSeekBot
+Allow: /
+
+# Kimi / Moonshot AI
+User-agent: Kimibot
+Allow: /
+User-agent: MoonshotBot
+Allow: /
+User-agent: KimiCrawler
+Allow: /
+
+# xAI / Grok
+User-agent: GrokBot
+Allow: /
+User-agent: xAI-Grok
+Allow: /
+User-agent: Grok-DeepSearch
+Allow: /
+
+# You.com
+User-agent: YouBot
+Allow: /
+
+# DuckDuckGo (DuckAssist AI)
+User-agent: DuckAssistBot
+Allow: /
+
+# Mistral AI (Le Chat)
+User-agent: MistralAI-User
+Allow: /
+
+# Omgili (AI search)
+User-agent: Omgilibot
+Allow: /
+
+# Imagesift (visual search)
+User-agent: ImagesiftBot
+Allow: /
+
+# Firecrawl (multi-tenant scraping / AI data extraction)
+User-agent: Firecrawl
+Allow: /
+
+# ── Sitemap ───────────────────────────────────────────────────
+
+Sitemap: https://placepix.net/sitemap/sitemap-index.xml

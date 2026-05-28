@@ -1,0 +1,398 @@
+---
+title: PlacePix 開発者ガイド — セルフホスト型プレースホルダー画像APIと機能リファレンス
+description: 完全なPlacePix開発者ガイドおよびAPIリファレンス。Dockerを使用したプレースホルダー画像のデプロイ、グラデーションとSVGの生成、InstagramやYouTubeなどのソーシャルメディアプリセットの使用方法を学びます。
+keywords: セルフホスト型プレースホルダー画像API, 顔認識クロッププレースホルダー, グラデーションプレースホルダージェネレーター, Dockerプレースホルダー画像サービス, InstagramストーリープレースホルダーAPI, SVGプレースホルダージェネレーター, 開発者画像API
+author: RIADVICE
+robots: index, follow
+og_title: PlacePix 開発者ガイド — セルフホスト型プレースホルダー画像API＆機能リファレンス
+og_description: Dockerデプロイ、スマートクロップ、グラデーションプレースホルダー、SVG生成、ソーシャルメディアプリセットを網羅した完全な開発者ガイド。
+twitter_title: PlacePix 開発者ガイド — セルフホスト型プレースホルダー画像API＆機能リファレンス
+twitter_description: Dockerデプロイ、スマートクロップ、グラデーションプレースホルダー、SVG生成、ソーシャルメディアプリセットを網羅した完全な開発者ガイド。
+jsonld_name: PlacePix 開発者ガイド — セルフホスト型プレースホルダー画像API＆機能リファレンス
+jsonld_description: PlacePix（セルフホスト型プレースホルダー画像サービス）の完全な開発者ガイドとAPIリファレンス。Dockerデプロイ、顔認識スマートクロップ、グラデーションプレースホルダー、SVG生成、ソーシャルメディアプリセットを網羅。
+jsonld_proficiency: Expert
+jsonld_dependencies: Docker, Python 3.12, FastAPI
+header_title: PlacePix 開発者ガイド
+header_subtitle: セルフホスト型プレースホルダー画像サービスの完全なAPIリファレンスと機能ドキュメント。Dockerデプロイメント、スマートクロップ、グラデーションプレースホルダー、SVG生成、レターアバター、ソーシャルメディアプリセットをカバーしています。
+author_label: 作成者
+updated_label: "最終更新日：2026年5月"
+github_label: GitHubでオープンソース
+toc_title: 目次
+---
+
+## PlacePixとは？
+
+PlacePixは、開発者とデザインチームのために構築された**セルフホスト型プレースホルダー画像サービス**です。外部ネットワーク呼び出しを必要とし、消える可能性があるサードパーティのプレースホルダーサービスとは異なり、PlacePixは完全に独自のインフラストラクチャ上で実行されます。フォルダに画像をドロップするだけで、リサイズ・フィルタリング・フォーマットされた画像を提供するURLエンドポイントを即座に取得できます。
+
+このサービスはPythonでFastAPIを使用して書かれ、画像処理はPillowとOpenCVで駆動されています。DockerデプロイメントとS3互換オブジェクトストレージをサポートしています。
+
+### 機能
+
+- **ゼロ設定** — フォルダに画像をドロップするだけで開始
+- **顔認識クロッピング** — OpenCVが顔を検出し中心に配置
+- **グラデーション＆SVGプレースホルダー** — 画像は不要
+- **ソーシャルメディアプリセット** — Instagram、YouTube、TikTokサイズを内蔵
+- **カラーサーチ** — ブランドパレットに一致する画像を検索
+- **レターアバター** — 名前から決定論的なプロフィール画像を生成
+
+## Dockerデプロイメントガイド
+
+PlacePixを実行する最速の方法はDockerです。1つのコマンドで、スマートスキャン、カラー抽出、埋め込みURLビルダーを備えたサービス全体をデプロイします。
+
+### ワンラインデプロイメント
+
+```bash
+docker run -d -p 3000:3000 \
+  -v ./images:/app/images \
+  riadvice/placepix:latest
+```
+
+### Docker Compose（推奨）
+
+```yaml
+services:
+  placepix:
+    image: riadvice/placepix:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./images:/app/images
+      - ./data:/app/data
+    environment:
+      - HOST=0.0.0.0:3000
+      - UPLOAD_ENABLED=true
+      - WATERMARK_ENABLED=false
+    restart: unless-stopped
+```
+
+### 永続データと環境
+
+コンテナの再起動時に状態を保持するため、`/app/images`（画像ライブラリ）と`/app/data`（スキャンキャッシュとメタデータ）の両方をマウントしてください。環境変数または`.env`ファイルで動作を設定できます。
+
+### OVHcloud S3互換ストレージ
+
+PlacePixはS3互換バックエンドをサポートしています。OVHcloud Object Storageの場合は以下を設定してください：
+
+```
+S3_ENABLED=true
+S3_ENDPOINT=https://s3.rbx.io.cloud.ovh.net
+S3_ACCESS_KEY=your-key
+S3_SECRET_KEY=your-secret
+S3_BUCKET=your-bucket
+S3_REGION=rbx
+```
+
+## 顔認識スマートクロッピング
+
+標準の中心クロップは、ポートレート写真で顔を切り取ってしまう可能性があります。PlacePixはOpenCV Haarカスケードを活用した**顔認識スマートクロッピング**でこれを解決します。
+
+### 仕組み
+
+リクエストに`?fit=smart`が含まれる場合、PlacePixはOpenCVを使用して画像から人間の顔をスキャンします。顔が検出されると、クロップウィンドウが移動され、顔の重心が黄金比の交点にできるだけ近くなるようにします。顔が見つからない場合は、標準の中心クロップにフォールバックします。
+
+### API例
+
+```
+# 顔認識クロップ（顔を検出し中心に配置）
+/400/300/people?fit=smart
+
+# 標準中心クロップ
+/400/300/people?fit=crop
+
+# カバー充填（伸びる可能性あり）
+/400/300/people?fit=cover
+
+# コンテイン（レターボックス）
+/400/300/people?fit=contain
+```
+
+### スマートクロップを使用する場合
+
+- ポートレート写真とヘッドショット
+- 顔が重要なチームページ
+- ソーシャルメディアサムネイル
+- 幾何学的中心クロップが構図を損なうシナリオ
+
+## グラデーションプレースホルダーAPI
+
+アセットをアップロードせずに、即座に線形および放射状のグラデーション画像を生成します。ヒーロー背景、読み込み状態、デザインモックアップに最適です。
+
+### エンドポイント構文
+
+```
+/gradient/{width}/{height}/{from_hex}/{to_hex}
+```
+
+### 例
+
+```
+# シンプルな線形グラデーション（上から下）
+/gradient/800/400/3b82f6/10b981
+
+# 45度角グラデーション
+/gradient/800/400/e11d48/f59e0b?angle=45
+
+# 中心からの放射状グラデーション
+/gradient/800/400/1e293b/64748b?gradient_type=radial
+
+# 出力形式付き
+/gradient/800/400/0ea5e9/ffffff?format=webp&quality=80
+```
+
+### パラメータリファレンス
+
+- `{from_hex}` / `{to_hex}` — #プレフィックスなしの16進カラー
+- `?angle=45` — 度単位の線形角度（0-360）
+- `?gradient_type=radial` — 放射状グラデーションに切り替え
+- `?format=webp` — WebP出力（ファイルサイズが小さい）
+
+## SVGプレースホルダージェネレーター
+
+SVGプレースホルダーはサーバーサイド画像処理を必要としません。カスタマイズ可能な背景色、前景色、テキストラベルを持つインラインSVGとして生成されます。
+
+### エンドポイント
+
+```
+/svg/{width}/{height}?bg={hex}&fg={hex}&text={label}
+```
+
+### 例
+
+```
+# デフォルトのワイヤーフレームプレースホルダー
+/svg/400/300
+
+# カスタムブランドカラー
+/svg/400/300?bg=1c1917&fg=0ea5e9
+
+# カスタムテキスト付き
+/svg/400/300?bg=0ea5e9&fg=ffffff&text=Hero+Section
+```
+
+### なぜSVG？
+
+- ファイルサイズ500バイト未満
+- 品質損失なく無限にスケーラブル
+- サーバー処理オーバーヘッドゼロ
+- ワイヤーフレームや低忠実度プロトタイプに最適
+
+## ソーシャルメディアプリセット
+
+PlacePixには、人気のソーシャルプラットフォームと画面サイズの定義済みサイズが含まれています。これらを使用して、Instagram、YouTube、TikTok、LinkedIn、X（Twitter）、標準ディスプレイに最適なサイズのプレースホルダー画像を生成できます。
+
+### Instagram
+
+```
+/preset/instagram-square/nature     # 1080x1080
+/preset/instagram-portrait/nature  # 1080x1350
+/preset/instagram-story/nature     # 1080x1920
+```
+
+### YouTube
+
+```
+/preset/youtube-thumbnail/nature   # 1280x720
+/preset/youtube-banner/nature      # 2560x423
+```
+
+### TikTok
+
+```
+/preset/tiktok-video/nature        # 1080x1920 (9:16)
+```
+
+### LinkedIn
+
+```
+/preset/linkedin-post/nature       # 1200x627
+```
+
+### X（Twitter）
+
+```
+/preset/twitter-header/nature      # 1500x500
+```
+
+### 画面サイズ
+
+```
+/preset/mobile/nature              # 375x812
+/preset/tablet/nature              # 768x1024
+/preset/desktop/nature             # 1920x1080
+/preset/4k/nature                  # 3840x2160
+```
+
+### ロングテールユースケース：InstagramストーリーAPI
+
+ソーシャルメディア管理ツールを構築していて、**Instagramストーリーサイズのプレースホルダー画像**が必要な場合は、`/preset/instagram-story/{category}`を使用してください。ポートレート写真には`?fit=smart`を、最適化された配信には`?format=webp&quality=70`を組み合わせてください。
+
+## カラーサーチAPI
+
+PlacePixのすべての画像は、上位3つの支配的カラーについてスキャンされます。16進カラーでライブラリ全体を検索し、ブランドパレットに一致する画像を見つけることができます。
+
+### エンドポイント
+
+```
+# 特定の16進カラーに一致する画像を取得
+/color/0ea5e9/400/300
+
+# 支配的カラーで任意のエンドポイントをフィルタリング
+/400/300/nature?color=d97706
+
+# カラーに一致するすべての画像を一覧表示
+/api/color/3b82f6
+```
+
+### カラースキャンの仕組み
+
+起動時、PlacePixはLABカラースペースでのk-meansクラスタリングを使用して、各画像から最も頻繁に出現するカラーを抽出します。これにより、生のRGB平均ではなく、知覚的に正確な一致が生成されます。パレットページ（`/palette`）はこれらのカラーを視覚化し、色相カテゴリでブラウズできます。
+
+## フィルターとエフェクト
+
+クエリパラメータを介して、任意の画像にリアルタイムフィルターとエフェクトを適用します。すべての処理はサーバーサイドで行われ、後続のリクエストのためにキャッシュされます。
+
+### カラー調整
+
+```
+?grayscale=1               # 白黒
+?sepia=1                   # 暖かいセピアトーン
+?tint=0ea5e9               # 16進カラーオーバーレイ
+?brightness=1.3            # 0.0～2.0
+?contrast=1.2              # 0.0～2.0
+?saturation=2.0            # 0.0～2.0
+?invert=true               # カラー反転
+?posterize=4               # カラーレベル（1-8）
+?duotone=ff0000,0000ff     # 2色マップ
+```
+
+### 画像エフェクト
+
+```
+?blur=2                    # ガウスブラー（1-10）
+?sharpen=1.5               # シャープ量
+?emboss=true               # 3Dエンボス
+?edges=sobel               # エッジ検出
+?edges=canny               # Cannyエッジ
+?halftone=4                # ドットパターン
+?oil_painting=true         # 油絵スタイル
+?pencil_sketch=true        # 鉛筆スケッチ
+?cartoon=true              # カートゥーンエフェクト
+?vignette=0.5              # エッジ暗化（0-1）
+```
+
+### オーバーレイパラメータ
+
+```
+?text=Hello+World          # テキストオーバーレイ
+?border=4,ffffff           # ボーダー幅とカラー
+?watermark=1               # 設定済みウォーターマークを適用
+?padding=20                # 内部パディング
+```
+
+## レターアバタージェネレーター
+
+任意の名前やメールアドレスから、決定論的な文字ベースのアバターを生成します。ユーザープロフィールプレースホルダー、コメントシステム、チームディレクトリに最適です。各名前は常に同じカラーを生成するため、アバターはセッション間で一貫しています。
+
+### エンドポイント
+
+```
+/avatar/{size}/{name}
+/avatar/{size}/{name}.{ext}
+```
+
+### パラメータ
+
+- `size` — ピクセルサイズ（例：`64`、`128`、`256`）
+- `name` — 任意の文字列；アバターのために最初の文字が抽出されます
+- `circle` — 円形にクロップ
+- `border={width},{color}` — ボーダーを追加
+- `bg={hex}` — 背景色を上書き
+- `fg={hex}` — テキスト/前景色を上書き
+- `single=true` — 最初の文字のみを使用
+- `uppercase=false` — 小文字を保持
+- `palette={name}` — `flatui`、`material`、`pastel`、`neon`から選択
+
+### 例
+
+```
+# シンプルな128pxアバター
+/avatar/128/John+Doe
+
+# カスタムボーダー付き円形アバター
+/avatar/128/John+Doe?circle=true&border=2,ffffff
+
+# 単一イニシャル、パステルパレット
+/avatar/64/Alice?single=true&palette=pastel
+
+# SVG出力（スケーラブル、500バイト未満）
+/avatar/128/John+Doe.svg
+```
+
+### レターアバターを使用する理由
+
+- 外部依存関係ゼロ — Gravatarやサードパーティアバターサービスは不要
+- 決定論的 — 同じ名前は常に同じカラーを生成
+- SVGサポート — 無限にスケーラブル、HiDPIディスプレイに最適
+- あらゆるブランド審美のために4つの組み込みカラーパレット
+
+## REST APIクイックリファレンス
+
+すべてのエンドポイントはCORSをサポートし、長期キャッシュヘッダー付きで画像を返します。Base64 JSON出力は、小さなサムネイルで利用可能です。
+
+### 画像エンドポイント
+
+- `GET /{width}/{height}/{category}` — カテゴリからのランダム画像
+- `GET /{width}/{height}` — すべてのカテゴリからのランダム画像
+- `GET /id/{id}/{width}/{height}` — IDによる特定の画像
+- `GET /ratio/{ratio}/{width}/{category}` — アスペクト比画像
+- `GET /preset/{preset}/{category}` — ソーシャルメディアプリセット
+- `GET /color/{hex}/{width}/{height}` — カラーマッチング画像
+- `GET /gradient/{w}/{h}/{from}/{to}` — グラデーション画像
+- `GET /svg/{width}/{height}` — SVGプレースホルダー
+- `GET /avatar/{size}/{name}` — レターアバター（PNG/SVG）
+
+### メタデータエンドポイント
+
+- `GET /api/images` — カテゴリと合計を一覧表示
+- `GET /api/info/id/{id}` — 画像メタデータ（寸法、カラー、形式）
+- `GET /api/color/{hex}` — カラーに一致する画像
+
+### ヘルスエンドポイント
+
+- `GET /health` — ライブネスプローブ（Docker/K8s）
+- `GET /ready` — レディネスプローブ（画像が読み込まれるまで503）
+
+## 専門知識と資格
+
+- 2008年以降、オープンソースエコシステムへの積極的な貢献者
+- すべてのコードはMITライセンスの下でオープンソースであり、<a href="https://github.com/riadvice/placepix" target="_blank" class="text-accent hover:underline">GitHub</a>で監査可能
+
+## よくある質問
+
+### DockerでPlacePixをデプロイするには？
+
+`docker run -d -p 3000:3000 -v ./images:/app/images riadvice/placepix:latest`を実行してください。画像フォルダをマウントすると、スマートスキャンが有効になった状態でサービスが即座に開始されます。
+
+### 顔認識スマートクロッピングとは？
+
+PlacePixはOpenCV Haarカスケードを使用して画像内の顔を検出します。任意のURLに`?fit=smart`を追加すると、幾何学的中心ではなく、検出された顔を中心にするようにクロップ領域が移動されます。顔が見つからない場合は、標準の中心クロップにフォールバックします。
+
+### 写真をアップロードせずにグラデーションプレースホルダー画像を生成できますか？
+
+はい。`/gradient/{width}/{height}/{from}/{to}`エンドポイントは、URLパラメータから完全にグラデーション画像を生成します。アップロードされた画像は必要ありません。`/svg/{width}/{height}`でSVGプレースホルダーも作成できます。
+
+### API経由でInstagramストーリーサイズのプレースホルダー画像を生成するには？
+
+プリセットエンドポイントを使用してください：`/preset/instagram-story/{category}`。これは1080x1920の画像を返します。最適化された配信には`?format=webp&quality=70`を、ポートレート安全クロップには`?fit=smart`を組み合わせてください。
+
+### PlacePixはS3互換オブジェクトストレージをサポートしていますか？
+
+はい。PlacePixはOVHcloud Object Storage、AWS S3、MinIO、およびS3互換プロバイダーと連携します。エンドポイント、バケット、アクセスキー、シークレットキーは環境変数で設定してください。
+
+### サポートされている出力形式は何ですか？
+
+WebP、AVIF、JPEG、PNG、SVG、およびBase64 JSONです。ファイル拡張子として`.webp`、`.avif`、または`.png`を使用するか、クエリパラメータとして`?format=webp`を追加してください。AVIFは最も小さいファイルを生成します。PNGはロスレスです。
+
+### PlacePixは商用利用に無料ですか？
+
+はい。PlacePixはMITライセンスの下でリリースされており、個人および商用利用の両方で無料です。セルフホストであるため、使用制限、APIキー、リクエストごとの課金はありません。

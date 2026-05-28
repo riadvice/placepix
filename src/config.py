@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     # Google Analytics (optional)
     ga_tracking_id: str = Field(default="")
 
+    # SEO / meta tags (set seo_enabled=false and site_url empty for private sites)
+    seo_enabled: bool = Field(default=True)
+    site_url: str = Field(default="")
+
     # Legal links (GDPR compliance)
     privacy_policy_url: str = Field(default="")
     gdpr_statement_url: str = Field(default="")

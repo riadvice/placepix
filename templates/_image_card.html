@@ -2,14 +2,14 @@
 {% set thumb_url = "/id/" ~ entry.id ~ "/200/150" %}
 {% set view_url = "/id/" ~ entry.id ~ "/800/600" %}
 {% set info_url = "/api/info/id/" ~ entry.id %}
-<div class="explorer-card">
+<article class="explorer-card">
     <a href="{{ view_url }}" target="_blank"><img src="{{ thumb_url }}" alt="{{ entry.filename }}" loading="lazy"></a>
     <div class="explorer-info">
-        <div class="explorer-id">ID: <a href="{{ view_url }}" target="_blank">{{ entry.id }}</a></div>
-        <div class="explorer-meta">{{ entry.category }} / {{ entry.filename }}</div>
+        <p class="explorer-id">ID: <a href="{{ view_url }}" target="_blank">{{ entry.id }}</a></p>
+        <p class="explorer-meta">{{ entry.category }} / {{ entry.filename }}</p>
         <div class="explorer-links">
             <a href="{{ view_url }}" target="_blank">view</a>
             <a href="{{ info_url }}" target="_blank">info</a>
         </div>
     </div>
-</div>
+</article>

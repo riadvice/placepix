@@ -3,28 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1c1917">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <title>PlacePix Image Explorer — Browse All Images</title>
+{% if seo_enabled %}
     <meta name="description" content="Browse and explore all placeholder images in the PlacePix gallery. View image IDs, categories, and generate custom URLs with different sizes and formats.">
     <meta name="keywords" content="image gallery, placeholder images, image explorer, image database, developer tools">
     <meta name="author" content="RIADVICE">
     <meta name="robots" content="index, follow">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://placepix.riadvice.com/images">
+    <meta property="og:url" content="{{ page_url }}">
     <meta property="og:title" content="PlacePix Image Explorer — Browse All Images">
     <meta property="og:description" content="Browse and explore all placeholder images in the PlacePix gallery. View image IDs, categories, and generate custom URLs.">
-    <meta property="og:image" content="https://placepix.riadvice.com/static/logo.svg">
-    
+    {% if site_url %}<meta property="og:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://placepix.riadvice.com/images">
+    <meta name="twitter:url" content="{{ page_url }}">
     <meta name="twitter:title" content="PlacePix Image Explorer — Browse All Images">
     <meta name="twitter:description" content="Browse and explore all placeholder images in the PlacePix gallery. View image IDs, categories, and generate custom URLs.">
-    <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
-    
+    {% if site_url %}<meta name="twitter:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
+    <link rel="canonical" href="{{ page_url }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "PlacePix Image Explorer — Browse All Images",
+      "description": "Browse and explore all placeholder images in the PlacePix gallery. View image IDs, categories, and generate custom URLs with different sizes and formats.",
+      "url": "{{ page_url }}",
+      "image": "{{ site_url }}/static/logo.svg",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "PlacePix",
+        "url": "{{ site_url }}/"
+      }
+    }
+    </script>
+{% endif %}
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    <link rel="canonical" href="https://placepix.riadvice.com/images">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
@@ -51,7 +72,7 @@
 </head>
 <body data-theme="light">
     {% include "nav.html" %}
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <main class="max-w-7xl mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-stone-800 text-center mb-2" data-i18n="explorer.title">Image Explorer — Browse All Placeholder Images</h1>
         <p class="text-stone-500 text-center mb-8">{{ total }} images &mdash; Page {{ page }} of {{ total_pages }}</p>
     <div class="explorer-grid">
@@ -61,7 +82,7 @@
     </div>
     {% set base_url = "/images" %}
     {% include "_pagination.html" %}
-    </div>
+    </main>
     <script src="/static/js/i18n.js"></script>
     <script src="/static/js/common.js"></script>
 

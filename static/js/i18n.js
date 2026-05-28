@@ -3,7 +3,7 @@
  * - localStorage preference takes priority on return visits
  * - First visit: auto-detect from navigator.language
  * - Falls back to 'en' for unknown/partial locales
- * - Toggles <html dir="rtl"> for Arabic
+ * - Toggles <html dir="rtl"> for Arabic and Persian (Farsi)
  * - Marks active language in the selector
  */
 (function () {
@@ -11,13 +11,13 @@
 
   const STORAGE_KEY = 'placepix_lang';
   const DEFAULT_LANG = 'en';
-  const RTL_LANGS = ['ar'];
+  const RTL_LANGS = ['ar', 'fa'];
 
   const SUPPORTED = [
-    'ar', 'bn', 'zh-CN', 'zh-TW', 'cs', 'nl', 'en', 'fil',
+    'ar', 'bn', 'zh-CN', 'zh-TW', 'cs', 'nl', 'en', 'fa', 'fil',
     'fr', 'de', 'el', 'hi', 'id', 'it', 'ja', 'ko',
     'no', 'pl', 'pt-BR', 'pt-PT', 'ru', 'es', 'sv',
-    'th', 'tr', 'uk', 'vi'
+    'th', 'tr', 'uk', 'uz', 'vi'
   ];
 
   let _translations = {};
@@ -174,6 +174,7 @@
   const LANG_META = {
     'ar':    { flag: 'sa', native: 'العربية' },
     'bn':    { flag: 'bd', native: 'বাংলা' },
+    'fa':    { flag: 'ir', native: 'فارسی' },
     'zh-CN': { flag: 'cn', native: '中文 (简体)' },
     'zh-TW': { flag: 'tw', native: '中文 (繁體)' },
     'cs':    { flag: 'cz', native: 'Čeština' },
@@ -198,6 +199,7 @@
     'th':    { flag: 'th', native: 'ไทย' },
     'tr':    { flag: 'tr', native: 'Türkçe' },
     'uk':    { flag: 'ua', native: 'Українська' },
+    'uz':    { flag: 'uz', native: 'Oʻzbek' },
     'vi':    { flag: 'vn', native: 'Tiếng Việt' },
   };
 

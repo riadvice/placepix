@@ -3,28 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1c1917">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <title>PlacePix — Self-Hosted Placeholder Image Service</title>
+{% if seo_enabled %}
   <meta name="description" content="PlacePix is a self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, text overlays, and more. Perfect for developers and designers.">
   <meta name="keywords" content="placeholder images, image service, self-hosted, image resizing, image filters, placeholder generator, developer tools, design mockups">
   <meta name="author" content="RIADVICE">
   <meta name="robots" content="index, follow">
-  
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://placepix.riadvice.com/">
+  <meta property="og:url" content="{{ page_url }}">
   <meta property="og:title" content="PlacePix — Self-Hosted Placeholder Image Service">
   <meta property="og:description" content="Self-hosted placeholder image service with resizing, filters, and text overlays. Drop images into folders, get instant URLs.">
-  <meta property="og:image" content="https://placepix.riadvice.com/static/logo.svg">
-  
+  {% if site_url %}<meta property="og:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://placepix.riadvice.com/">
+  <meta name="twitter:url" content="{{ page_url }}">
   <meta name="twitter:title" content="PlacePix — Self-Hosted Placeholder Image Service">
   <meta name="twitter:description" content="Self-hosted placeholder image service with resizing, filters, and text overlays.">
-  <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
-  
+  {% if site_url %}<meta name="twitter:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
+  <link rel="canonical" href="{{ page_url }}">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "PlacePix",
+        "description": "Self-hosted placeholder image service with resizing, filters, and text overlays.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "url": "{{ page_url }}",
+        "image": "{{ site_url }}/static/logo.svg",
+        "author": {
+          "@type": "Organization",
+          "name": "RIADVICE",
+          "url": "https://riadvice.com"
+        },
+        "license": "https://github.com/riadvice/placepix/blob/main/LICENSE",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": "Image resizing, Smart crop, Face detection, Aspect ratios, Presets, SVG placeholders, Gradient placeholders, Color search, Filters and effects, Text overlays, Watermarks"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is PlacePix?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PlacePix is a self-hosted placeholder image service. Drop images into folders and get instant URLs with resizing, filters, and text overlays."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is PlacePix free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, PlacePix is open source under the MIT License and free to use."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I deploy PlacePix with Docker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, PlacePix can be deployed in seconds with a single Docker command: docker run -d -p 3000:3000 -v ./images:/app/images riadvice/placepix:latest"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does PlacePix support S3 storage?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, PlacePix supports S3-compatible storage including OVHcloud, AWS, and MinIO."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+{% endif %}
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-  <link rel="canonical" href="https://placepix.riadvice.com/">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/static/css/styles.css">
@@ -105,6 +177,7 @@
         <a href="/images" class="hover:text-accent transition" data-i18n="nav.explorer">Explorer</a>
         <a href="/palette" class="hover:text-accent transition" data-i18n="nav.palette">Palette</a>
         <a href="/url-builder" class="hover:text-accent transition" data-i18n="nav.url_builder">URL Builder</a>
+        <a href="/guide" class="hover:text-accent transition">Guide</a>
         <div class="dropdown" id="features-dropdown">
           <span class="dropdown-toggle hover:text-accent font-medium transition" data-i18n="nav.features">Features ▾</span>
           <div class="dropdown-menu">
@@ -180,10 +253,12 @@
     </div>
   </nav>
 
+  <main>
   <!-- Hero -->
   <section class="relative h-96 overflow-hidden bg-gradient-to-br from-stone-200 via-stone-100 to-sky-50">
     <img src="/1200/400/{{ (categories|random).name if categories else 'all' }}?seed=hero&format=webp&quality=70"
-         alt="Hero" class="absolute inset-0 w-full h-full object-cover opacity-75">
+         alt="Hero" width="1200" height="400" fetchpriority="high" loading="eager" decoding="async"
+         class="absolute inset-0 w-full h-full object-cover opacity-75">
     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-stone-900/20 to-transparent"></div>
     <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-8">
       <div class="max-w-7xl mx-auto">
@@ -1433,6 +1508,8 @@
     // Rate limit cleanup is handled server-side
   </script>
   {% endif %}
+
+  </main>
 
   <!-- Dark Mode Toggle Button -->
   <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode (Ctrl+D)">

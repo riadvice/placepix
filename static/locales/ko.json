@@ -3,6 +3,7 @@
   "nav.explorer": "탐색기",
   "nav.palette": "팔레트",
   "nav.url_builder": "URL 빌더",
+  "nav.guide": "가이드",
   "nav.features": "기능 ▾",
   "nav.features.smart_crop": "스마트 자르기",
   "nav.features.aspect_ratios": "화면비",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "복사",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "다크",
-
   "notification.copied": "URL이 클립보드에 복사되었습니다!",
   "notification.qr_error": "QR 코드 생성 실패",
   "upload.uploading": "{count}개 파일 업로드 중...",
   "upload.uploaded": "{uploaded}/{total}개 파일 업로드됨. 다시 로드 중...",
   "upload.copy_error": "복사 실패:",
   "console.load_categories_error": "카테고리 로드 실패:",
-
   "docker.title": "원라인 Docker 배포",
   "docker.desc": "단일 Docker 명령으로 몇 초 만에 PlacePix를 실행하세요. 구성이 필요하지 않습니다.",
   "docker.features": "기능:",

@@ -3,6 +3,7 @@
   "nav.explorer": "Оглядач",
   "nav.palette": "Палітра",
   "nav.url_builder": "Конструктор URL",
+  "nav.guide": "Посібник",
   "nav.features": "Можливості ▾",
   "nav.features.smart_crop": "Розумне обрізання",
   "nav.features.aspect_ratios": "Співвідношення сторін",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Копіювати",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Темний",
-
   "notification.copied": "URL скопійовано в буфер обміну!",
   "notification.qr_error": "Не вдалося створити QR-код",
   "upload.uploading": "Завантаження {count} файлу(ів)...",
   "upload.uploaded": "Завантажено {uploaded}/{total} файлів. Перезавантаження...",
   "upload.copy_error": "Не вдалося скопіювати:",
   "console.load_categories_error": "Не вдалося завантажити категорії:",
-
   "docker.title": "Docker Deploy в один рядок",
   "docker.desc": "Запустіть PlacePix за секунди за допомогою однієї команди Docker. Конфігурація не потрібна.",
   "docker.features": "Функції:",

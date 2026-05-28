@@ -2,7 +2,7 @@
 name = "placepix"
 version = "1.0.0"
 description = "A self-hosted placeholder image server inspired by lorem-server and picsum.photos"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.136.3",
     "uvicorn[standard]>=0.48.0",
@@ -20,6 +20,8 @@ dependencies = [
     "apscheduler>=3.11.2",
     "requests>=2.34.2",
     "blurhash>=1.1.5",
+    "markdown>=3.10.2",
+    "pygments>=2.20.0",
 ]
 
 [project.optional-dependencies]

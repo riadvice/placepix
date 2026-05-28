@@ -3,6 +3,7 @@
   "nav.explorer": "Prohlížeč",
   "nav.palette": "Paleta",
   "nav.url_builder": "URL Sestavovač",
+  "nav.guide": "Průvodce",
   "nav.features": "Funkce ▾",
   "nav.features.smart_crop": "Chytré ořezání",
   "nav.features.aspect_ratios": "Poměry stran",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Kopírovat",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Tmavý",
-
   "notification.copied": "URL zkopírována do schránky!",
   "notification.qr_error": "Nepodařilo se vygenerovat QR kód",
   "upload.uploading": "Nahrávání {count} souboru(ů)...",
   "upload.uploaded": "Nahráno {uploaded}/{total} souborů. Znovu načítání...",
   "upload.copy_error": "Kopírování selhalo:",
   "console.load_categories_error": "Načítání kategorií selhalo:",
-
   "docker.title": "Docker nasazení na jednom řádku",
   "docker.desc": "Spusťte PlacePix za pár sekund jedním Docker příkazem. Není vyžadována konfigurace.",
   "docker.features": "Funkce:",

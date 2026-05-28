@@ -3,6 +3,7 @@
   "nav.explorer": "Εξερευνητής",
   "nav.palette": "Παλέτα",
   "nav.url_builder": "Δημιουργός URL",
+  "nav.guide": "Οδηγός",
   "nav.features": "Χαρακτηριστικά ▾",
   "nav.features.smart_crop": "Έξυπνο κόψιμο",
   "nav.features.aspect_ratios": "Αναλογίες διαστάσεων",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Αντιγραφή",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Σκούρο",
-
   "notification.copied": "Το URL αντιγράφηκε στο πρόχειρο!",
   "notification.qr_error": "Απέτυχε η δημιουργία κωδικού QR",
   "upload.uploading": "Μεταφόρτωση {count} αρχείου(ων)...",
   "upload.uploaded": "Μεταφορτώθηκαν {uploaded}/{total} αρχεία. Επαναφόρτωση...",
   "upload.copy_error": "Αποτυχία αντιγραφής:",
   "console.load_categories_error": "Αποτυχία φόρτωσης κατηγοριών:",
-
   "docker.title": "Docker Deploy σε μία γραμμή",
   "docker.desc": "Εκτελέστε το PlacePix σε δευτερόλεπτα με μία εντολή Docker. Δεν απαιτείται ρύθμιση.",
   "docker.features": "Χαρακτηριστικά:",

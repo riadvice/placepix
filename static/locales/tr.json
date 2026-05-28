@@ -3,6 +3,7 @@
   "nav.explorer": "Gezgin",
   "nav.palette": "Palet",
   "nav.url_builder": "URL Oluşturucu",
+  "nav.guide": "Rehber",
   "nav.features": "Özellikler ▾",
   "nav.features.smart_crop": "Akıllı Kırpma",
   "nav.features.aspect_ratios": "En Boy Oranları",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Kopyala",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Koyu",
-
   "notification.copied": "URL panoya kopyalandı!",
   "notification.qr_error": "QR kod oluşturulamadı",
   "upload.uploading": "{count} dosya yükleniyor...",
   "upload.uploaded": "{uploaded}/{total} dosya yüklendi. Yeniden yükleniyor...",
   "upload.copy_error": "Kopyalama başarısız:",
   "console.load_categories_error": "Kategoriler yüklenemedi:",
-
   "docker.title": "Tek Satırlı Docker Dağıtımı",
   "docker.desc": "Tek bir Docker komutuyla saniyeler içinde PlacePix'i çalıştırın. Yapılandırma gerekmez.",
   "docker.features": "Özellikler:",

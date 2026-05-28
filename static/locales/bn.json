@@ -3,6 +3,7 @@
   "nav.explorer": "এক্সপ্লোরার",
   "nav.palette": "প্যালেট",
   "nav.url_builder": "URL বিল্ডার",
+  "nav.guide": "গাইড",
   "nav.features": "বৈশিষ্ট্য ▾",
   "nav.features.smart_crop": "স্মার্ট ক্রপ",
   "nav.features.aspect_ratios": "অ্যাসপেক্ট রেশিও",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "কপি",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "ডার্ক",
-
   "notification.copied": "URL ক্লিপবোর্ডে কপি হয়েছে!",
   "notification.qr_error": "QR কোড তৈরি করতে ব্যর্থ",
   "upload.uploading": "{count} ফাইল আপলোড হচ্ছে...",
   "upload.uploaded": "{uploaded}/{total} ফাইল আপলোড হয়েছে। পুনরায় লোড হচ্ছে...",
   "upload.copy_error": "কপি করতে ব্যর্থ:",
   "console.load_categories_error": "ক্যাটাগরি লোড করতে ব্যর্থ:",
-
   "docker.title": "এক লাইনের Docker ডিপ্লয়",
   "docker.desc": "একটি একক Docker কমান্ড দিয়ে সেকেন্ডে PlacePix চালান। কোনো কনফিগারেশন প্রয়োজন নেই।",
   "docker.features": "বৈশিষ্ট্য:",

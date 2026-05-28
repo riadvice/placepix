@@ -3,6 +3,7 @@
   "nav.explorer": "Изследовател",
   "nav.palette": "Палитра",
   "nav.url_builder": "URL Конструктор",
+  "nav.guide": "Ръководство",
   "nav.features": "Функции ▾",
   "nav.features.smart_crop": "Интелигентно Изрязване",
   "nav.features.aspect_ratios": "Съотношение на страните",
@@ -14,53 +15,43 @@
   "nav.api": "API",
   "nav.docs": "Документация",
   "nav.language": "Език",
-
   "hero.subtitle": "Самостоятелно хоствана Услуга за Заместващи Изображения",
   "hero.description": "Самостоятелно хоствана услуга за заместващи изображения. Пуснете изображения в папки, получете незабавни URL адреси с оразмеряване, филтри и текстови слоеве.",
   "hero.stats": "{total} изображения в {count} категории",
-
   "section.smart_crop": "Интелигентно Изрязване",
   "section.smart_crop.desc": "Интелигентно изрязване с разпознаване на лица. PlacePix разпознава лица и автоматично ги центрира в зоната на изрязване.",
   "smart_crop.face_detection": "Разпознаване на лица",
   "smart_crop.center_crop": "Стандартно Централно Изрязване",
   "smart_crop.cover_fill": "Покривно Запълване",
-
   "section.aspect_ratios": "Съотношение на страните",
   "section.aspect_ratios.desc": "Изберете от често срещани съотношения на страните и нека PlacePix изчисли точните размери.",
   "ratio.widescreen": "16:9 Широкоекранно",
   "ratio.square": "1:1 Квадрат",
   "ratio.portrait": "9:16 Портрет",
-
   "section.overlays": "Слоеве",
   "section.overlays.desc": "Добавяйте персонализирани текстови етикети и водни знаци директно върху вашите изображения.",
   "overlay.text_label": "Текстов етикет",
   "overlay.border": "Граница",
   "overlay.watermark": "Воден знак",
-
   "section.presets": "Предварителни настройки",
   "section.presets.desc": "Предварително зададени размери с едно кликване за популярни социални и екранни размери.",
   "preset.instagram_square": "Instagram Квадрат",
   "preset.youtube_thumbnail": "YouTube Миниатюра",
   "preset.mobile": "Мобилен",
-
   "section.upload": "Качване на Изображения",
   "upload.drag_drop": "Плъзнете и пуснете изображения тук",
   "upload.or_browse": "или кликнете за преглед на файлове",
   "upload.category_label": "Категория:",
-
   "section.categories": "Категории",
   "categories.desc": "Кликнете върху всеки размер, за да получите случайно изображение от тази категория",
-
   "section.random": "Генератор на Случайни Изображения",
   "random.desc": "Вземете всеки размер от всяка категория — или нека PlacePix избере едно за вас.",
-
   "section.svg": "SVG Генератор за Заместващи Изображения",
   "section.svg.desc": "Wireframe заместващи изображения с нулева обработка. Перфектни за оформления и макети.",
   "svg.params": "Параметри:",
   "svg.param.bg": "hex цвят на фона",
   "svg.param.fg": "hex цвят на текста",
   "svg.param.text": "персонализиран етикет (по подразбиране: ширина×височина)",
-
   "section.gradient": "Градиентен Генератор за Заместващи Изображения",
   "section.gradient.desc": "Генерирайте линейни или радиални градиентни изображения мигновено. Перфектни за фонове и слоеве.",
   "gradient.linear": "Линеен Градиент",
@@ -69,7 +60,6 @@
   "gradient.params": "Параметри:",
   "gradient.param.angle": "линеен ъгъл (0-360)",
   "gradient.param.radial": "радиален от центъра",
-
   "section.filters": "Филтри & Ефекти",
   "section.filters.desc": "Прилагайте филтри и корекции на цветовете към всяко изображение мигновено.",
   "filter.sepia": "Сепия Тон",
@@ -91,14 +81,12 @@
   "filter.cartoon": "Карикатура",
   "filter.vignette": "Виньетка",
   "filter.params": "Параметри:",
-
   "section.color_search": "Търсене по Доминиращ Цвят",
   "color_search.desc": "Намерете изображения, които съвпадат с вашата цветова палитра. Всяко изображение е сканирано за топ 3 доминиращи цветове.",
   "color.sky": "Небе",
   "color.green": "Зелено",
   "color.red": "Червено",
   "color_search.how": "Как работи:",
-
   "section.api": "API Референция",
   "api.cors_note": "Всички крайни точки поддържат CORS и връщат изображения с дългосрочни заглавки за кеширане.",
   "api.random_category": "Случайно изображение от категория",
@@ -115,7 +103,6 @@
   "api.param.avif": "AVIF изход (по-малък)",
   "api.param.webp": "WebP изход",
   "api.param.png": "PNG изход (без загуби)",
-
   "section.figma": "Figma Интеграция",
   "figma.desc": "Вграждане на живи PlacePix изображения директно във вашите Figma дизайни чрез iframe вграждания.",
   "figma.paste_note": "Поставете този iframe код във Figma като вграден URL:",
@@ -129,7 +116,6 @@
   "figma.tip3_suffix": "за wireframe режим",
   "figma.tip4": "Използвайте",
   "figma.tip4_suffix": "за заместващи фонове",
-
   "footer.about": "PlacePix",
   "footer.about_desc": "Самостоятелно хоствана услуга за заместващи изображения с оразмеряване, филтри и текстови слоеве.",
   "footer.links": "Връзки",
@@ -141,10 +127,8 @@
   "footer.built_by": "Създаден от",
   "footer.version": "Версия:",
   "footer.load_time": "Време за зареждане:",
-
   "explorer.title": "Изследовател на Изображения — Преглед на Всички Заместващи Изображения",
   "explorer.page_of": "Страница {page} от {total}",
-
   "palette.title": "Цветова Палитра — Преглед на Изображения по Доминиращ Цвят",
   "palette.subtitle": "доминиращи цветове — кликнете върху всеки за преглед на съвпадащи изображения",
   "palette.search_placeholder": "Търсене на hex цвят (напр. 3b82f6)",
@@ -152,7 +136,6 @@
   "palette.scan_banner": "Сканиране на цветове в процес — нови цветове ще се появят скоро.",
   "pagination.previous": "Предишна",
   "pagination.next": "Следваща",
-
   "url_builder.title": "URL Конструктор — Интерактивен Конструктор за Заместващи Изображения",
   "url_builder.subtitle": "Изградете своя перфектен URL за заместващо изображение с нашия интерактивен конструктор",
   "url_builder.panel_left": "URL Конструктор",
@@ -239,30 +222,25 @@
   "url_builder.hint.optional": "(по избор)",
   "url_builder.hint.svg_default": "По подразбиране: {width}x{height}",
   "url_builder.hint.hex_no_hash": "Hex цвят (без #)",
-
   "url_builder.fit.crop": "Изрязване (център)",
   "url_builder.fit.smart": "Интелигентно Изрязване (разпознаване на лица)",
   "url_builder.fit.scale": "Мащабиране (разтягане)",
   "url_builder.fit.contain": "Съдържание (побиране)",
   "url_builder.fit.cover": "Покриване (запълване)",
-
   "qr.title": "Сканиране на QR Код",
   "qr.subtitle": "Сканирайте за отваряне на този URL на вашето мобилно устройство",
   "qr.close": "Затваряне",
-
   "shortcuts.label": "Клавишни комбинации:",
   "shortcuts.preview": "Преглед",
   "shortcuts.copy": "Копиране",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Тъмен",
-
   "notification.copied": "URL е копиран в клипборда!",
   "notification.qr_error": "Неуспешно генериране на QR код",
   "upload.uploading": "Качване на {count} файл(ове)...",
   "upload.uploaded": "Качени {uploaded}/{total} файла. Презареждане...",
   "upload.copy_error": "Неуспешно копиране:",
   "console.load_categories_error": "Неуспешно зареждане на категории:",
-
   "docker.title": "Едноредов Docker Разгръщане",
   "docker.desc": "Пуснете PlacePix за секунди с една Docker команда. Не се нуждае от конфигурация.",
   "docker.features": "Функции:",
@@ -270,7 +248,6 @@
   "docker.feature2": "Извличане на цветове",
   "docker.feature3": "Нулева Конфигурация",
   "docker.feature4": "Вграден URL Конструктор",
-
   "aria.toggle_navigation": "Превключване на навигацията",
   "ai.title": "AI Генериране на Изображения",
   "ai.experimental": "Експериментално — захранвано от OVHcloud AI Endpoints",

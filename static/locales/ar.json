@@ -3,6 +3,7 @@
   "nav.explorer": "المستكشف",
   "nav.palette": "لوحة الألوان",
   "nav.url_builder": "منشئ الرابط",
+  "nav.guide": "دليل",
   "nav.features": "الميزات ▾",
   "nav.features.smart_crop": "القص الذكي",
   "nav.features.aspect_ratios": "نسب العرض",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "نسخ",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "داكن",
-
   "notification.copied": "تم نسخ الرابط إلى الحافظة!",
   "notification.qr_error": "فشل إنشاء رمز QR",
   "upload.uploading": "جاري رفع {count} ملف(ات)...",
   "upload.uploaded": "تم رفع {uploaded}/{total} ملف. إعادة التحميل...",
   "upload.copy_error": "فشل النسخ:",
   "console.load_categories_error": "فشل تحميل الفئات:",
-
   "docker.title": "نشر Docker بسطر واحد",
   "docker.desc": "شغّل PlacePix في ثوانٍ بأمر Docker واحد. لا حاجة للتكوين.",
   "docker.features": "الميزات:",

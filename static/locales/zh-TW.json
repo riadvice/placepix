@@ -3,6 +3,7 @@
   "nav.explorer": "瀏覽器",
   "nav.palette": "調色盤",
   "nav.url_builder": "URL建構器",
+  "nav.guide": "指南",
   "nav.features": "功能 ▾",
   "nav.features.smart_crop": "智慧裁切",
   "nav.features.aspect_ratios": "寬高比",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "複製",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "深色",
-
   "notification.copied": "URL已複製到剪貼簿!",
   "notification.qr_error": "生成 QR 碼失敗",
   "upload.uploading": "正在上傳 {count} 個檔案...",
   "upload.uploaded": "已上傳 {uploaded}/{total} 個檔案。重新載入...",
   "upload.copy_error": "複製失敗:",
   "console.load_categories_error": "載入類別失敗:",
-
   "docker.title": "單行 Docker 部署",
   "docker.desc": "使用單一 Docker 命令在幾秒內運行 PlacePix。無需配置。",
   "docker.features": "功能:",

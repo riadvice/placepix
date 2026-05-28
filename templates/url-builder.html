@@ -3,26 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1c1917">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <title>URL Builder — PlacePix</title>
+{% if seo_enabled %}
     <meta name="description" content="Interactive URL builder for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more. Perfect for developers and designers.">
     <meta name="keywords" content="placeholder image generator, URL builder, image filters, image effects, developer tools, design mockups, image API">
     <meta name="author" content="RIADVICE">
     <meta name="robots" content="index, follow">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://placepix.riadvice.com/url-builder">
+    <meta property="og:url" content="{{ page_url }}">
     <meta property="og:title" content="URL Builder — PlacePix">
     <meta property="og:description" content="Interactive URL constructor for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more.">
-    <meta property="og:image" content="https://placepix.riadvice.com/static/logo.svg">
-    
+    {% if site_url %}<meta property="og:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://placepix.riadvice.com/url-builder">
+    <meta name="twitter:url" content="{{ page_url }}">
     <meta name="twitter:title" content="URL Builder — PlacePix">
     <meta name="twitter:description" content="Interactive URL constructor for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more.">
-    <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
-    
+    {% if site_url %}<meta name="twitter:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
+    <link rel="canonical" href="{{ page_url }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "URL Builder — PlacePix",
+      "description": "Interactive URL builder for PlacePix. Build custom placeholder image URLs with resizing, filters, effects, and more. Perfect for developers and designers.",
+      "url": "{{ page_url }}",
+      "image": "{{ site_url }}/static/logo.svg",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "PlacePix",
+        "url": "{{ site_url }}/"
+      }
+    }
+    </script>
+{% endif %}
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -30,7 +53,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@3.0.1/dist/cookieconsent.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
-    <link rel="canonical" href="https://placepix.riadvice.com/url-builder">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -88,7 +110,7 @@
 <body data-theme="light">
     {% include "nav.html" %}
 
-    <div class="url-builder-layout">
+    <main class="url-builder-layout">
         <!-- Sticky Left Sidebar -->
         <div class="endpoint-sidebar-fixed">
             <div class="endpoint-sidebar">
@@ -677,8 +699,8 @@
             </div>
         </div>
     </div>
-    </div>
-    
+    </main>
+
     <!-- Zoom Modal -->
     <div id="zoom-modal" class="zoom-modal" onclick="closeZoom()">
         <span class="zoom-close" onclick="closeZoom()">&times;</span>

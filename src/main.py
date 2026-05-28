@@ -7,7 +7,10 @@ import html
 import io
 import json
 import logging
+import yaml
 import os
+import re
+import markdown
 import shutil
 import signal
 import time
@@ -409,12 +412,73 @@ jinja_env = Environment(
     autoescape=select_autoescape(['html', 'xml']),
     cache_size=0  # Disable caching to avoid unhashable type errors
 )
-def render_template(name: str, context: dict) -> HTMLResponse:
+def render_template(name: str, context: dict, request: Request | None = None) -> HTMLResponse:
     template = jinja_env.get_template(name)
-    content = template.render(**context)
+    page_url = ""
+    if request is not None:
+        page_url = str(request.url)
+    merged = {
+        "seo_enabled": settings.seo_enabled,
+        "site_url": settings.site_url.rstrip("/") if settings.site_url else "",
+        "page_url": page_url,
+        **context,
+    }
+    content = template.render(**merged)
     return HTMLResponse(content)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 logger.info("Static files mounted at /static")
+
+
+# ── SEO / AI Discoverability Files ─────────────────────────────────
+# Served conditionally based on settings.seo_enabled.
+# When disabled, a minimal robots.txt is returned and llms.txt / sitemaps
+# are hidden (404) to keep private deployments off AI crawlers.
+
+_MINIMAL_ROBOTS = "User-agent: *\nAllow: /\n\nDisallow: /admin\n"
+
+@app.get("/robots.txt", response_class=Response)
+async def robots_txt() -> Response:
+    """Return full robots.txt when SEO is enabled, minimal otherwise."""
+    if settings.seo_enabled:
+        content = Path("robots.txt").read_text(encoding="utf-8")
+    else:
+        content = _MINIMAL_ROBOTS
+    return Response(content=content, media_type="text/plain")
+
+
+@app.get("/llms.txt", response_class=Response)
+async def llms_txt() -> Response:
+    """Return llms.txt only when SEO / AI discoverability is enabled."""
+    if not settings.seo_enabled:
+        raise HTTPException(status_code=404, detail="llms.txt disabled")
+    path = Path("llms.txt")
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="llms.txt not found")
+    return Response(content=path.read_text(encoding="utf-8"), media_type="text/plain")
+
+
+@app.get("/sitemap/sitemap-index.xml", response_class=Response)
+async def sitemap_index() -> Response:
+    """Return sitemap index only when SEO is enabled."""
+    if not settings.seo_enabled:
+        raise HTTPException(status_code=404, detail="sitemap disabled")
+    path = Path("sitemap/sitemap-index.xml")
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="sitemap not found")
+    return Response(content=path.read_text(encoding="utf-8"), media_type="application/xml")
+
+
+@app.get("/sitemap/{filename}", response_class=Response)
+async def sitemap_file(filename: str) -> Response:
+    """Return language sitemap only when SEO is enabled."""
+    if not settings.seo_enabled:
+        raise HTTPException(status_code=404, detail="sitemap disabled")
+    # Sanitise filename to prevent path traversal
+    safe_name = Path(filename).name
+    path = Path("sitemap") / safe_name
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail="sitemap not found")
+    return Response(content=path.read_text(encoding="utf-8"), media_type="application/xml")
 
 logger.info(f"PlacePix ready - listening on {settings.bind_host}:{settings.bind_port}")
 
@@ -1785,6 +1849,7 @@ async def index(request: Request) -> Any:
             "gdpr_statement_url": settings.gdpr_statement_url,
             "cookie_policy_url": settings.cookie_policy_url,
         },
+        request=request,
     )
 
 
@@ -1800,6 +1865,213 @@ async def url_builder(request: Request) -> Any:
             "gdpr_statement_url": settings.gdpr_statement_url,
             "cookie_policy_url": settings.cookie_policy_url,
         },
+        request=request,
+    )
+
+
+_GUIDE_LOCALES = [
+    "ar", "bg", "bn", "cs", "da", "de", "el", "en", "es", "fa",
+    "fil", "fr", "hi", "hu", "id", "it", "ja", "ko", "ms", "nl",
+    "no", "pl", "pt-BR", "pt-PT", "ro", "ru", "sv", "th", "tr", "uk",
+    "vi", "zh-CN", "zh-TW",
+]
+
+_RTL_LOCALES = {"ar", "fa"}
+
+_LOCALE_FLAGS = {
+    "ar": "sa",
+    "bg": "bg",
+    "bn": "bd",
+    "cs": "cz",
+    "da": "dk",
+    "de": "de",
+    "el": "gr",
+    "en": "gb",
+    "es": "es",
+    "fa": "ir",
+    "fil": "ph",
+    "fr": "fr",
+    "hi": "in",
+    "hu": "hu",
+    "id": "id",
+    "it": "it",
+    "ja": "jp",
+    "ko": "kr",
+    "ms": "my",
+    "nl": "nl",
+    "no": "no",
+    "pl": "pl",
+    "pt-BR": "br",
+    "pt-PT": "pt",
+    "ro": "ro",
+    "ru": "ru",
+    "sv": "se",
+    "th": "th",
+    "tr": "tr",
+    "uk": "ua",
+    "vi": "vn",
+    "zh-CN": "cn",
+    "zh-TW": "tw",
+}
+
+_LOCALE_NAMES = {
+    "ar": "العربية",
+    "bg": "Български",
+    "bn": "বাংলা",
+    "cs": "Čeština",
+    "da": "Dansk",
+    "de": "Deutsch",
+    "el": "Ελληνικά",
+    "en": "English",
+    "es": "Español",
+    "fa": "فارسی",
+    "fil": "Filipino",
+    "fr": "Français",
+    "hi": "हिन्दी",
+    "hu": "Magyar",
+    "id": "Bahasa Indonesia",
+    "it": "Italiano",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ms": "Bahasa Melayu",
+    "nl": "Nederlands",
+    "no": "Norsk",
+    "pl": "Polski",
+    "pt-BR": "Português (Brasil)",
+    "pt-PT": "Português",
+    "ro": "Română",
+    "ru": "Русский",
+    "sv": "Svenska",
+    "th": "ไทย",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "vi": "Tiếng Việt",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+}
+
+
+def _parse_frontmatter(text: str) -> tuple[dict, str]:
+    """Extract YAML frontmatter and body from a markdown file."""
+    match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", text, re.DOTALL)
+    if match:
+        meta = yaml.safe_load(match.group(1))
+        body = match.group(2)
+        return meta or {}, body
+    return {}, text
+
+
+def _split_sections(html: str) -> list[dict]:
+    """Split rendered HTML into sections by <h2> tags."""
+    # Find all <h2> positions
+    h2_pattern = re.compile(r"<h2>(.*?)</h2>", re.IGNORECASE)
+    matches = list(h2_pattern.finditer(html))
+
+    sections = []
+    for i, match in enumerate(matches):
+        heading = match.group(1)
+        start = match.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(html)
+        section_html = html[start:end].strip()
+        sections.append({"heading": heading, "html": section_html})
+
+    return sections
+
+
+@app.get("/guide", response_class=HTMLResponse)
+async def guide(request: Request, lang: str = "en") -> Any:
+    """Developer guide and feature documentation.
+
+    Accepts ?lang= query param for multilingual server-side rendering.
+    Falls back to English if the requested locale is not available.
+    """
+    if lang not in _GUIDE_LOCALES:
+        lang = "en"
+
+    guide_path = Path(f"static/locales/guide/guide.{lang}.md")
+    if not guide_path.exists():
+        guide_path = Path("static/locales/guide/guide.en.md")
+
+    raw = guide_path.read_text(encoding="utf-8")
+    meta, body = _parse_frontmatter(raw)
+
+    # Render markdown to HTML
+    md = markdown.Markdown(
+        extensions=[
+            "fenced_code",
+            "tables",
+            "nl2br",
+            "sane_lists",
+            "attr_list",
+        ]
+    )
+    body_html = md.convert(body)
+
+    # Split into sections by <h2>
+    sections = _split_sections(body_html)
+
+    # Build FAQ data from FAQ section if present
+    faqs = []
+    for section in sections:
+        if section["heading"] == "Frequently Asked Questions":
+            # Extract Q/A from h3 tags within the section
+            h3_pattern = re.compile(r"<h3>(.*?)</h3>\s*<p>(.*?)</p>", re.IGNORECASE | re.DOTALL)
+            for q_match in h3_pattern.finditer(section["html"]):
+                faqs.append({
+                    "question": q_match.group(1),
+                    "answer": q_match.group(2),
+                })
+
+    guide_data = {
+        "title": meta.get("title", "PlacePix Developer Guide"),
+        "meta": {
+            "description": meta.get("description", ""),
+            "keywords": meta.get("keywords", ""),
+            "author": meta.get("author", "RIADVICE"),
+            "robots": meta.get("robots", "index, follow"),
+        },
+        "og": {
+            "title": meta.get("og_title", ""),
+            "description": meta.get("og_description", ""),
+        },
+        "twitter": {
+            "title": meta.get("twitter_title", ""),
+            "description": meta.get("twitter_description", ""),
+        },
+        "jsonld": {
+            "name": meta.get("jsonld_name", ""),
+            "description": meta.get("jsonld_description", ""),
+            "proficiency": meta.get("jsonld_proficiency", "Expert"),
+            "dependencies": meta.get("jsonld_dependencies", "Docker, Python 3.12, FastAPI"),
+            "faqs": faqs,
+        },
+        "header": {
+            "title": meta.get("header_title", "PlacePix Developer Guide"),
+            "subtitle": meta.get("header_subtitle", ""),
+            "author_label": meta.get("author_label", "By"),
+            "updated_label": meta.get("updated_label", "Last updated: May 2026"),
+            "github_label": meta.get("github_label", "Open Source on GitHub"),
+        },
+        "toc_title": meta.get("toc_title", "Table of Contents"),
+        "sections": sections,
+    }
+
+    return render_template(
+        "guide.html",
+        {
+            "ga_tracking_id": settings.ga_tracking_id,
+            "upload_enabled": settings.upload_enabled and _upload_writable,
+            "privacy_policy_url": settings.privacy_policy_url,
+            "gdpr_statement_url": settings.gdpr_statement_url,
+            "cookie_policy_url": settings.cookie_policy_url,
+            "guide": guide_data,
+            "current_lang": lang,
+            "guide_locales": _GUIDE_LOCALES,
+            "is_rtl": lang in _RTL_LOCALES,
+            "locale_flags": _LOCALE_FLAGS,
+            "locale_names": _LOCALE_NAMES,
+        },
+        request=request,
     )
 
 
@@ -2020,7 +2292,7 @@ async def readiness() -> JSONResponse:
 
 # ── Image Explorer ────────────────────────────────────────────────
 @app.get("/images")
-async def image_explorer(page: int = 1) -> Response:
+async def image_explorer(request: Request, page: int = 1) -> Response:
     per_page = 20
     entries, total = manager.list_entries(page=page, per_page=per_page)
     total_pages = max((total + per_page - 1) // per_page, 1)
@@ -2035,13 +2307,15 @@ async def image_explorer(page: int = 1) -> Response:
             "entries": entries,
             "upload_enabled": settings.upload_enabled,
             "upload_writable": _upload_writable,
-        }
+        },
+        request=request,
     )
 
 
 # ── Color Palette ───────────────────────────────────────────────
 @app.get("/palette")
 async def color_palette(
+    request: Request,
     page: int = 1,
     per_page: int = 24,
     category: str = "",
@@ -2075,7 +2349,8 @@ async def color_palette(
             "scanning": manager._scanning_colors,
             "upload_enabled": settings.upload_enabled,
             "upload_writable": _upload_writable,
-        }
+        },
+        request=request,
     )
 
 

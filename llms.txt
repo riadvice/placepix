@@ -1,0 +1,268 @@
+# PlacePix - Self-Hosted Placeholder Image Service
+
+PlacePix is an open-source, self-hosted placeholder image service built for developers, designers, and product teams. It runs entirely on your own infrastructure (Docker, bare metal, or cloud) and requires no external API keys, no rate limits, and no per-request billing. Drop images into folders and instantly get URL endpoints that serve resized, filtered, and formatted images on demand.
+
+Built with Python 3.12, FastAPI, Pillow, and OpenCV. Supports Docker deployment, S3-compatible object storage (OVHcloud, AWS, MinIO), and optional AI image generation via OVHcloud AI Endpoints.
+
+## Who is this for?
+- Developers building apps that need placeholder images without relying on external services
+- Design teams creating wireframes and mockups with consistent image URLs
+- E-commerce platforms that need staging images before real product photography is ready
+- Content management systems that want self-hosted image processing
+- Anyone who wants deterministic, seedable random images for consistent UI across environments
+
+## Quick Start (Docker)
+Single command:
+docker run -d -p 3000:3000 -v ./images:/app/images riadvice/placepix:latest
+
+Docker Compose (recommended for persistence):
+services:
+  placepix:
+    image: riadvice/placepix:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./images:/app/images
+      - ./data:/app/data
+    environment:
+      - HOST=0.0.0.0:3000
+      - UPLOAD_ENABLED=true
+    restart: unless-stopped
+
+## Main Links
+- Homepage: https://placepix.net
+- Image Explorer: https://placepix.net/images
+- Color Palette: https://placepix.net/palette
+- URL Builder: https://placepix.net/url-builder
+- Developer Guide: https://placepix.net/guide
+- API Documentation (Swagger UI): https://placepix.net/docs
+- OpenAPI Spec: https://placepix.net/openapi.json
+- GitHub Repository: https://github.com/riadvice/placepix
+- Docker Hub: https://hub.docker.com/r/riadvice/placepix
+
+## Image Serving URL Patterns
+
+These are the primary URLs developers use to request images. All endpoints support query parameters for resizing, filtering, and format conversion.
+
+### Random image from a category
+GET /{width}/{height}/{category}
+Example: /400/300/nature
+Returns a random image from the "nature" category, resized to 400x300.
+
+### Random image from all categories
+GET /{width}/{height}
+Example: /400/300
+Returns a random image from any category.
+
+### Specific image by ID
+GET /id/{id}/{width}/{height}
+Example: /id/abc123/400/300
+Returns the image with ID "abc123" resized to 400x300.
+
+### Aspect ratio constrained image
+GET /ratio/{ratio}/{width}/{category}
+Example: /ratio/16:9/800/nature
+Returns an image constrained to 16:9 aspect ratio, 800px wide.
+Supported ratios: 16:9, 4:3, 1:1, 3:2, 21:9, 9:16
+
+### Social media preset
+GET /preset/{preset}/{category}
+Example: /preset/instagram-story/nature
+Returns an image sized for the specified preset.
+Available presets:
+- instagram-square (1080x1080)
+- instagram-portrait (1080x1350)
+- instagram-story (1080x1920)
+- youtube-thumbnail (1280x720)
+- youtube-banner (2560x423)
+- tiktok-video (1080x1920)
+- linkedin-post (1200x627)
+- twitter-header (1500x500)
+- mobile (375x812)
+- tablet (768x1024)
+- desktop (1920x1080)
+- 4k (3840x2160)
+
+### Color-matched image
+GET /color/{hex}/{width}/{height}
+Example: /color/0ea5e9/400/300
+Returns an image whose dominant color is closest to the specified hex color.
+
+### Gradient placeholder (no images required)
+GET /gradient/{width}/{height}/{from_hex}/{to_hex}
+Example: /gradient/800/400/3b82f6/10b981
+Generates a gradient image from two hex colors.
+Parameters:
+- ?angle=45 – linear angle in degrees (0-360, default 0)
+- ?gradient_type=radial – switches to radial gradient
+- ?format=webp – output format
+- ?quality=80 – quality (1-100)
+
+### SVG placeholder (no images required, <500 bytes)
+GET /svg/{width}/{height}
+Example: /svg/400/300
+Example with options: /svg/400/300?bg=1c1917&fg=0ea5e9&text=Hero+Section
+Parameters:
+- ?bg={hex} – background color
+- ?fg={hex} – foreground/text color
+- ?text={label} – text label
+
+## Common Query Parameters
+
+Apply these to any image endpoint above:
+
+### Resizing & Fit
+- ?fit=crop – center crop (default)
+- ?fit=smart – face-aware smart crop (OpenCV face detection)
+- ?fit=cover – cover fill (may stretch)
+- ?fit=contain – letterbox to fit
+
+### Output Format
+- .webp, .avif, .png, .jpg as file extension
+- ?format=webp – WebP output
+- ?format=avif – AVIF output (smallest)
+- ?format=png – lossless PNG
+- ?quality=70 – quality 1-100 (default varies by format)
+
+### Filters & Effects
+- ?grayscale=1 – black & white
+- ?sepia=1 – warm sepia tone
+- ?tint=0ea5e9 – hex color overlay
+- ?brightness=1.3 – 0.0 to 2.0
+- ?contrast=1.2 – 0.0 to 2.0
+- ?saturation=2.0 – 0.0 to 2.0
+- ?invert=true – invert colors
+- ?blur=2 – Gaussian blur (1-10)
+- ?sharpen=1.5 – sharpen amount
+- ?edges=sobel – edge detection (sobel or canny)
+- ?cartoon=true – cartoon effect
+- ?pencil_sketch=true – pencil sketch effect
+- ?oil_painting=true – oil painting effect
+- ?posterize=4 – color levels (1-8)
+- ?duotone=ff0000,0000ff – two-color map
+- ?vignette=0.5 – darken edges (0-1)
+
+### Overlays
+- ?text=Hello+World – text overlay
+- ?border=4,ffffff – border width and color
+- ?watermark=1 – apply configured watermark
+- ?padding=20 – internal padding
+
+### Deterministic images (same URL = same image)
+- ?seed=abc123 – returns the same image every time for a given seed
+Useful for consistent mockups across environments.
+
+## Integration Examples
+
+### HTML img tag
+<img src="https://placepix.net/400/300/nature?fit=smart&format=webp" alt="Nature" width="400" height="300">
+
+### CSS background
+background-image: url('https://placepix.net/1200/400/abstract?grayscale=1&format=webp');
+
+### Responsive srcset
+<img src="https://placepix.net/800/600/nature"
+     srcset="https://placepix.net/400/300/nature 400w,
+             https://placepix.net/800/600/nature 800w,
+             https://placepix.net/1200/900/nature 1200w"
+     sizes="(max-width: 600px) 400px, 800px"
+     alt="Nature">
+
+### React component
+function PlaceholderImage({ width, height, category, fit = 'crop' }) {
+  const url = `https://placepix.net/${width}/${height}/${category}?fit=${fit}&format=webp`;
+  return <img src={url} alt={category} width={width} height={height} loading="lazy" />;
+}
+
+## Metadata & Admin API Endpoints
+
+- GET /api/images – List all categories and image counts
+- GET /api/info/id/{id} – Get metadata for a specific image (dimensions, format, dominant colors)
+- GET /api/color/{hex} – Find images matching a hex color
+- GET /api/blurhash/{image_id} – Get BlurHash string for low-quality preview
+- GET /api/srcset – Generate responsive srcset markup
+- POST /api/upload – Upload a new image (if upload_enabled=true)
+- POST /api/ai-generate – Generate image via AI (if ai_generation_enabled=true)
+- GET /health – Liveness probe (returns 200 OK)
+- GET /ready – Readiness probe (returns 503 until images are loaded)
+
+## Environment Variables (.env)
+
+Key configuration options:
+- HOST – bind address (default: 127.0.0.1:3000)
+- IMAGES_DIR – folder containing source images (default: ./images)
+- DATA_DIR – folder for scan cache and metadata (default: ./data)
+- UPLOAD_ENABLED – allow image uploads via API (default: true)
+- WATERMARK_ENABLED – enable watermark overlay (default: true)
+- CACHE – enable disk caching of processed images (default: true)
+- CACHE_TTL_HOURS – cache expiration (default: 336 = 2 weeks)
+- SEO_ENABLED – enable meta tags and structured data (default: true)
+- SITE_URL – base URL for canonical links and OG images
+- S3_ENABLED – enable S3-compatible storage backend
+- S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET – S3 configuration
+- AI_GENERATION_ENABLED – enable AI image generation
+- GA_TRACKING_ID – Google Analytics tracking ID (optional)
+
+## S3-Compatible Storage
+
+PlacePix supports any S3-compatible backend. For OVHcloud Object Storage:
+S3_ENABLED=true
+S3_ENDPOINT=https://s3.rbx.io.cloud.ovh.net
+S3_ACCESS_KEY=your-key
+S3_SECRET_KEY=your-secret
+S3_BUCKET=your-bucket
+S3_REGION=rbx
+
+## Key Features
+
+- Smart cropping with face detection (OpenCV Haar cascades, ?fit=smart)
+- 20+ image filters and effects (blur, sepia, duotone, cartoon, pencil sketch, etc.)
+- Gradient and SVG placeholder generation (no source images needed)
+- Social media presets (Instagram, YouTube, TikTok, LinkedIn, X/Twitter)
+- Color search by dominant color (k-means clustering in LAB color space)
+- Aspect ratio constraints (16:9, 4:3, 1:1, 3:2, 21:9, 9:16)
+- BlurHash/LQIP generation for loading placeholders
+- Watermark overlay (text or image, configurable position and opacity)
+- Base64 JSON output for small inline thumbnails
+- S3-compatible storage backend
+- Admin dashboard with usage metrics
+- AI image generation via OVHcloud AI Endpoints (experimental)
+- 30+ language localizations
+- Cookie consent and GDPR compliance support
+
+## FAQ
+
+Q: What is PlacePix?
+A: PlacePix is a self-hosted placeholder image service. You drop images into folders and get instant URLs with resizing, filters, text overlays, and more. It runs entirely on your own infrastructure with no external dependencies.
+
+Q: Is PlacePix free?
+A: Yes. PlacePix is open source under the MIT License and free for both personal and commercial use. Because it is self-hosted, there are no usage limits, API keys, or per-request fees.
+
+Q: How do I deploy PlacePix with Docker?
+A: Run: docker run -d -p 3000:3000 -v ./images:/app/images riadvice/placepix:latest
+
+Q: What is face-aware smart cropping?
+A: PlacePix uses OpenCV to detect faces in images. When you request ?fit=smart, it automatically centers the crop region on detected faces instead of using geometric center cropping.
+
+Q: Can I generate placeholder images without uploading photos?
+A: Yes. Use /gradient/{w}/{h}/{from}/{to} for gradient images or /svg/{w}/{h} for SVG wireframe placeholders. No source images are required.
+
+Q: Does PlacePix support S3 storage?
+A: Yes. PlacePix supports any S3-compatible storage including OVHcloud Object Storage, AWS S3, and MinIO.
+
+Q: What output formats are supported?
+A: WebP, AVIF, JPEG, PNG, SVG, and base64 JSON. AVIF produces the smallest files; PNG is lossless.
+
+Q: How do I get the same image every time?
+A: Add ?seed=your-seed-value to any URL. The same seed returns the same image consistently.
+
+Q: Can I use PlacePix for Instagram story size images?
+A: Yes. Use /preset/instagram-story/{category} for 1080x1920 images. Combine with ?fit=smart for portrait-safe cropping and ?format=webp for optimized delivery.
+
+Q: Does PlacePix work behind a CDN?
+A: Yes. Set the CDN environment variable or configure your CDN to cache the processed image URLs. PlacePix sends appropriate Cache-Control headers.
+
+## License
+
+MIT License – free for personal and commercial use.
+© RIADVICE – https://riadvice.com

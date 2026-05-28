@@ -3,6 +3,7 @@
   "nav.explorer": "Explorator",
   "nav.palette": "Paletă",
   "nav.url_builder": "Constructor URL",
+  "nav.guide": "Ghid",
   "nav.features": "Funcționalități ▾",
   "nav.features.smart_crop": "Decupare Inteligentă",
   "nav.features.aspect_ratios": "Raport de Aspect",
@@ -14,53 +15,43 @@
   "nav.api": "API",
   "nav.docs": "Documentație",
   "nav.language": "Limbă",
-
   "hero.subtitle": "Serviciu de Imagini Placeholder Auto-găzduit",
   "hero.description": "Serviciu de imagini placeholder auto-găzduit. Aruncați imagini în foldere, obțineți URL-uri instantanee cu redimensionare, filtre și suprapuneri de text.",
   "hero.stats": "{total} imagini în {count} categorii",
-
   "section.smart_crop": "Decupare Inteligentă",
   "section.smart_crop.desc": "Decupare inteligentă cu detectare a fețelor. PlacePix detectează fețele și le centrează automat în zona de decupare.",
   "smart_crop.face_detection": "Detectare Fețe",
   "smart_crop.center_crop": "Decupare Centrală Standard",
   "smart_crop.cover_fill": "Umplere Cover",
-
   "section.aspect_ratios": "Raport de Aspect",
   "section.aspect_ratios.desc": "Alegeți din rapoarte de aspect comune și lăsați PlacePix să calculeze dimensiunile exacte.",
   "ratio.widescreen": "16:9 Ecran Lat",
   "ratio.square": "1:1 Pătrat",
   "ratio.portrait": "9:16 Portret",
-
   "section.overlays": "Suprapuneri",
   "section.overlays.desc": "Adăugați etichete de text personalizate și filigrane direct pe imaginile dvs.",
   "overlay.text_label": "Etichetă Text",
   "overlay.border": "Bordură",
   "overlay.watermark": "Filigran",
-
   "section.presets": "Presetări",
   "section.presets.desc": "Dimensiuni presetate cu un singur clic pentru dimensiuni populare de social media și ecran.",
   "preset.instagram_square": "Instagram Pătrat",
   "preset.youtube_thumbnail": "Thumbnail YouTube",
   "preset.mobile": "Mobil",
-
   "section.upload": "Încărcare Imagini",
   "upload.drag_drop": "Trageți și plasați imagini aici",
   "upload.or_browse": "sau faceți clic pentru a răsfoi fișiere",
   "upload.category_label": "Categorie:",
-
   "section.categories": "Categorii",
   "categories.desc": "Faceți clic pe orice dimensiune pentru a obține o imagine aleatorie din acea categorie",
-
   "section.random": "Generator de Imagini Aleatorii",
   "random.desc": "Luați orice dimensiune din orice categorie — sau lăsați PlacePix să aleagă una pentru dvs.",
-
   "section.svg": "Generator Placeholder SVG",
   "section.svg.desc": "Placeholder-uri wireframe cu procesare zero. Perfecte pentru layout-uri și mockup-uri.",
   "svg.params": "Parametri:",
   "svg.param.bg": "culoare hex de fundal",
   "svg.param.fg": "culoare hex de text",
   "svg.param.text": "etichetă personalizată (implicit: lățime×înălțime)",
-
   "section.gradient": "Generator Placeholder Gradient",
   "section.gradient.desc": "Generați imagini gradient liniar sau radial pe loc. Perfecte pentru fundaluri și suprapuneri.",
   "gradient.linear": "Gradient Liniar",
@@ -69,7 +60,6 @@
   "gradient.params": "Parametri:",
   "gradient.param.angle": "unghi liniar (0-360)",
   "gradient.param.radial": "radial din centru",
-
   "section.filters": "Filtre & Efecte",
   "section.filters.desc": "Aplicați filtre și ajustări de culoare la orice imagine pe loc.",
   "filter.sepia": "Ton Sepia",
@@ -91,14 +81,12 @@
   "filter.cartoon": "Caricatură",
   "filter.vignette": "Vignetă",
   "filter.params": "Parametri:",
-
   "section.color_search": "Căutare după Culoare Dominantă",
   "color_search.desc": "Găsiți imagini care se potrivesc cu paleta de brand. Fiecare imagine este scanată pentru primele 3 culori dominante.",
   "color.sky": "Cer",
   "color.green": "Verde",
   "color.red": "Roșu",
   "color_search.how": "Cum funcționează:",
-
   "section.api": "Referință API",
   "api.cors_note": "Toate endpoint-urile suportă CORS și returnează imagini cu headere de cache pe termen lung.",
   "api.random_category": "Imagine aleatorie dintr-o categorie",
@@ -115,7 +103,6 @@
   "api.param.avif": "Ieșire AVIF (mai mic)",
   "api.param.webp": "Ieșire WebP",
   "api.param.png": "Ieșire PNG (fără pierderi)",
-
   "section.figma": "Integrare Figma",
   "figma.desc": "Încorporați imagini PlacePix live direct în design-urile dvs. Figma folosind embed-uri iframe.",
   "figma.paste_note": "Lipiți acest cod iframe în Figma ca URL încorporat:",
@@ -129,7 +116,6 @@
   "figma.tip3_suffix": "pentru mod wireframe",
   "figma.tip4": "Utilizați",
   "figma.tip4_suffix": "pentru fundaluri placeholder",
-
   "footer.about": "PlacePix",
   "footer.about_desc": "Serviciu de imagini placeholder auto-găzduit cu redimensionare, filtre și suprapuneri de text.",
   "footer.links": "Link-uri",
@@ -141,10 +127,8 @@
   "footer.built_by": "Construit de",
   "footer.version": "Versiune:",
   "footer.load_time": "Timp de Încărcare:",
-
   "explorer.title": "Explorator de Imagini — Răsfoiți Toate Imaginile Placeholder",
   "explorer.page_of": "Pagina {page} din {total}",
-
   "palette.title": "Paletă de Culori — Răsfoiți Imagini după Culoare Dominantă",
   "palette.subtitle": "culori dominante — faceți clic pe oricare pentru previzualizarea imaginilor potrivite",
   "palette.search_placeholder": "Căutare culoare hex (ex. 3b82f6)",
@@ -152,7 +136,6 @@
   "palette.scan_banner": "Scanare culori în progres — noi culori vor apărea în curând.",
   "pagination.previous": "Anterior",
   "pagination.next": "Următor",
-
   "url_builder.title": "Constructor URL — Constructor de Imagini Placeholder Interactiv",
   "url_builder.subtitle": "Construiți URL-ul perfect de imagine placeholder cu constructorul nostru interactiv",
   "url_builder.panel_left": "Constructor URL",
@@ -239,30 +222,25 @@
   "url_builder.hint.optional": "(opțional)",
   "url_builder.hint.svg_default": "Implicit: {width}x{height}",
   "url_builder.hint.hex_no_hash": "Culoare hex (fără #)",
-
   "url_builder.fit.crop": "Decupare (centru)",
   "url_builder.fit.smart": "Decupare Inteligentă (detectare fețe)",
   "url_builder.fit.scale": "Scalare (întindere)",
   "url_builder.fit.contain": "Conținere (potrivire înăuntru)",
   "url_builder.fit.cover": "Cover (umplere)",
-
   "qr.title": "Scanare Cod QR",
   "qr.subtitle": "Scanați pentru a deschide acest URL pe dispozitivul dvs. mobil",
   "qr.close": "Închidere",
-
   "shortcuts.label": "Comenzi Rapide:",
   "shortcuts.preview": "Previzualizare",
   "shortcuts.copy": "Copiere",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Întunecat",
-
   "notification.copied": "URL copiat în clipboard!",
   "notification.qr_error": "Eșec la generarea codului QR",
   "upload.uploading": "Încărcare {count} fișier(e)...",
   "upload.uploaded": "Încărcate {uploaded}/{total} fișiere. Reîncărcare...",
   "upload.copy_error": "Eșec la copiere:",
   "console.load_categories_error": "Eșec la încărcarea categoriilor:",
-
   "docker.title": "Deploy Docker într-o Singură Linie",
   "docker.desc": "Porniți PlacePix în câteva secunde cu o singură comandă Docker. Nu este necesară configurare.",
   "docker.features": "Funcționalități:",
@@ -270,7 +248,6 @@
   "docker.feature2": "Extracție culori",
   "docker.feature3": "Configurare Zero",
   "docker.feature4": "Constructor URL Încorporat",
-
   "aria.toggle_navigation": "Comutare navigare",
   "ai.title": "Generare Imagini AI",
   "ai.experimental": "Experimental — alimentat de OVHcloud AI Endpoints",

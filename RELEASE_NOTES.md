@@ -12,7 +12,21 @@
 
 - **Version Number**: 0.3
 - **Release Date**: 2026-05-27
-- **General Overview**: Docker publishing improvements.
+- **General Overview**: Comprehensive SEO optimization, AI model discoverability, and multilingual sitemap infrastructure.
+
+### ✨ New Features
+
+#### SEO & Discoverability
+- **Complete SEO overhaul** — conditional meta tags, Open Graph / Twitter Cards, canonical URLs, JSON-LD Schema.org, semantic HTML, and Core Web Vitals optimizations; gated via `seo_enabled` / `site_url` settings
+- **Conditional SEO file serving** — `/robots.txt`, `/llms.txt`, and `/sitemap/*` are gated by `seo_enabled`; when disabled, a minimal robots.txt is returned and llms.txt/sitemaps return 404
+- **32 language XML sitemaps** with `sitemap-index.xml` master served at `/sitemap`, robots.txt points to the index, and valid `?lang=` hreflang alternates for `/guide` URLs
+
+#### AI Model Discoverability
+- **AI crawler coverage** — `robots.txt` allows 28 verified AI crawlers (OpenAI, Anthropic, Google, Apple, Meta, DeepSeek, Kimi, xAI, etc.); `llms.txt` expanded with URL patterns, integration examples, and FAQ
+
+#### Developer Guide
+- **New `/guide` page** — multilingual developer documentation with E-E-A-T signals, `TechArticle` structured data, and server-side rendering for 30+ languages with language switcher
+
 
 ### 🔧 Improvements
 

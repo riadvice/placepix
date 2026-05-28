@@ -3,6 +3,7 @@
   "nav.explorer": "Utforsker",
   "nav.palette": "Palett",
   "nav.url_builder": "URL-bygger",
+  "nav.guide": "Veiledning",
   "nav.features": "Funksjoner ▾",
   "nav.features.smart_crop": "Smart beskjæring",
   "nav.features.aspect_ratios": "Størrelsesforhold",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Kopier",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Mørk",
-
   "notification.copied": "URL kopiert til utklippstavle!",
   "notification.qr_error": "Kunne ikke generere QR-kode",
   "upload.uploading": "Laster opp {count} fil(er)...",
   "upload.uploaded": "{uploaded}/{total} filer lastet opp. Laster på nytt...",
   "upload.copy_error": "Kopiering mislyktes:",
   "console.load_categories_error": "Kunne ikke laste kategorier:",
-
   "docker.title": "Docker Deploy på én linje",
   "docker.desc": "Kjør PlacePix på sekunder med én Docker-kommando. Ingen konfigurasjon nødvendig.",
   "docker.features": "Funksjoner:",

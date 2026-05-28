@@ -3,6 +3,7 @@
   "nav.explorer": "Böngésző",
   "nav.palette": "Paletta",
   "nav.url_builder": "URL Építő",
+  "nav.guide": "Útmutató",
   "nav.features": "Funkciók ▾",
   "nav.features.smart_crop": "Intelligens Vágás",
   "nav.features.aspect_ratios": "Képarány",
@@ -14,53 +15,43 @@
   "nav.api": "API",
   "nav.docs": "Dokumentáció",
   "nav.language": "Nyelv",
-
   "hero.subtitle": "Önállóan Hostolt Helykitöltő Képszolgáltatás",
   "hero.description": "Önállóan hostolt helykitöltő képszolgáltatás. Dobd be a képeket mappákba, kapj azonnali URL-eket átméretezéssel, szűrőkkel és szövegrétegekkel.",
   "hero.stats": "{total} kép {count} kategóriában",
-
   "section.smart_crop": "Intelligens Vágás",
   "section.smart_crop.desc": "Intelligens arcfelismerő vágás. A PlacePix felismeri az arcokat és automatikusan középre helyezi őket a vágási területen.",
   "smart_crop.face_detection": "Arcfelismerés",
   "smart_crop.center_crop": "Szabványos Középvágás",
   "smart_crop.cover_fill": "Cover Kitöltés",
-
   "section.aspect_ratios": "Képarány",
   "section.aspect_ratios.desc": "Válassz a gyakori képarányok közül, és hagyd, hogy a PlacePix kiszámolja a pontos méreteket.",
   "ratio.widescreen": "16:9 Szélesvásznú",
   "ratio.square": "1:1 Négyzet",
   "ratio.portrait": "9:16 Álló",
-
   "section.overlays": "Rétegek",
   "section.overlays.desc": "Adj hozzá egyedi szövegcímkéket és vízjeleket közvetlenül a képeidhez.",
   "overlay.text_label": "Szövegcímke",
   "overlay.border": "Szegély",
   "overlay.watermark": "Vízjel",
-
   "section.presets": "Előbeállítások",
   "section.presets.desc": "Egy kattintásos előbeállított méretek népszerű közösségi és képernyőméretekhez.",
   "preset.instagram_square": "Instagram Négyzet",
   "preset.youtube_thumbnail": "YouTube Bélyegkép",
   "preset.mobile": "Mobil",
-
   "section.upload": "Képek Feltöltése",
   "upload.drag_drop": "Húzd ide a képeket",
   "upload.or_browse": "vagy kattints a fájlok tallózásához",
   "upload.category_label": "Kategória:",
-
   "section.categories": "Kategóriák",
   "categories.desc": "Kattints bármelyik méretre, hogy véletlenszerű képet kapj abból a kategóriából",
-
   "section.random": "Véletlenszerű Kép Generátor",
   "random.desc": "Vedd bármilyen méretet bármely kategóriából — vagy hagyd, hogy a PlacePix válasszon egyet neked.",
-
   "section.svg": "SVG Helykitöltő Generátor",
   "section.svg.desc": "Nulla feldolgozású wireframe helykitöltők. Tökéletes elrendezésekhez és mockupokhoz.",
   "svg.params": "Paraméterek:",
   "svg.param.bg": "háttér hex szín",
   "svg.param.fg": "szöveg hex szín",
   "svg.param.text": "egyedi címke (alapértelmezett: szélesség×magasság)",
-
   "section.gradient": "Gradiens Helykitöltő Generátor",
   "section.gradient.desc": "Lineáris vagy radiális gradiens képek generálása azonnal. Tökéletes hátterekhez és rétegekhez.",
   "gradient.linear": "Lineáris Gradiens",
@@ -69,7 +60,6 @@
   "gradient.params": "Paraméterek:",
   "gradient.param.angle": "lineáris szög (0-360)",
   "gradient.param.radial": "radiális a középpontból",
-
   "section.filters": "Szűrők & Hatások",
   "section.filters.desc": "Szűrők és színbeállítások alkalmazása bármely képre azonnal.",
   "filter.sepia": "Szépia Tónus",
@@ -91,14 +81,12 @@
   "filter.cartoon": "Karakterrajz",
   "filter.vignette": "Vignett",
   "filter.params": "Paraméterek:",
-
   "section.color_search": "Keresés Domináns Szín Alapján",
   "color_search.desc": "Keress képeket, amelyek illeszkednek a márkád palettájához. Minden kép be van szkennelve a legfelső 3 domináns színére.",
   "color.sky": "Ég",
   "color.green": "Zöld",
   "color.red": "Piros",
   "color_search.how": "Hogyan működik:",
-
   "section.api": "API Referencia",
   "api.cors_note": "Minden végpont támogatja a CORS-t és hosszú távú cache fejlécekkel tér vissza képekkel.",
   "api.random_category": "Véletlenszerű kép egy kategóriából",
@@ -115,7 +103,6 @@
   "api.param.avif": "AVIF kimenet (kisebb)",
   "api.param.webp": "WebP kimenet",
   "api.param.png": "PNG kimenet (veszteségmentes)",
-
   "section.figma": "Figma Integráció",
   "figma.desc": "Élő PlacePix képek beágyazása közvetlenül a Figma terveidbe iframe beágyazások használatával.",
   "figma.paste_note": "Illeszd be ezt az iframe kódot a Figmába beágyazott URL-ként:",
@@ -129,7 +116,6 @@
   "figma.tip3_suffix": "wireframe módhoz",
   "figma.tip4": "Használj",
   "figma.tip4_suffix": "helykitöltő hátterekhez",
-
   "footer.about": "PlacePix",
   "footer.about_desc": "Önállóan hostolt helykitöltő képszolgáltatás átméretezéssel, szűrőkkel és szövegrétegekkel.",
   "footer.links": "Linkek",
@@ -141,10 +127,8 @@
   "footer.built_by": "Készítette",
   "footer.version": "Verzió:",
   "footer.load_time": "Betöltési Idő:",
-
   "explorer.title": "Kép Böngésző — Az Összes Helykitöltő Kép Böngészése",
   "explorer.page_of": "{page}. oldal a {total}-ból",
-
   "palette.title": "Szín Paletta — Képek Böngészése Domináns Szín Alapján",
   "palette.subtitle": "domináns színek — kattints bármelyikre az illeszkedő képek előnézetéhez",
   "palette.search_placeholder": "Keresés hex szín (pl. 3b82f6)",
@@ -152,7 +136,6 @@
   "palette.scan_banner": "Szín szkennelés folyamatban — új színek hamarosan megjelennek.",
   "pagination.previous": "Előző",
   "pagination.next": "Következő",
-
   "url_builder.title": "URL Építő — Interaktív Helykitöltő Kép Konstruktor",
   "url_builder.subtitle": "Építsd meg a tökéletes helykitöltő kép URL-edet az interaktív konstruktorunkkal",
   "url_builder.panel_left": "URL Konstruktor",
@@ -239,30 +222,25 @@
   "url_builder.hint.optional": "(opcionális)",
   "url_builder.hint.svg_default": "Alapértelmezett: {width}x{height}",
   "url_builder.hint.hex_no_hash": "Hex szín (# nélkül)",
-
   "url_builder.fit.crop": "Vágás (közép)",
   "url_builder.fit.smart": "Intelligens Vágás (arcfelismerés)",
   "url_builder.fit.scale": "Skálázás (nyújtás)",
   "url_builder.fit.contain": "Tartalmaz (befér)",
   "url_builder.fit.cover": "Cover (kitölt)",
-
   "qr.title": "QR Kód Szkennelése",
   "qr.subtitle": "Szkenneld az URL megnyitásához a mobil eszközödön",
   "qr.close": "Bezárás",
-
   "shortcuts.label": "Gyorsbillentyűk:",
   "shortcuts.preview": "Előnézet",
   "shortcuts.copy": "Másolás",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Sötét",
-
   "notification.copied": "URL a vágólapra másolva!",
   "notification.qr_error": "QR kód generálása sikertelen",
   "upload.uploading": "{count} fájl feltöltése...",
   "upload.uploaded": "{uploaded}/{total} fájl feltöltve. Újratöltés...",
   "upload.copy_error": "Másolás sikertelen:",
   "console.load_categories_error": "Kategóriák betöltése sikertelen:",
-
   "docker.title": "Egy Soros Docker Deploy",
   "docker.desc": "Indítsd el a PlacePix-et másodpercek alatt egyetlen Docker paranccsal. Nincs szükség konfigurációra.",
   "docker.features": "Funkciók:",
@@ -270,7 +248,6 @@
   "docker.feature2": "Szín kinyerés",
   "docker.feature3": "Nulla Konfiguráció",
   "docker.feature4": "Beágyazott URL Építő",
-
   "aria.toggle_navigation": "Navigáció váltása",
   "ai.title": "AI Kép Generálás",
   "ai.experimental": "Kísérleti — OVHcloud AI Endpoints által hajtva",

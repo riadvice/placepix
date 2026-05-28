@@ -3,6 +3,7 @@
   "nav.explorer": "Explorer",
   "nav.palette": "Palette",
   "nav.url_builder": "URL Builder",
+  "nav.guide": "Guide",
   "nav.features": "Features ▾",
   "nav.features.smart_crop": "Smart Crop",
   "nav.features.aspect_ratios": "Aspect Ratios",
@@ -14,53 +15,43 @@
   "nav.api": "API",
   "nav.docs": "Docs",
   "nav.language": "Language",
-
   "hero.subtitle": "Self-Hosted Placeholder Image Service",
   "hero.description": "Self-hosted placeholder image service. Drop images into folders, get instant URLs with resizing, filters, and text overlays.",
   "hero.stats": "{total} images across {count} categories",
-
   "section.smart_crop": "Smart Crop",
   "section.smart_crop.desc": "Intelligent face-aware cropping. PlacePix detects faces and centers them in the crop area automatically.",
   "smart_crop.face_detection": "Face Detection",
   "smart_crop.center_crop": "Standard Center Crop",
   "smart_crop.cover_fill": "Cover Fill",
-
   "section.aspect_ratios": "Aspect Ratios",
   "section.aspect_ratios.desc": "Pick from common aspect ratios and let PlacePix compute the exact dimensions.",
   "ratio.widescreen": "16:9 Widescreen",
   "ratio.square": "1:1 Square",
   "ratio.portrait": "9:16 Portrait",
-
   "section.overlays": "Overlays",
   "section.overlays.desc": "Add custom text labels and watermarks directly onto your images.",
   "overlay.text_label": "Text Label",
   "overlay.border": "Border",
   "overlay.watermark": "Watermark",
-
   "section.presets": "Presets",
   "section.presets.desc": "One-click preset dimensions for popular social and screen sizes.",
   "preset.instagram_square": "Instagram Square",
   "preset.youtube_thumbnail": "YouTube Thumbnail",
   "preset.mobile": "Mobile",
-
   "section.upload": "Upload Images",
   "upload.drag_drop": "Drag & drop images here",
   "upload.or_browse": "or click to browse files",
   "upload.category_label": "Category:",
-
   "section.categories": "Categories",
   "categories.desc": "Click any size to get a random image from that category",
-
   "section.random": "Random Image Generator",
   "random.desc": "Grab any size from any category — or let PlacePix pick one for you.",
-
   "section.svg": "SVG Placeholder Generator",
   "section.svg.desc": "Zero-processing wireframe placeholders. Perfect for layouts and mockups.",
   "svg.params": "Parameters:",
   "svg.param.bg": "background hex color",
   "svg.param.fg": "text hex color",
   "svg.param.text": "custom label (default: width×height)",
-
   "section.gradient": "Gradient Placeholder Generator",
   "section.gradient.desc": "Generate linear or radial gradient images on the fly. Perfect for backgrounds and overlays.",
   "gradient.linear": "Linear Gradient",
@@ -69,7 +60,6 @@
   "gradient.params": "Parameters:",
   "gradient.param.angle": "linear angle (0-360)",
   "gradient.param.radial": "radial from center",
-
   "section.filters": "Filters & Effects",
   "section.filters.desc": "Apply filters and color adjustments to any image on the fly.",
   "filter.sepia": "Sepia Tone",
@@ -91,14 +81,12 @@
   "filter.cartoon": "Cartoon",
   "filter.vignette": "Vignette",
   "filter.params": "Parameters:",
-
   "section.color_search": "Search by Dominant Color",
   "color_search.desc": "Find images that match your brand palette. Every image is scanned for its top 3 dominant colors.",
   "color.sky": "Sky",
   "color.green": "Green",
   "color.red": "Red",
   "color_search.how": "How it works:",
-
   "section.api": "API Reference",
   "api.cors_note": "All endpoints support CORS and return images with long-term cache headers.",
   "api.random_category": "Random image from a category",
@@ -115,7 +103,6 @@
   "api.param.avif": "AVIF output (smaller)",
   "api.param.webp": "WebP output",
   "api.param.png": "PNG output (lossless)",
-
   "section.figma": "Figma Integration",
   "figma.desc": "Embed live PlacePix images directly in your Figma designs using iframe embeds.",
   "figma.paste_note": "Paste this iframe code into Figma as an embedded URL:",
@@ -129,7 +116,6 @@
   "figma.tip3_suffix": "for wireframe mode",
   "figma.tip4": "Use",
   "figma.tip4_suffix": "for placeholder backgrounds",
-
   "footer.about": "PlacePix",
   "footer.about_desc": "Self-hosted placeholder image service with resizing, filters, and text overlays.",
   "footer.links": "Links",
@@ -141,10 +127,8 @@
   "footer.built_by": "Built by",
   "footer.version": "Version:",
   "footer.load_time": "Load Time:",
-
   "explorer.title": "Image Explorer — Browse All Placeholder Images",
   "explorer.page_of": "Page {page} of {total}",
-
   "palette.title": "Color Palette — Browse Images by Dominant Color",
   "palette.subtitle": "dominant colors — click any to preview matching images",
   "palette.search_placeholder": "Search hex color (e.g. 3b82f6)",
@@ -152,7 +136,6 @@
   "palette.scan_banner": "Color scan in progress — new colors will appear shortly.",
   "pagination.previous": "Previous",
   "pagination.next": "Next",
-
   "url_builder.title": "URL Builder — Interactive Placeholder Image Constructor",
   "url_builder.subtitle": "Build your perfect placeholder image URL with our interactive constructor",
   "url_builder.panel_left": "URL Constructor",
@@ -239,30 +222,25 @@
   "url_builder.hint.optional": "(optional)",
   "url_builder.hint.svg_default": "Default: {width}x{height}",
   "url_builder.hint.hex_no_hash": "Hex color (without #)",
-
   "url_builder.fit.crop": "Crop (center)",
   "url_builder.fit.smart": "Smart Crop (face detection)",
   "url_builder.fit.scale": "Scale (stretch)",
   "url_builder.fit.contain": "Contain (fit inside)",
   "url_builder.fit.cover": "Cover (fill)",
-
   "qr.title": "Scan QR Code",
   "qr.subtitle": "Scan to open this URL on your mobile device",
   "qr.close": "Close",
-
   "shortcuts.label": "Shortcuts:",
   "shortcuts.preview": "Preview",
   "shortcuts.copy": "Copy",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Dark",
-
   "notification.copied": "URL copied to clipboard!",
   "notification.qr_error": "Failed to generate QR code",
   "upload.uploading": "Uploading {count} file(s)...",
   "upload.uploaded": "Uploaded {uploaded}/{total} files. Reloading...",
   "upload.copy_error": "Failed to copy:",
   "console.load_categories_error": "Failed to load categories:",
-
   "docker.title": "One-Line Docker Deploy",
   "docker.desc": "Get PlacePix running in seconds with a single Docker command. No configuration needed.",
   "docker.features": "Features:",
@@ -270,7 +248,6 @@
   "docker.feature2": "Color extraction",
   "docker.feature3": "Zero Configuration",
   "docker.feature4": "Embedded URL Builder",
-
   "aria.toggle_navigation": "Toggle navigation",
   "ai.title": "AI Image Generation",
   "ai.experimental": "Experimental — powered by OVHcloud AI Endpoints",

@@ -3,6 +3,7 @@
   "nav.explorer": "Trình khám phá",
   "nav.palette": "Bảng màu",
   "nav.url_builder": "Trình tạo URL",
+  "nav.guide": "Hướng dẫn",
   "nav.features": "Tính năng ▾",
   "nav.features.smart_crop": "Cắt thông minh",
   "nav.features.aspect_ratios": "Tỷ lệ khung hình",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Sao chép",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Tối",
-
   "notification.copied": "URL đã được sao chép vào bộ nhớ tạm!",
   "notification.qr_error": "Không thể tạo mã QR",
   "upload.uploading": "Đang tải lên {count} tệp...",
   "upload.uploaded": "Đã tải lên {uploaded}/{total} tệp. Đang tải lại...",
   "upload.copy_error": "Sao chép thất bại:",
   "console.load_categories_error": "Không thể tải danh mục:",
-
   "docker.title": "Triển khai Docker một dòng",
   "docker.desc": "Chạy PlacePix trong vài giây với một lệnh Docker duy nhất. Không cần cấu hình.",
   "docker.features": "Tính năng:",

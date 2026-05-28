@@ -7,7 +7,7 @@
 
   Serve random images with on-the-fly resizing, filtering, and formatting.
 
-  **Live:** [placepix.net](https://placepix.net) · **Made by [RIADVICE](https://riadvice.com)**
+  **Live:** [placepix.net](https://placepix.net) · **Guide:** [placepix.net/guide](https://placepix.net/guide) · **Made by [RIADVICE](https://riadvice.com)**
 
   ---
 </div>
@@ -17,6 +17,7 @@
 - [Features](#features)
 - [Get Started in 5 Steps](#get-started-in-5-steps)
 - [URL Examples](#url-examples)
+- [Developer Guide](https://placepix.net/guide) — full API reference & feature documentation
 - [Environment Variables](#environment-variables)
 - [API](#api)
 - [Development](#development)

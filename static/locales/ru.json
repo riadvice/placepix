@@ -3,6 +3,7 @@
   "nav.explorer": "Проводник",
   "nav.palette": "Палитра",
   "nav.url_builder": "Конструктор URL",
+  "nav.guide": "Руководство",
   "nav.features": "Возможности ▾",
   "nav.features.smart_crop": "Умная обрезка",
   "nav.features.aspect_ratios": "Соотношения сторон",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Копировать",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Тёмный",
-
   "notification.copied": "URL скопирован в буфер обмена!",
   "notification.qr_error": "Не удалось создать QR-код",
   "upload.uploading": "Загрузка {count} файла(ов)...",
   "upload.uploaded": "Загружено {uploaded}/{total} файлов. Перезагрузка...",
   "upload.copy_error": "Не удалось скопировать:",
   "console.load_categories_error": "Не удалось загрузить категории:",
-
   "docker.title": "Развертывание Docker в одну строку",
   "docker.desc": "Запустите PlacePix за секунды с помощью одной команды Docker. Конфигурация не требуется.",
   "docker.features": "Возможности:",

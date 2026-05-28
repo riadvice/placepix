@@ -3,6 +3,7 @@
   "nav.explorer": "Eksplorator",
   "nav.palette": "Paleta",
   "nav.url_builder": "Konstruktor URL",
+  "nav.guide": "Przewodnik",
   "nav.features": "Funkcje ▾",
   "nav.features.smart_crop": "Inteligentne kadrowanie",
   "nav.features.aspect_ratios": "Proporcje obrazu",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Kopiuj",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Ciemny",
-
   "notification.copied": "URL skopiowany do schowka!",
   "notification.qr_error": "Nie udało się wygenerować kodu QR",
   "upload.uploading": "Wysyłanie {count} pliku(ów)...",
   "upload.uploaded": "Wysłano {uploaded}/{total} plików. Przeładowywanie...",
   "upload.copy_error": "Kopiowanie nieudane:",
   "console.load_categories_error": "Nie udało się załadować kategorii:",
-
   "docker.title": "Wdrożenie Docker w jednej linii",
   "docker.desc": "Uruchom PlacePix w kilka sekund jednym poleceniem Docker. Konfiguracja nie jest wymagana.",
   "docker.features": "Funkcje:",

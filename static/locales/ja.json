@@ -3,6 +3,7 @@
   "nav.explorer": "エクスプローラー",
   "nav.palette": "パレット",
   "nav.url_builder": "URLビルダー",
+  "nav.guide": "ガイド",
   "nav.features": "機能 ▾",
   "nav.features.smart_crop": "スマートクロップ",
   "nav.features.aspect_ratios": "アスペクト比",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "コピー",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "ダーク",
-
   "notification.copied": "URLをクリップボードにコピーしました!",
   "notification.qr_error": "QRコードの生成に失敗しました",
   "upload.uploading": "{count}個のファイルをアップロード中...",
   "upload.uploaded": "{uploaded}/{total}個のファイルをアップロードしました。再読み込み中...",
   "upload.copy_error": "コピーに失敗しました:",
   "console.load_categories_error": "カテゴリの読み込みに失敗しました:",
-
   "docker.title": "ワンラインDockerデプロイ",
   "docker.desc": "単一のDockerコマンドで数秒でPlacePixを実行。設定は不要です。",
   "docker.features": "機能:",

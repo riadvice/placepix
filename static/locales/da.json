@@ -3,6 +3,7 @@
   "nav.explorer": "Udforsker",
   "nav.palette": "Palet",
   "nav.url_builder": "URL-bygger",
+  "nav.guide": "Guide",
   "nav.features": "Funktioner ▾",
   "nav.features.smart_crop": "Smart Beskæring",
   "nav.features.aspect_ratios": "Billedformat",
@@ -14,53 +15,43 @@
   "nav.api": "API",
   "nav.docs": "Dokumentation",
   "nav.language": "Sprog",
-
   "hero.subtitle": "Selvhostet Placeringsbilledtjeneste",
   "hero.description": "Selvhostet tjeneste til pladsholderbilleder. Drop billeder i mapper, få øjeblikkelige URL'er med ændring af størrelse, filtre og tekstoverlays.",
   "hero.stats": "{total} billeder på tværs af {count} kategorier",
-
   "section.smart_crop": "Smart Beskæring",
   "section.smart_crop.desc": "Intelligent ansigtsbevidst beskæring. PlacePix registrerer ansigter og centrerer dem automatisk i beskæringsområdet.",
   "smart_crop.face_detection": "Ansigtsregistrering",
   "smart_crop.center_crop": "Standard Centerbeskæring",
   "smart_crop.cover_fill": "Cover Udfyldning",
-
   "section.aspect_ratios": "Billedformat",
   "section.aspect_ratios.desc": "Vælg blandt almindelige billedformater, og lad PlacePix beregne de nøjagtige dimensioner.",
   "ratio.widescreen": "16:9 Widescreen",
   "ratio.square": "1:1 Firkant",
   "ratio.portrait": "9:16 Portræt",
-
   "section.overlays": "Overlays",
   "section.overlays.desc": "Tilføj brugerdefinerede tekstetiketter og vandmærker direkte på dine billeder.",
   "overlay.text_label": "Tekstetiket",
   "overlay.border": "Kant",
   "overlay.watermark": "Vandmærke",
-
   "section.presets": "Forudindstillinger",
   "section.presets.desc": "Ét-klik forudindstillede dimensioner til populære sociale og skærmstørrelser.",
   "preset.instagram_square": "Instagram Firkant",
   "preset.youtube_thumbnail": "YouTube Miniaturebillede",
   "preset.mobile": "Mobil",
-
   "section.upload": "Upload Billeder",
   "upload.drag_drop": "Træk & slip billeder her",
   "upload.or_browse": "eller klik for at gennemse filer",
   "upload.category_label": "Kategori:",
-
   "section.categories": "Kategorier",
   "categories.desc": "Klik på en hvilken som helst størrelse for at få et tilfældigt billede fra den kategori",
-
   "section.random": "Tilfældig Billedgenerator",
   "random.desc": "Hent en hvilken som helst størrelse fra en hvilken som helst kategori — eller lad PlacePix vælge en for dig.",
-
   "section.svg": "SVG Pladsholdergenerator",
   "section.svg.desc": "Nul-behandling wireframe-pladsholdere. Perfekt til layouts og mockups.",
   "svg.params": "Parametre:",
   "svg.param.bg": "baggrund hex-farve",
   "svg.param.fg": "tekst hex-farve",
   "svg.param.text": "brugerdefineret etiket (standard: bredde×højde)",
-
   "section.gradient": "Gradient Pladsholdergenerator",
   "section.gradient.desc": "Generer lineære eller radiale gradientbilleder på farten. Perfekt til baggrunde og overlays.",
   "gradient.linear": "Lineær Gradient",
@@ -69,7 +60,6 @@
   "gradient.params": "Parametre:",
   "gradient.param.angle": "lineær vinkel (0-360)",
   "gradient.param.radial": "radial fra center",
-
   "section.filters": "Filtre & Effekter",
   "section.filters.desc": "Anvend filtre og farvejusteringer på ethvert billede på farten.",
   "filter.sepia": "Sepia Tone",
@@ -91,14 +81,12 @@
   "filter.cartoon": "Tegneserie",
   "filter.vignette": "Vignette",
   "filter.params": "Parametre:",
-
   "section.color_search": "Søg efter Dominerende Farve",
   "color_search.desc": "Find billeder, der matcher dit brandpalet. Hvert billede scannes for dets top 3 dominerende farver.",
   "color.sky": "Himmel",
   "color.green": "Grøn",
   "color.red": "Rød",
   "color_search.how": "Sådan fungerer det:",
-
   "section.api": "API-reference",
   "api.cors_note": "Alle endpoints understøtter CORS og returnerer billeder med langtidscache-headers.",
   "api.random_category": "Tilfældigt billede fra en kategori",
@@ -115,7 +103,6 @@
   "api.param.avif": "AVIF output (mindre)",
   "api.param.webp": "WebP output",
   "api.param.png": "PNG output (tabsfri)",
-
   "section.figma": "Figma Integration",
   "figma.desc": "Indlejre live PlacePix-billeder direkte i dine Figma-designs ved hjælp af iframe-embeds.",
   "figma.paste_note": "Indsæt denne iframe-kode i Figma som en indlejret URL:",
@@ -129,7 +116,6 @@
   "figma.tip3_suffix": "for wireframe-tilstand",
   "figma.tip4": "Brug",
   "figma.tip4_suffix": "for pladsholderbaggrunde",
-
   "footer.about": "PlacePix",
   "footer.about_desc": "Selvhostet pladsholderbilledtjeneste med ændring af størrelse, filtre og tekstoverlays.",
   "footer.links": "Links",
@@ -141,10 +127,8 @@
   "footer.built_by": "Bygget af",
   "footer.version": "Version:",
   "footer.load_time": "Indlæsningstid:",
-
   "explorer.title": "Billedudforsker — Gennemse Alle Pladsholderbilleder",
   "explorer.page_of": "Side {page} af {total}",
-
   "palette.title": "Farvepalet — Gennemse Billeder efter Dominerende Farve",
   "palette.subtitle": "dominerende farver — klik på en for at forhåndsvise matchende billeder",
   "palette.search_placeholder": "Søg hex-farve (f.eks. 3b82f6)",
@@ -152,7 +136,6 @@
   "palette.scan_banner": "Farvescanning i gang — nye farver vil snart vises.",
   "pagination.previous": "Forrige",
   "pagination.next": "Næste",
-
   "url_builder.title": "URL-bygger — Interaktiv Pladsholderbilledkonstruktør",
   "url_builder.subtitle": "Byg din perfekte pladsholderbilled-URL med vores interaktive konstruktør",
   "url_builder.panel_left": "URL-konstruktør",
@@ -239,30 +222,25 @@
   "url_builder.hint.optional": "(valgfri)",
   "url_builder.hint.svg_default": "Standard: {width}x{height}",
   "url_builder.hint.hex_no_hash": "Hex-farve (uden #)",
-
   "url_builder.fit.crop": "Beskær (center)",
   "url_builder.fit.smart": "Smart Beskær (ansigtsregistrering)",
   "url_builder.fit.scale": "Skaler (stræk)",
   "url_builder.fit.contain": "Indehold (pas ind)",
   "url_builder.fit.cover": "Cover (udfyld)",
-
   "qr.title": "Scan QR-kode",
   "qr.subtitle": "Scan for at åbne denne URL på din mobile enhed",
   "qr.close": "Luk",
-
   "shortcuts.label": "Genveje:",
   "shortcuts.preview": "Forhåndsvisning",
   "shortcuts.copy": "Kopier",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Mørk",
-
   "notification.copied": "URL kopieret til udklipsholder!",
   "notification.qr_error": "Kunne ikke generere QR-kode",
   "upload.uploading": "Uploader {count} fil(er)...",
   "upload.uploaded": "Uploadet {uploaded}/{total} filer. Genindlæser...",
   "upload.copy_error": "Kunne ikke kopiere:",
   "console.load_categories_error": "Kunne ikke indlæse kategorier:",
-
   "docker.title": "En-linje Docker Deploy",
   "docker.desc": "Få PlacePix kørende på få sekunder med en enkelt Docker-kommando. Ingen konfiguration nødvendig.",
   "docker.features": "Funktioner:",
@@ -270,7 +248,6 @@
   "docker.feature2": "Farveudtrækning",
   "docker.feature3": "Nul Konfiguration",
   "docker.feature4": "Indlejret URL-bygger",
-
   "aria.toggle_navigation": "Skift navigation",
   "ai.title": "AI Billedgenerering",
   "ai.experimental": "Eksperimentelt — drevet af OVHcloud AI Endpoints",

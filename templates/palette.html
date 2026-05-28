@@ -3,28 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1c1917">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>PlacePix Color Palette — Browse Images by Dominant Color</title>
+{% if seo_enabled %}
     <meta name="description" content="Browse placeholder images by their dominant colors. Find images that match your brand palette with PlacePix color search. Filter by color, category, and search hex codes.">
     <meta name="keywords" content="color palette, image colors, color search, dominant colors, brand colors, placeholder images, design tools">
     <meta name="author" content="RIADVICE">
     <meta name="robots" content="index, follow">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://placepix.riadvice.com/palette">
+    <meta property="og:url" content="{{ page_url }}">
     <meta property="og:title" content="PlacePix Color Palette — Browse Images by Dominant Color">
     <meta property="og:description" content="Browse placeholder images by their dominant colors. Find images that match your brand palette with PlacePix color search.">
-    <meta property="og:image" content="https://placepix.riadvice.com/static/logo.svg">
-    
+    {% if site_url %}<meta property="og:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://placepix.riadvice.com/palette">
+    <meta name="twitter:url" content="{{ page_url }}">
     <meta name="twitter:title" content="PlacePix Color Palette — Browse Images by Dominant Color">
     <meta name="twitter:description" content="Browse placeholder images by their dominant colors. Find images that match your brand palette with PlacePix color search.">
-    <meta name="twitter:image" content="https://placepix.riadvice.com/static/logo.svg">
-    
+    {% if site_url %}<meta name="twitter:image" content="{{ site_url }}/static/logo.svg">{% endif %}
+
+    <link rel="canonical" href="{{ page_url }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "PlacePix Color Palette — Browse Images by Dominant Color",
+      "description": "Browse placeholder images by their dominant colors. Find images that match your brand palette with PlacePix color search. Filter by color, category, and search hex codes.",
+      "url": "{{ page_url }}",
+      "image": "{{ site_url }}/static/logo.svg",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "PlacePix",
+        "url": "{{ site_url }}/"
+      }
+    }
+    </script>
+{% endif %}
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    <link rel="canonical" href="https://placepix.riadvice.com/palette">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7/css/flag-icons.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
@@ -50,7 +70,7 @@
 </head>
 <body data-theme="light">
     {% include "nav.html" %}
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <main class="max-w-7xl mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-stone-800 text-center mb-2" data-i18n="palette.title">Color Palette — Browse Images by Dominant Color</h1>
         <p class="text-stone-500 text-center mb-8">{{ total }} dominant colors &mdash; click any to preview matching images</p>
     <div class="palette-controls">
@@ -78,7 +98,7 @@
     </div>
     {% set base_url = "/palette?search=" ~ safe_search ~ ("&category=" ~ safe_category if safe_category else "") %}
     {% include "_pagination.html" %}
-    </div>
+    </main>
     <script src="/static/js/i18n.js"></script>
     <script src="/static/js/common.js"></script>
 

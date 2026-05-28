@@ -3,6 +3,7 @@
   "nav.explorer": "Peneroka",
   "nav.palette": "Palet",
   "nav.url_builder": "Pembina URL",
+  "nav.guide": "Panduan",
   "nav.features": "Ciri-ciri ▾",
   "nav.features.smart_crop": "Pangkas Pintar",
   "nav.features.aspect_ratios": "Nisbah Aspek",
@@ -14,53 +15,43 @@
   "nav.api": "API",
   "nav.docs": "Dokumentasi",
   "nav.language": "Bahasa",
-
   "hero.subtitle": "Perkhidmatan Imej Tempat Letak Sendiri",
   "hero.description": "Perkhidmatan imej tempat letak yang dihoskan sendiri. Letakkan imej ke dalam folder, dapatkan URL segera dengan saiz semula, penapis, dan tindihan teks.",
   "hero.stats": "{total} imej merentasi {count} kategori",
-
   "section.smart_crop": "Pangkas Pintar",
   "section.smart_crop.desc": "Pangkas yang peka wajah secara pintar. PlacePix mengesan wajah dan memusatkan mereka secara automatik di kawasan pangkas.",
   "smart_crop.face_detection": "Pengesanan Wajah",
   "smart_crop.center_crop": "Pangkas Pusat Standard",
   "smart_crop.cover_fill": "Isi Cover",
-
   "section.aspect_ratios": "Nisbah Aspek",
   "section.aspect_ratios.desc": "Pilih daripada nisbah aspek biasa dan biarkan PlacePix mengira dimensi yang tepat.",
   "ratio.widescreen": "16:9 Skrin Lebar",
   "ratio.square": "1:1 Segi Empat",
   "ratio.portrait": "9:16 Potret",
-
   "section.overlays": "Tindihan",
   "section.overlays.desc": "Tambah label teks dan tanda air tersuai terus ke imej anda.",
   "overlay.text_label": "Label Teks",
   "overlay.border": "Sempadan",
   "overlay.watermark": "Tanda Air",
-
   "section.presets": "Pratetap",
   "section.presets.desc": "Dimensi pratetap satu klik untuk saiz skrin dan sosial yang popular.",
   "preset.instagram_square": "Instagram Segi Empat",
   "preset.youtube_thumbnail": "Thumbnail YouTube",
   "preset.mobile": "Peralatan Mudah Alih",
-
   "section.upload": "Muat Naik Imej",
   "upload.drag_drop": "Seret & lepaskan imej di sini",
   "upload.or_browse": "atau klik untuk melayari fail",
   "upload.category_label": "Kategori:",
-
   "section.categories": "Kategori",
   "categories.desc": "Klik mana-mana saiz untuk mendapatkan imej rawak dari kategori itu",
-
   "section.random": "Penjana Imej Rawak",
   "random.desc": "Ambil mana-mana saiz dari mana-mana kategori — atau biarkan PlacePix memilih satu untuk anda.",
-
   "section.svg": "Penjana Tempat Letak SVG",
   "section.svg.desc": "Tempat letak wireframe sfera pemprosesan. Sempurna untuk susun atur dan mockups.",
   "svg.params": "Parameter:",
   "svg.param.bg": "warna latar belakang hex",
   "svg.param.fg": "warna teks hex",
   "svg.param.text": "label tersuai (lalai: lebar×tinggi)",
-
   "section.gradient": "Penjana Tempat Letak Kecerunan",
   "section.gradient.desc": "Jana imej kecerunan linear atau radial dengan pantas. Sempurna untuk latar belakang dan tindihan.",
   "gradient.linear": "Kecerunan Linear",
@@ -69,7 +60,6 @@
   "gradient.params": "Parameter:",
   "gradient.param.angle": "sudut linear (0-360)",
   "gradient.param.radial": "radial dari pusat",
-
   "section.filters": "Penapis & Kesan",
   "section.filters.desc": "Gunakan penapis dan pelarasan warna pada mana-mana imej dengan pantas.",
   "filter.sepia": "Tona Sepia",
@@ -91,14 +81,12 @@
   "filter.cartoon": "Kartun",
   "filter.vignette": "Vignette",
   "filter.params": "Parameter:",
-
   "section.color_search": "Cari mengikut Warna Dominan",
   "color_search.desc": "Cari imej yang sepadan dengan palet jenama anda. Setiap imej diimbas untuk 3 warna dominan teratasnya.",
   "color.sky": "Langit",
   "color.green": "Hijau",
   "color.red": "Merah",
   "color_search.how": "Bagaimana ia berfungsi:",
-
   "section.api": "Rujukan API",
   "api.cors_note": "Semua endpoint menyokong CORS dan mengembalikan imej dengan header cache jangka panjang.",
   "api.random_category": "Imej rawak dari kategori",
@@ -115,7 +103,6 @@
   "api.param.avif": "Output AVIF (lebih kecil)",
   "api.param.webp": "Output WebP",
   "api.param.png": "Output PNG (tanpa kehilangan)",
-
   "section.figma": "Integrasi Figma",
   "figma.desc": "Benamkan imej PlacePix secara langsung dalam reka bentuk Figma anda menggunakan embed iframe.",
   "figma.paste_note": "Tampal kod iframe ini ke dalam Figma sebagai URL yang disematkan:",
@@ -129,7 +116,6 @@
   "figma.tip3_suffix": "untuk mod wireframe",
   "figma.tip4": "Gunakan",
   "figma.tip4_suffix": "untuk latar belakang tempat letak",
-
   "footer.about": "PlacePix",
   "footer.about_desc": "Perkhidmatan imej tempat letak yang dihoskan sendiri dengan saiz semula, penapis, dan tindihan teks.",
   "footer.links": "Pautan",
@@ -141,10 +127,8 @@
   "footer.built_by": "Dibina oleh",
   "footer.version": "Versi:",
   "footer.load_time": "Masa Muat:",
-
   "explorer.title": "Peneroka Imej — Layari Semua Imej Tempat Letak",
   "explorer.page_of": "Halaman {page} daripada {total}",
-
   "palette.title": "Palet Warna — Layari Imej mengikut Warna Dominan",
   "palette.subtitle": "warna dominan — klik mana-mana untuk pratonton imej yang sepadan",
   "palette.search_placeholder": "Cari warna hex (cth 3b82f6)",
@@ -152,7 +136,6 @@
   "palette.scan_banner": "Imbasan warna sedang berjalan — warna baru akan muncul tidak lama lagi.",
   "pagination.previous": "Sebelumnya",
   "pagination.next": "Seterusnya",
-
   "url_builder.title": "Pembina URL — Konstruktor Imej Tempat Letak Interaktif",
   "url_builder.subtitle": "Bina URL imej tempat letak sempurna anda dengan konstruktor interaktif kami",
   "url_builder.panel_left": "Konstruktor URL",
@@ -239,30 +222,25 @@
   "url_builder.hint.optional": "(pilihan)",
   "url_builder.hint.svg_default": "Lalai: {width}x{height}",
   "url_builder.hint.hex_no_hash": "Warna hex (tanpa #)",
-
   "url_builder.fit.crop": "Pangkas (pusat)",
   "url_builder.fit.smart": "Pangkas Pintar (pengesanan wajah)",
   "url_builder.fit.scale": "Skala (regang)",
   "url_builder.fit.contain": "Mengandungi (muat di dalam)",
   "url_builder.fit.cover": "Cover (isi)",
-
   "qr.title": "Imbas Kod QR",
   "qr.subtitle": "Imbas untuk membuka URL ini pada peranti mudah alih anda",
   "qr.close": "Tutup",
-
   "shortcuts.label": "Pintasan:",
   "shortcuts.preview": "Pratonton",
   "shortcuts.copy": "Salin",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Gelap",
-
   "notification.copied": "URL disalin ke papan keratan!",
   "notification.qr_error": "Gagal menjana kod QR",
   "upload.uploading": "Memuat naik {count} fail...",
   "upload.uploaded": "Dimuat naik {uploaded}/{total} fail. Memuat semula...",
   "upload.copy_error": "Gagal menyalin:",
   "console.load_categories_error": "Gagal memuatkan kategori:",
-
   "docker.title": "Deploy Docker Satu Baris",
   "docker.desc": "Dapatkan PlacePix berjalan dalam beberapa saat dengan satu perintah Docker. Tiada konfigurasi diperlukan.",
   "docker.features": "Ciri-ciri:",
@@ -270,7 +248,6 @@
   "docker.feature2": "Pengekstrakan warna",
   "docker.feature3": "Konfigurasi Sifar",
   "docker.feature4": "Pembina URL Terbenam",
-
   "aria.toggle_navigation": "Togol navigasi",
   "ai.title": "Penjanaan Imej AI",
   "ai.experimental": "Eksperimen — dikuasakan oleh OVHcloud AI Endpoints",

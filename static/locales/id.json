@@ -3,6 +3,7 @@
   "nav.explorer": "Penjelajah",
   "nav.palette": "Palet",
   "nav.url_builder": "Pembuat URL",
+  "nav.guide": "Panduan",
   "nav.features": "Fitur ▾",
   "nav.features.smart_crop": "Pangkas Pintar",
   "nav.features.aspect_ratios": "Rasio Aspek",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "Salin",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "Gelap",
-
   "notification.copied": "URL disalin ke clipboard!",
   "notification.qr_error": "Gagal membuat kode QR",
   "upload.uploading": "Mengunggah {count} file...",
   "upload.uploaded": "{uploaded}/{total} file diunggah. Memuat ulang...",
   "upload.copy_error": "Gagal menyalin:",
   "console.load_categories_error": "Gagal memuat kategori:",
-
   "docker.title": "Deploy Docker Satu Baris",
   "docker.desc": "Jalankan PlacePix dalam hitungan detik dengan satu perintah Docker. Tidak perlu konfigurasi.",
   "docker.features": "Fitur:",

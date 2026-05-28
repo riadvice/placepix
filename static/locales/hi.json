@@ -3,6 +3,7 @@
   "nav.explorer": "एक्सप्लोरर",
   "nav.palette": "पैलेट",
   "nav.url_builder": "URL बिल्डर",
+  "nav.guide": "गाइड",
   "nav.features": "सुविधाएँ ▾",
   "nav.features.smart_crop": "स्मार्ट क्रॉप",
   "nav.features.aspect_ratios": "पहलू अनुपात",
@@ -234,14 +235,12 @@
   "shortcuts.copy": "कॉपी करें",
   "shortcuts.qr": "QR",
   "shortcuts.dark": "डार्क",
-
   "notification.copied": "URL क्लिपबोर्ड पर कॉपी हो गया!",
   "notification.qr_error": "QR कोड बनाने में विफल",
   "upload.uploading": "{count} फ़ाइल(ें) अपलोड हो रही है...",
   "upload.uploaded": "{uploaded}/{total} फ़ाइलें अपलोड हुईं। पुनः लोड हो रहा है...",
   "upload.copy_error": "कॉपी करने में विफल:",
   "console.load_categories_error": "श्रेणियां लोड करने में विफल:",
-
   "docker.title": "एक लाइन Docker डिप्लॉय",
   "docker.desc": "एक डॉकर कमांड के साथ सेकंड में PlacePix चलाएं। कोई कॉन्फ़िगरेशन की आवश्यकता नहीं।",
   "docker.features": "विशेषताएं:",
