@@ -42,10 +42,36 @@ from src.seed import seed_images
 
 
 # ── Logging Setup ───────────────────────────────────────────────────
+class ResourceFormatter(logging.Formatter):
+    """Log formatter with milliseconds and current process resource usage."""
+
+    def formatTime(self, record, datefmt=None):
+        s = time.strftime("%Y-%m-%d %H:%M:%S", self.converter(record.created))
+        tz = time.strftime("%z", self.converter(record.created))
+        return f"{s}.{int(record.msecs):03d}{tz}"
+
+    def format(self, record):
+        try:
+            with open("/proc/self/status") as f:
+                for line in f:
+                    if line.startswith("VmRSS:"):
+                        ram_kb = int(line.split()[1])
+                        record.resources = (
+                            f"CPU:{time.process_time():.3f}s RAM:{ram_kb / 1024:.3f}MB"
+                        )
+                        break
+                else:
+                    record.resources = f"CPU:{time.process_time():.3f}s RAM:?"
+        except Exception:
+            record.resources = f"CPU:{time.process_time():.3f}s RAM:?"
+        return super().format(record)
+
+
 def setup_logging():
     """Configure logging with console output only."""
-    log_format = "%(asctime)s | %(levelname)-8s | %(name)s | [PID:%(process)d] | %(message)s"
-    date_format = "%Y-%m-%d %H:%M:%S"
+    log_format = (
+        "%(asctime)s | %(levelname)-8s | %(name)s | [PID:%(process)d] | %(resources)s | %(message)s"
+    )
 
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, settings.log_level.upper()))
@@ -53,7 +79,7 @@ def setup_logging():
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(getattr(logging, settings.log_level.upper()))
-    console_handler.setFormatter(logging.Formatter(log_format, date_format))
+    console_handler.setFormatter(ResourceFormatter(log_format))
     logger.addHandler(console_handler)
 
     return logger
