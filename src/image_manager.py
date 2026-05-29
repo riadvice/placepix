@@ -949,9 +949,8 @@ class ImageManager:
             h = (r - g) / d + 4
         h *= 60
         # Brown: dark, earthy tones in orange/red range
-        if total < 380 and (h < 45 or h >= 15):
-            if 15 <= h < 45:
-                return "Brown"
+        if total < 380 and (h < 45 or h >= 15) and 15 <= h < 45:
+            return "Brown"
         if h < 15 or h >= 345:
             return "Red"
         if h < 45:

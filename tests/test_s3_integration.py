@@ -100,7 +100,7 @@ def test_s3_scan_merges_categories(s3_client):
 @pytest.mark.slow
 def test_s3_image_served(s3_client):
     """Test that S3 images are served correctly."""
-    client, manager, _mock = s3_client
+    client, _manager, _mock = s3_client
 
     response = client.get("/500/500/nature/forest.jpg")
     assert response.status_code == 200
@@ -110,7 +110,7 @@ def test_s3_image_served(s3_client):
 @pytest.mark.slow
 def test_s3_info_endpoint(s3_client):
     """Test that S3 images show up in info endpoint."""
-    client, manager, _mock = s3_client
+    client, _manager, _mock = s3_client
 
     response = client.get("/500/500/nature/forest.jpg?info")
     assert response.status_code == 200

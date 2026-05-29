@@ -25,7 +25,7 @@ require_ubuntu() {
     sudo DEBIAN_FRONTEND=noninteractive apt-get update -y && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y lsb-release
   fi
   local id; id="$(lsb_release -is)"
-  [[ "$id" == "Ubuntu" ]] || die "This script targets Ubuntu (got: $id)"
+  [[ "$id" = "Ubuntu" ]] || die "This script targets Ubuntu (got: $id)"
   local rel; rel="$(lsb_release -rs)"
   log "Detected Ubuntu $rel ($(lsb_release -cs))"
 }
@@ -129,23 +129,27 @@ eval "$(pyenv init - bash 2>/dev/null || pyenv init -)"'
   done
 fi
 
-# Create or update venv using uv
+# Create or update venv using python3-venv
 if [[ ! -d "$VENV_DIR" ]]; then
-  log "Creating Python venv at $VENV_DIR using uv"
-  # First install uv globally if not available
-  if ! command -v uv >/dev/null 2>&1; then
-    log "Installing uv globally"
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.local/bin:$PATH"
-  fi
-  uv venv "$VENV_DIR"
+  log "Creating Python venv at $VENV_DIR"
+  "$PYTHON_CMD" -m venv "$VENV_DIR"
 else
   ok "Venv already exists at $VENV_DIR"
 fi
 
+# Activate venv and install uv
+log "Activating venv and installing uv"
+source "$VENV_DIR/bin/activate"
+log "Upgrading pip"
+pip install --upgrade pip -q
+if ! command -v uv >/dev/null 2>&1; then
+  log "Installing uv in venv"
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
 # Use uv to install project dependencies
 log "Installing project dependencies with uv"
-"$VENV_DIR/bin/uv" pip install -e "$ROOT_DIR[dev]"
+uv pip install -e "$ROOT_DIR[dev]"
 
 # Add venv activation to shell
 log "Adding venv activation to shell configs"

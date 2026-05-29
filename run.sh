@@ -54,9 +54,9 @@ fi
 WORKERS="${WORKERS:-2}"
 
 # Ensure WORKERS is a number
-if ! [[ "$WORKERS" =~ ^[0-9]+$ ]]; then
-  WORKERS=2
-fi
+case "$WORKERS" in
+  ''|*[!0-9]*) WORKERS=2 ;;
+esac
 
 if [[ "$WORKERS" -gt 1 ]]; then
   log "Running with $WORKERS workers (reload disabled)"

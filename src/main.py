@@ -166,10 +166,9 @@ def _validate_startup() -> None:
             "/Windows/Fonts",
         ]
         for font_dir in system_font_dirs:
-            if Path(font_dir).exists():
-                if any(Path(font_dir).rglob("*.ttf")):
-                    font_found = True
-                    break
+            if Path(font_dir).exists() and any(Path(font_dir).rglob("*.ttf")):
+                font_found = True
+                break
 
         if not font_found:
             logger.warning("No system fonts found; text overlays may use fallback font")
@@ -1033,15 +1032,13 @@ async def _serve_entry(
         output_format = "jpeg"
 
     # Validate base64 size limit
-    if as_base64:
-        if width > settings.base64_max_size or height > settings.base64_max_size:
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    f"base64 images limited to {settings.base64_max_size}x"
-                    f"{settings.base64_max_size} px"
-                ),
-            )
+    if as_base64 and (width > settings.base64_max_size or height > settings.base64_max_size):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"base64 images limited to {settings.base64_max_size}x{settings.base64_max_size} px"
+            ),
+        )
 
     # Prepare watermark config
     watermark_config = None
@@ -1332,7 +1329,7 @@ async def serve_by_id(
     blur: int = 0,
     text: str = "",
     fit: str = "crop",
-    format: str = "",  # noqa: A002
+    output_format: str = "",
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -1379,7 +1376,7 @@ async def serve_by_id(
         blur,
         text,
         fit,
-        format,
+        output_format,
         tint,
         brightness,
         contrast,
@@ -1434,7 +1431,7 @@ async def serve_by_ratio(
     seed: str = "",
     text: str = "",
     fit: str = "crop",
-    format: str = "",  # noqa: A002
+    output_format: str = "",
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -1494,7 +1491,7 @@ async def serve_by_ratio(
         blur,
         text,
         fit,
-        format,
+        output_format,
         tint,
         brightness,
         contrast,
@@ -1548,7 +1545,7 @@ async def serve_by_preset(
     seed: str = "",
     text: str = "",
     fit: str = "crop",
-    format: str = "",  # noqa: A002
+    output_format: str = "",
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -1609,7 +1606,7 @@ async def serve_by_preset(
         blur,
         text,
         fit,
-        format,
+        output_format,
         tint,
         brightness,
         contrast,
@@ -1932,7 +1929,7 @@ async def serve_image(
     seed: str = "",
     text: str = "",
     fit: str = "crop",
-    format: str = "",  # noqa: A002
+    output_format: str = "",
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -1994,7 +1991,7 @@ async def serve_image(
         blur,
         text,
         fit,
-        format,
+        output_format,
         tint,
         brightness,
         contrast,
@@ -2044,7 +2041,7 @@ async def serve_by_color(
     blur: int = 0,
     text: str = "",
     fit: str = "crop",
-    format: str = "",  # noqa: A002
+    output_format: str = "",
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -2092,7 +2089,7 @@ async def serve_by_color(
         blur,
         text,
         fit,
-        format,
+        output_format,
         tint,
         brightness,
         contrast,
@@ -2636,8 +2633,8 @@ async def get_blurhash(image_id: int) -> JSONResponse:
             # Encode to blurhash
             hash_str = blurhash.encode(
                 img,
-                x_components=4,
-                y_components=3,
+                x_comp=4,
+                y_comp=3,
             )
         return JSONResponse(
             {
@@ -2940,7 +2937,7 @@ async def ai_generate(
 async def generate_srcset(
     image_id: int,
     sizes: str = "320,640,1024,1920",
-    format: str = "jpeg",  # noqa: A002
+    output_format: str = "jpeg",
 ) -> JSONResponse:
     """Generate srcset URLs for responsive images."""
     entry = manager.get_by_id(image_id)
@@ -2962,7 +2959,7 @@ async def generate_srcset(
     srcset_entries = []
     for width in size_list:
         height = int(width / aspect_ratio)
-        url = f"/id/{image_id}/{width}/{height}.{format}"
+        url = f"/id/{image_id}/{width}/{height}.{output_format}"
         srcset_entries.append(
             {
                 "url": url,

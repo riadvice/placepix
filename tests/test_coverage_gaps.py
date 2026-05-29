@@ -164,11 +164,11 @@ class TestImageManagerGaps:
             # Make the client raise an exception
             mock_boto3.client.side_effect = Exception("S3 connection error")
 
-            cats, next_id = manager._scan_s3({}, 1)
+            cats, _next_id = manager._scan_s3({}, 1)
 
         # Should return empty categories on error
         assert cats == {}
-        assert next_id == 1
+        assert _next_id == 1
 
     @staticmethod
     def test_scan_s3_filters(test_images_dir, monkeypatch):
@@ -201,7 +201,7 @@ class TestImageManagerGaps:
         ]
         mock_client.get_paginator.return_value = mock_paginator
         with patch("src.image_manager.boto3.client", return_value=mock_client):
-            cats, next_id = manager._scan_s3({}, 1)
+            cats, _next_id = manager._scan_s3({}, 1)
         assert "nature" in cats
         assert len(cats["nature"].entries) == 1
         assert cats["nature"].entries[0].filename == "forest.jpg"
@@ -360,7 +360,7 @@ class TestImageManagerGaps:
         mock_paginator.paginate.return_value = [{"Contents": []}]
         mock_client.get_paginator.return_value = mock_paginator
         with patch("src.image_manager.boto3.client", return_value=mock_client):
-            cats, next_id = manager._scan_s3({}, 1)
+            cats, _next_id = manager._scan_s3({}, 1)
         assert isinstance(cats, dict)
 
     @staticmethod
@@ -383,9 +383,9 @@ class TestImageManagerGaps:
         mock_client = MagicMock()
         mock_client.get_paginator.side_effect = Exception("S3 error")
         with patch("src.image_manager.boto3.client", return_value=mock_client):
-            cats, next_id = manager._scan_s3({}, 1)
+            cats, _next_id = manager._scan_s3({}, 1)
         assert cats == {}
-        assert next_id == 1
+        assert _next_id == 1
 
     @staticmethod
     def test_read_meta_invalid_json(test_images_dir, monkeypatch):

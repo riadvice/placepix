@@ -2,7 +2,7 @@
 
 ## Released versions
 
-- [v0.3 - Work In Progress](#v03)
+- [v0.3 - 2026-05-29](#v03)
 - [v0.2 - 2026-05-26](#v02)
 - [v0.1 - 2026-05-25](#v01)
 
@@ -11,8 +11,8 @@
 ### 🚀 Introduction
 
 - **Version Number**: 0.3
-- **Release Date**: 2026-05-27
-- **General Overview**: Comprehensive SEO optimization, AI model discoverability, and multilingual sitemap infrastructure.
+- **Release Date**: 2026-05-29
+- **General Overview**: Adds image orientation filtering, comprehensive SEO optimization with meta tags and structured data, multilingual sitemap infrastructure, and multiavatar integration for vector avatars.
 
 ### ✨ New Features
 

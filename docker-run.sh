@@ -11,7 +11,7 @@ cd "$SCRIPT_DIR"
 IMAGE_NAME="placepix:latest"
 
 # Build if requested or image does not exist
-if [[ "${1:-}" == "build" ]] || ! docker image inspect "$IMAGE_NAME" &>/dev/null; then
+if [[ "${1:-}" = "build" ]] || ! docker image inspect "$IMAGE_NAME" &>/dev/null; then
     echo "[placepix] Building Docker image..."
     docker build -t "$IMAGE_NAME" .
 fi

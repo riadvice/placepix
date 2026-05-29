@@ -528,13 +528,6 @@ def test_tint_with_hash(client: TestClient):
 def test_orientation_landscape(client: TestClient):
     """Test orientation=landscape filter on random endpoint."""
 
-    # Patch dimensions so we have a mix of orientations
-    for entry in (
-        manager._categories.get("nature", []).entries
-        if hasattr(manager._categories.get("nature", []), "entries")
-        else []
-    ):
-        pass  # no-op fallback
     # Set dimensions on all entries
     all_entries = []
     for cat in manager._categories.values():

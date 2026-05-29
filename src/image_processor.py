@@ -801,7 +801,7 @@ class ImageProcessor:
         else:  # sobel (default)
             sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
             sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
-            edges = np.sqrt(sobelx**2 + sobely**2)
+            edges = np.hypot(sobelx, sobely)
             edges = np.clip(edges, 0, 255).astype(np.uint8)
 
         # Convert back to RGB
@@ -870,8 +870,8 @@ class ImageProcessor:
         # Calculate distance from center
         dx = x - center_x
         dy = y - center_y
-        dist = np.sqrt(dx * dx + dy * dy)
-        max_dist = np.sqrt(center_x**2 + center_y**2)
+        dist = np.hypot(dx, dy)
+        max_dist = np.hypot(center_x, center_y)
 
         # Create vignette mask (darken edges)
         mask = 1 - (dist / max_dist) * intensity
