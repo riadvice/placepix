@@ -240,25 +240,6 @@ class TestObserver:
         observer.stop()
 
 
-# ── Image Processor Exception Handling Tests ───────────────────────
-
-
-class TestImageProcessorExceptions:
-    def test_avif_unavailable(self, monkeypatch):
-        """Test pillow_avif unavailable handling."""
-        from src import image_processor
-
-        monkeypatch.setattr("src.image_processor._AVIF_AVAILABLE", False)
-        assert not image_processor._AVIF_AVAILABLE
-
-    def test_opencv_unavailable(self, monkeypatch):
-        """Test opencv unavailable handling."""
-        from src import image_processor
-
-        monkeypatch.setattr("src.image_processor._OPENCV_AVAILABLE", False)
-        assert not image_processor._OPENCV_AVAILABLE
-
-
 # ── Image Manager Boto3 Tests ───────────────────────────────────────
 
 
@@ -939,13 +920,6 @@ class TestMainEntryPoint:
         from src.main import run
 
         assert callable(run)
-
-    def test_apscheduler_unavailable(self, monkeypatch):
-        """Test apscheduler unavailable handling in main."""
-        from src import main
-
-        monkeypatch.setattr("src.main._APSCHEDULER_AVAILABLE", False)
-        assert not main._APSCHEDULER_AVAILABLE
 
     def test_get_git_version_env(self, monkeypatch):
         """Test git version from environment variable."""

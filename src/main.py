@@ -26,13 +26,7 @@ import markdown
 from starlette.middleware.base import BaseHTTPMiddleware
 import yaml
 
-try:
-    from apscheduler.schedulers.background import BackgroundScheduler
-
-    _APSCHEDULER_AVAILABLE = True
-except Exception:
-    _APSCHEDULER_AVAILABLE = False
-
+from apscheduler.schedulers.background import BackgroundScheduler
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from multiavatar.multiavatar import multiavatar
 from PIL import Image, ImageDraw, ImageFont
@@ -368,7 +362,7 @@ class CacheCleaner:
 
 # Scheduler (only start in leader worker)
 _scheduler = None
-if manager._is_leader and _APSCHEDULER_AVAILABLE:
+if manager._is_leader:
     _scheduler = BackgroundScheduler()
 
     if settings.cache_ttl_hours > 0:

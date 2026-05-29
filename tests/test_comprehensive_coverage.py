@@ -14,21 +14,6 @@ def _get_image_id(client: TestClient) -> int:
     return entry.id
 
 
-def test_config_avif_available(client: TestClient):
-    """Test AVIF format availability check."""
-    from src.image_processor import _AVIF_AVAILABLE
-
-    # Just verify the flag exists
-    assert isinstance(_AVIF_AVAILABLE, bool)
-
-
-def test_config_opencv_available(client: TestClient):
-    """Test OpenCV availability check."""
-    from src.image_processor import _OPENCV_AVAILABLE
-
-    assert isinstance(_OPENCV_AVAILABLE, bool)
-
-
 def test_image_processor_tint_effect(client: TestClient):
     """Test tint color effect."""
     image_id = _get_image_id(client)

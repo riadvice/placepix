@@ -97,18 +97,6 @@ def test_process_watermark_all_positions(complex_image):
         assert isinstance(result, bytes)
 
 
-def test_smart_crop_without_opencv(complex_image, monkeypatch):
-    """Test smart crop falls back when OpenCV not available."""
-    # Mock OpenCV as unavailable
-    import src.image_processor
-
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", False)
-
-    processor = ImageProcessor()
-    result = processor.process(complex_image, width=400, height=300, fit="smart")
-    assert isinstance(result, bytes)
-
-
 def test_resize_contain_mode(complex_image):
     """Test contain resize mode."""
     processor = ImageProcessor()
@@ -240,30 +228,6 @@ def test_process_with_invalid_image_path():
     processor = ImageProcessor()
     with pytest.raises(Exception):
         processor.process(Path("/nonexistent/image.jpg"), width=400, height=300)
-
-
-def test_avif_import_failure(monkeypatch):
-    """Test when pillow_avif import fails."""
-    import src.image_processor
-
-    original_avif = src.image_processor._AVIF_AVAILABLE
-    monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", False)
-
-    # Should still work, just fallback
-    assert src.image_processor._AVIF_AVAILABLE is False
-    monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", original_avif)
-
-
-def test_opencv_import_failure(monkeypatch):
-    """Test when opencv import fails."""
-    import src.image_processor
-
-    original_opencv = src.image_processor._OPENCV_AVAILABLE
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", False)
-
-    # Should still work, just fallback
-    assert src.image_processor._OPENCV_AVAILABLE is False
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
 
 
 def test_pixelate_size_one(complex_image):
@@ -434,14 +398,6 @@ def test_watermark_position_from_config(complex_image):
 
 def test_smart_crop_opencv_error(complex_image, monkeypatch):
     """Test smart crop when opencv cascade loading fails."""
-    import src.image_processor
-
-    original_opencv = src.image_processor._OPENCV_AVAILABLE
-
-    # Mock OpenCV as available but cascade loading fails
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
-
-    # Mock cv2 to raise exception on cascade load
     import cv2
 
     original_cascade = cv2.CascadeClassifier
@@ -456,7 +412,6 @@ def test_smart_crop_opencv_error(complex_image, monkeypatch):
     assert isinstance(result, bytes)
 
     # Restore
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
     monkeypatch.setattr(cv2, "CascadeClassifier", original_cascade)
 
 
@@ -464,11 +419,6 @@ def test_smart_crop_no_faces_detected(complex_image, monkeypatch):
     """Test smart crop when no faces are detected."""
     import cv2
     import numpy as np
-
-    import src.image_processor
-
-    original_opencv = src.image_processor._OPENCV_AVAILABLE
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
 
     # Mock detectMultiScale to return empty array
     original_detect = cv2.CascadeClassifier.detectMultiScale
@@ -483,7 +433,6 @@ def test_smart_crop_no_faces_detected(complex_image, monkeypatch):
     assert isinstance(result, bytes)
 
     # Restore
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
     monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", original_detect)
 
 
@@ -491,11 +440,6 @@ def test_smart_crop_with_faces(complex_image, monkeypatch):
     """Test smart crop when faces are detected."""
     import cv2
     import numpy as np
-
-    import src.image_processor
-
-    original_opencv = src.image_processor._OPENCV_AVAILABLE
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
 
     # Mock detectMultiScale to return faces
     original_detect = cv2.CascadeClassifier.detectMultiScale
@@ -510,7 +454,6 @@ def test_smart_crop_with_faces(complex_image, monkeypatch):
     assert isinstance(result, bytes)
 
     # Restore
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
     monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", original_detect)
 
 
@@ -518,11 +461,6 @@ def test_smart_crop_taller_than_wide(complex_image, monkeypatch):
     """Test smart crop when current ratio is taller than target."""
     import cv2
     import numpy as np
-
-    import src.image_processor
-
-    original_opencv = src.image_processor._OPENCV_AVAILABLE
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
 
     # Mock detectMultiScale to return faces that create tall aspect ratio
     original_detect = cv2.CascadeClassifier.detectMultiScale
@@ -537,7 +475,6 @@ def test_smart_crop_taller_than_wide(complex_image, monkeypatch):
     assert isinstance(result, bytes)
 
     # Restore
-    monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
     monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", original_detect)
 
 

@@ -546,26 +546,6 @@ class TestImageManagerGaps:
             entry2 = manager.pick(category=cat_name, seed="test")
             assert entry1.id == entry2.id
 
-    def test_processor_avif_unavailable(self, test_images_dir):
-        from src.image_processor import ImageProcessor
-
-        processor = ImageProcessor()
-        with patch("src.image_processor._AVIF_AVAILABLE", False):
-            result = processor.process(
-                test_images_dir / "test1.jpg", width=200, height=200, output_format="avif"
-            )
-        assert isinstance(result, bytes)
-
-    def test_processor_opencv_unavailable(self, test_images_dir):
-        from src.image_processor import ImageProcessor
-
-        processor = ImageProcessor()
-        with patch("src.image_processor._OPENCV_AVAILABLE", False):
-            result = processor.process(
-                test_images_dir / "test1.jpg", width=200, height=200, fit="smart"
-            )
-        assert isinstance(result, bytes)
-
     def test_processor_noise_zero(self, test_images_dir):
         from src.image_processor import ImageProcessor
 
@@ -1167,16 +1147,6 @@ class TestImageProcessorGaps:
         result = processor.process(test_images_dir / "test1.jpg", width=100, height=100, pixelate=1)
         assert isinstance(result, bytes)
 
-    def test_smart_crop_no_opencv(self, test_images_dir):
-        from src.image_processor import ImageProcessor
-
-        processor = ImageProcessor()
-        with patch("src.image_processor._OPENCV_AVAILABLE", False):
-            result = processor.process(
-                test_images_dir / "test1.jpg", width=100, height=100, fit="smart"
-            )
-        assert isinstance(result, bytes)
-
     def test_smart_crop_face_error(self, test_images_dir):
         from src.image_processor import ImageProcessor
 
@@ -1663,57 +1633,3 @@ class TestConfigGaps:
         settings = Settings(host="127.0.0.1", dir="/tmp")
         assert settings.bind_port == 3000
 
-
-# ── Import Exception Tests (subprocess) ───────────────────────────
-
-
-def test_pillow_avif_import_failure():
-    """Test that image_processor handles missing pillow_avif gracefully."""
-    code = """
-import sys
-from unittest.mock import patch
-
-for mod in list(sys.modules.keys()):
-    if mod == 'pillow_avif':
-        del sys.modules[mod]
-
-real_import = __builtins__.__import__
-
-def bad_import(name, *args, **kwargs):
-    if name == 'pillow_avif':
-        raise ImportError("No module named pillow_avif")
-    return real_import(name, *args, **kwargs)
-
-with patch.object(__builtins__, '__import__', bad_import):
-    import src.image_processor as ip
-
-assert ip._AVIF_AVAILABLE is False
-"""
-    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
-def test_cv2_import_failure():
-    """Test that image_processor handles missing cv2 gracefully."""
-    code = """
-import sys
-from unittest.mock import patch
-
-for mod in list(sys.modules.keys()):
-    if mod == 'cv2' or mod.startswith('cv2.'):
-        del sys.modules[mod]
-
-real_import = __builtins__.__import__
-
-def bad_import(name, *args, **kwargs):
-    if name == 'cv2':
-        raise ImportError("No module named cv2")
-    return real_import(name, *args, **kwargs)
-
-with patch.object(__builtins__, '__import__', bad_import):
-    import src.image_processor as ip
-
-assert ip._OPENCV_AVAILABLE is False
-"""
-    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
-    assert result.returncode == 0, f"stderr: {result.stderr}"

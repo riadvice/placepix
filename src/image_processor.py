@@ -7,21 +7,10 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
+import cv2
+import pillow_avif  # noqa: F401
+
 from src.config import settings
-
-try:
-    import pillow_avif  # noqa: F401
-
-    _AVIF_AVAILABLE = True
-except Exception:
-    _AVIF_AVAILABLE = False
-
-try:
-    import cv2
-
-    _OPENCV_AVAILABLE = True
-except Exception:
-    _OPENCV_AVAILABLE = False
 
 
 def _load_font(font_size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -484,10 +473,6 @@ class ImageProcessor:
 
     def _smart_crop(self, img: Image.Image, width: int, height: int) -> Image.Image:
         """Smart crop using OpenCV face detection, fallback to center crop."""
-        if not _OPENCV_AVAILABLE:
-            # Fallback to center crop if OpenCV not available
-            return self._crop_center(img, width, height)
-
         # Convert PIL to OpenCV format
         img_array = np.array(img)
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
@@ -809,9 +794,6 @@ class ImageProcessor:
 
     def _apply_edges(self, img: Image.Image, method: str) -> Image.Image:
         """Apply edge detection (sobel or canny)."""
-        if not _OPENCV_AVAILABLE:
-            return img
-
         img_array = np.array(img)
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
 
@@ -829,9 +811,6 @@ class ImageProcessor:
 
     def _apply_oil_painting(self, img: Image.Image) -> Image.Image:
         """Apply oil painting effect using OpenCV stylization."""
-        if not _OPENCV_AVAILABLE:
-            return img
-
         img_array = np.array(img)
         # cv2.stylization is available in newer OpenCV versions
         try:
@@ -844,9 +823,6 @@ class ImageProcessor:
 
     def _apply_pencil_sketch(self, img: Image.Image) -> Image.Image:
         """Apply pencil sketch effect using OpenCV."""
-        if not _OPENCV_AVAILABLE:
-            return img
-
         img_array = np.array(img)
         gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
 
@@ -864,9 +840,6 @@ class ImageProcessor:
 
     def _apply_cartoon(self, img: Image.Image) -> Image.Image:
         """Apply cartoon effect using OpenCV."""
-        if not _OPENCV_AVAILABLE:
-            return img
-
         img_array = np.array(img)
 
         # Bilateral filter for color quantization
