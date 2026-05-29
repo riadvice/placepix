@@ -655,14 +655,26 @@ class ImageManager:
                             entries=[],
                         )
 
+                    entry_id = manifest[manifest_key]
                     new_categories[cat_name].entries.append(ImageEntry(
                         path=None,
                         filename=filename,
                         category=cat_name,
-                        id=manifest[manifest_key],
+                        id=entry_id,
                         s3_key=key,
                         ai=cat_name.startswith("ai-generated/"),
                     ))
+
+                    # Extract dimensions if not already cached
+                    if entry_id not in self._dimensions:
+                        try:
+                            response = client.get_object(Bucket=settings.s3_bucket, Key=key)
+                            image_data = response["Body"].read()
+                            with Image.open(io.BytesIO(image_data)) as img:
+                                self._dimensions[entry_id] = img.size
+                                logger.debug(f"Dimensions extracted (S3): {filename} -> {img.size}")
+                        except Exception as e:
+                            logger.warning(f"Failed to read dimensions for S3 image {key}: {e}")
         except Exception as e:
             logger.error(f"S3 scan failed: {e}")
             import traceback
