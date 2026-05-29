@@ -369,7 +369,7 @@ class ImageManager:
                 f.write(str(os.getpid()))
                 f.flush()
                 self._leader_lock_file = f
-                logger.info(f"Worker {os.getpid()} acquired leader lock")
+                logger.info("Worker %s acquired leader lock", os.getpid())
                 # Register cleanup on exit
                 atexit.register(self._release_leader_lock)
                 return True
@@ -403,16 +403,17 @@ class ImageManager:
                             return True
                         except (IOError, BlockingIOError):
                             f2.close()
-                            logger.debug(f"Worker {os.getpid()} could not break stale lock")
+                            logger.debug("Worker %s could not break stale lock", os.getpid())
                 except Exception as ex:
-                    logger.debug(f"Error checking stale lock: {ex}")
+                    logger.debug("Error checking stale lock: %s", ex)
 
                 logger.debug(
-                    f"Worker {os.getpid()} did not acquire leader lock (held by another process)"
+                    "Worker %s did not acquire leader lock (held by another process)",
+                    os.getpid(),
                 )
                 return False
         except Exception as e:
-            logger.warning(f"Failed to acquire leader lock: {e}")
+            logger.warning("Failed to acquire leader lock: %s", e)
             return False
 
     def _release_leader_lock(self) -> None:
@@ -422,12 +423,12 @@ class ImageManager:
                 fcntl.flock(self._leader_lock_file.fileno(), fcntl.LOCK_UN)
                 self._leader_lock_file.close()
                 try:
-                    logger.info(f"Worker {os.getpid()} released leader lock")
+                    logger.info("Worker %s released leader lock", os.getpid())
                 except Exception:
                     pass
             except Exception as e:
                 try:
-                    logger.warning(f"Failed to release leader lock: {e}")
+                    logger.warning("Failed to release leader lock: %s", e)
                 except Exception:
                     pass
 
@@ -464,7 +465,7 @@ class ImageManager:
         if not data_dir.exists():
             data_dir.mkdir(parents=True)
 
-        logger.info(f"Scanning image directory: {images_dir}")
+        logger.info("Scanning image directory: %s", images_dir)
         manifest = self._load_manifest()
         next_id = max(manifest.values(), default=0) + 1
 
@@ -472,7 +473,7 @@ class ImageManager:
         total = 0
 
         # Scan images_dir for user images
-        logger.debug(f"  Scanning: {images_dir}")
+        logger.debug("  Scanning: %s", images_dir)
         for item in images_dir.iterdir():
             if item.name.startswith(".") or item.name in self.IGNORE_FILES:
                 continue
@@ -512,7 +513,7 @@ class ImageManager:
 
         # Scan S3 if enabled (all workers need S3 images in memory)
         if settings.s3_enabled and settings.s3_endpoint and settings.s3_bucket:
-            logger.info(f"Scanning S3 bucket: {settings.s3_bucket}")
+            logger.info("Scanning S3 bucket: %s", settings.s3_bucket)
             s3_categories, next_id = self._scan_s3(manifest, next_id)
             for cat_name, category in s3_categories.items():
                 if cat_name in new_categories:
@@ -520,7 +521,7 @@ class ImageManager:
                 else:
                     new_categories[cat_name] = category
                 total += len(category.entries)
-            logger.info(f"S3 scan complete: found {len(s3_categories)} categories")
+            logger.info("S3 scan complete: found %s categories", len(s3_categories))
         else:
             logger.debug("S3 scan skipped (S3 not configured)")
 
@@ -531,7 +532,7 @@ class ImageManager:
         self._colors = colors
         self._save_manifest(manifest)
         self._save_dimensions()
-        logger.info(f"Scan complete: {total} images in {len(new_categories)} categories")
+        logger.info("Scan complete: %s images in %s categories", total, len(new_categories))
 
     def scan_colors(self) -> None:
         """Extract dominant colors for images that don't have them yet."""
@@ -551,7 +552,7 @@ class ImageManager:
                 self._colors = colors
                 return
 
-            logger.info(f"Color scan: extracting colors for {len(missing_entries)} images")
+            logger.info("Color scan: extracting colors for %s images", len(missing_entries))
 
             # Initialize S3 client if needed for S3 images
             s3_client = None
@@ -567,14 +568,20 @@ class ImageManager:
                         config=Config(signature_version="s3v4"),
                     )
                 except Exception as e:
-                    logger.warning(f"Failed to initialize S3 client for color scan: {e}")
+                    logger.warning("Failed to initialize S3 client for color scan: %s", e)
 
             total = len(missing_entries)
             last_logged_percent = 0
 
             for i, entry in enumerate(missing_entries, 1):
                 source = entry.path if entry.path else f"S3:{entry.s3_key}"
-                logger.info(f"Color scan [{i}/{total}]: processing {entry.filename} from {source}")
+                logger.info(
+                    "Color scan [%s/%s]: processing %s from %s",
+                    i,
+                    total,
+                    entry.filename,
+                    source,
+                )
                 extracted: list[str] = []
 
                 if entry.path is not None:
@@ -588,7 +595,9 @@ class ImageManager:
                         extracted = _extract_dominant_colors_from_bytes(image_data)
                     except Exception as e:
                         logger.warning(
-                            f"Failed to extract colors from S3 image {entry.s3_key}: {e}"
+                            "Failed to extract colors from S3 image %s: %s",
+                            entry.s3_key,
+                            e,
                         )
 
                 # Also extract dimensions while we have the image open
@@ -599,7 +608,9 @@ class ImageManager:
                             dims = img.size
                     except Exception as e:
                         logger.warning(
-                            f"Failed to read dimensions for local file {entry.filename}: {e}"
+                            "Failed to read dimensions for local file %s: %s",
+                            entry.filename,
+                            e,
                         )
                 elif entry.s3_key and s3_client:
                     try:
@@ -607,24 +618,29 @@ class ImageManager:
                             dims = img.size
                     except Exception as e:
                         logger.warning(
-                            f"Failed to read dimensions for S3 image {entry.filename}: {e}"
+                            "Failed to read dimensions for S3 image %s: %s",
+                            entry.filename,
+                            e,
                         )
                 if dims:
                     self._dimensions[entry.id] = dims
-                    logger.debug(f"Dimensions extracted: {entry.filename} -> {dims}")
+                    logger.debug("Dimensions extracted: %s -> %s", entry.filename, dims)
 
                 if extracted:
                     colors[entry.id] = extracted
-                    logger.info(f"Color scan [{i}/{total}]: {entry.filename} -> {extracted}")
+                    logger.info("Color scan [%s/%s]: %s -> %s", i, total, entry.filename, extracted)
                 else:
                     logger.warning(
-                        f"Color scan [{i}/{total}]: {entry.filename} -> no colors extracted"
+                        "Color scan [%s/%s]: %s -> no colors extracted",
+                        i,
+                        total,
+                        entry.filename,
                     )
 
                 # Log progress every 5%
                 percent = int((i / total) * 100)
                 if percent >= last_logged_percent + 5 or i == total:
-                    logger.info(f"Color scan progress: {percent}% ({i}/{total} images)")
+                    logger.info("Color scan progress: %s%% (%s/%s images)", percent, i, total)
                     last_logged_percent = percent
 
                 # Save colors periodically
@@ -635,7 +651,7 @@ class ImageManager:
             self._colors = colors
             self._save_colors(colors)
             self._save_dimensions()
-            logger.info(f"Color scan complete: {len(missing_entries)} images processed")
+            logger.info("Color scan complete: %s images processed", len(missing_entries))
         finally:
             self._scanning_colors = False
 
@@ -655,7 +671,7 @@ class ImageManager:
                 logger.info("Dimension scan: all images already have dimensions")
                 return
 
-            logger.info(f"Dimension scan: extracting dimensions for {len(missing_entries)} images")
+            logger.info("Dimension scan: extracting dimensions for %s images", len(missing_entries))
 
             # Initialize S3 client if needed for S3 images
             s3_client = None
@@ -671,7 +687,7 @@ class ImageManager:
                         config=Config(signature_version="s3v4"),
                     )
                 except Exception as e:
-                    logger.warning(f"Failed to initialize S3 client for dimension scan: {e}")
+                    logger.warning("Failed to initialize S3 client for dimension scan: %s", e)
 
             total = len(missing_entries)
             last_logged_percent = 0
@@ -679,7 +695,11 @@ class ImageManager:
             for i, entry in enumerate(missing_entries, 1):
                 source = entry.path if entry.path else f"S3:{entry.s3_key}"
                 logger.info(
-                    f"Dimension scan [{i}/{total}]: processing {entry.filename} from {source}"
+                    "Dimension scan [%s/%s]: processing %s from %s",
+                    i,
+                    total,
+                    entry.filename,
+                    source,
                 )
                 dims: tuple[int, int] | None = None
 
@@ -689,7 +709,9 @@ class ImageManager:
                             dims = img.size
                     except Exception as e:
                         logger.warning(
-                            f"Failed to read dimensions for local file {entry.filename}: {e}"
+                            "Failed to read dimensions for local file %s: %s",
+                            entry.filename,
+                            e,
                         )
                 elif entry.s3_key and s3_client:
                     try:
@@ -699,21 +721,26 @@ class ImageManager:
                             dims = img.size
                     except Exception as e:
                         logger.warning(
-                            f"Failed to read dimensions for S3 image {entry.s3_key}: {e}"
+                            "Failed to read dimensions for S3 image %s: %s",
+                            entry.s3_key,
+                            e,
                         )
 
                 if dims:
                     self._dimensions[entry.id] = dims
-                    logger.info(f"Dimension scan [{i}/{total}]: {entry.filename} -> {dims}")
+                    logger.info("Dimension scan [%s/%s]: %s -> %s", i, total, entry.filename, dims)
                 else:
                     logger.warning(
-                        f"Dimension scan [{i}/{total}]: {entry.filename} -> no dimensions extracted"
+                        "Dimension scan [%s/%s]: %s -> no dimensions extracted",
+                        i,
+                        total,
+                        entry.filename,
                     )
 
                 # Log progress every 5%
                 percent = int((i / total) * 100)
                 if percent >= last_logged_percent + 5 or i == total:
-                    logger.info(f"Dimension scan progress: {percent}% ({i}/{total} images)")
+                    logger.info("Dimension scan progress: %s%% (%s/%s images)", percent, i, total)
                     last_logged_percent = percent
 
                 # Save dimensions periodically
@@ -721,7 +748,7 @@ class ImageManager:
                     self._save_dimensions()
 
             self._save_dimensions()
-            logger.info(f"Dimension scan complete: {len(missing_entries)} images processed")
+            logger.info("Dimension scan complete: %s images processed", len(missing_entries))
         finally:
             self._scanning_dimensions = False
 
@@ -730,7 +757,9 @@ class ImageManager:
         new_categories: dict[str, Category] = {}
         try:
             logger.info(
-                f"Connecting to S3: endpoint={settings.s3_endpoint}, bucket={settings.s3_bucket}"
+                "Connecting to S3: endpoint=%s, bucket=%s",
+                settings.s3_endpoint,
+                settings.s3_bucket,
             )
             client = boto3.client(
                 "s3",
@@ -744,7 +773,7 @@ class ImageManager:
             if prefix and not prefix.endswith("/"):
                 prefix += "/"
 
-            logger.info(f"Listing S3 objects with prefix: '{prefix}'")
+            logger.info("Listing S3 objects with prefix: '%s'", prefix)
             paginator = client.get_paginator("list_objects_v2")
             pages = paginator.paginate(Bucket=settings.s3_bucket, Prefix=prefix)
 
@@ -796,7 +825,7 @@ class ImageManager:
                         )
                     )
         except Exception as e:
-            logger.error(f"S3 scan failed: {e}")
+            logger.error("S3 scan failed: %s", e)
             import traceback
 
             logger.error(traceback.format_exc())
@@ -835,9 +864,9 @@ class ImageManager:
                 try:
                     with Image.open(child) as img:
                         self._dimensions[entry.id] = img.size
-                        logger.debug(f"Dimensions extracted: {child.name} -> {img.size}")
+                        logger.debug("Dimensions extracted: %s -> %s", child.name, img.size)
                 except Exception as e:
-                    logger.warning(f"Failed to read dimensions for {child.name}: {e}")
+                    logger.warning("Failed to read dimensions for %s: %s", child.name, e)
 
         meta = self._read_meta(subdir)
         return entries, meta, next_id

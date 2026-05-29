@@ -54,7 +54,7 @@ class _RescanHandler(FileSystemEventHandler):
         if now - self._last_rescan < self._debounce_seconds:
             return
         self._last_rescan = now
-        logger.info(f"File system change: {reason} - triggering rescan")
+        logger.info("File system change: %s - triggering rescan", reason)
         # debounce: wait a moment for bulk file operations to finish
         time.sleep(0.3)
         self.manager.rescan()
@@ -68,15 +68,16 @@ def start_watching(manager: ImageManager) -> Observer:
     # Check if the directory exists before scheduling
     if not settings.images_dir.exists():
         logger.warning(
-            f"Images directory does not exist: {settings.images_dir}, file watcher disabled"
+            "Images directory does not exist: %s, file watcher disabled",
+            settings.images_dir,
         )
         return observer
 
     try:
         observer.schedule(handler, str(settings.images_dir), recursive=True)
         observer.start()
-        logger.info(f"File watcher active for: {settings.images_dir}")
+        logger.info("File watcher active for: %s", settings.images_dir)
     except Exception as e:
-        logger.error(f"Failed to start file watcher for {settings.images_dir}: {e}")
+        logger.error("Failed to start file watcher for %s: %s", settings.images_dir, e)
 
     return observer

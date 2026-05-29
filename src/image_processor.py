@@ -4,10 +4,9 @@ import io
 import math
 from pathlib import Path
 
+import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
-
-import cv2
 import pillow_avif  # noqa: F401
 
 from src.config import settings

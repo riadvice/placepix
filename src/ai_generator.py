@@ -153,7 +153,7 @@ def generate_image(
         if seed is not None:
             payload["seed"] = seed
 
-        logger.info(f"Calling OVHcloud AI Endpoints: {url}")
+        logger.info("Calling OVHcloud AI Endpoints: %s", url)
         response = requests.post(url, headers=headers, json=payload, timeout=120)
         response.raise_for_status()
 
@@ -173,7 +173,7 @@ def generate_image(
         with open(local_path, "wb") as f:
             f.write(image_bytes)
 
-        logger.info(f"AI image saved: {local_path}")
+        logger.info("AI image saved: %s", local_path)
 
         # Optional S3 upload
         s3_key = None
@@ -190,10 +190,10 @@ def generate_image(
         )
 
     except requests.RequestException as e:
-        logger.error(f"OVHcloud AI request failed: {e}")
+        logger.error("OVHcloud AI request failed: %s", e)
         return GenerationResult(success=False, error=f"AI generation request failed: {e}")
     except Exception as e:
-        logger.error(f"AI generation failed: {e}")
+        logger.error("AI generation failed: %s", e)
         return GenerationResult(success=False, error=f"AI generation failed: {e}")
 
 
@@ -217,8 +217,8 @@ def _upload_to_s3(image_bytes: bytes, s3_key: str) -> str | None:
             Body=image_bytes,
             ContentType="image/png",
         )
-        logger.info(f"AI image uploaded to S3: {s3_key}")
+        logger.info("AI image uploaded to S3: %s", s3_key)
         return s3_key
     except Exception as e:
-        logger.warning(f"S3 upload failed for AI image: {e}")
+        logger.warning("S3 upload failed for AI image: %s", e)
         return None

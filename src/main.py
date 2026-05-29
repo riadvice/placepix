@@ -16,21 +16,20 @@ import shutil
 import time
 from typing import Annotated, Any
 
+from apscheduler.schedulers.background import BackgroundScheduler
 import boto3
 from botocore.config import Config
 from fastapi import FastAPI, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
-import markdown
-from starlette.middleware.base import BaseHTTPMiddleware
-import yaml
-
-from apscheduler.schedulers.background import BackgroundScheduler
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+import markdown
 from multiavatar.multiavatar import multiavatar
 from PIL import Image, ImageDraw, ImageFont
 from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
+import yaml
 
 from src.ai_generator import check_rate_limit, generate_image
 from src.avatar_generator import AvatarGenerator
@@ -123,8 +122,8 @@ def _validate_startup() -> None:
                 font_found = True
             else:
                 logger.warning(
-                    "Custom font directory configured but no fonts found in"
-                    f" {settings.font_dir_path}"
+                    "Custom font directory configured but no fonts found in %s",
+                    settings.font_dir_path,
                 )
 
     # Check system fonts as fallback
@@ -155,7 +154,7 @@ def _validate_startup() -> None:
 
     if errors:
         for err in errors:
-            logger.error(f"Startup validation failed: {err}")
+            logger.error("Startup validation failed: %s", err)
         raise SystemExit(f"Startup validation failed with {len(errors)} error(s). Check logs.")
     logger.info("Startup validation passed")
 
@@ -229,15 +228,15 @@ app = FastAPI(title="PlacePix", version="1.0.0")
 
 # Seed images if enabled
 if settings.seed_enabled:
-    logger.info(f"Seeding sample images in: {settings.seed_dir}")
+    logger.info("Seeding sample images in: %s", settings.seed_dir)
     seed_images(settings.seed_dir)
 else:
     logger.info("Seed images disabled")
 
 # In-memory image registry
-logger.info(f"Loading image registry from: {settings.images_dir} and {settings.seed_dir}")
+logger.info("Loading image registry from: %s and %s", settings.images_dir, settings.seed_dir)
 manager = ImageManager()
-logger.info(f"Registry loaded: {manager.total} images in {len(manager.categories)} categories")
+logger.info("Registry loaded: %s images in %s categories", manager.total, len(manager.categories))
 
 processor = ImageProcessor(
     min_width=settings.min_width,
@@ -251,7 +250,7 @@ if manager._is_leader:
     logger.info("Starting file watcher for hot-reload")
     _observer = start_watching(manager)
 else:
-    logger.info(f"File watcher skipped (not leader worker, is_leader={manager._is_leader})")
+    logger.info("File watcher skipped (not leader worker, is_leader=%s)", manager._is_leader)
     _observer = None
 
 
@@ -367,8 +366,9 @@ if manager._is_leader:
 
     if settings.cache_ttl_hours > 0:
         logger.info(
-            f"Starting cache cleanup scheduler (TTL: {settings.cache_ttl_hours}h, "
-            f"interval: {settings.cache_cleanup_interval_minutes}m)"
+            "Starting cache cleanup scheduler (TTL: %sh, interval: %sm)",
+            settings.cache_ttl_hours,
+            settings.cache_cleanup_interval_minutes,
         )
         _cache_cleaner = CacheCleaner(
             settings.cache_dir, settings.cache_ttl_hours, settings.cache_max_size_mb
@@ -401,12 +401,13 @@ _upload_writable = False
 if settings.upload_enabled:
     if not os.access(settings.images_dir, os.W_OK):
         logger.warning(
-            f"Uploads are enabled but the image directory is not writable: {settings.images_dir}. "
-            "Upload functionality will be hidden in the UI."
+            "Uploads are enabled but the image directory is not writable: %s. "
+            "Upload functionality will be hidden in the UI.",
+            settings.images_dir,
         )
         _upload_writable = False
     else:
-        logger.info(f"Upload directory is writable: {settings.images_dir}")
+        logger.info("Upload directory is writable: %s", settings.images_dir)
         _upload_writable = True
 
 # Metrics tracker (always enabled)
@@ -438,7 +439,6 @@ async def lifespan(app: FastAPI):
 app.router.lifespan_context = lifespan
 
 # Templates
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 jinja_env = Environment(
     loader=FileSystemLoader("templates"),
@@ -539,7 +539,7 @@ async def sitemap_file(filename: str) -> Response:
     return Response(content=path.read_text(encoding="utf-8"), media_type="application/xml")
 
 
-logger.info(f"PlacePix ready - listening on {settings.bind_host}:{settings.bind_port}")
+logger.info("PlacePix ready - listening on %s:%s", settings.bind_host, settings.bind_port)
 
 
 # ── Metrics Middleware ──────────────────────────────────────────────
@@ -553,9 +553,11 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
         # Log the request
         logger.info(
-            f"{request.method} {request.url.path} - "
-            f"Status: {response.status_code} - "
-            f"Time: {response_time_ms:.2f}ms"
+            "%s %s - Status: %s - Time: %.2fms",
+            request.method,
+            request.url.path,
+            response.status_code,
+            response_time_ms,
         )
 
         # Extract metadata from request
@@ -833,13 +835,13 @@ def _check_not_modified(
 def _resolve_image_source(entry: ImageEntry) -> Path | io.BytesIO:
     """Return local path or download S3 object into a BytesIO buffer."""
     if entry.s3_key and settings.s3_enabled:
-        logger.debug(f"Loading S3 image: {entry.s3_key}")
+        logger.debug("Loading S3 image: %s", entry.s3_key)
         try:
             client = _get_s3_client()
             response = client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
             return io.BytesIO(response["Body"].read())
         except Exception as e:
-            logger.error(f"Failed to load S3 image {entry.s3_key}: {e}")
+            logger.error("Failed to load S3 image %s: %s", entry.s3_key, e)
             raise HTTPException(status_code=500, detail=f"Failed to load S3 image: {e}")
     if entry.path is None:
         raise HTTPException(status_code=500, detail="image has no local path or S3 key")
@@ -1063,7 +1065,7 @@ async def _serve_entry(
         )
         cached = _read_cached(cache_path)
         if cached is not None:
-            logger.debug(f"Cache hit: {entry.filename} at {width}x{height}")
+            logger.debug("Cache hit: %s at %sx%s", entry.filename, width, height)
             if settings.cdn:
                 return RedirectResponse(
                     url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}"
@@ -1075,7 +1077,7 @@ async def _serve_entry(
 
             # Check if client cache is still valid
             if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
-                logger.debug(f"Client cache valid: {entry.filename}")
+                logger.debug("Client cache valid: %s", entry.filename)
                 return Response(
                     status_code=304, headers={"ETag": etag, "Last-Modified": last_modified}
                 )
@@ -1128,7 +1130,7 @@ async def _serve_entry(
     # Request coalescing: wait if another identical request is already processing
     existing_event = await _claim_inflight(inflight_key)
     if existing_event is not None:
-        logger.debug(f"Coalescing request for {entry.filename} ({width}x{height})")
+        logger.debug("Coalescing request for %s (%sx%s)", entry.filename, width, height)
         await existing_event.wait()
         # After waiting, check cache again
         if settings.cache and cache_path is not None:
@@ -1138,7 +1140,7 @@ async def _serve_entry(
                     cached, output_format, entry.category, width, height, is_random, as_base64
                 )
         # Cache miss after waiting (evicted or error) — fall through to process ourselves
-        logger.debug(f"Cache miss after coalescing, processing: {entry.filename}")
+        logger.debug("Cache miss after coalescing, processing: %s", entry.filename)
         # Re-claim since previous claim was released
         second_claim = await _claim_inflight(inflight_key)
         if second_claim is not None:
@@ -1155,7 +1157,13 @@ async def _serve_entry(
         image_source = _resolve_image_source(entry)
 
         # Process image (limit concurrency to prevent CPU/memory thrashing)
-        logger.debug(f"Processing image: {entry.filename} -> {width}x{height} {output_format}")
+        logger.debug(
+            "Processing image: %s -> %sx%s %s",
+            entry.filename,
+            width,
+            height,
+            output_format,
+        )
         async with _processing_sem:
             processed = processor.process(
                 image_path=image_source,
@@ -1200,7 +1208,7 @@ async def _serve_entry(
         # Cache if enabled
         if settings.cache and cache_path is not None:
             _write_cache(cache_path, processed)
-            logger.debug(f"Cached processed image: {cache_path}")
+            logger.debug("Cached processed image: %s", cache_path)
             if settings.cdn:
                 return RedirectResponse(
                     url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}"
@@ -1325,10 +1333,10 @@ async def serve_by_id(
     text_color: str = "ffffff",
     text_bg: str = "000000",
 ) -> Response:
-    logger.debug(f"Serving image by ID #{image_id} at {width}x{height}")
+    logger.debug("Serving image by ID #%s at %sx%s", image_id, width, height)
     entry = manager.get_by_id(image_id)
     if entry is None:
-        logger.warning(f"Image not found: ID #{image_id}")
+        logger.warning("Image not found: ID #%s", image_id)
         raise HTTPException(status_code=404, detail="image not found")
     return await _serve_entry(
         entry,
@@ -1430,10 +1438,10 @@ async def serve_by_ratio(
     orientation: str = "",
 ) -> Response:
     """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
-    logger.debug(f"Serving image by ratio: {ratio} at height {height}")
+    logger.debug("Serving image by ratio: %s at height %s", ratio, height)
     width, height = _parse_aspect_ratio(ratio, height)
     if width == 0 or height == 0:
-        logger.warning(f"Invalid aspect ratio format: {ratio}")
+        logger.warning("Invalid aspect ratio format: %s", ratio)
         raise HTTPException(status_code=400, detail="invalid aspect ratio format")
 
     if color:
@@ -1441,7 +1449,7 @@ async def serve_by_ratio(
     else:
         entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
-        logger.warning(f"Category not found for ratio: {category or 'all'}")
+        logger.warning("Category not found for ratio: %s", category or 'all')
         raise HTTPException(status_code=404, detail="category not found")
 
     is_random = not seed
@@ -1544,9 +1552,9 @@ async def serve_by_preset(
     orientation: str = "",
 ) -> Response:
     """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
-    logger.debug(f"Serving image by preset: {preset_name}")
+    logger.debug("Serving image by preset: %s", preset_name)
     if preset_name not in PRESETS:
-        logger.warning(f"Unknown preset: {preset_name}")
+        logger.warning("Unknown preset: %s", preset_name)
         raise HTTPException(status_code=404, detail=f"unknown preset: {preset_name}")
 
     width, height = PRESETS[preset_name]
@@ -1556,7 +1564,7 @@ async def serve_by_preset(
     else:
         entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
-        logger.warning(f"Category not found for preset: {category or 'all'}")
+        logger.warning("Category not found for preset: %s", category or 'all')
         raise HTTPException(status_code=404, detail="category not found")
 
     is_random = not seed
@@ -1929,13 +1937,19 @@ async def serve_image(
 ) -> Response:
     cat_display = category or "all"
     seed_display = seed or "random"
-    logger.debug(f"Serving {width}x{height} from category '{cat_display}' (seed: {seed_display})")
+    logger.debug(
+        "Serving %sx%s from category '%s' (seed: %s)",
+        width,
+        height,
+        cat_display,
+        seed_display,
+    )
     if color:
         entry = manager.pick_by_color(color, category or None, orientation=orientation or None)
     else:
         entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
-        logger.warning(f"Category not found: {category or 'all'}")
+        logger.warning("Category not found: %s", category or 'all')
         raise HTTPException(status_code=404, detail="category not found")
     # Random images should not be cached long-term
     is_random = not seed
@@ -2032,10 +2046,10 @@ async def serve_by_color(
     text_bg: str = "000000",
     orientation: str = "",
 ) -> Response:
-    logger.debug(f"Serving image by color: {hex_color} at {width}x{height}")
+    logger.debug("Serving image by color: %s at %sx%s", hex_color, width, height)
     entry = manager.pick_by_color(hex_color, orientation=orientation or None)
     if entry is None:
-        logger.warning(f"No image matching color: {hex_color}")
+        logger.warning("No image matching color: %s", hex_color)
         raise HTTPException(status_code=404, detail="no image matching that color")
     return await _serve_entry(
         entry,
@@ -2604,7 +2618,7 @@ async def get_blurhash(image_id: int) -> JSONResponse:
             }
         )
     except Exception as e:
-        logger.error(f"Blurhash generation failed for image {image_id}: {e}")
+        logger.error("Blurhash generation failed for image %s: %s", image_id, e)
         raise HTTPException(status_code=500, detail=f"blurhash generation failed: {e}")
 
 
@@ -2764,7 +2778,7 @@ async def upload_image(
     category: str = Form(default=""),
 ) -> JSONResponse:
     cat_display = category or "__root"
-    logger.info(f"Upload request: {file.filename} to category '{cat_display}'")
+    logger.info("Upload request: %s to category '%s'", file.filename, cat_display)
 
     if not settings.upload_enabled or not _upload_writable:
         logger.warning("Upload blocked: uploads are disabled or directory is not writable")
@@ -2784,7 +2798,7 @@ async def upload_image(
     dest = target_dir / file.filename
     content = await file.read()
     dest.write_bytes(content)
-    logger.info(f"File saved: {dest} ({len(content)} bytes)")
+    logger.info("File saved: %s (%s bytes)", dest, len(content))
 
     # Trigger rescan
     manager.rescan()

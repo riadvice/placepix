@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import io
 import os
-import subprocess
-import sys
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
