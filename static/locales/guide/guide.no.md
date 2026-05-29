@@ -298,9 +298,9 @@ Bruk real-time filtre og effekter på ethvert bilde via spørreparametere. All b
 ?padding=20                # Indre polstring
 ```
 
-## Bokstav-avatar-generator
+## Avatar Generator
 
-Generer deterministiske bokstav-baserte avatarer fra ethvert navn eller e-post. Perfekt for brukerprofil-placeholders, kommentarsystemer og teamkataloger. Hvert navn produserer alltid samme farge, så avatarer er konsistente på tvers av økter.
+Generer deterministiske avatarer fra ethvert navn eller e-post. PlacePix støtter to avatar-typer: **Bokstav-avatar** (fargede initialer) og **Multiavatar** (multikulturelle vektor-avatarer).
 
 ### Endepunkt
 
@@ -311,38 +311,65 @@ Generer deterministiske bokstav-baserte avatarer fra ethvert navn eller e-post. 
 
 ### Parametere
 
-- `size` — pikselstørrelse (f.eks. `64`, `128`, `256`)
-- `name` — hvilken som helst streng; første bokstaver trekkes ut for avataren
-- `circle` — beskjær til en sirkelform
-- `border={width},{color}` — legg til en kant
-- `bg={hex}` — overstyre bakgrunnsfarge
-- `fg={hex}` — overstyre tekst-/forgrunnsfarge
-- `single=true` — bruk kun første bokstav
-- `uppercase=false` — behold små bokstaver
-- `palette={name}` — velg fra `flatui`, `material`, `pastel` eller `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Bokstav-avatar (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width}` — legg til en kantlinje
+- `border_color={hex}` — kantlinjefarge
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Eksempler
 
 ```
-# Enkel 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Sirkelavatar med tilpasset kant
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# Enkelt initial, pastellpalett
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG-utgang (skalerbar, under 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Hvorfor bruke bokstavavatarer?
+### Hvorfor bruke bokstav-avatarer?
 
 - Null eksterne avhengigheter — ingen Gravatar eller tredjeparts avatar-tjeneste
 - Deterministisk — samme navn produserer alltid samme farge
 - SVG-støtte — uendelig skalerbar, perfekt for HiDPI-skjermer
-- Fire innebygde fargepaletter for enhver merkevare-estetikk
+- Seks innebygde fargepaletter for enhver merkevareestetikk
+
+### Hvorfor bruke Multiavatar?
+
+- 12 milliarder unike multikulturelle avatarer
+- Deterministisk — samme navn produserer alltid samme avatar
+- Ren SVG-utdata — liten filstørrelse, uendelig skalerbar
+- Ingen eksterne API-kall nødvendig
 
 ## REST API-hurtigreferanse
 

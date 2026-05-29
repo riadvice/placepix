@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Annotated
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
+from fastapi import FastAPI, HTTPException, Query, Request, UploadFile, Header
 
 import boto3
 from botocore.config import Config
@@ -44,6 +44,7 @@ from src.metrics import MetricsTracker
 from src.observer import start_watching
 from src.seed import seed_images
 from src.avatar_generator import AvatarGenerator
+from multiavatar.multiavatar import multiavatar
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -1400,7 +1401,6 @@ async def solid_color_placeholder(
     text: str = "",
 ) -> Response:
     """Generate solid color placeholder with optional text."""
-    from PIL import Image, ImageDraw, ImageFont
     
     # Clamp size
     width = max(1, min(width, 5000))
@@ -1521,7 +1521,6 @@ async def gradient_placeholder(
 
     # Re-encode if not PNG (gradient generator outputs PNG)
     if output_format != "png":
-        from PIL import Image
         img = Image.open(io.BytesIO(gradient_bytes))
         buffer = io.BytesIO()
         img.save(buffer, format=output_format.upper(), optimize=True)
@@ -1551,6 +1550,7 @@ async def avatar_image(
     size: str,
     name: str,
     ext: str = "",
+    avatar_type: str = Query("letter", alias="type"),
     circle: bool = False,
     border: int = 0,
     border_color: str = "ffffff",
@@ -1559,8 +1559,34 @@ async def avatar_image(
     single: bool = False,
     uppercase: bool = True,
     palette: str = "flatui",
+    env: bool = True,
+    part: str = "",
+    theme: str = "",
 ) -> Response:
-    """Generate a letter-based avatar image (PNG/SVG)."""
+    """Generate an avatar image (letter-based or multiavatar)."""
+    avatar_type = avatar_type.lower().strip()
+    if avatar_type not in ("letter", "multiavatar"):
+        raise HTTPException(
+            status_code=400, detail="type must be 'letter' or 'multiavatar'"
+        )
+
+    # ── Multiavatar path ──────────────────────────────────────────
+    if avatar_type == "multiavatar":
+        version = None
+        if part or theme:
+            version = {"part": part, "theme": theme}
+        svg_code = multiavatar(name, None if env else True, version)
+        content = svg_code.encode("utf-8")
+        return Response(
+            content=content,
+            media_type="image/svg+xml",
+            headers={
+                "Cache-Control": "public, max-age=2592000, stale-while-revalidate=60, immutable",
+                "ETag": _generate_etag(content),
+            },
+        )
+
+    # ── Letter avatar path (default) ────────────────────────────
     output_format = ext.lstrip(".").lower() or "png"
 
     # Validate palette early
@@ -2149,8 +2175,6 @@ async def image_info_by_id(image_id: int) -> JSONResponse:
     if entry is None:
         raise HTTPException(status_code=404, detail="image not found")
 
-    from PIL import Image
-
     source = _resolve_image_source(entry)
     with Image.open(source) as img:
         width, height = img.size
@@ -2179,8 +2203,6 @@ async def image_info(category: str, filename: str) -> JSONResponse:
     entry = manager.get_entry(category, filename)
     if entry is None:
         raise HTTPException(status_code=404, detail="image not found")
-
-    from PIL import Image
 
     source = _resolve_image_source(entry)
     with Image.open(source) as img:
@@ -2241,7 +2263,6 @@ async def get_blurhash(image_id: int) -> JSONResponse:
 
     try:
         source = _resolve_image_source(entry)
-        from PIL import Image
         with Image.open(source) as img:
             img = img.convert("RGB")
             # Downsize to ~32x32 for blurhash encoding
@@ -2559,7 +2580,6 @@ async def generate_srcset(
         raise HTTPException(status_code=400, detail="invalid sizes format")
     
     # Calculate aspect ratio from original image
-    from PIL import Image
     source = _resolve_image_source(entry)
     with Image.open(source) as img:
         aspect_ratio = img.width / img.height

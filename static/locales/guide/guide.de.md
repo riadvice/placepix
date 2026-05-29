@@ -318,11 +318,11 @@ Wenden Sie Echtzeit-Filter und Effekte auf beliebige Bilder über Abfrageparamet
 ?padding=20                # Interner Abstand
 ```
 
-## Buchstaben-Avatar-Generator
+## Avatar-Generator
 
-Generieren Sie deterministische buchstabenbasierte Avatare aus beliebigen Namen oder E-Mails. Perfekt für Benutzerprofil-Placeholder, Kommentarsysteme und Teamverzeichnisse. Jeder Name erzeugt immer dieselbe Farbe, sodass Avatare über Sitzungen hinweg konsistent sind.
+Generiere deterministische Avatare aus jedem Namen oder jeder E-Mail. PlacePix unterstützt zwei Avatar-Typen: **Buchstaben-Avatar** (farbene Initialen) und **Multiavatar** (multikulturelle Vektor-Avatare).
 
-### Endpunkt
+### Endpoint
 
 ```
 /avatar/{size}/{name}
@@ -331,38 +331,65 @@ Generieren Sie deterministische buchstabenbasierte Avatare aus beliebigen Namen 
 
 ### Parameter
 
-- `size` — Pixelgröße (z.B. `64`, `128`, `256`)
-- `name` — beliebige Zeichenkette; erste Buchstaben werden für den Avatar extrahiert
-- `circle` — zu Kreisform zuschneiden
-- `border={width},{color}` — Rahmen hinzufügen
-- `bg={hex}` — Hintergrundfarbe überschreiben
-- `fg={hex}` — Text-/Vordergrundfarbe überschreiben
-- `single=true` — nur den ersten Buchstaben verwenden
-- `uppercase=false` — Kleinbuchstaben beibehalten
-- `palette={name}` — wählen aus `flatui`, `material`, `pastel` oder `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Buchstaben-Avatar (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width}` — einen Rahmen hinzufügen
+- `border_color={hex}` — Rahmenfarbe
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Beispiele
 
 ```
-# Einfacher 128px-Avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Kreis-Avatar mit benutzerdefiniertem Rahmen
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# Einzelinitial, Pastell-Palette
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG-Ausgabe (skalierbar, unter 500 Bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Warum Buchstaben-Avatare verwenden?
 
-- Null externe Abhängigkeiten — kein Gravatar oder Drittanbieter-Avatar-Dienst
+- Keine externen Abhängigkeiten — kein Gravatar oder Avatar-Dienst eines Drittanbieters
 - Deterministisch — derselbe Name erzeugt immer dieselbe Farbe
 - SVG-Unterstützung — unendlich skalierbar, perfekt für HiDPI-Displays
-- Vier integrierte Farbpaletten für jede Markenästhetik
+- Sechs integrierte Farbpaletten für jedes Brand-Aesthetic
+
+### Warum Multiavatar verwenden?
+
+- 12 Milliarden einzigartige multikulturelle Avatare
+- Deterministisch — derselbe Name erzeugt immer denselben Avatar
+- Reine SVG-Ausgabe — kleine Dateigröße, unendlich skalierbar
+- Keine externen API-Aufrufe erforderlich
 
 ## REST API-Kurzreferenz
 

@@ -298,9 +298,9 @@ PlacePix đọc kích thước hình ảnh từ tiêu đề tệp trong quá tr�
 ?padding=20                # Khoảng đệm bên trong
 ```
 
-## Trình Tạo Avatar Chữ cái
+## Trình Tạo Avatar
 
-Tạo avatar dựa trên chữ cái mang tính xác định từ bất kỳ tên hoặc email nào. Hoàn hảo cho placeholder hồ sơ người dùng, hệ thống bình luận và thư mục nhóm. Mỗi tên luôn tạo ra cùng một màu, vì vậy avatar nhất quán trên các phiên.
+Tạo avatar xác định từ bất kỳ tên hoặc email nào. PlacePix hỗ trợ hai loại avatar: **Avatar chữ cái** (chữ cái đầu màu sắc) và **Multiavatar** (avatar vector đa văn hóa).
 
 ### Endpoint
 
@@ -311,38 +311,65 @@ Tạo avatar dựa trên chữ cái mang tính xác định từ bất kỳ tên
 
 ### Tham số
 
-- `size` — kích thước pixel (ví dụ: `64`, `128`, `256`)
-- `name` — bất kỳ chuỗi nào; các chữ cái đầu được trích xuất cho avatar
-- `circle` — cắt thành hình tròn
-- `border={width},{color}` — thêm viền
-- `bg={hex}` — ghi đè màu nền
-- `fg={hex}` — ghi đè màu chữ/màu trước
-- `single=true` — chỉ sử dụng chữ cái đầu tiên
-- `uppercase=false` — giữ nguyên chữ thường
-- `palette={name}` — chọn từ `flatui`, `material`, `pastel`, hoặc `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Avatar chữ cái (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width}` — thêm viền
+- `border_color={hex}` — màu viền
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Ví dụ
 
 ```
-# Avatar 128px đơn giản
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Avatar hình tròn với viền tùy chỉnh
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# Chữ cái đầu duy nhất, bảng màu pastel
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# Đầu ra SVG (có thể mở rộng, dưới 500 byte)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Tại sao sử dụng Avatar Chữ cái?
+### Tại sao sử dụng avatar chữ cái?
 
-- Không phụ thuộc bên ngoài — không có Gravatar hoặc dịch vụ avatar bên thứ ba
-- Xác định — cùng tên luôn tạo ra cùng một màu
-- Hỗ trợ SVG — vô hạn khả năng mở rộng, hoàn hảo cho màn hình HiDPI
-- Bốn bảng màu tích hợp cho bất kỳ thẩm mỹ thương hiệu nào
+- Không có phụ thuộc bên ngoài — không có Gravatar hay dịch vụ avatar bên thứ ba
+- Xác định — cùng một tên luôn tạo ra cùng một màu
+- Hỗ trợ SVG — có thể mở rộng vô hạn, hoàn hảo cho màn hình HiDPI
+- Sáu bảng màu tích hợp cho mọi thẩm mỹ thương hiệu
+
+### Tại sao sử dụng Multiavatar?
+
+- 12 tỷ avatar đa văn hóa duy nhất
+- Xác định — cùng một tên luôn tạo ra cùng một avatar
+- Đầu ra SVG thuần — kích thước tệp nhỏ, có thể mở rộng vô hạn
+- Không cần gọi API bên ngoài
 
 ## Tài liệu tham khảo nhanh REST API
 

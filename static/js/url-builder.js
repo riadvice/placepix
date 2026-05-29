@@ -211,9 +211,26 @@ function buildGradientURL(params) {
     return `/gradient/${gradWidth}x${gradHeight}/${gradFrom}/${gradTo}`;
 }
 
-function buildAvatarURL(params) {
-    const avatarSize = document.getElementById('avatar-size').value;
-    const avatarName = document.getElementById('avatar-name').value;
+function toggleAvatarType() {
+    const avatarType = document.getElementById('avatar-type').value;
+    const letterControls = document.querySelector('.avatar-letter-controls');
+    const multiavatarControls = document.querySelector('.avatar-multiavatar-controls');
+    if (letterControls) letterControls.style.display = avatarType === 'letter' ? 'block' : 'none';
+    if (multiavatarControls) multiavatarControls.style.display = avatarType === 'multiavatar' ? 'block' : 'none';
+    updateURL();
+}
+
+function _pushMultiavatarParams(params) {
+    params.push('type=multiavatar');
+    const avatarEnv = document.getElementById('avatar-env').checked;
+    if (!avatarEnv) params.push('env=false');
+    const avatarPart = document.getElementById('avatar-part').value.trim();
+    const avatarTheme = document.getElementById('avatar-theme').value.trim();
+    if (avatarPart) params.push(`part=${encodeURIComponent(avatarPart)}`);
+    if (avatarTheme) params.push(`theme=${encodeURIComponent(avatarTheme)}`);
+}
+
+function _pushLetterAvatarParams(params) {
     const avatarPalette = document.getElementById('avatar-palette').value;
     const avatarCircle = document.getElementById('avatar-circle').checked;
     const avatarSingle = document.getElementById('avatar-single').checked;
@@ -221,7 +238,7 @@ function buildAvatarURL(params) {
     const avatarFg = document.getElementById('avatar-fg').value.replace('#', '');
     const avatarBorder = document.getElementById('avatar-border').value;
     const avatarBorderColor = document.getElementById('avatar-border-color').value.replace('#', '');
-    let url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
+    
     if (avatarPalette && avatarPalette !== 'flatui') params.push(`palette=${avatarPalette}`);
     if (avatarCircle) params.push('circle=true');
     if (avatarSingle) params.push('single=true');
@@ -231,13 +248,27 @@ function buildAvatarURL(params) {
     }
     if (avatarBg && avatarBg !== '#667eea') params.push(`bg=${avatarBg.replace('#', '')}`);
     if (avatarFg && avatarFg !== 'ffffff') params.push(`fg=${avatarFg}`);
+}
+
+function buildAvatarURL(params) {
+    const avatarType = document.getElementById('avatar-type').value;
+    const avatarSize = document.getElementById('avatar-size').value;
+    const avatarName = document.getElementById('avatar-name').value;
+    const url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
+    
+    if (avatarType === 'multiavatar') {
+        _pushMultiavatarParams(params);
+        return { url, supportsFormat: false };
+    }
+    
+    _pushLetterAvatarParams(params);
     return { url, supportsFormat: true };
 }
 
 function buildLuckyURL(params) {
     const luckyCategory = document.getElementById('random-category').value;
     const luckyColor = document.getElementById('random-color').value;
-    let url = `/random/${luckyCategory}`;
+    const url = `/random/${luckyCategory}`;
     if (luckyColor && luckyColor !== '#3b82f6') params.push(`color=${encodeURIComponent(luckyColor.replace('#', ''))}`);
     return { url, supportsFormat: false };
 }
@@ -604,7 +635,11 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// Avatar type toggle
+document.getElementById('avatar-type').addEventListener('change', toggleAvatarType);
+
 // Initialize
 loadTheme();
 loadCategories();
+toggleAvatarType();
 updateURL();

@@ -322,9 +322,9 @@ PlacePix ابعاد تصاویر را از سرصفحه‌های فایل در �
 ?padding=20                # padding داخلی
 ```
 
-## تولیدکننده آواتار حرفی
+## تولیدکننده آواتار
 
-آواتارهای قطعی مبتنی بر حرف را از هر نام یا ایمیل تولید کنید. عالی برای placeholderهای پروفایل کاربر، سیستم‌های نظر و دایرکتوری‌های تیم. هر نام همیشه همان رنگ را تولید می‌کند، بنابراین آواتارها در بین sessionها سازگار هستند.
+آواتارهای قطعی را از هر نام یا ایمیلی تولید کنید. PlacePix از دو نوع آواتار پشتیبانی می‌کند: **آواتار حرفی** (حروف اول رنگی) و **Multiavatar** (آواتارهای برداری چندفرهنگی).
 
 ### نقطه پایانی
 
@@ -335,38 +335,65 @@ PlacePix ابعاد تصاویر را از سرصفحه‌های فایل در �
 
 ### پارامترها
 
-- `size` — اندازه پیکسل (مثلاً `64`، `128`، `256`)
-- `name` — هر رشته‌ای؛ حروف اول برای آواتار استخراج می‌شوند
-- `circle` — برش به شکل دایره
-- `border={width},{color}` — افزودن border
-- `bg={hex}` — لغو رنگ پس‌زمینه
-- `fg={hex}` — لغو رنگ متن/foreground
-- `single=true` — استفاده فقط از حرف اول
-- `uppercase=false` — حفظ حروف کوچک
-- `palette={name}` — انتخاب از `flatui`، `material`، `pastel`، یا `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### آواتار حرفی (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width}` — اضافه کردن حاشیه
+- `border_color={hex}` — رنگ حاشیه
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### نمونه‌ها
 
 ```
-# آواتار ساده ۱۲۸px
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# آواتار دایره‌ای با border سفارشی
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# حرف اول، پالت pastel
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# خروجی SVG (مقیاس‌پذیر، زیر ۵۰۰ بایت)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### چرا از آواتارهای حرفی استفاده کنیم؟
 
 - بدون وابستگی خارجی — بدون Gravatar یا سرویس آواتار شخص ثالث
-- قطعی — یک نام همیشه همان رنگ را تولید می‌کند
-- پشتیبانی SVG — بی‌نهایت مقیاس‌پذیر، عالی برای نمایشگرهای HiDPI
-- چهار پالت رنگ داخلی برای هر زیبایی‌شناسی برند
+- قطعی — همان نام همیشه همان رنگ را تولید می‌کند
+- پشتیبانی از SVG — قابل مقیاس‌بندی نامحدود، مناسب برای نمایشگرهای HiDPI
+- شش پالت رنگ داخلی برای هر زیبایی‌شناسی برند
+
+### چرا از Multiavatar استفاده کنیم؟
+
+- 12 میلیارد آواتار چندفرهنگی منحصربه‌فرد
+- قطعی — همان نام همیشه همان آواتار را تولید می‌کند
+- خروجی SVG خالص — حجم فایل کوچک، قابل مقیاس‌بندی نامحدود
+- بدون نیاز به فراخوانی API خارجی
 
 ## مرجع سریع REST API
 
@@ -429,4 +456,3 @@ WebP، AVIF، JPEG، PNG، SVG و JSON base64. از `.webp`، `.avif` یا `.png
 ### آیا PlacePix برای استفاده تجاری رایگان است؟
 
 بله. PlacePix تحت مجوز MIT منتشر شده و برای استفاده شخصی و تجاری رایگان است. از آنجا که self-hosted است، هیچ محدودیت استفاده، هیچ کلید API و هیچ صورتحساب per-request وجود ندارد.
-

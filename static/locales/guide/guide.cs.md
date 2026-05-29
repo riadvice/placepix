@@ -318,51 +318,78 @@ Aplikujte real-time filtry a efekty na jakýkoli obrázek pomocí query parametr
 ?padding=20                # Vnitřní padding
 ```
 
-## Generátor písmenných avatarů
+## Generátor avatarů
 
-Generujte deterministické písmenné avatary z jakéhokoli jména nebo e-mailu. Ideální pro placeholder uživatelských profilů, komentářové systémy a týmové adresáře. Každé jméno vždy produkuje stejnou barvu, takže avatary jsou konzistentní napříč relacemi.
+Generujte deterministické avatary z libovolného jména nebo e-mailu. PlacePix podporuje dva typy avatarů: **Písmenný avatar** (barevné iniciály) a **Multiavatar** (multikulturní vektorové avatary).
 
-### Koncový bod
+### Endpoint
 
 ```
 /avatar/{size}/{name}
 /avatar/{size}/{name}.{ext}
 ```
 
-### Parameters
+### Parametry
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Písmenný avatar (`type=letter`)
+
 - `circle` — crop to a circle shape
-- `border={width},{color}` — add a border
+- `border={width}` — přidat okraj
+- `border_color={hex}` — barva okraje
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Příklady
 
 ```
-# Jednoduchý 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Kruhový avatar s vlastním okrajem
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# Jedna iniciála, pastelová paleta
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG výstup (škálovatelný, pod 500 bajtů)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Proč používat písmenné avatary?
 
-- Nulové externí závislosti — žádný Gravatar nebo avatarová služba třetí strany
-- Deterministické — stejné jméno vždy produkuje stejnou barvu
+- Nulové externí závislosti — žádný Gravatar ani avatarová služba třetí strany
+- Deterministický — stejné jméno vždy produkuje stejnou barvu
 - Podpora SVG — nekonečně škálovatelné, ideální pro HiDPI displeje
-- Čtyři vestavěné barevné palety pro jakoukoli estetiku značky
+- Šest vestavěných barevných palet pro jakoukoli značkovou estetiku
+
+### Proč používat Multiavatar?
+
+- 12 miliard unikátních multikulturních avatarů
+- Deterministický — stejné jméno vždy produkuje stejný avatar
+- Čistý SVG výstup — malá velikost souboru, nekonečně škálovatelný
+- Žádné externí API volání nejsou nutná
 
 ## Stručný přehled REST API
 

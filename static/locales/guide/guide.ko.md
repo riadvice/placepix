@@ -318,9 +318,9 @@ PlacePix는 초기 스캔 중(로컬 파일)과 백그라운드 메타데이터 
 ?padding=20                # 내부 패딩
 ```
 
-## 글자 아바타 생성기
+## 아바타 생성기
 
-모든 이름이나 이메일에서 결정론적 문자 기반 아바타를 생성하세요. 사용자 프로필 플레이스홀더, 댓글 시스템 및 팀 디렉토리에 완벽합니다. 각 이름은 항상 동일한 색상을 생성하므로 세션 간에 아바타가 일관됩니다.
+모든 이름이나 이메일에서 결정론적 아바타를 생성합니다. PlacePix는 두 가지 아바타 유형을 지원합니다: **문자 아바타** (색상 이니셜) 및 **Multiavatar** (다문화 벡터 아바타).
 
 ### 엔드포인트
 
@@ -331,38 +331,65 @@ PlacePix는 초기 스캔 중(로컬 파일)과 백그라운드 메타데이터 
 
 ### 매개변수
 
-- `size` — 픽셀 크기(예: `64`, `128`, `256`)
-- `name` — 모든 문자열; 아바타를 위해 첫 글자가 추출됨
-- `circle` — 원 모양으로 자르기
-- `border={width},{color}` — 테두리 추가
-- `bg={hex}` — 배경색 재정의
-- `fg={hex}` — 텍스트/전경색 재정의
-- `single=true` — 첫 번째 글자만 사용
-- `uppercase=false` — 소문자 보존
-- `palette={name}` — `flatui`, `material`, `pastel` 또는 `neon` 중 선택
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
 
-### 예제
+#### 문자 아바타 (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width}` — 테두리 추가
+- `border_color={hex}` — 테두리 색상
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
+
+### 예시
 
 ```
-# 간단한 128px 아바타
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# 사용자 지정 테두리가 있는 원형 아바타
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# 단일 이니셜, 파스텔 팔레트
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG 출력(확장 가능, 500바이트 미만)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### 왜 글자 아바타를 사용하나요?
+### 문자 아바타를 사용하는 이유
 
-- 제로 외부 종속성 — Gravatar 또는 서드파티 아바타 서비스 없음
-- 결정론적 — 동일한 이름은 항상 동일한 색상을 생성
-- SVG 지원 — 무한 확장 가능, HiDPI 디스플레이에 완벽
-- 모든 브랜드 미학을 위한 4개의 내장 색상 팔레트
+- 외부 종속성 제로 — Gravatar 또는 제3자 아바타 서비스 없음
+- 결정론적 — 동일한 이름은 항상 동일한 색상을 생성합니다
+- SVG 지원 — 무한히 확장 가능, HiDPI 디스플레이에 최적
+- 모든 브랜드 미학을 위한 6가지 내장 컬러 팔레트
+
+### Multiavatar를 사용하는 이유
+
+- 120억 개의 고유한 다문화 아바타
+- 결정론적 — 동일한 이름은 항상 동일한 아바타를 생성합니다
+- 순수 SVG 출력 — 작은 파일 크기, 무한히 확장 가능
+- 외부 API 호출 필요 없음
 
 ## REST API 퀵 레퍼런스
 

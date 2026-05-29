@@ -22,6 +22,7 @@ dependencies = [
     "blurhash>=1.1.5",
     "markdown>=3.10.2",
     "pygments>=2.20.0",
+    "multiavatar>=1.0.3",
 ]
 
 [project.optional-dependencies]

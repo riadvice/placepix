@@ -319,9 +319,9 @@ Apply real-time filters and effects to any image via query parameters. All proce
 ?padding=20                # Internal padding
 ```
 
-## Letter Avatar Generator
+## Avatar Generator
 
-Generate deterministic letter-based avatars from any name or email. Perfect for user profile placeholders, comment systems, and team directories. Each name always produces the same color, so avatars are consistent across sessions.
+Generate deterministic avatars from any name or email. PlacePix supports two avatar types: **Letter Avatar** (colored initials) and **Multiavatar** (multicultural vector avatars).
 
 ### Endpoint
 
@@ -332,30 +332,50 @@ Generate deterministic letter-based avatars from any name or email. Perfect for 
 
 ### Parameters
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Letter Avatar (`type=letter`)
+
 - `circle` — crop to a circle shape
-- `border={width},{color}` — add a border
+- `border={width}` — add a border
+- `border_color={hex}` — border color
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Examples
 
 ```
-# Simple 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Circle avatar with custom border
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG output (scalable, under 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Why Use Letter Avatars?
@@ -363,7 +383,14 @@ Generate deterministic letter-based avatars from any name or email. Perfect for 
 - Zero external dependencies — no Gravatar or third-party avatar service
 - Deterministic — the same name always produces the same color
 - SVG support — infinitely scalable, perfect for HiDPI displays
-- Four built-in color palettes for any brand aesthetic
+- Six built-in color palettes for any brand aesthetic
+
+### Why Use Multiavatar?
+
+- 12 billion unique multicultural avatars
+- Deterministic — the same name always produces the same avatar
+- Pure SVG output — tiny file size, infinitely scalable
+- No external API calls required
 
 ## REST API Quick Reference
 
@@ -379,7 +406,7 @@ All endpoints support CORS and return images with long-term cache headers. Base6
 - `GET /color/{hex}/{width}/{height}` — Color-matched image
 - `GET /gradient/{w}/{h}/{from}/{to}` — Gradient image
 - `GET /svg/{width}/{height}` — SVG placeholder
-- `GET /avatar/{size}/{name}` — Letter avatar (PNG/SVG)
+- `GET /avatar/{size}/{name}` — Avatar (letter PNG/SVG or multiavatar SVG)
 
 ### Metadata Endpoints
 

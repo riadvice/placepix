@@ -240,3 +240,42 @@ def test_avatar_endpoint_png_transparent(client: TestClient):
     img = Image.open(BytesIO(response.content))
     assert img.mode == "RGBA"
     assert img.getpixel((0, 0))[3] == 0
+
+
+# ── Multiavatar endpoint tests ──────────────────────────────────
+
+
+def test_multiavatar_endpoint_svg(client: TestClient):
+    response = client.get("/avatar/100/Binx%20Bond?type=multiavatar")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/svg+xml"
+    assert "<svg" in response.text
+    assert "</svg>" in response.text
+
+
+def test_multiavatar_endpoint_env_false(client: TestClient):
+    response_with_env = client.get("/avatar/100/Binx%20Bond?type=multiavatar&env=true")
+    response_no_env = client.get("/avatar/100/Binx%20Bond?type=multiavatar&env=false")
+    assert response_with_env.status_code == 200
+    assert response_no_env.status_code == 200
+    # Omitting the environment should produce a different (smaller) SVG
+    assert response_with_env.text != response_no_env.text
+
+
+def test_multiavatar_endpoint_specific_version(client: TestClient):
+    response = client.get("/avatar/100/Binx%20Bond?type=multiavatar&part=11&theme=C")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/svg+xml"
+    assert "<svg" in response.text
+
+
+def test_multiavatar_endpoint_unknown_type(client: TestClient):
+    response = client.get("/avatar/100/John%20Doe?type=unicorn")
+    assert response.status_code == 400
+
+
+def test_multiavatar_endpoint_default_is_letter(client: TestClient):
+    # Omitting type should still produce a letter avatar PNG
+    response = client.get("/avatar/100/John%20Doe.png")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"

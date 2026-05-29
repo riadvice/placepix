@@ -298,9 +298,9 @@ PlacePix は、初期スキャン中（ローカルファイル）およびバ�
 ?padding=20                # 内部パディング
 ```
 
-## レターアバタージェネレーター
+## アバタージェネレーター
 
-任意の名前やメールアドレスから、決定論的な文字ベースのアバターを生成します。ユーザープロフィールプレースホルダー、コメントシステム、チームディレクトリに最適です。各名前は常に同じカラーを生成するため、アバターはセッション間で一貫しています。
+任意の名前やメールアドレスから決定論的なアバターを生成します。PlacePixは2種類のアバターをサポートしています: **レターアバター**（カラーイニシャル）と**Multiavatar**（マルチカルチャルベクターアバター）。
 
 ### エンドポイント
 
@@ -311,38 +311,65 @@ PlacePix は、初期スキャン中（ローカルファイル）およびバ�
 
 ### パラメータ
 
-- `size` — ピクセルサイズ（例：`64`、`128`、`256`）
-- `name` — 任意の文字列；アバターのために最初の文字が抽出されます
-- `circle` — 円形にクロップ
-- `border={width},{color}` — ボーダーを追加
-- `bg={hex}` — 背景色を上書き
-- `fg={hex}` — テキスト/前景色を上書き
-- `single=true` — 最初の文字のみを使用
-- `uppercase=false` — 小文字を保持
-- `palette={name}` — `flatui`、`material`、`pastel`、`neon`から選択
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### レターアバター (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width}` — ボーダーを追加
+- `border_color={hex}` — ボーダーの色
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### 例
 
 ```
-# シンプルな128pxアバター
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# カスタムボーダー付き円形アバター
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# 単一イニシャル、パステルパレット
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG出力（スケーラブル、500バイト未満）
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### レターアバターを使用する理由
+### レターアバターを使う理由
 
-- 外部依存関係ゼロ — Gravatarやサードパーティアバターサービスは不要
-- 決定論的 — 同じ名前は常に同じカラーを生成
-- SVGサポート — 無限にスケーラブル、HiDPIディスプレイに最適
-- あらゆるブランド審美のために4つの組み込みカラーパレット
+- 外部依存ゼロ — Gravatarや第三者のアバターサービス不要
+- 決定論的 — 同じ名前は常に同じ色を生成する
+- SVG対応 — 無限にスケーラブル、HiDPIディスプレイに最適
+- あらゆるブランドエステティック向けの6つの組み込みカラーパレット
+
+### Multiavatarを使う理由
+
+- 120億のユニークなマルチカルチャルアバター
+- 決定論的 — 同じ名前は常に同じアバターを生成する
+- ピュアSVG出力 — ファイルサイズが小さく、無限にスケーラブル
+- 外部API呼び出しは不要
 
 ## REST APIクイックリファレンス
 

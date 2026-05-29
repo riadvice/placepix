@@ -320,11 +320,11 @@ PlacePix อ่านขนาดรูปภาพจากส่วนหั�
 ?padding=20                # การเติมภายใน
 ```
 
-## เครื่องมือสร้างอวตารตัวอักษร
+## ตัวสร้างอวตาร
 
-สร้างอวตารตัวอักษรแบบกำหนดได้จากชื่อหรืออีเมลใดๆ เหมาะสำหรับตัวยึดตำแหน่งโปรไฟล์ผู้ใช้ ระบบความคิดเห็น และไดเรกทอรีทีม ชื่อแต่ละชื่อจะผลิตสีเดียวกันเสมอ ดังนั้นอวตารจะสอดคล้องกันในทุกเซสชัน
+สร้างอวตารแบบกำหนดได้จากชื่อหรืออีเมลใดก็ได้ PlacePix รองรับอวตารสองประเภท: **อวตารตัวอักษร** (ตัวอักษรย่อสี) และ **Multiavatar** (อวตารเวกเตอร์หลายวัฒนธรรม)
 
-### เอ็นด์พอยต์
+### จุดปลายทาง
 
 ```
 /avatar/{size}/{name}
@@ -333,38 +333,65 @@ PlacePix อ่านขนาดรูปภาพจากส่วนหั�
 
 ### พารามิเตอร์
 
-- `size` — ขนาดพิกเซล (เช่น `64`, `128`, `256`)
-- `name` — สตริงใดๆ ตัวอักษรแรกจะถูกแยกออกมาสำหรับอวตาร
-- `circle` — ครอปเป็นทรงกลม
-- `border={width},{color}` — เพิ่มขอบ
-- `bg={hex}` — แทนที่สีพื้นหลัง
-- `fg={hex}` — แทนที่สีข้อความ/พื้นหน้า
-- `single=true` — ใช้เฉพาะตัวอักษรแรก
-- `uppercase=false` — รักษาตัวอักษรพิมพ์เล็ก
-- `palette={name}` — เลือกจาก `flatui`, `material`, `pastel` หรือ `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### อวตารตัวอักษร (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width}` — เพิ่มขอบ
+- `border_color={hex}` — สีขอบ
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### ตัวอย่าง
 
 ```
-# อวตาร 128px แบบง่าย
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# อวตารวงกลมพร้อมขอบแบบกำหนดเอง
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+# Circle letter avatar with custom border
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
-# ตัวอักษรแรกเดียว พาเลทพาสเทล
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# เอาต์พุต SVG (สเกลได้ ภายใต้ 500 ไบต์)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### ทำไมต้องใช้อวตารตัวอักษร?
+### ทำไมถึงใช้อวตารตัวอักษร?
 
-- ไม่มีการพึ่งพาภายนอก — ไม่มี Gravatar หรือบริการอวตารบุคคลที่สาม
-- กำหนดได้ — ชื่อเดียวกันจะสร้างสีเดียวกันเสมอ
-- รองรับ SVG — สเกลได้ไม่จำกัด เหมาะสำหรับจอแสดงผล HiDPI
-- มีพาเลทสี่ชุดในตัวสำหรับทุกสไตล์แบรนด์
+- ไม่มีการพึ่งพาภายนอก — ไม่มี Gravatar หรือบริการอวตารของบุคคลที่สาม
+- กำหนดได้ — ชื่อเดียวกันสร้างสีเดียวกันเสมอ
+- รองรับ SVG — ปรับขนาดได้ไม่จำกัด เหมาะสำหรับจอแสดงผล HiDPI
+- หกชุดสีในตัวสำหรับทุกสไตล์แบรนด์
+
+### ทำไมถึงใช้ Multiavatar?
+
+- 12 พันล้านอวตารหลายวัฒนธรรมที่ไม่ซ้ำใคร
+- กำหนดได้ — ชื่อเดียวกันสร้างอวตารเดียวกันเสมอ
+- เอาต์พุต SVG บริสุทธิ์ — ขนาดไฟล์เล็ก ปรับขนาดได้ไม่จำกัด
+- ไม่ต้องเรียก API ภายนอก
 
 ## คู่มืออ้างอิง REST API อย่างรวดเร็ว
 

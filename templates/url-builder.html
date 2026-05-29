@@ -408,6 +408,13 @@
                     <!-- Avatar endpoint -->
                     <div class="endpoint-config" data-endpoint="avatar">
                         <div class="form-group">
+                            <label data-i18n="url_builder.label.avatar_type">Type</label>
+                            <select id="avatar-type">
+                                <option value="letter" data-i18n="url_builder.option.letter_avatar">Letter Avatar</option>
+                                <option value="multiavatar" data-i18n="url_builder.option.multiavatar">Multiavatar</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Size</label>
                             <input type="text" id="avatar-size" value="100" placeholder="e.g., 100 or 100x150">
                             <small>Single number for square, or widthxheight</small>
@@ -416,41 +423,57 @@
                             <label>Name</label>
                             <input type="text" id="avatar-name" value="John Doe" placeholder="e.g., John Doe">
                         </div>
-                        <div class="form-group">
-                            <label>Palette</label>
-                            <select id="avatar-palette">
-                                <option value="flatui">Flat UI (default)</option>
-                                <option value="material">Material Design</option>
-                                <option value="pastel">Pastel</option>
-                                <option value="neon">Neon</option>
-                                <option value="cool">Cool</option>
-                                <option value="warm">Warm</option>
-                            </select>
+                        <div class="avatar-letter-controls">
+                            <div class="form-group">
+                                <label>Palette</label>
+                                <select id="avatar-palette">
+                                    <option value="flatui">Flat UI (default)</option>
+                                    <option value="material">Material Design</option>
+                                    <option value="pastel">Pastel</option>
+                                    <option value="neon">Neon</option>
+                                    <option value="cool">Cool</option>
+                                    <option value="warm">Warm</option>
+                                </select>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="avatar-circle">
+                                <label for="avatar-circle">Circular</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="avatar-single">
+                                <label for="avatar-single">Single Letter Only</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Background Color <small>(optional, auto by default)</small></label>
+                                <input type="color" id="avatar-bg" value="#667eea">
+                                <small>Leave as-is for auto-generated color based on name</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Text Color</label>
+                                <input type="color" id="avatar-fg" value="#ffffff">
+                            </div>
+                            <div class="form-group">
+                                <label>Border Width</label>
+                                <input type="number" id="avatar-border" value="0" min="0" max="20">
+                            </div>
+                            <div class="form-group">
+                                <label>Border Color</label>
+                                <input type="color" id="avatar-border-color" value="#ffffff">
+                            </div>
                         </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="avatar-circle">
-                            <label for="avatar-circle">Circular</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="avatar-single">
-                            <label for="avatar-single">Single Letter Only</label>
-                        </div>
-                        <div class="form-group">
-                            <label>Background Color <small>(optional, auto by default)</small></label>
-                            <input type="color" id="avatar-bg" value="#667eea">
-                            <small>Leave as-is for auto-generated color based on name</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Text Color</label>
-                            <input type="color" id="avatar-fg" value="#ffffff">
-                        </div>
-                        <div class="form-group">
-                            <label>Border Width</label>
-                            <input type="number" id="avatar-border" value="0" min="0" max="20">
-                        </div>
-                        <div class="form-group">
-                            <label>Border Color</label>
-                            <input type="color" id="avatar-border-color" value="#ffffff">
+                        <div class="avatar-multiavatar-controls" style="display:none">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="avatar-env" checked>
+                                <label for="avatar-env" data-i18n="url_builder.label.avatar_env">Include Environment</label>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="url_builder.label.avatar_part">Part <small data-i18n="url_builder.hint.optional">(optional)</small></label>
+                                <input type="text" id="avatar-part" value="" placeholder="e.g., 11">
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="url_builder.label.avatar_theme">Theme <small data-i18n="url_builder.hint.optional">(optional)</small></label>
+                                <input type="text" id="avatar-theme" value="" placeholder="e.g., C">
+                            </div>
                         </div>
                     </div>
                     
