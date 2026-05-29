@@ -189,3 +189,53 @@ def test_palette_param_neon(client: TestClient):
 def test_palette_param_unknown(client: TestClient):
     response = client.get("/avatar/100/Alice.png?palette=notreal")
     assert response.status_code == 400
+
+
+def test_generate_png_transparent_default():
+    gen = AvatarGenerator()
+    data = gen.generate_png("John Doe", size_str="100")
+    img = Image.open(BytesIO(data))
+    assert img.mode == "RGBA"
+    # Default (no explicit bg) should be transparent
+    assert img.getpixel((0, 0))[3] == 0
+
+
+def test_generate_png_opaque_when_bg_set():
+    gen = AvatarGenerator()
+    data = gen.generate_png("John Doe", size_str="100", bg="ff0000")
+    img = Image.open(BytesIO(data))
+    assert img.mode == "RGBA"
+    assert img.getpixel((0, 0)) == (255, 0, 0, 255)
+
+
+def test_generate_png_circle_transparent_corners():
+    gen = AvatarGenerator()
+    data = gen.generate_png("Jane Doe", size_str="100", circle=True)
+    img = Image.open(BytesIO(data))
+    assert img.mode == "RGBA"
+    # Corner should be transparent
+    assert img.getpixel((0, 0))[3] == 0
+    # Image should contain some text pixels (non-transparent)
+    assert img.getbbox() is not None
+
+
+def test_generate_png_text_centered():
+    gen = AvatarGenerator()
+    data = gen.generate_png("A", size_str="100", bg="000000")
+    img = Image.open(BytesIO(data))
+    bbox = img.getbbox()
+    assert bbox is not None
+    left, top, right, bottom = bbox
+    cx = (left + right) / 2
+    cy = (top + bottom) / 2
+    # The text should be roughly centered in the 100x100 image
+    assert abs(cx - 50) < 10
+    assert abs(cy - 50) < 10
+
+
+def test_avatar_endpoint_png_transparent(client: TestClient):
+    response = client.get("/avatar/100/John%20Doe.png")
+    assert response.status_code == 200
+    img = Image.open(BytesIO(response.content))
+    assert img.mode == "RGBA"
+    assert img.getpixel((0, 0))[3] == 0

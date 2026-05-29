@@ -1614,6 +1614,8 @@ async def avatar_image(
         with Image.open(io.BytesIO(png_bytes)) as img:
             buffer = io.BytesIO()
             fmt = "JPEG" if output_format in ("jpeg", "jpg") else output_format.upper()
+            if fmt == "JPEG" and img.mode == "RGBA":
+                img = img.convert("RGB")
             img.save(buffer, format=fmt, optimize=True)
             content = buffer.getvalue()
 

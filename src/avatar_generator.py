@@ -269,7 +269,7 @@ class AvatarGenerator:
         max_height: int,
     ) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
         """Find the largest font size that fits within the given bounds."""
-        for size in range(max_width, 8, -2):
+        for size in range(min(max_width, max_height), 8, -2):
             font = _load_font(size)
             bbox = draw.textbbox((0, 0), text, font=font)
             text_width = bbox[2] - bbox[0]
@@ -315,24 +315,25 @@ class AvatarGenerator:
         img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
 
-        # Draw background (square or circle)
-        if circle:
-            draw.ellipse((0, 0, width - 1, height - 1), fill=(*bg_rgb, 255))
-        else:
-            draw.rectangle((0, 0, width - 1, height - 1), fill=(*bg_rgb, 255))
+        # Draw background only when explicitly requested
+        if bg:
+            if circle:
+                draw.ellipse((0, 0, width, height), fill=(*bg_rgb, 255))
+            else:
+                draw.rectangle((0, 0, width, height), fill=(*bg_rgb, 255))
 
         # Draw border
         if border > 0:
             inset = border // 2
             if circle:
                 draw.ellipse(
-                    (inset, inset, width - 1 - inset, height - 1 - inset),
+                    (inset, inset, width - inset, height - inset),
                     outline=(*border_rgb, 255),
                     width=border,
                 )
             else:
                 draw.rectangle(
-                    (inset, inset, width - 1 - inset, height - 1 - inset),
+                    (inset, inset, width - inset, height - inset),
                     outline=(*border_rgb, 255),
                     width=border,
                 )
@@ -342,17 +343,24 @@ class AvatarGenerator:
         max_text_w = width - padding * 2
         max_text_h = height - padding * 2
         font = self._fit_font(draw, text, max_text_w, max_text_h)
-        bbox = draw.textbbox((0, 0), text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-        x = (width - text_width) // 2
-        y = (height - text_height) // 2
-        draw.text((x, y), text, fill=(*fg_rgb, 255), font=font)
+        if hasattr(font, "getbbox"):
+            draw.text(
+                (width // 2, height // 2),
+                text,
+                fill=(*fg_rgb, 255),
+                font=font,
+                anchor="mm",
+            )
+        else:
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            x = (width - text_width) // 2
+            y = (height - text_height) // 2
+            draw.text((x, y), text, fill=(*fg_rgb, 255), font=font)
 
-        # Convert to RGB for JPEG compatibility
-        img_rgb = img.convert("RGB")
         buffer = io.BytesIO()
-        img_rgb.save(buffer, format="PNG", optimize=True)
+        img.save(buffer, format="PNG", optimize=True)
         return buffer.getvalue()
 
     def generate_svg(
