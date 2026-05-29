@@ -36,7 +36,6 @@
         </div>
       </div>
       {% if upload_enabled and upload_writable %}<a href="/?lang={{ current_lang }}#upload" class="hover:text-accent transition" data-i18n="nav.upload">Upload</a>{% endif %}
-      <a href="/?lang={{ current_lang }}#api" class="hover:text-accent transition" data-i18n="nav.api">API</a>
       <a href="/docs" target="_blank" class="bg-gradient-to-r from-sky-600 to-sky-500 text-white px-4 py-2 rounded-lg hover:from-sky-700 hover:to-sky-600 transition font-semibold shadow-md shadow-sky-900/20" data-i18n="nav.docs">Docs</a>
       {% if ga_tracking_id %}
       <a href="javascript:void(0)" onclick="CookieConsent.showPreferences()" class="hover:text-accent transition" data-i18n="nav.cookie_preferences">Cookie Preferences</a>
