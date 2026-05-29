@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+from pathlib import Path
+import tempfile
+
 from fastapi.testclient import TestClient
+from PIL import Image, ImageDraw
+
+from src.image_processor import ImageProcessor
+from src.main import manager
 
 
 def _get_image_id(client: TestClient) -> int:
     """Helper to get a valid image ID from the manager."""
-    from src.main import manager
 
     entry = manager.pick()
     assert entry is not None
@@ -140,12 +146,6 @@ def test_effects_with_different_formats(client: TestClient):
 
 def test_noise_processor_method():
     """Test noise application in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     # Create a test image
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -160,12 +160,6 @@ def test_noise_processor_method():
 
 def test_pixelate_processor_method():
     """Test pixelate application in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -179,12 +173,6 @@ def test_pixelate_processor_method():
 
 def test_border_processor_method():
     """Test border application in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -198,12 +186,6 @@ def test_border_processor_method():
 
 def test_lqip_processor_method():
     """Test LQIP generation in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -220,12 +202,6 @@ def test_lqip_processor_method():
 
 def test_quality_affects_file_size():
     """Test that quality parameter affects file size."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image, ImageDraw
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -338,12 +314,6 @@ def test_vignette_effect(client: TestClient):
 
 def test_invert_processor_method():
     """Test invert in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -357,12 +327,6 @@ def test_invert_processor_method():
 
 def test_posterize_processor_method():
     """Test posterize in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -376,12 +340,6 @@ def test_posterize_processor_method():
 
 def test_duotone_processor_method():
     """Test duotone in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -395,12 +353,6 @@ def test_duotone_processor_method():
 
 def test_sharpen_processor_method():
     """Test sharpen in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -414,12 +366,6 @@ def test_sharpen_processor_method():
 
 def test_emboss_processor_method():
     """Test emboss in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
@@ -433,12 +379,6 @@ def test_emboss_processor_method():
 
 def test_vignette_processor_method():
     """Test vignette in processor."""
-    from pathlib import Path
-    import tempfile
-
-    from PIL import Image
-
-    from src.image_processor import ImageProcessor
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"

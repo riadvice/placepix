@@ -2,17 +2,36 @@
 
 from __future__ import annotations
 
+import asyncio
 import io
+from io import StringIO
 import os
 from pathlib import Path
+import subprocess
+import sys
+import time
 from unittest.mock import MagicMock
 
+import cv2
 from fastapi.testclient import TestClient
 from PIL import Image
 
+from src import admin as admin_module
+from src.admin import _fmt_number, _print_header, _print_row, _print_table
 from src.config import Settings
-from src.image_manager import ImageManager
+from src.image_manager import ImageManager, _hex_to_rgb
+from src.image_processor import ImageProcessor
+from src.main import (
+    CacheCleaner,
+    _claim_inflight,
+    _get_git_version,
+    _release_inflight,
+    app,
+    run,
+    setup_logging,
+)
 from src.metrics import MetricsTracker
+from src.observer import _RescanHandler, start_watching
 
 # ── Admin CLI Tests ────────────────────────────────────────────────
 
@@ -21,7 +40,6 @@ class TestAdminCLI:
     @staticmethod
     def test_admin_cli_runs_with_data(tmp_path: Path, monkeypatch):
         """Test admin CLI prints stats with data."""
-        from src import admin as admin_module
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
@@ -29,7 +47,6 @@ class TestAdminCLI:
         tracker.log_request("/600/600", "GET", 404, 5.0, width=600, height=600, cache_hit=False)
 
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
-        import sys
 
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
@@ -42,12 +59,10 @@ class TestAdminCLI:
     @staticmethod
     def test_admin_cli_empty_db(tmp_path: Path, monkeypatch):
         """Test admin CLI with empty database."""
-        from src import admin as admin_module
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
-        import sys
 
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
@@ -58,13 +73,9 @@ class TestAdminCLI:
     @staticmethod
     def test_admin_helpers():
         """Test admin formatting helpers."""
-        from src.admin import _fmt_number, _print_header, _print_row, _print_table
 
         assert _fmt_number(1234) == "1,234"
         assert _fmt_number(0) == "0"
-
-        from io import StringIO
-        import sys
 
         buf = StringIO()
         old_stdout = sys.stdout
@@ -81,7 +92,6 @@ class TestAdminCLI:
     @staticmethod
     def test_admin_with_popular_categories(tmp_path: Path, monkeypatch):
         """Test admin CLI with popular categories data."""
-        from src import admin as admin_module
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
@@ -100,7 +110,6 @@ class TestAdminCLI:
         )
 
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
-        import sys
 
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
@@ -111,7 +120,6 @@ class TestAdminCLI:
     @staticmethod
     def test_admin_with_popular_formats(tmp_path: Path, monkeypatch):
         """Test admin CLI with popular formats data."""
-        from src import admin as admin_module
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
@@ -123,7 +131,6 @@ class TestAdminCLI:
         )
 
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
-        import sys
 
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
@@ -134,12 +141,10 @@ class TestAdminCLI:
     @staticmethod
     def test_admin_main_entry(tmp_path: Path, monkeypatch):
         """Test admin main() entry point via __main__."""
-        from src import admin as admin_module
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
-        import sys
 
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
@@ -153,7 +158,6 @@ class TestAdminCLI:
 class TestObserver:
     def test_rescan_handler_events(self, tmp_path: Path):
         """Test RescanHandler file system events."""
-        from src.observer import _RescanHandler
 
         # Create a mock manager
         mock_manager = MagicMock()
@@ -193,7 +197,6 @@ class TestObserver:
 
     def test_rescan_handler_ignores_metadata(self, tmp_path: Path):
         """Test RescanHandler ignores metadata files."""
-        from src.observer import _RescanHandler
 
         mock_manager = MagicMock()
         handler = _RescanHandler(mock_manager)
@@ -210,9 +213,6 @@ class TestObserver:
 
     def test_rescan_handler_debounce(self, tmp_path: Path):
         """Test RescanHandler debounce."""
-        import time
-
-        from src.observer import _RescanHandler
 
         mock_manager = MagicMock()
         handler = _RescanHandler(mock_manager)
@@ -231,8 +231,6 @@ class TestObserver:
     @staticmethod
     def test_start_watching(tmp_path: Path, monkeypatch):
         """Test start_watching creates and starts observer."""
-        from src.config import Settings
-        from src.observer import start_watching
 
         mock_manager = MagicMock()
         images_dir = tmp_path / "images"
@@ -253,7 +251,6 @@ class TestImageManagerBoto3:
     @staticmethod
     def test_hex_to_rgb():
         """Test hex to RGB conversion."""
-        from src.image_manager import _hex_to_rgb
 
         assert _hex_to_rgb("#ff0000") == (255, 0, 0)
         assert _hex_to_rgb("#fff") == (255, 255, 255)
@@ -263,7 +260,6 @@ class TestImageManagerBoto3:
     @staticmethod
     def test_leader_lock_acquire_release(tmp_path: Path, monkeypatch):
         """Test leader lock acquisition and release."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -285,7 +281,6 @@ class TestImageManagerBoto3:
     @staticmethod
     def test_load_manifest_exception_handling(tmp_path: Path, monkeypatch):
         """Test _load_manifest exception handling."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -307,7 +302,6 @@ class TestImageManagerBoto3:
     @staticmethod
     def test_save_manifest_exception_handling(tmp_path: Path, monkeypatch):
         """Test _save_manifest exception handling."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -340,7 +334,6 @@ class TestImageProcessorWatermark:
     @staticmethod
     def test_watermark_with_image(tmp_path: Path):
         """Test watermark application with image file."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -363,7 +356,6 @@ class TestImageProcessorWatermark:
     @staticmethod
     def test_watermark_with_text():
         """Test watermark application with text."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -381,7 +373,6 @@ class TestImageProcessorWatermark:
     @staticmethod
     def test_watermark_no_config():
         """Test watermark with no valid config returns original."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -398,7 +389,6 @@ class TestImageProcessorWatermark:
     @staticmethod
     def test_watermark_all_positions():
         """Test all watermark positions."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -416,7 +406,6 @@ class TestImageProcessorWatermark:
     @staticmethod
     def test_watermark_image_load_failure():
         """Test watermark falls back to text when image load fails."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -433,7 +422,6 @@ class TestImageProcessorWatermark:
     @staticmethod
     def test_watermark_true_position():
         """Test watermark with position='true' uses config default."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -450,7 +438,6 @@ class TestImageProcessorWatermark:
     @staticmethod
     def test_watermark_rgba_conversion():
         """Test watermark RGBA mode conversion."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -473,7 +460,6 @@ class TestImageProcessorSmartCrop:
     @staticmethod
     def test_smart_crop_no_faces():
         """Test smart crop falls back to center when no faces."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -483,7 +469,6 @@ class TestImageProcessorSmartCrop:
     @staticmethod
     def test_smart_crop_cv2_error(monkeypatch):
         """Test smart crop fallback on cv2 error."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
@@ -492,7 +477,6 @@ class TestImageProcessorSmartCrop:
         buf.seek(0)
 
         # Mock cv2.CascadeClassifier to raise exception
-        import cv2
 
         def bad_cascade(*args, **kwargs):
             raise RuntimeError("cv2 error")
@@ -509,7 +493,6 @@ class TestImageProcessorBorder:
     @staticmethod
     def test_border_processing():
         """Test border effect in image processing."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (400, 300), color=(100, 100, 100))
@@ -523,7 +506,6 @@ class TestImageProcessorBorder:
     @staticmethod
     def test_padding_processing():
         """Test padding effect in image processing."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         img = Image.new("RGB", (400, 300), color=(100, 100, 100))
@@ -542,7 +524,6 @@ class TestImageProcessorGradient:
     @staticmethod
     def test_gradient_linear():
         """Test linear gradient generation."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         result = proc.generate_gradient(400, 300, "ff0000", "0000ff")
@@ -552,7 +533,6 @@ class TestImageProcessorGradient:
     @staticmethod
     def test_gradient_radial():
         """Test radial gradient generation."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         result = proc.generate_gradient(400, 300, "ff0000", "0000ff", gradient_type="radial")
@@ -562,7 +542,6 @@ class TestImageProcessorGradient:
     @staticmethod
     def test_gradient_with_angle():
         """Test gradient with angle."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         result = proc.generate_gradient(400, 300, "ff0000", "0000ff", angle=45)
@@ -571,7 +550,6 @@ class TestImageProcessorGradient:
     @staticmethod
     def test_gradient_short_hex():
         """Test gradient with short hex colors."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         result = proc.generate_gradient(400, 300, "f00", "00f")
@@ -580,7 +558,6 @@ class TestImageProcessorGradient:
     @staticmethod
     def test_gradient_invalid_hex():
         """Test gradient with invalid hex raises error."""
-        from src.image_processor import ImageProcessor
 
         proc = ImageProcessor()
         try:
@@ -597,8 +574,6 @@ class TestRawServing:
     @staticmethod
     def test_raw_by_id(test_images_dir: Path, monkeypatch):
         """Test raw image serving by ID."""
-        from src.image_manager import ImageManager
-        from src.main import app
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -615,8 +590,6 @@ class TestRawServing:
     @staticmethod
     def test_raw_by_path(test_images_dir: Path, monkeypatch):
         """Test raw image serving by category/filename."""
-        from src.image_manager import ImageManager
-        from src.main import app
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -632,8 +605,6 @@ class TestRawServing:
     @staticmethod
     def test_raw_not_modified(test_images_dir: Path, monkeypatch):
         """Test raw serving returns 304 when not modified."""
-        from src.image_manager import ImageManager
-        from src.main import app
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -720,7 +691,6 @@ class TestImageManagerEdgeCases:
     @staticmethod
     def test_manifest_invalid_json(tmp_path: Path, monkeypatch):
         """Test manifest loading with invalid JSON."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -738,7 +708,6 @@ class TestImageManagerEdgeCases:
     @staticmethod
     def test_manifest_not_dict(tmp_path: Path, monkeypatch):
         """Test manifest loading when JSON is not a dict."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -756,7 +725,6 @@ class TestImageManagerEdgeCases:
     @staticmethod
     def test_colors_invalid_json(tmp_path: Path, monkeypatch):
         """Test colors loading with invalid JSON."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -774,7 +742,6 @@ class TestImageManagerEdgeCases:
     @staticmethod
     def test_colors_not_dict(tmp_path: Path, monkeypatch):
         """Test colors loading when JSON is not a dict."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -820,7 +787,6 @@ class TestImageManagerEdgeCases:
     @staticmethod
     def test_rescan_creates_dir(tmp_path: Path, monkeypatch):
         """Test rescan creates missing directories."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "new_images"
         seed_dir = tmp_path / "new_seed"
@@ -861,7 +827,6 @@ class TestImageManagerEdgeCases:
     @staticmethod
     def test_s3_scan_disabled(tmp_path: Path, monkeypatch):
         """Test S3 scan when boto3 not available."""
-        from src.image_manager import ImageManager
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -889,7 +854,6 @@ class TestImageManagerEdgeCases:
     @staticmethod
     def test_hex_to_hue_category():
         """Test hue category classification."""
-        from src.image_manager import ImageManager
 
         assert ImageManager._hex_to_hue_category("#ff0000") == "Red"
         assert ImageManager._hex_to_hue_category("#00ff00") == "Green"
@@ -971,14 +935,12 @@ class TestMainEntryPoint:
     @staticmethod
     def test_run_function(monkeypatch):
         """Test run() function exists and is importable."""
-        from src.main import run
 
         assert callable(run)
 
     @staticmethod
     def test_get_git_version_env(monkeypatch):
         """Test git version from environment variable."""
-        from src.main import _get_git_version
 
         monkeypatch.setenv("GIT_VERSION", "1.0.0")
         assert _get_git_version() == "1.0.0"
@@ -986,7 +948,6 @@ class TestMainEntryPoint:
     @staticmethod
     def test_get_git_version_dev(monkeypatch):
         """Test git version with dev environment."""
-        from src.main import _get_git_version
 
         monkeypatch.setenv("GIT_VERSION", "dev")
         # Should fall back to git describe
@@ -996,9 +957,6 @@ class TestMainEntryPoint:
     @staticmethod
     def test_get_git_version_subprocess_error(monkeypatch):
         """Test git version when subprocess fails."""
-        import subprocess
-
-        from src.main import _get_git_version
 
         # Mock subprocess.run to fail
         def mock_run(*args, **kwargs):
@@ -1012,9 +970,6 @@ class TestMainEntryPoint:
     @staticmethod
     def test_inflight_claim_release():
         """Test in-flight request claim and release."""
-        import asyncio
-
-        from src.main import _claim_inflight, _release_inflight
 
         async def test():
             key = "test_key"
@@ -1035,9 +990,6 @@ class TestMainEntryPoint:
     def test_setup_logging(monkeypatch):
         """Test setup_logging function."""
 
-        from src.config import Settings
-        from src.main import setup_logging
-
         # Test with different log levels
         test_settings = Settings(log_level="DEBUG")
         monkeypatch.setattr("src.main.settings", test_settings)
@@ -1048,9 +1000,6 @@ class TestMainEntryPoint:
     @staticmethod
     def test_upload_writable_check(tmp_path: Path, monkeypatch):
         """Test upload directory writability check."""
-        import os
-
-        from src.config import Settings
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -1064,7 +1013,6 @@ class TestMainEntryPoint:
     @staticmethod
     def test_seed_images_enabled(tmp_path: Path, monkeypatch):
         """Test seed images enabled path."""
-        from src.config import Settings
 
         seed_dir = tmp_path / "seed"
         seed_dir.mkdir()
@@ -1087,7 +1035,6 @@ class TestMainEntryPoint:
     @staticmethod
     def test_seed_images_disabled(monkeypatch):
         """Test seed images disabled path."""
-        from src.config import Settings
 
         test_settings = Settings(seed_enabled=False)
         monkeypatch.setattr("src.main.settings", test_settings)
@@ -1103,7 +1050,6 @@ class TestCacheCleaner:
     @staticmethod
     def test_cache_cleaner_disabled(tmp_path: Path):
         """Test cache cleaner with TTL <= 0 does nothing."""
-        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
@@ -1114,9 +1060,6 @@ class TestCacheCleaner:
     @staticmethod
     def test_cache_cleaner_removes_old_files(tmp_path: Path):
         """Test cache cleaner removes files older than TTL."""
-        import time
-
-        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
@@ -1136,7 +1079,6 @@ class TestCacheCleaner:
     @staticmethod
     def test_cache_cleaner_keeps_new_files(tmp_path: Path):
         """Test cache cleaner keeps files newer than TTL."""
-        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
@@ -1154,9 +1096,6 @@ class TestCacheCleaner:
     @staticmethod
     def test_cache_cleaner_removes_empty_subdirs(tmp_path: Path):
         """Test cache cleaner removes empty subdirectories."""
-        import time
-
-        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
@@ -1176,7 +1115,6 @@ class TestCacheCleaner:
     @staticmethod
     def test_cache_cleaner_ignores_invalid_subdirs(tmp_path: Path):
         """Test cache cleaner ignores subdirs with invalid names."""
-        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
@@ -1190,9 +1128,6 @@ class TestCacheCleaner:
     @staticmethod
     def test_cache_cleaner_handles_file_exceptions(tmp_path: Path):
         """Test cache cleaner handles file stat exceptions."""
-        import time
-
-        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()

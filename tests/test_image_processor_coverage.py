@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 import tempfile
 
-from PIL import Image
+import cv2
+import numpy as np
+import PIL
+from PIL import Image, ImageFont
 import pytest
 
 from src.image_processor import ImageProcessor
@@ -398,7 +401,6 @@ def test_watermark_position_from_config(complex_image):
 
 def test_smart_crop_opencv_error(complex_image, monkeypatch):
     """Test smart crop when opencv cascade loading fails."""
-    import cv2
 
     original_cascade = cv2.CascadeClassifier
 
@@ -417,8 +419,6 @@ def test_smart_crop_opencv_error(complex_image, monkeypatch):
 
 def test_smart_crop_no_faces_detected(complex_image, monkeypatch):
     """Test smart crop when no faces are detected."""
-    import cv2
-    import numpy as np
 
     # Mock detectMultiScale to return empty array
     original_detect = cv2.CascadeClassifier.detectMultiScale
@@ -438,8 +438,6 @@ def test_smart_crop_no_faces_detected(complex_image, monkeypatch):
 
 def test_smart_crop_with_faces(complex_image, monkeypatch):
     """Test smart crop when faces are detected."""
-    import cv2
-    import numpy as np
 
     # Mock detectMultiScale to return faces
     original_detect = cv2.CascadeClassifier.detectMultiScale
@@ -459,8 +457,6 @@ def test_smart_crop_with_faces(complex_image, monkeypatch):
 
 def test_smart_crop_taller_than_wide(complex_image, monkeypatch):
     """Test smart crop when current ratio is taller than target."""
-    import cv2
-    import numpy as np
 
     # Mock detectMultiScale to return faces that create tall aspect ratio
     original_detect = cv2.CascadeClassifier.detectMultiScale
@@ -480,8 +476,6 @@ def test_smart_crop_taller_than_wide(complex_image, monkeypatch):
 
 def test_add_text_font_exception(complex_image, monkeypatch):
     """Test text overlay when font loading fails."""
-    from PIL import ImageFont
-    import PIL.ImageFont
 
     original_truetype = PIL.ImageFont.truetype
     original_load_default = PIL.ImageFont.load_default
@@ -506,8 +500,6 @@ def test_add_text_font_exception(complex_image, monkeypatch):
 
 def test_watermark_font_exception(complex_image, monkeypatch):
     """Test watermark text when font loading fails."""
-    from PIL import ImageFont
-    import PIL.ImageFont
 
     original_truetype = PIL.ImageFont.truetype
     original_load_default = PIL.ImageFont.load_default
@@ -577,9 +569,6 @@ def test_watermark_nonexistent_image_with_text(complex_image):
 
 def test_watermark_image_load_exception_with_mock(complex_image, monkeypatch):
     """Test watermark image load exception by mocking Path.exists and Image.open."""
-    from pathlib import Path
-
-    from PIL import Image
 
     # Create a real file that exists
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as wm:

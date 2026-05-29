@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 import time
 
@@ -14,7 +15,6 @@ class TestCacheHashDeterminism:
     @staticmethod
     def test_same_inputs_produce_same_key(test_images_dir, monkeypatch):
         """Identical params and image must yield the same cache path."""
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -28,7 +28,6 @@ class TestCacheHashDeterminism:
     @staticmethod
     def test_different_params_produce_different_keys(test_images_dir, monkeypatch):
         """Changing any param must produce a different cache path."""
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -45,7 +44,6 @@ class TestCacheHashDeterminism:
 
     @staticmethod
     def test_border_changes_hash(test_images_dir, monkeypatch):
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -58,7 +56,6 @@ class TestCacheHashDeterminism:
 
     @staticmethod
     def test_padding_changes_hash(test_images_dir, monkeypatch):
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -71,7 +68,6 @@ class TestCacheHashDeterminism:
 
     @staticmethod
     def test_noise_changes_hash(test_images_dir, monkeypatch):
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -84,7 +80,6 @@ class TestCacheHashDeterminism:
 
     @staticmethod
     def test_pixelate_changes_hash(test_images_dir, monkeypatch):
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -97,7 +92,6 @@ class TestCacheHashDeterminism:
 
     @staticmethod
     def test_quality_changes_hash(test_images_dir, monkeypatch):
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -110,7 +104,6 @@ class TestCacheHashDeterminism:
 
     @staticmethod
     def test_lqip_changes_hash(test_images_dir, monkeypatch):
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -123,7 +116,6 @@ class TestCacheHashDeterminism:
 
     @staticmethod
     def test_watermark_changes_hash(test_images_dir, monkeypatch):
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -153,7 +145,6 @@ class TestCacheHashDeterminism:
     @staticmethod
     def test_source_mtime_changes_hash(test_images_dir, monkeypatch):
         """Changing the source image mtime must invalidate the cache key."""
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -172,7 +163,6 @@ class TestCacheHashDeterminism:
     @staticmethod
     def test_s3_key_in_hash_no_local_path(test_images_dir, monkeypatch):
         """S3 entries use s3_key in the hash instead of source_mtime."""
-        from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
@@ -265,8 +255,6 @@ class TestCacheCleaner:
         now = time.time()
         os.utime(str(old_file), (now - 7200, now - 7200))
 
-        import logging
-
         with caplog.at_level(logging.INFO, logger="src.main"):
             cleaner = CacheCleaner(cache_dir, ttl_hours=1)
             cleaner.run()
@@ -282,7 +270,6 @@ class _TestSettings:
 
     @staticmethod
     def make(images_dir: Path, cache_dir: Path) -> "Settings":
-        from src.config import Settings
 
         class OverrideSettings(Settings):
             @property
@@ -306,7 +293,6 @@ class TestEndToEndCache:
     @staticmethod
     def test_cache_path_creates_flat_structure(test_images_dir, monkeypatch, tmp_path):
         """Test that cache path creates flat structure with 2-char prefix."""
-        from src.image_manager import ImageEntry
 
         cache_dir = tmp_path / "test_cache"
         cache_dir.mkdir()
@@ -328,7 +314,6 @@ class TestEndToEndCache:
     @staticmethod
     def test_cache_path_is_deterministic(test_images_dir, monkeypatch, tmp_path):
         """Same inputs should produce same cache path."""
-        from src.image_manager import ImageEntry
 
         cache_dir = tmp_path / "test_cache2"
         cache_dir.mkdir()

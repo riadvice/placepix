@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from src.main import PRESETS, _parse_aspect_ratio
+
 
 def test_aspect_ratio_16_9(client: TestClient):
     """Test 16:9 aspect ratio sizing."""
@@ -140,7 +142,6 @@ def test_solid_color_cache_headers(client: TestClient):
 
 def test_all_presets_exist():
     """Test that all documented presets are available."""
-    from src.main import PRESETS
 
     expected_presets = [
         "facebook-cover",
@@ -164,7 +165,6 @@ def test_all_presets_exist():
 
 def test_aspect_ratio_parser():
     """Test aspect ratio parsing function."""
-    from src.main import _parse_aspect_ratio
 
     # Valid ratios
     assert _parse_aspect_ratio("16:9", 1080) == (1920, 1080)

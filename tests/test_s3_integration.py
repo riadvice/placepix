@@ -10,6 +10,7 @@ import pytest
 
 from src.config import Settings
 from src.image_manager import ImageManager
+from src.main import app
 
 
 @pytest.fixture
@@ -78,9 +79,6 @@ def s3_client(
         patch("src.image_manager.boto3.client", return_value=mock_client),
         patch("src.main.boto3.client", return_value=mock_client),
     ):
-        from src.image_manager import ImageManager
-        from src.main import app
-
         manager = ImageManager()
         monkeypatch.setattr("src.main.manager", manager)
 
@@ -123,7 +121,6 @@ def test_s3_info_endpoint(s3_client):
 @pytest.mark.slow
 def test_s3_disabled_falls_back_to_local_only(test_images_dir, monkeypatch):
     """Test that when S3 is disabled, only local images are used."""
-    from src.config import Settings
 
     settings = Settings(
         host="127.0.0.1:3000",
@@ -140,8 +137,6 @@ def test_s3_disabled_falls_back_to_local_only(test_images_dir, monkeypatch):
     monkeypatch.setattr("src.config.settings", settings)
     monkeypatch.setattr("src.main.settings", settings)
     monkeypatch.setattr("src.image_manager.settings", settings)
-
-    from src.image_manager import ImageManager
 
     manager = ImageManager()
     monkeypatch.setattr("src.main.manager", manager)

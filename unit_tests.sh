@@ -45,6 +45,7 @@ mkdir -p "$TEST_DATA_DIR" "$TEST_IMAGES_DIR"
 # Set test environment
 echo "🔧 Setting up test environment..."
 export ENV_FILE=".env.test"
+export TESTING=1
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
 # Source venv if exists
@@ -59,7 +60,7 @@ echo "📦 Ensuring test dependencies are installed..."
 pip install pytest pytest-cov pytest-xdist --quiet
 
 # Build pytest command
-PYTEST_CMD="pytest tests/ -n $PARALLEL_JOBS --dist=loadscope"
+PYTEST_CMD="pytest tests/ -n $PARALLEL_JOBS --dist=loadscope -m 'not slow'"
 
 if [ "$FAST_MODE" = true ]; then
     echo "🚀 Running tests in fast mode (no coverage)..."

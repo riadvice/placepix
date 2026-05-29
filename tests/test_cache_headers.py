@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
+
+from src.main import app, manager
 
 
 def _get_image_id(client: TestClient) -> int:
     """Helper to get a valid image ID from the manager."""
-    from src.main import manager
 
     entry = manager.pick()
     assert entry is not None
@@ -132,9 +134,6 @@ def test_head_request_with_etag(client: TestClient):
 
 def test_cors_middleware_configured():
     """Test CORS middleware is configured correctly."""
-    from fastapi.middleware.cors import CORSMiddleware
-
-    from src.main import app
 
     # Check that CORS middleware is in the middleware stack
     has_cors = any(hasattr(m, "cls") and m.cls == CORSMiddleware for m in app.user_middleware)

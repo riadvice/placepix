@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from src.main import manager
+
 
 def _get_available_category(client: TestClient) -> str:
     """Helper to get an available category from the manager."""
-    from src.main import manager
 
     categories = list(manager.categories.keys())
     return categories[0] if categories else ""

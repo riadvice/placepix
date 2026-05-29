@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from src.main import manager
+
 
 def _get_image_id(client: TestClient) -> int:
     """Helper to get a valid image ID from the manager."""
-    from src.main import manager
 
     entry = manager.pick()
     assert entry is not None
@@ -121,7 +122,6 @@ def test_random_image_with_seed(client: TestClient):
 def test_random_image_with_category(client: TestClient):
     """Test random image from specific category."""
     _get_image_id(client)  # Reuse helper to get a category
-    from src.main import manager
 
     categories = list(manager.categories.keys())
     if not categories:
@@ -132,7 +132,6 @@ def test_random_image_with_category(client: TestClient):
 
 def test_random_image_with_extension(client: TestClient):
     """Test random image with file extension."""
-    from src.main import manager
 
     categories = list(manager.categories.keys())
     if not categories:
@@ -209,7 +208,6 @@ def test_random_redirect_endpoint(client: TestClient):
 
 def test_random_redirect_with_category(client: TestClient):
     """Test random redirect with category."""
-    from src.main import manager
 
     categories = list(manager.categories.keys())
     if not categories:
@@ -529,7 +527,6 @@ def test_tint_with_hash(client: TestClient):
 
 def test_orientation_landscape(client: TestClient):
     """Test orientation=landscape filter on random endpoint."""
-    from src.main import manager
 
     # Patch dimensions so we have a mix of orientations
     for entry in (
@@ -549,7 +546,6 @@ def test_orientation_landscape(client: TestClient):
 
 def test_orientation_portrait(client: TestClient):
     """Test orientation=portrait filter on random endpoint."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():
@@ -561,7 +557,6 @@ def test_orientation_portrait(client: TestClient):
 
 def test_orientation_squarish(client: TestClient):
     """Test orientation=squarish filter on random endpoint."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():
@@ -573,7 +568,6 @@ def test_orientation_squarish(client: TestClient):
 
 def test_orientation_no_match(client: TestClient):
     """Test orientation filter with no matching images returns 404."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():
@@ -586,7 +580,6 @@ def test_orientation_no_match(client: TestClient):
 
 def test_orientation_with_seed(client: TestClient):
     """Test orientation combined with seed parameter."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():
@@ -598,7 +591,6 @@ def test_orientation_with_seed(client: TestClient):
 
 def test_orientation_on_ratio_endpoint(client: TestClient):
     """Test orientation filter on ratio endpoint."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():
@@ -610,7 +602,6 @@ def test_orientation_on_ratio_endpoint(client: TestClient):
 
 def test_orientation_on_preset_endpoint(client: TestClient):
     """Test orientation filter on preset endpoint."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():
@@ -622,7 +613,6 @@ def test_orientation_on_preset_endpoint(client: TestClient):
 
 def test_orientation_on_color_endpoint(client: TestClient):
     """Test orientation filter on color endpoint."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():
@@ -635,7 +625,6 @@ def test_orientation_on_color_endpoint(client: TestClient):
 
 def test_api_color_match_with_orientation(client: TestClient):
     """Test API color match endpoint with orientation filter."""
-    from src.main import manager
 
     all_entries = []
     for cat in manager._categories.values():

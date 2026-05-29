@@ -8,19 +8,19 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from PIL import Image
 
+import src.ai_generator as ag
+import src.config
 from src.image_manager import ImageEntry, ImageManager
 
 
 def _clear_rate_limit():
     """Clear the global rate limit state."""
-    import src.ai_generator as ag
 
     ag._rate_limit_last.clear()
 
 
 def _make_test_manager(images_dir: Path, tmp_path: Path) -> ImageManager:
     """Create an ImageManager with test settings, patching all references."""
-    import src.config
 
     # Save original values
     orig_dir = src.config.settings.dir

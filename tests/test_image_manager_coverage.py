@@ -18,13 +18,17 @@ Current coverage: 76% (377/499 lines)
 
 from __future__ import annotations
 
+import io
 import json
 from pathlib import Path
 import tempfile
 
+from PIL import Image
 import pytest
 import yaml
 
+from src.config import Settings
+import src.image_manager
 from src.image_manager import (
     Category,
     CategoryMeta,
@@ -40,7 +44,6 @@ from src.image_manager import (
 @pytest.fixture
 def temp_images_dir(tmp_path):
     """Create a temporary images directory with test images."""
-    from PIL import Image
 
     # Create data directory
     data_dir = tmp_path / "data"
@@ -65,8 +68,6 @@ def temp_images_dir(tmp_path):
 @pytest.fixture
 def image_manager(temp_images_dir, monkeypatch):
     """Create an ImageManager with temporary directory."""
-    from src.config import Settings
-    import src.image_manager
 
     settings = Settings(
         host="127.0.0.1:3000",
@@ -157,9 +158,6 @@ def test_color_distance():
 
 def test_extract_dominant_colors_from_bytes():
     """Test extracting dominant colors from image bytes."""
-    import io
-
-    from PIL import Image
 
     # Create a simple red image
     img = Image.new("RGB", (100, 100), color=(255, 0, 0))
@@ -242,7 +240,6 @@ def test_image_manager_pick_with_seed_and_category(image_manager):
 def test_image_manager_pick_empty_category_entries(image_manager):
     """Test pick when category has no entries."""
     # Add a category with no entries
-    from src.image_manager import Category, CategoryMeta
 
     image_manager._categories["empty_cat"] = Category(
         name="empty_cat", meta=CategoryMeta(), entries=[]
@@ -265,7 +262,6 @@ def test_image_manager_pick_invalid_category(image_manager):
 
 def test_image_manager_pick_empty_categories(monkeypatch):
     """Test pick when no categories exist."""
-    from src.config import Settings
 
     settings = Settings(
         host="127.0.0.1:3000",
@@ -611,9 +607,6 @@ def test_extract_dominant_colors_exception_path(temp_images_dir):
 
 def test_extract_dominant_colors_palette_exception():
     """Test _extract_dominant_colors when palette is None."""
-    import io
-
-    from PIL import Image
 
     # Create a very small image that might fail quantization
     img = Image.new("RGB", (1, 1), color=(255, 0, 0))
@@ -634,8 +627,6 @@ def test_extract_dominant_colors_palette_exception():
 
 def test_release_leader_lock_no_lock_file(monkeypatch):
     """Test _release_leader_lock when no lock file exists."""
-    from src.config import Settings
-    import src.image_manager
 
     settings = Settings(
         host="127.0.0.1:3000",
@@ -660,9 +651,6 @@ def test_release_leader_lock_no_lock_file(monkeypatch):
 
 def test_release_leader_lock_exception(monkeypatch):
     """Test _release_leader_lock when flock fails."""
-
-    from src.config import Settings
-    import src.image_manager
 
     settings = Settings(
         host="127.0.0.1:3000",

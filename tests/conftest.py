@@ -7,6 +7,7 @@ from PIL import Image
 import pytest
 
 from src.config import Settings
+from src.image_manager import ImageManager
 from src.main import app
 
 
@@ -56,9 +57,9 @@ def client(test_settings: Settings, monkeypatch) -> TestClient:
     """Create a test client with test settings."""
     monkeypatch.setattr("src.config.settings", test_settings)
     monkeypatch.setattr("src.main.settings", test_settings)
+    monkeypatch.setattr("src.image_manager.settings", test_settings)
 
     # Reinitialize manager with test settings
-    from src.image_manager import ImageManager
 
     manager = ImageManager()
     monkeypatch.setattr("src.main.manager", manager)

@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 import tempfile
 
-from PIL import Image
+from PIL import Image, ImageDraw
 import pytest
 
 from src.image_processor import ImageProcessor
@@ -14,7 +14,6 @@ from src.image_processor import ImageProcessor
 @pytest.fixture
 def test_image():
     """Create a test image with gradient for better compression testing."""
-    from PIL import ImageDraw
 
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
         img = Image.new("RGB", (800, 600))

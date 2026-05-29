@@ -16,6 +16,7 @@ class Settings(BaseSettings):
         else [".env"],
         env_file_encoding="utf-8",
         extra="ignore",
+        populate_by_name=True,
     )
 
     host: str = Field(default="127.0.0.1:3000")

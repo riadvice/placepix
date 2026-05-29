@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from src.main import manager
+
 
 def _get_image_id(client: TestClient) -> int:
     """Helper to get a valid image ID from the manager."""
-    from src.main import manager
 
     entry = manager.pick()
     assert entry is not None

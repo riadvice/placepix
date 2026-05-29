@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 import pytest
 
+from src.main import MetricsMiddleware
 from src.metrics import MetricsTracker
 
 
@@ -149,7 +150,6 @@ def test_new_granular_stats(tmp_path: Path):
 
 def test_metrics_middleware_class():
     """Test that metrics middleware class is defined."""
-    from src.main import MetricsMiddleware
 
     assert MetricsMiddleware is not None
     assert hasattr(MetricsMiddleware, "dispatch")
