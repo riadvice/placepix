@@ -403,18 +403,23 @@ class AvatarGenerator:
         font_size = min(width, height) // 2
         font_size = max(10, min(font_size, 120))
 
-        # Build SVG
+        # Build SVG — draw background only when explicitly requested
         shape = ""
-        if circle:
-            cx = width // 2
-            cy = height // 2
-            r = min(cx, cy)
-            shape += f'  <circle cx="{cx}" cy="{cy}" r="{r}" fill="{bg_hex}"/>\n'
-            if border > 0:
+        if bg:
+            if circle:
+                cx = width // 2
+                cy = height // 2
+                r = min(cx, cy)
+                shape += f'  <circle cx="{cx}" cy="{cy}" r="{r}" fill="{bg_hex}"/>\n'
+            else:
+                shape += f'  <rect width="100%" height="100%" fill="{bg_hex}"/>\n'
+        if border > 0:
+            if circle:
+                cx = width // 2
+                cy = height // 2
+                r = min(cx, cy)
                 shape += f'  <circle cx="{cx}" cy="{cy}" r="{r - border / 2}" fill="none" stroke="{border_hex}" stroke-width="{border}"/>\n'
-        else:
-            shape += f'  <rect width="100%" height="100%" fill="{bg_hex}"/>\n'
-            if border > 0:
+            else:
                 inset = border / 2
                 shape += f'  <rect x="{inset}" y="{inset}" width="{width - border}" height="{height - border}" fill="none" stroke="{border_hex}" stroke-width="{border}"/>\n'
 

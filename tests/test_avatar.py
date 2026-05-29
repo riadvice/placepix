@@ -90,7 +90,7 @@ def test_generate_svg_basic():
 
 def test_generate_svg_circle():
     gen = AvatarGenerator()
-    svg = gen.generate_svg("Jane Doe", size_str="100", circle=True)
+    svg = gen.generate_svg("Jane Doe", size_str="100", circle=True, bg="ff0000")
     assert "<circle" in svg
 
 
@@ -119,7 +119,7 @@ def test_avatar_endpoint_svg(client: TestClient):
 
 
 def test_avatar_endpoint_circle(client: TestClient):
-    response = client.get("/avatar/100/John%20Doe.svg?circle=true")
+    response = client.get("/avatar/100/John%20Doe.svg?circle=true&bg=ff0000")
     assert response.status_code == 200
     assert "<circle" in response.text
 
@@ -221,7 +221,8 @@ def test_generate_png_circle_transparent_corners():
 
 def test_generate_png_text_centered():
     gen = AvatarGenerator()
-    data = gen.generate_png("A", size_str="100", bg="000000")
+    # Transparent background so getbbox() returns text-only bbox
+    data = gen.generate_png("A", size_str="100")
     img = Image.open(BytesIO(data))
     bbox = img.getbbox()
     assert bbox is not None
