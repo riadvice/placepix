@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Annotated
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, Header
+from fastapi import FastAPI, HTTPException, Query, Request, UploadFile, Header
 
 import boto3
 from botocore.config import Config
@@ -1552,7 +1552,7 @@ async def avatar_image(
     size: str,
     name: str,
     ext: str = "",
-    type: str = "letter",
+    avatar_type: str = Query("letter", alias="type"),
     circle: bool = False,
     border: int = 0,
     border_color: str = "ffffff",
@@ -1566,14 +1566,14 @@ async def avatar_image(
     theme: str = "",
 ) -> Response:
     """Generate an avatar image (letter-based or multiavatar)."""
-    type = type.lower().strip()
-    if type not in ("letter", "multiavatar"):
+    avatar_type = avatar_type.lower().strip()
+    if avatar_type not in ("letter", "multiavatar"):
         raise HTTPException(
             status_code=400, detail="type must be 'letter' or 'multiavatar'"
         )
 
     # ── Multiavatar path ──────────────────────────────────────────
-    if type == "multiavatar":
+    if avatar_type == "multiavatar":
         version = None
         if part and theme:
             version = {"part": part, "theme": theme}

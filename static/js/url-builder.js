@@ -220,19 +220,23 @@ function toggleAvatarType() {
     updateURL();
 }
 
+function _pushMultiavatarParams(params) {
+    params.push('type=multiavatar');
+    const avatarEnv = document.getElementById('avatar-env').checked;
+    if (!avatarEnv) params.push('env=false');
+    const avatarPart = document.getElementById('avatar-part').value.trim();
+    const avatarTheme = document.getElementById('avatar-theme').value.trim();
+    if (avatarPart) params.push(`part=${encodeURIComponent(avatarPart)}`);
+    if (avatarTheme) params.push(`theme=${encodeURIComponent(avatarTheme)}`);
+}
+
 function buildAvatarURL(params) {
     const avatarType = document.getElementById('avatar-type').value;
     const avatarSize = document.getElementById('avatar-size').value;
     const avatarName = document.getElementById('avatar-name').value;
-    let url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
+    const url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
     if (avatarType === 'multiavatar') {
-        params.push('type=multiavatar');
-        const avatarEnv = document.getElementById('avatar-env').checked;
-        if (!avatarEnv) params.push('env=false');
-        const avatarPart = document.getElementById('avatar-part').value.trim();
-        const avatarTheme = document.getElementById('avatar-theme').value.trim();
-        if (avatarPart) params.push(`part=${encodeURIComponent(avatarPart)}`);
-        if (avatarTheme) params.push(`theme=${encodeURIComponent(avatarTheme)}`);
+        _pushMultiavatarParams(params);
         return { url, supportsFormat: false };
     }
     const avatarPalette = document.getElementById('avatar-palette').value;
