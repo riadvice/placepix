@@ -1401,7 +1401,6 @@ async def solid_color_placeholder(
     text: str = "",
 ) -> Response:
     """Generate solid color placeholder with optional text."""
-    from PIL import Image, ImageDraw, ImageFont
     
     # Clamp size
     width = max(1, min(width, 5000))
@@ -1522,7 +1521,6 @@ async def gradient_placeholder(
 
     # Re-encode if not PNG (gradient generator outputs PNG)
     if output_format != "png":
-        from PIL import Image
         img = Image.open(io.BytesIO(gradient_bytes))
         buffer = io.BytesIO()
         img.save(buffer, format=output_format.upper(), optimize=True)
@@ -1575,7 +1573,7 @@ async def avatar_image(
     # ── Multiavatar path ──────────────────────────────────────────
     if avatar_type == "multiavatar":
         version = None
-        if part and theme:
+        if part or theme:
             version = {"part": part, "theme": theme}
         svg_code = multiavatar(name, None if env else True, version)
         content = svg_code.encode("utf-8")
@@ -2177,8 +2175,6 @@ async def image_info_by_id(image_id: int) -> JSONResponse:
     if entry is None:
         raise HTTPException(status_code=404, detail="image not found")
 
-    from PIL import Image
-
     source = _resolve_image_source(entry)
     with Image.open(source) as img:
         width, height = img.size
@@ -2210,8 +2206,6 @@ async def image_info(category: str, filename: str) -> JSONResponse:
 
     from PIL import Image
 
-    source = _resolve_image_source(entry)
-    with Image.open(source) as img:
         width, height = img.size
         fmt = img.format.lower() if img.format else "unknown"
 
@@ -2269,7 +2263,6 @@ async def get_blurhash(image_id: int) -> JSONResponse:
 
     try:
         source = _resolve_image_source(entry)
-        from PIL import Image
         with Image.open(source) as img:
             img = img.convert("RGB")
             # Downsize to ~32x32 for blurhash encoding
@@ -2587,7 +2580,6 @@ async def generate_srcset(
         raise HTTPException(status_code=400, detail="invalid sizes format")
     
     # Calculate aspect ratio from original image
-    from PIL import Image
     source = _resolve_image_source(entry)
     with Image.open(source) as img:
         aspect_ratio = img.width / img.height
