@@ -298,9 +298,9 @@ Sorgu parametreleri aracılığıyla herhangi bir görüntüye gerçek zamanlı 
 ?padding=20                # İç dolgu
 ```
 
-## Harf Avatarı Oluşturucu
+## Avatar Oluşturucu
 
-Herhangi bir isim veya e-postadan deterministik harf tabanlı avatarlar oluşturun. Kullanıcı profili yer tutucuları, yorum sistemleri ve takım dizinleri için mükemmel. Her isim her zaman aynı rengi üretir, bu nedenle avatarlar oturumlar arasında tutarlıdır.
+Herhangi bir isim veya e-postadan deterministik avatarlar oluşturun. PlacePix iki avatar türünü destekler: **Harf Avatarı** (renkli baş harfler) ve **Multiavatar** (çok kültürlü vektör avatarlar).
 
 ### Endpoint
 
@@ -311,38 +311,64 @@ Herhangi bir isim veya e-postadan deterministik harf tabanlı avatarlar oluştur
 
 ### Parametreler
 
-- `size` — piksel boyutu (örn. `64`, `128`, `256`)
-- `name` — herhangi bir dize; avatar için ilk harfler çıkarılır
-- `circle` — daire şekline kırpma
-- `border={width},{color}` — kenarlık ekleme
-- `bg={hex}` — arka plan rengini geçersiz kılma
-- `fg={hex}` — metin/ön plan rengini geçersiz kılma
-- `single=true` — yalnızca ilk harfi kullanma
-- `uppercase=false` — küçük harfleri koruma
-- `palette={name}` — `flatui`, `material`, `pastel` veya `neon` arasından seçim
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Harf Avatarı (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Örnekler
 
 ```
-# Basit 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Özel kenarlıklı daire avatar
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Tek baş harf, pastel palet
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG çıktısı (ölçeklenebilir, 500 baytın altında)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Neden Harf Avatarları Kullanılmalı?
+### Neden Harf Avatarı Kullanmalı?
 
-- Sıfır dış bağımlılık — Gravatar veya üçüncü taraf avatar hizmeti yok
+- Sıfır harici bağımlılık — Gravatar veya üçüncü taraf avatar hizmeti yok
 - Deterministik — aynı isim her zaman aynı rengi üretir
 - SVG desteği — sonsuz ölçeklenebilir, HiDPI ekranlar için mükemmel
-- Herhangi bir marka estetiği için dört yerleşik renk paleti
+- Herhangi bir marka estetiği için altı yerleşik renk paleti
+
+### Neden Multiavatar Kullanmalı?
+
+- 12 milyar benzersiz çok kültürlü avatar
+- Deterministik — aynı isim her zaman aynı avatarı üretir
+- Saf SVG çıktısı — küçük dosya boyutu, sonsuz ölçeklenebilir
+- Harici API çağrılarına gerek yok
 
 ## REST API Hızlı Referans
 

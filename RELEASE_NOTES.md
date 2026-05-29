@@ -30,6 +30,9 @@
 #### Developer Guide
 - **New `/guide` page** — multilingual developer documentation with E-E-A-T signals, `TechArticle` structured data, and server-side rendering for 30+ languages with language switcher
 
+#### Multiavatar Integration
+- **`/avatar` endpoint now supports `type=multiavatar`** — deterministic multicultural vector avatars via `multiavatar-python`; `type=letter` remains the default
+
 
 ### 🐞 Bug Fixes
 

@@ -318,51 +318,77 @@ Anvend real-time filtre og effekter på ethvert billede via query-parametre. Al 
 ?padding=20                # Intern padding
 ```
 
-## Bogstav-avatar-generator
+## Avatar Generator
 
-Generer deterministiske bogstav-baserede avatarer fra ethvert navn eller e-mail. Perfekt til brugerprofil-placeholders, kommentarsystemer og teamkataloger. Hvert navn producerer altid samme farve, så avatarer er konsistente på tværs af sessioner.
+Generer deterministiske avatarer fra ethvert navn eller e-mail. PlacePix understøtter to avatar-typer: **Bogstav-avatar** (farvede initialer) og **Multiavatar** (multikulturelle vektor-avatarer).
 
-### Endepunkt
+### Endpoint
 
 ```
 /avatar/{size}/{name}
 /avatar/{size}/{name}.{ext}
 ```
 
-### Parameters
+### Parametre
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Bogstav-avatar (`type=letter`)
+
 - `circle` — crop to a circle shape
 - `border={width},{color}` — add a border
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Eksempler
 
 ```
-# Enkel 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Cirkelavatar med tilpasset kant
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Enkelt initial, pastelpalet
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG-output (skalerbar, under 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Hvorfor bruge bogstav-avatarer?
 
-- Nul eksterne afhængigheder — ingen Gravatar eller avatar-tjeneste fra tredjepart
+- Nul eksterne afhængigheder — ingen Gravatar eller tredjeparts avatar-tjeneste
 - Deterministisk — samme navn producerer altid samme farve
 - SVG-understøttelse — uendeligt skalerbar, perfekt til HiDPI-skærme
-- Fire indbyggede farvepaletter til enhver brandæstetik
+- Seks indbyggede farvepaletter til enhver brandæstetik
+
+### Hvorfor bruge Multiavatar?
+
+- 12 milliarder unikke multikulturelle avatarer
+- Deterministisk — samme navn producerer altid samme avatar
+- Ren SVG-output — lille filstørrelse, uendeligt skalerbar
+- Ingen eksterne API-kald nødvendig
 
 ## Hurtigreference til REST API
 

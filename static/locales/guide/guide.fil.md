@@ -319,9 +319,9 @@ Ilapat ang mga real-time filter at epekto sa anumang larawan sa pamamagitan ng q
 ?padding=20                # Internal padding
 ```
 
-## Tagabuo ng Avatar na Letra
+## Avatar Generator
 
-Bumuo ng mga deterministic na avatar na nakabase sa letra mula sa anumang pangalan o email. Perpekto para sa user profile placeholders, comment systems, at team directories. Ang bawat pangalan ay laging nagpuproduce ng parehong kulay, kaya ang mga avatar ay consistent sa lahat ng session.
+Bumuo ng mga deterministic avatar mula sa anumang pangalan o email. Sinusuportahan ng PlacePix ang dalawang uri ng avatar: **Avatar na letra** (mga kulay na inisyal) at **Multiavatar** (mga multikultural na vector avatar).
 
 ### Endpoint
 
@@ -332,38 +332,64 @@ Bumuo ng mga deterministic na avatar na nakabase sa letra mula sa anumang pangal
 
 ### Mga Parameter
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Avatar na letra (`type=letter`)
+
 - `circle` — crop to a circle shape
 - `border={width},{color}` — add a border
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Mga Halimbawa
 
 ```
-# Simpleng 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Circle avatar na may custom border
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG output (scalable, under 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Bakit Gumamit ng Avatar na Letra?
 
-- Zero external dependencies — walang Gravatar o avatar service ng third-party
-- Deterministic — ang parehong pangalan ay laging nagpuproduce ng parehong kulay
-- SVG support — infinitely scalable, perpekto para sa HiDPI displays
-- Four built-in color palettes para sa anumang brand aesthetic
+- Walang panlabas na dependency — walang Gravatar o serbisyo ng avatar ng third party
+- Deterministiko — ang parehong pangalan ay laging nagbubunga ng parehong kulay
+- Suporta sa SVG — walang hangganang scalable, perpekto para sa mga HiDPI display
+- Anim na built-in na color palette para sa anumang brand aesthetic
+
+### Bakit Gumamit ng Multiavatar?
+
+- 12 bilyong natatanging multikultural na avatar
+- Deterministiko — ang parehong pangalan ay laging nagbubunga ng parehong avatar
+- Malinis na SVG output — maliit na laki ng file, walang hangganang scalable
+- Walang kinakailangang panlabas na API calls
 
 ## Mabilis na Sanggunian sa REST API
 

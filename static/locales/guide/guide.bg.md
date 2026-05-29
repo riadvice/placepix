@@ -320,11 +320,11 @@ PlacePix чете размерите на изображенията от заг
 ?padding=20                # Вътрешен отстъп
 ```
 
-## Генератор на буквени аватари
+## Генератор на аватари
 
-Генерирайте детерминистични аватари, базирани на букви, от всяко име или имейл. Перфектно за placeholder изображения за потребителски профили, системи за коментари и екипни директории. Всяко име винаги произвежда същия цвят, така че аватарите са последователни между сесиите.
+Генерирайте детерминистични аватари от всяко име или имейл. PlacePix поддържа два типа аватари: **Буквен аватар** (цветни инициали) и **Multiavatar** (мултикултурни векторни аватари).
 
-### Краен точка
+### Крайна точка
 
 ```
 /avatar/{size}/{name}
@@ -333,38 +333,64 @@ PlacePix чете размерите на изображенията от заг
 
 ### Параметри
 
-- `size` — размер в пиксели (напр. `64`, `128`, `256`)
-- `name` — произволен низ; първите букви се извличат за аватара
-- `circle` — изрязване в кръгла форма
-- `border={width},{color}` — добавяне на рамка
-- `bg={hex}` — замяна на цвета на фона
-- `fg={hex}` — замяна на цвета на текста/преден план
-- `single=true` — използване само на първата буква
-- `uppercase=false` — запазване на малки букви
-- `palette={name}` — избор от `flatui`, `material`, `pastel` или `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Буквен аватар (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Примери
 
 ```
-# Прост 128px аватар
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Кръгъл аватар с персонализирана рамка
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Единична инициала, пастелна палитра
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG изход (мащабируем, под 500 байта)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Защо да използвате буквени аватари?
 
-- Нулеви външни зависимости — без Gravatar или услуга за аватари от трета страна
-- Детерминистичен — едно и също име винаги произвежда един и същи цвят
-- SVG поддръжка — безкрайно мащабируем, перфектен за HiDPI дисплеи
-- Четири вградени цветови палитри за всяка естетика на марката
+- Нула външни зависимости — без Gravatar или услуга за аватари на трета страна
+- Детерминистичен — едно и също име винаги дава един и същи цвят
+- Поддръжка на SVG — безкрайно мащабируем, идеален за HiDPI дисплеи
+- Шест вградени цветови палитри за всяка естетика на марката
+
+### Защо да използвате Multiavatar?
+
+- 12 милиарда уникални мултикултурни аватари
+- Детерминистичен — едно и също име винаги дава един и същи аватар
+- Чист SVG изход — малък размер на файла, безкрайно мащабируем
+- Без необходимост от външни API заявки
 
 ## Кратък справочник за REST API
 

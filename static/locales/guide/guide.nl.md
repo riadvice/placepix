@@ -318,9 +318,9 @@ Pas real-time filters en effecten toe op elke afbeelding via query-parameters. A
 ?padding=20                # Interne opvulling
 ```
 
-## Letter-avatar-generator
+## Avatar Generator
 
-Genereer deterministische letter-gebaseerde avatars vanuit elke naam of e-mail. Perfect voor gebruikersprofiel-placeholders, commentsystemen en teamdirectories. Elke naam produceert altijd dezelfde kleur, zodat avatars consistent zijn tussen sessies.
+Genereer deterministische avatars vanuit elke naam of email. PlacePix ondersteunt twee avatar-types: **Letter avatar** (gekleurde initialen) en **Multiavatar** (multiculturele vector avatars).
 
 ### Endpoint
 
@@ -331,38 +331,64 @@ Genereer deterministische letter-gebaseerde avatars vanuit elke naam of e-mail. 
 
 ### Parameters
 
-- `size` — pixelgrootte (bijv. `64`, `128`, `256`)
-- `name` — elke string; eerste letters worden geëxtraheerd voor de avatar
-- `circle` — bijsnijden naar een cirkelvorm
-- `border={width},{color}` — een rand toevoegen
-- `bg={hex}` — achtergrondkleur overschrijven
-- `fg={hex}` — tekst/voorgrondkleur overschrijven
-- `single=true` — alleen de eerste letter gebruiken
-- `uppercase=false` — kleine letters behouden
-- `palette={name}` — kiezen uit `flatui`, `material`, `pastel` of `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Letter avatar (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Voorbeelden
 
 ```
-# Eenvoudige 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Cirkelavatar met aangepaste rand
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Enkele initiaal, pastel-palet
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG-uitvoer (schaalbaar, minder dan 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Waarom letter-avatars gebruiken?
+### Waarom letter avatars gebruiken?
 
-- Zero externe afhankelijkheden — geen Gravatar of avatar-service van derden
+- Nul externe afhankelijkheden — geen Gravatar of avatar-dienst van derden
 - Deterministisch — dezelfde naam produceert altijd dezelfde kleur
-- SVG-ondersteuning — oneindig schaalbaar, perfect voor HiDPI-displays
-- Vier ingebouwde kleurpaletten voor elke merkesthetiek
+- SVG-ondersteuning — oneindig schaalbaar, perfect voor HiDPI-schermen
+- Zes ingebouwde kleurenpaletten voor elke brand-esthetiek
+
+### Waarom Multiavatar gebruiken?
+
+- 12 miljard unieke multiculturele avatars
+- Deterministisch — dezelfde naam produceert altijd dezelfde avatar
+- Pure SVG-uitvoer — kleine bestandsgrootte, oneindig schaalbaar
+- Geen externe API-aanroepen nodig
 
 ## REST API-snelzoekgids
 

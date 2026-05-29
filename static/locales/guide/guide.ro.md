@@ -318,9 +318,9 @@ Aplicați filtre și efecte real-time la orice imagine prin parametri de interog
 ?padding=20                # Internal padding
 ```
 
-## Generator de avatare cu litere
+## Generator de Avatare
 
-Generați avatare bazate pe litere deterministe din orice nume sau e-mail. Perfect pentru placeholder-e de profil utilizator, sisteme de comentarii și directoare de echipă. Fiecare nume produce întotdeauna aceeași culoare, deci avatarele sunt consistente în toate sesiunile.
+Generează avatare deterministe din orice nume sau email. PlacePix suportă două tipuri de avatare: **Avatar cu litere** (inițiale colorate) și **Multiavatar** (avatare vectoriale multiculturale).
 
 ### Endpoint
 
@@ -329,40 +329,66 @@ Generați avatare bazate pe litere deterministe din orice nume sau e-mail. Perfe
 /avatar/{size}/{name}.{ext}
 ```
 
-### Parameters
+### Parametri
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Avatar cu litere (`type=letter`)
+
 - `circle` — crop to a circle shape
 - `border={width},{color}` — add a border
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Exemple
 
 ```
-# Simple 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Circle avatar with custom border
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG output (scalable, under 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Why Use Letter Avatars?
+### De ce să folosești avatare cu litere?
 
-- Zero dependențe externe — niciun Gravatar sau serviciu avatar terț
+- Zero dependențe externe — niciun Gravatar sau serviciu de avatar terț
 - Determinist — același nume produce întotdeauna aceeași culoare
 - Suport SVG — infinit scalabil, perfect pentru afișaje HiDPI
-- Patru palete de culori încorporate pentru orice estetică de brand
+- Șase palete de culori integrate pentru orice estetică de brand
+
+### De ce să folosești Multiavatar?
+
+- 12 miliarde de avatare multiculturale unice
+- Determinist — același nume produce întotdeauna același avatar
+- Ieșire SVG pură — dimensiune mică a fișierului, infinit scalabil
+- Nu sunt necesare apeluri API externe
 
 ## Referință rapidă API REST
 
@@ -378,7 +404,7 @@ Toate endpoint-urile suportă CORS și returnează imagini cu headere de cache p
 - `GET /color/{hex}/{width}/{height}` — Color-matched image
 - `GET /gradient/{w}/{h}/{from}/{to}` — Gradient image
 - `GET /svg/{width}/{height}` — SVG placeholder
-- `GET /avatar/{size}/{name}` — Letter avatar (PNG/SVG)
+- `GET /avatar/{size}/{name}` — Avatar (letter PNG/SVG or multiavatar SVG)
 
 ### Endpoint-uri de Metadate
 

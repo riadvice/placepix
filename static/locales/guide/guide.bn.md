@@ -320,9 +320,9 @@ query প্যারামিটারের মাধ্যমে যেকো
 ?padding=20                # অভ্যন্তরীণ প্যাডিং
 ```
 
-## লেটার অ্যাভাটার জেনারেটর
+## অবতার জেনারেটর
 
-যেকোনো নাম বা ইমেইল থেকে নির্ধারণমূলক অক্ষর-ভিত্তিক অ্যাভাটার তৈরি করুন। ব্যবহারকারী প্রোফাইল প্লেসহোল্ডার, কমেন্ট সিস্টেম এবং টিম ডিরেক্টরির জন্য আদর্শ। প্রতিটি নাম সর্বদা একই রঙ তৈরি করে, তাই অ্যাভাটারগুলি সেশন জুড়ে স্থির থাকে।
+যেকোনো নাম বা ইমেইল থেকে নির্ধারণমূলক অবতার তৈরি করুন। PlacePix দুটি ধরনের অবতার সমর্থন করে: **অক্ষর অবতার** (রঙিন প্রথম অক্ষর) এবং **Multiavatar** (বহুসাংস্কৃতিক ভেক্টর অবতার)।
 
 ### এন্ডপয়েন্ট
 
@@ -331,40 +331,66 @@ query প্যারামিটারের মাধ্যমে যেকো
 /avatar/{size}/{name}.{ext}
 ```
 
-### প্যারামিটারসমূহ
+### প্যারামিটার
 
-- `size` — পিক্সেল সাইজ (যেমন `64`, `128`, `256`)
-- `name` — যেকোনো স্ট্রিং; অ্যাভাটারের জন্য প্রথম অক্ষরগুলি বের করা হয়
-- `circle` — একটি বৃত্ত আকারে ক্রপ করুন
-- `border={width},{color}` — একটি বর্ডার যোগ করুন
-- `bg={hex}` — ব্যাকগ্রাউন্ড রঙ ওভাররাইড করুন
-- `fg={hex}` — টেক্সট/ফোরগ্রাউন্ড রঙ ওভাররাইড করুন
-- `single=true` — শুধুমাত্র প্রথম অক্ষর ব্যবহার করুন
-- `uppercase=false` — ছোট অক্ষর সংরক্ষণ করুন
-- `palette={name}` — `flatui`, `material`, `pastel`, বা `neon` থেকে চয়ন করুন
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### অক্ষর অবতার (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### উদাহরণ
 
 ```
-# সহজ 128px অ্যাভাটার
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# কাস্টম বর্ডার সহ সার্কেল অ্যাভাটার
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# একক প্রাথমিক, প্যাস্টেল প্যালেট
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG আউটপুট (স্কেলেবল, 500 বাইটের কম)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### লেটার অ্যাভাটার কেন ব্যবহার করবেন?
+### অক্ষর অবতার কেন ব্যবহার করবেন?
 
-- শূন্য বাহ্যিক নির্ভরতা — কোনো Gravatar বা তৃতীয় পক্ষের অ্যাভাটার সার্ভিস নেই
-- নির্ধারণমূলক — একই নাম সর্বদা একই রং তৈরি করে
-- SVG সমর্থন — অসীমভাবে স্কেলেবল, HiDPI ডিসপ্লের জন্য উপযুক্ত
-- যেকোনো ব্র্যান্ডের জন্য চারটি বিল্ট-ইন রঙের প্যালেট
+- শূন্য বাহ্যিক নির্ভরশীলতা — কোনো Gravatar বা তৃতীয় পক্ষের অবতার সেবা নেই
+- নির্ধারণমূলক — একই নাম সর্বদা একই রঙ তৈরি করে
+- SVG সমর্থন — অসীমভাবে স্কেলযোগ্য, HiDPI ডিসপ্লের জন্য নিখুঁত
+- যেকোনো ব্র্যান্ড এসথেটিকের জন্য ছয়টি অন্তর্নির্মিত রঙের প্যালেট
+
+### Multiavatar কেন ব্যবহার করবেন?
+
+- 12 বিলিয়ন অনন্য বহুসাংস্কৃতিক অবতার
+- নির্ধারণমূলক — একই নাম সর্বদা একই অবতার তৈরি করে
+- পিউর SVG আউটপুট — ছোট ফাইল সাইজ, অসীমভাবে স্কেলযোগ্য
+- কোনো বাহ্যিক API কলের প্রয়োজন নেই
 
 ## REST API কুইক রেফারেন্স
 

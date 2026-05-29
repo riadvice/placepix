@@ -44,6 +44,7 @@ from src.metrics import MetricsTracker
 from src.observer import start_watching
 from src.seed import seed_images
 from src.avatar_generator import AvatarGenerator
+from multiavatar.multiavatar import multiavatar
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -1551,6 +1552,7 @@ async def avatar_image(
     size: str,
     name: str,
     ext: str = "",
+    type: str = "letter",
     circle: bool = False,
     border: int = 0,
     border_color: str = "ffffff",
@@ -1559,8 +1561,34 @@ async def avatar_image(
     single: bool = False,
     uppercase: bool = True,
     palette: str = "flatui",
+    env: bool = True,
+    part: str = "",
+    theme: str = "",
 ) -> Response:
-    """Generate a letter-based avatar image (PNG/SVG)."""
+    """Generate an avatar image (letter-based or multiavatar)."""
+    type = type.lower().strip()
+    if type not in ("letter", "multiavatar"):
+        raise HTTPException(
+            status_code=400, detail="type must be 'letter' or 'multiavatar'"
+        )
+
+    # ── Multiavatar path ──────────────────────────────────────────
+    if type == "multiavatar":
+        version = None
+        if part and theme:
+            version = {"part": part, "theme": theme}
+        svg_code = multiavatar(name, None if env else True, version)
+        content = svg_code.encode("utf-8")
+        return Response(
+            content=content,
+            media_type="image/svg+xml",
+            headers={
+                "Cache-Control": "public, max-age=2592000, stale-while-revalidate=60, immutable",
+                "ETag": _generate_etag(content),
+            },
+        )
+
+    # ── Letter avatar path (default) ────────────────────────────
     output_format = ext.lstrip(".").lower() or "png"
 
     # Validate palette early

@@ -298,9 +298,9 @@ Terapkan filter dan efek real-time ke gambar apa pun melalui parameter query. Se
 ?padding=20                # Internal padding
 ```
 
-## Pembuat Avatar Huruf
+## Pembuat Avatar
 
-Hasilkan avatar berbasis huruf yang deterministik dari nama atau email apa pun. Sempurna untuk placeholder profil pengguna, sistem komentar, dan direktori tim. Setiap nama selalu menghasilkan warna yang sama, sehingga avatar konsisten di seluruh sesi.
+Hasilkan avatar deterministik dari nama atau email apa pun. PlacePix mendukung dua jenis avatar: **Avatar Huruf** (inisial berwarna) dan **Multiavatar** (avatar vektor multikultural).
 
 ### Endpoint
 
@@ -311,38 +311,64 @@ Hasilkan avatar berbasis huruf yang deterministik dari nama atau email apa pun. 
 
 ### Parameter
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Avatar Huruf (`type=letter`)
+
 - `circle` — crop to a circle shape
 - `border={width},{color}` — add a border
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Contoh
 
 ```
-# Avatar 128px sederhana
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Avatar lingkaran dengan border kustom
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Inisial tunggal, palet pastel
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# Output SVG (dapat diskalakan, di bawah 500 byte)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Mengapa Menggunakan Avatar Huruf?
 
-- Zero external dependencies — no Gravatar or third-party avatar service
-- Deterministic — the same name always produces the same color
-- SVG support — infinitely scalable, perfect for HiDPI displays
-- Four built-in color palettes for any brand aesthetic
+- Nol dependensi eksternal — tidak ada Gravatar atau layanan avatar pihak ketiga
+- Deterministik — nama yang sama selalu menghasilkan warna yang sama
+- Dukungan SVG — dapat diskalakan tanpa batas, sempurna untuk layar HiDPI
+- Enam palet warna bawaan untuk estetika merek apa pun
+
+### Mengapa Menggunakan Multiavatar?
+
+- 12 miliar avatar multikultural unik
+- Deterministik — nama yang sama selalu menghasilkan avatar yang sama
+- Output SVG murni — ukuran file kecil, dapat diskalakan tanpa batas
+- Tidak diperlukan panggilan API eksternal
 
 ## Referensi Cepat REST API
 
@@ -358,7 +384,7 @@ Semua endpoint mendukung CORS dan mengembalikan gambar dengan header cache jangk
 - `GET /color/{hex}/{width}/{height}` — Color-matched image
 - `GET /gradient/{w}/{h}/{from}/{to}` — Gradient image
 - `GET /svg/{width}/{height}` — SVG placeholder
-- `GET /avatar/{size}/{name}` — Letter avatar (PNG/SVG)
+- `GET /avatar/{size}/{name}` — Avatar (letter PNG/SVG or multiavatar SVG)
 
 ### Endpoint Metadata
 

@@ -320,51 +320,77 @@ S3_REGION=rbx
 ?padding=20                # الحشو الداخلي
 ```
 
-## مولد الأفاتار الحرفي
+## Avatar Generator
 
-إنشاء أفاتار حتمي قائم على الحروف من أي اسم أو بريد إلكتروني. مثالي للصور البديلة لملف المستخدم الشخصي وأنظمة التعليقات وأدلة الفريق. ينتج كل اسم دائمًا نفس اللون، بحيث تكون الأفاتار متسقة عبر الجلسات.
+Generate deterministic avatars from any name or email. PlacePix supports two avatar types: **Letter Avatar** (colored initials) and **Multiavatar** (multicultural vector avatars).
 
-### نقطة النهاية
+### Endpoint
 
 ```
 /avatar/{size}/{name}
 /avatar/{size}/{name}.{ext}
 ```
 
-### المعلمات
+### Parameters
 
-- `size` — حجم البكسل (مثل `64`، `128`، `256`)
-- `name` — أي سلسلة؛ يتم استخراج الأحرف الأولى للأفاتار
-- `circle` — اقتصاص لشكل دائري
-- `border={width},{color}` — إضافة حدود
-- `bg={hex}` — تجاوز لون الخلفية
-- `fg={hex}` — تجاوز لون النص/المقدمة
-- `single=true` — استخدام الحرف الأول فقط
-- `uppercase=false` — الحفاظ على الأحرف الصغيرة
-- `palette={name}` — الاختيار من `flatui` أو `material` أو `pastel` أو `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
 
-### أمثلة
+#### Letter Avatar (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
+
+### Examples
 
 ```
-# أفاتار بسيط 128px
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# أفاتار دائري مع حدود مخصصة
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# حرف أولي واحد، لوحة ألوان الباستيل
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# إخراج SVG (قابل للتطوير، أقل من 500 بايت)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### لماذا استخدام الأفاتار الحرفي؟
+### Why Use Letter Avatars?
 
-- صفر التبعيات الخارجية — لا Gravatar أو خدمة أفاتار طرف ثالث
-- حتمي — نفس الاسم ينتج دائمًا نفس اللون
-- دعم SVG — قابل للتطوير بلا نهاية، مثالي لشاشات HiDPI
-- أربع لوحات ألوان مدمجة لأي جمالية للعلامة التجارية
+- Zero external dependencies — no Gravatar or third-party avatar service
+- Deterministic — the same name always produces the same color
+- SVG support — infinitely scalable, perfect for HiDPI displays
+- Six built-in color palettes for any brand aesthetic
+
+### Why Use Multiavatar?
+
+- 12 billion unique multicultural avatars
+- Deterministic — the same name always produces the same avatar
+- Pure SVG output — tiny file size, infinitely scalable
+- No external API calls required
 
 ## مرجع سريع لواجهة REST API
 

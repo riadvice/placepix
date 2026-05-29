@@ -319,9 +319,9 @@ query parameters के माध्यम से किसी भी इमे�
 ?padding=20                # Internal padding
 ```
 
-## लेटर अवतार जनरेटर
+## अवतार जनरेटर
 
-किसी भी नाम या ईमेल से deterministic letter-based avatars जनरेट करें। यूज़र प्रोफाइल placeholders, कमेंट सिस्टम और टीम डायरेक्टरी के लिए परफेक्ट। हर नाम हमेशा एक ही रंग उत्पन्न करता है, इसलिए avatars सत्रों में सुसंगत होते हैं।
+किसी भी नाम या ईमेल से निर्धारणमूलक अवतार बनाएं। PlacePix दो प्रकार के अवतार का समर्थन करता है: **अक्षर अवतार** (रंगीन अक्षर) और **Multiavatar** (बहु-सांस्कृतिक वेक्टर अवतार)।
 
 ### एंडपॉइंट
 
@@ -330,40 +330,66 @@ query parameters के माध्यम से किसी भी इमे�
 /avatar/{size}/{name}.{ext}
 ```
 
-### Parameters
+### पैरामीटर
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### अक्षर अवतार (`type=letter`)
+
 - `circle` — crop to a circle shape
 - `border={width},{color}` — add a border
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### उदाहरण
 
 ```
-# सरल 128px अवतार
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# कस्टम बॉर्डर के साथ सर्कल अवतार
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# सिंगल initial, पेस्टेल पैलेट
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG आउटपुट (स्केलेबल, 500 बाइट से कम)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### लेटर अवतार क्यों उपयोग करें?
+### अक्षर अवतार क्यों उपयोग करें?
 
 - शून्य बाहरी निर्भरता — कोई Gravatar या तृतीय-पक्ष अवतार सेवा नहीं
-- निर्धारित — समान नाम हमेशा समान रंग उत्पन्न करता है
-- SVG समर्थन — अनंत स्केलेबल, HiDPI डिस्प्ले के लिए परफेक्ट
-- किसी भी ब्रांड सौंदर्यशास्त्र के लिए चार बuilt-in कलर पैलेट
+- निर्धारणमूलक — एक ही नाम हमेशा एक ही रंग उत्पन्न करता है
+- SVG समर्थन — अनंत रूप से स्केलेबल, HiDPI डिस्प्ले के लिए उपयुक्त
+- किसी भी ब्रांड सौंदर्यशास्त्र के लिए छह अंतर्निर्मित रंग पैलेट
+
+### Multiavatar क्यों उपयोग करें?
+
+- 12 बिलियन अद्वितीय बहु-सांस्कृतिक अवतार
+- निर्धारणमूलक — एक ही नाम हमेशा एक ही अवतार उत्पन्न करता है
+- शुद्ध SVG आउटपुट — छोटी फ़ाइल आकार, अनंत रूप से स्केलेबल
+- कोई बाहरी API कॉल आवश्यक नहीं
 
 ## REST API क्विक रेफरेंस
 

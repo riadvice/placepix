@@ -319,9 +319,9 @@ Alkalmazzon valós idejű szűrőket és effekteket bármely képre lekérdezés
 ?padding=20                # Belső padding
 ```
 
-## Betű avatar generátor
+## Avatar Generátor
 
-Generáljon determinisztikus betű-alapú avatart bármely névből vagy e-mailből. Tökéletes felhasználói profil helyőrzőkhöz, komment rendszerekhez és csapat könyvtárakhoz. Minden név mindig ugyanazt a színt adja, így az avatárok konzisztensek a munkameneteken keresztül.
+Generálj determinisztikus avatarokat bármilyen névből vagy emailből. A PlacePix két avatar típust támogat: **Betű avatar** (színes kezdőbetűk) és **Multiavatar** (multikulturális vektor avatarok).
 
 ### Végpont
 
@@ -330,40 +330,66 @@ Generáljon determinisztikus betű-alapú avatart bármely névből vagy e-mailb
 /avatar/{size}/{name}.{ext}
 ```
 
-### Parameters
+### Paraméterek
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Betű avatar (`type=letter`)
+
 - `circle` — crop to a circle shape
 - `border={width},{color}` — add a border
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Példák
 
 ```
-# Egyszerű 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Kör avatar egyedi kerettel
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Egyetlen kezdőbetű, pasztell paletta
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG kimenet (skálázható, 500 bájt alatt)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Miért használjunk betű avatart?
+### Miért használj betű avatarokat?
 
-- Nulla külső függőség — nincs Gravatar vagy harmadik fél avatar szolgáltatása
+- Nulla külső függőség — nincs Gravatar vagy harmadik féltől származó avatar szolgáltatás
 - Determinisztikus — ugyanaz a név mindig ugyanazt a színt adja
 - SVG támogatás — végtelenül skálázható, tökéletes HiDPI kijelzőkhöz
-- Négy beépített színpaletta bármely márka esztétikájához
+- Hat beépített színpaletta bármilyen márka esztétikához
+
+### Miért használj Multiavatart?
+
+- 12 milliárd egyedi multikulturális avatar
+- Determinisztikus — ugyanaz a név mindig ugyanazt az avatart adja
+- Tiszta SVG kimenet — kis fájlméret, végtelenül skálázható
+- Nem szükségesek külső API hívások
 
 ## REST API gyorsreferencia
 

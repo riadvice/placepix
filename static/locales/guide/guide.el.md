@@ -319,9 +319,9 @@ PlacePix reads image dimensions from file headers during the initial scan (local
 ?padding=20                # Εσωτερικό padding
 ```
 
-## Γεννήτρια avatar με γράμματα
+## Γεννήτρια Avatar
 
-Δημιουργήστε ντετερμινιστικά avatars με βάση γράμματα από οποιοδήποτε όνομα ή e-mail. Τέλεια για placeholders προφίλ χρηστών, συστήματα σχολίων και καταλόγους ομάδων. Κάθε όνομα παράγει πάντα το ίδιο χρώμα, οπότε τα avatars είναι συνεπή σε όλες τις συνεδρίες.
+Δημιουργήστε ντετερμινιστικά avatar από οποιοδήποτε όνομα ή email. Το PlacePix υποστηρίζει δύο τύπους avatar: **Avatar με γράμμα** (έγχρωμα αρχικά) και **Multiavatar** (πολυπολιτισμικά διανυσματικά avatar).
 
 ### Endpoint
 
@@ -330,40 +330,66 @@ PlacePix reads image dimensions from file headers during the initial scan (local
 /avatar/{size}/{name}.{ext}
 ```
 
-### Parameters
+### Παράμετροι
 
+- `type` — avatar type: `letter` (default) or `multiavatar`
 - `size` — pixel size (e.g. `64`, `128`, `256`)
-- `name` — any string; first letters are extracted for the avatar
+- `name` — any string; used as seed for the avatar
+
+#### Avatar με γράμμα (`type=letter`)
+
 - `circle` — crop to a circle shape
 - `border={width},{color}` — add a border
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
 - `uppercase=false` — preserve lowercase letters
-- `palette={name}` — choose from `flatui`, `material`, `pastel`, or `neon`
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Παραδείγματα
 
 ```
-# Απλό 128px avatar
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Κυκλικό avatar με προσαρμοσμένο περίγραμμα
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Μονό αρχικό, παστέλ παλέτα
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG output (scalable, κάτω από 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Γιατί να χρησιμοποιήσετε Avatars με γράμματα;
+### Γιατί να χρησιμοποιήσετε avatar με γράμμα;
 
 - Μηδενικές εξωτερικές εξαρτήσεις — κανένα Gravatar ή υπηρεσία avatar τρίτου
 - Ντετερμινιστικό — το ίδιο όνομα παράγει πάντα το ίδιο χρώμα
-- Υποστήριξη SVG — άπειρα κλιμακώσιμο, τέλειο για οθόνες HiDPI
-- Τέσσερις ενσωματωμένες παλέτες χρωμάτων για κάθε αισθητική μάρκας
+- Υποστήριξη SVG — άπειρα κλιμακώσιμο, ιδανικό για οθόνες HiDPI
+- Έξι ενσωματωμένες παλέτες χρωμάτων για κάθε αισθητική επωνυμίας
+
+### Γιατί να χρησιμοποιήσετε Multiavatar;
+
+- 12 δισεκατομμύρια μοναδικά πολυπολιτισμικά avatar
+- Ντετερμινιστικό — το ίδιο όνομα παράγει πάντα το ίδιο avatar
+- Καθαρή έξοδος SVG — μικρό μέγεθος αρχείου, άπειρα κλιμακώσιμο
+- Δεν απαιτούνται εξωτερικά API calls
 
 ## Σύντομη αναφορά REST API
 

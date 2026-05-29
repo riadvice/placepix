@@ -320,9 +320,9 @@ PlacePix 中的每張圖像都會被掃描其前 3 種主導色。您可以通�
 ?padding=20                # 內部填充
 ```
 
-## 字母頭像生成器
+## 頭像產生器
 
-從任何姓名或電子郵件生成確定性的基於字母的頭像。非常適合用戶個人資料佔位符、評論系統和團隊目錄。每個姓名總是產生相同的顏色，因此跨會話的頭像保持一致。
+從任何姓名或電子郵件生成確定性頭像。PlacePix 支援兩種頭像類型：**字母頭像**（彩色首字母）和 **Multiavatar**（多元文化向量頭像）。
 
 ### 端點
 
@@ -333,38 +333,64 @@ PlacePix 中的每張圖像都會被掃描其前 3 種主導色。您可以通�
 
 ### 參數
 
-- `size` — 像素大小（例如 `64`、`128`、`256`）
-- `name` — 任意字符串；為首字母頭像提取首字母
-- `circle` — 裁剪為圓形
-- `border={width},{color}` — 添加邊框
-- `bg={hex}` — 覆蓋背景顏色
-- `fg={hex}` — 覆蓋文本/前景顏色
-- `single=true` — 僅使用第一個字母
-- `uppercase=false` — 保留小寫字母
-- `palette={name}` — 從 `flatui`、`material`、`pastel` 或 `neon` 中選擇
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### 字母頭像 (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### 範例
 
 ```
-# 簡單的 128px 頭像
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# 帶自定義邊框的圓形頭像
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# 單個首字母，粉彩調色板
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG 輸出（可縮放，小於 500 字節）
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### 為什麼使用字母頭像？
+### 為什麼要使用字母頭像？
 
 - 零外部依賴 — 無需 Gravatar 或第三方頭像服務
-- 確定性 — 相同的姓名總是產生相同的顏色
-- SVG 支持 — 無限可縮放，非常適合 HiDPI 顯示器
-- 四種內置調色板，適合任何品牌美學
+- 確定性 — 相同姓名始終生成相同顏色
+- SVG 支援 — 無限可縮放，非常適合 HiDPI 顯示器
+- 六種內建調色板，適合任何品牌美學
+
+### 為什麼要使用 Multiavatar？
+
+- 120 億個獨特的多元文化頭像
+- 確定性 — 相同姓名始終生成相同頭像
+- 純 SVG 輸出 — 檔案大小極小，無限可縮放
+- 無需外部 API 呼叫
 
 ## REST API 快速參考
 

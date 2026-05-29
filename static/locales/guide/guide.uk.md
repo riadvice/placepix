@@ -319,11 +319,11 @@ PlacePix зчитує розміри зображень із заголовкі�
 ?padding=20                # Internal padding
 ```
 
-## Генератор літерних аватарів
+## Генератор Аватарів
 
-Створюйте детерміновані аватари на основі літер з будь-якого імені або електронної пошти. Ідеально для плейсхолдерів профілів користувачів, систем коментарів і командних директорій. Кожне ім'я завжди дає той самий колір, тому аватари узгоджуються між сеансами.
+Створюйте детерміновані аватари з будь-якого імені або email. PlacePix підтримує два типи аватарів: **Літерний аватар** (кольорові ініціали) та **Multiavatar** (мультикультурні векторні аватари).
 
-### Ендпоінт
+### Endpoint
 
 ```
 /avatar/{size}/{name}
@@ -332,38 +332,64 @@ PlacePix зчитує розміри зображень із заголовкі�
 
 ### Параметри
 
-- `size` — розмір у пікселях (напр. `64`, `128`, `256`)
-- `name` — будь-який рядок; для аватара витягуються перші літери
-- `circle` — обрізати до круглої форми
-- `border={width},{color}` — додати рамку
-- `bg={hex}` — перевизначити колір фону
-- `fg={hex}` — перевизначити колір тексту/переднього плану
-- `single=true` — використовувати лише першу літеру
-- `uppercase=false` — зберегти малі літери
-- `palette={name}` — вибрати з `flatui`, `material`, `pastel` або `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Літерний аватар (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Приклади
 
 ```
-# Простий 128px аватар
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Круглий аватар з користувацьким обрамленням
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Одиночна ініціал, пастельна палітра
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# SVG вивід (масштабований, менше 500 байт)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
 ### Чому використовувати літерні аватари?
 
-- Нульові зовнішні залежності — немає Gravatar або стороннього сервісу аватарів
-- Детермінований — одне і те ж ім'я завжди дає той самий колір
-- Підтримка SVG — безмежно масштабований, ідеальний для HiDPI дисплеїв
-- Чотири вбудовані кольорові палітри для будь-якого бренду
+- Нуль зовнішніх залежностей — жодного Gravatar або стороннього сервісу аватарів
+- Детермінований — одне й теж саме ім'я завжди дає той самий колір
+- Підтримка SVG — нескінченно масштабований, ідеальний для HiDPI-дисплеїв
+- Шість вбудованих кольорових палітр для будь-якої естетики бренду
+
+### Чому використовувати Multiavatar?
+
+- 12 мільярдів унікальних мультикультурних аватарів
+- Детермінований — одне й теж саме ім'я завжди дає той самий аватар
+- Чистий SVG-вивід — малий розмір файлу, нескінченно масштабований
+- Зовнішні API-виклики не потрібні
 
 ## Швидкий довідник REST API
 

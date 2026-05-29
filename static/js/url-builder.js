@@ -211,9 +211,30 @@ function buildGradientURL(params) {
     return `/gradient/${gradWidth}x${gradHeight}/${gradFrom}/${gradTo}`;
 }
 
+function toggleAvatarType() {
+    const type = document.getElementById('avatar-type').value;
+    const letterControls = document.querySelector('.avatar-letter-controls');
+    const multiavatarControls = document.querySelector('.avatar-multiavatar-controls');
+    if (letterControls) letterControls.style.display = type === 'letter' ? 'block' : 'none';
+    if (multiavatarControls) multiavatarControls.style.display = type === 'multiavatar' ? 'block' : 'none';
+    updateURL();
+}
+
 function buildAvatarURL(params) {
+    const avatarType = document.getElementById('avatar-type').value;
     const avatarSize = document.getElementById('avatar-size').value;
     const avatarName = document.getElementById('avatar-name').value;
+    let url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
+    if (avatarType === 'multiavatar') {
+        params.push('type=multiavatar');
+        const avatarEnv = document.getElementById('avatar-env').checked;
+        if (!avatarEnv) params.push('env=false');
+        const avatarPart = document.getElementById('avatar-part').value.trim();
+        const avatarTheme = document.getElementById('avatar-theme').value.trim();
+        if (avatarPart) params.push(`part=${encodeURIComponent(avatarPart)}`);
+        if (avatarTheme) params.push(`theme=${encodeURIComponent(avatarTheme)}`);
+        return { url, supportsFormat: false };
+    }
     const avatarPalette = document.getElementById('avatar-palette').value;
     const avatarCircle = document.getElementById('avatar-circle').checked;
     const avatarSingle = document.getElementById('avatar-single').checked;
@@ -221,7 +242,6 @@ function buildAvatarURL(params) {
     const avatarFg = document.getElementById('avatar-fg').value.replace('#', '');
     const avatarBorder = document.getElementById('avatar-border').value;
     const avatarBorderColor = document.getElementById('avatar-border-color').value.replace('#', '');
-    let url = `/avatar/${avatarSize}/${encodeURIComponent(avatarName)}`;
     if (avatarPalette && avatarPalette !== 'flatui') params.push(`palette=${avatarPalette}`);
     if (avatarCircle) params.push('circle=true');
     if (avatarSingle) params.push('single=true');
@@ -604,7 +624,11 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// Avatar type toggle
+document.getElementById('avatar-type').addEventListener('change', toggleAvatarType);
+
 // Initialize
 loadTheme();
 loadCategories();
+toggleAvatarType();
 updateURL();

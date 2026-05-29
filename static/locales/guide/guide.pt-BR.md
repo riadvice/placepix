@@ -318,9 +318,9 @@ Aplique filtros e efeitos em tempo real a qualquer imagem via parâmetros de con
 ?padding=20                # Preenchimento interno
 ```
 
-## Gerador de Avatar de Letras
+## Gerador de Avatares
 
-Gere avatares determinísticos baseados em letras de qualquer nome ou e-mail. Perfeito para placeholders de perfil de usuário, sistemas de comentários e diretórios de equipe. Cada nome sempre produz a mesma cor, então avatares são consistentes entre sessões.
+Gere avatares determinísticos de qualquer nome ou email. PlacePix suporta dois tipos de avatares: **Avatar de letra** (iniciais coloridas) e **Multiavatar** (avatares vetoriais multiculturais).
 
 ### Endpoint
 
@@ -331,38 +331,64 @@ Gere avatares determinísticos baseados em letras de qualquer nome ou e-mail. Pe
 
 ### Parâmetros
 
-- `size` — tamanho em pixels (ex: `64`, `128`, `256`)
-- `name` — qualquer string; primeiras letras são extraídas para o avatar
-- `circle` — cortar em formato circular
-- `border={width},{color}` — adicionar borda
-- `bg={hex}` — substituir cor de fundo
-- `fg={hex}` — substituir cor de texto/primeiro plano
-- `single=true` — usar apenas a primeira letra
-- `uppercase=false` — preservar letras minúsculas
-- `palette={name}` — escolher entre `flatui`, `material`, `pastel` ou `neon`
+- `type` — avatar type: `letter` (default) or `multiavatar`
+- `size` — pixel size (e.g. `64`, `128`, `256`)
+- `name` — any string; used as seed for the avatar
+
+#### Avatar de letra (`type=letter`)
+
+- `circle` — crop to a circle shape
+- `border={width},{color}` — add a border
+- `bg={hex}` — override background color
+- `fg={hex}` — override text/foreground color
+- `single=true` — use only the first letter
+- `uppercase=false` — preserve lowercase letters
+- `palette={name}` — choose from `flatui`, `material`, `pastel`, `neon`, `cool`, `warm`
+
+#### Multiavatar (`type=multiavatar`)
+
+- `env` — include environment background (`true` by default, `false` to omit)
+- `part` — specific part code (optional, e.g. `11`)
+- `theme` — specific theme code (optional, e.g. `C`)
 
 ### Exemplos
 
 ```
-# Avatar simples de 128px
+# Simple 128px letter avatar
 /avatar/128/John+Doe
 
-# Avatar circular com borda personalizada
+# Circle letter avatar with custom border
 /avatar/128/John+Doe?circle=true&border=2,ffffff
 
-# Inicial única, paleta pastel
+# Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
 
-# Saída SVG (escalável, menos de 500 bytes)
+# SVG letter output (scalable, under 500 bytes)
 /avatar/128/John+Doe.svg
+
+# Multiavatar (multicultural vector avatar)
+/avatar/128/Binx+Bond?type=multiavatar
+
+# Multiavatar without environment background
+/avatar/128/Binx+Bond?type=multiavatar&env=false
+
+# Specific multiavatar version
+/avatar/128/Binx+Bond?type=multiavatar&part=11&theme=C
 ```
 
-### Por que usar avatares de letras?
+### Por que usar avatares de letra?
 
-- Zero dependências externas — nenhum Gravatar ou serviço de avatar de terceiros
+- Zero dependências externas — sem Gravatar ou serviço de avatar de terceiros
 - Determinístico — o mesmo nome sempre produz a mesma cor
-- Suporte SVG — infinitamente escalável, perfeito para displays HiDPI
-- Quatro paletas de cores integradas para qualquer estética de marca
+- Suporte SVG — infinitamente escalável, perfeito para telas HiDPI
+- Seis paletas de cores embutidas para qualquer estética de marca
+
+### Por que usar Multiavatar?
+
+- 12 bilhões de avatares multiculturais únicos
+- Determinístico — o mesmo nome sempre produz o mesmo avatar
+- Saída SVG pura — tamanho de arquivo pequeno, infinitamente escalável
+- Nenhuma chamada de API externa necessária
 
 ## Referência Rápida da API REST
 
