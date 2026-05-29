@@ -1,0 +1,8 @@
+# .fossa.yml
+version: 3
+
+paths:
+  exclude:
+    - ./**/tests/**
+    - ./**/docs/**
+    - ./**/example/**

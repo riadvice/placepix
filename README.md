@@ -21,6 +21,7 @@
 [![Pillow](https://img.shields.io/badge/Pillow-9cf?logo=pillow&logoColor=white)](https://pillow.readthedocs.io)
 [![codecov](https://codecov.io/gh/riadvice/placepix/branch/master/graph/badge.svg)](https://codecov.io/gh/riadvice/placepix)
 [![Website](https://img.shields.io/website?up_message=online&down_message=offline&url=https%3A%2F%2Fplacepix.net)](https://placepix.net)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Friadvice%2Fplacepix.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Friadvice%2Fplacepix?ref=badge_shield)
 
 ## Contents
 
