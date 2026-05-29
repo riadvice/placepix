@@ -1449,7 +1449,7 @@ async def serve_by_ratio(
     else:
         entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
-        logger.warning("Category not found for ratio: %s", category or 'all')
+        logger.warning("Category not found for ratio: %s", category or "all")
         raise HTTPException(status_code=404, detail="category not found")
 
     is_random = not seed
@@ -1564,7 +1564,7 @@ async def serve_by_preset(
     else:
         entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
-        logger.warning("Category not found for preset: %s", category or 'all')
+        logger.warning("Category not found for preset: %s", category or "all")
         raise HTTPException(status_code=404, detail="category not found")
 
     is_random = not seed
@@ -1710,7 +1710,7 @@ async def svg_placeholder(
         f'  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"\n'
         f'        fill="{fg_color}" font-family="system-ui, -apple-system, sans-serif"\n'
         f'        font-size="{font_size}px" font-weight="500">{display_text}</text>\n'
-        f'</svg>'
+        f"</svg>"
     )
 
     return Response(
@@ -1949,7 +1949,7 @@ async def serve_image(
     else:
         entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
-        logger.warning("Category not found: %s", category or 'all')
+        logger.warning("Category not found: %s", category or "all")
         raise HTTPException(status_code=404, detail="category not found")
     # Random images should not be cached long-term
     is_random = not seed

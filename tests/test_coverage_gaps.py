@@ -127,7 +127,7 @@ class TestImageManagerGaps:
 
         nonexistent = tmp_path / "nonexistent_images"
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(nonexistent)))
-        manager = ImageManager()
+        ImageManager()
         assert nonexistent.exists()
 
     @staticmethod
@@ -456,7 +456,7 @@ class TestImageManagerGaps:
         assert result is None or hasattr(result, "id")
 
     @staticmethod
-    def test_save_colors_exception(test_images_dir, monkeypatch, tmp_path):
+    def test_save_colors_exception_readonly_dir(test_images_dir, monkeypatch, tmp_path):
         bad_dir = tmp_path / "readonly"
         bad_dir.mkdir()
         os.chmod(bad_dir, 0o555)
@@ -1579,9 +1579,7 @@ class TestMetricsGaps:
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(str(db_path))
         # Log a request for "yesterday"
-        from datetime import date, timedelta
 
-        yesterday = date.today() - timedelta(days=1)
         tracker.log_request("/100/100", "GET", 200, 10.0)
         tracker.aggregate_daily_stats()
         # Should not crash even if no yesterday data
@@ -1780,4 +1778,3 @@ class TestConfigGaps:
 
         settings = Settings(host="127.0.0.1", dir="/tmp")
         assert settings.bind_port == 3000
-

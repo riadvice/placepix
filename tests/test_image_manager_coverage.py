@@ -3,7 +3,8 @@
 Note: Some lines in image_manager.py are difficult to cover in a test environment:
 - Lines 29-30: boto3 import exception handler (defensive code, requires removing boto3)
 - Lines 229-231, 241-242: manifest file I/O exception handlers (requires filesystem errors)
-- Lines 257-263, 268-270, 275-280: leader lock file I/O exception handlers (requires filesystem errors)
+- Lines 257-263, 268-270, 275-280: leader lock file I/O exception handlers
+  (requires filesystem errors)
 - Lines 292-294, 297-304: colors file I/O exception handlers (requires filesystem errors)
 - Lines 311, 313: directory creation in _rescan (requires real directory scanning)
 - Lines 325-361: directory scanning logic (_rescan, _scan_subdir) (requires real filesystem)
@@ -360,7 +361,6 @@ def test_image_manager_rescan_public(image_manager):
     # This just calls _rescan internally
     # We can't easily test the full _rescan without real directories
     # but we can at least call the public method
-    initial_total = image_manager.total
     # This will scan the real images directory which may be empty
     # Just ensure it doesn't crash
     try:

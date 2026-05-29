@@ -9,6 +9,7 @@ from PIL import Image
 import pytest
 
 from src.config import Settings
+from src.image_manager import ImageManager
 
 
 @pytest.fixture
@@ -97,8 +98,6 @@ def test_s3_scan_merges_categories(s3_client):
     assert "nature" in cat_names
     assert "__root" in cat_names
 
-    nature_cat = next(c for c in categories if c["name"] == "nature")
-
 
 @pytest.mark.slow
 def test_s3_image_served(s3_client):
@@ -143,12 +142,9 @@ def test_s3_disabled_falls_back_to_local_only(test_images_dir, monkeypatch):
     monkeypatch.setattr("src.image_manager.settings", settings)
 
     from src.image_manager import ImageManager
-    from src.main import app
 
     manager = ImageManager()
     monkeypatch.setattr("src.main.manager", manager)
-
-    client = TestClient(app)
 
     # Should only have local test images
     categories = manager.list_categories()

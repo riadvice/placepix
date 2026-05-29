@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import logging
+import math
 import os
 from pathlib import Path
 import random
@@ -383,8 +384,7 @@ class ImageManager:
                     # If lock is older than 60 seconds, consider it stale
                     if lock_age > 60:
                         logger.warning(
-                            "Found stale leader lock (age: %.1fs),"
-                            " attempting to break it",
+                            "Found stale leader lock (age: %.1fs), attempting to break it",
                             lock_age,
                         )
                         # Try to break the stale lock by acquiring it
@@ -395,8 +395,7 @@ class ImageManager:
                             f2.flush()
                             self._leader_lock_file = f2
                             logger.info(
-                                "Worker %s acquired leader lock after"
-                                " breaking stale lock",
+                                "Worker %s acquired leader lock after breaking stale lock",
                                 os.getpid(),
                             )
                             atexit.register(self._release_leader_lock)

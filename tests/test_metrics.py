@@ -11,7 +11,7 @@ from src.metrics import MetricsTracker
 def test_metrics_tracker_initialization(tmp_path: Path):
     """Test metrics tracker initializes database."""
     db_path = tmp_path / "test_metrics.db"
-    tracker = MetricsTracker(db_path)
+    MetricsTracker(db_path)
     assert db_path.exists()
 
 

@@ -120,7 +120,7 @@ def test_random_image_with_seed(client: TestClient):
 
 def test_random_image_with_category(client: TestClient):
     """Test random image from specific category."""
-    category = _get_image_id(client)  # Reuse helper to get a category
+    _get_image_id(client)  # Reuse helper to get a category
     from src.main import manager
 
     categories = list(manager.categories.keys())

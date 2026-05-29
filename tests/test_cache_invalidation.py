@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import time
 
+from src.config import Settings
 from src.image_manager import ImageEntry
 from src.main import CacheCleaner, _cache_path
 

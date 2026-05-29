@@ -105,7 +105,6 @@ class TestAdminCLI:
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
         admin_module.main()
-        output = captured.getvalue()
         # Popular Categories only shows if there's enough data
         # Just verify the CLI runs without error
 
@@ -455,7 +454,6 @@ class TestImageProcessorWatermark:
 
         proc = ImageProcessor()
         img = Image.new("RGB", (800, 600), color=(100, 100, 100))
-        wm = Image.new("RGB", (100, 50), color=(255, 255, 255))
 
         config = {
             "watermark_image": "",
@@ -495,8 +493,6 @@ class TestImageProcessorSmartCrop:
 
         # Mock cv2.CascadeClassifier to raise exception
         import cv2
-
-        orig = cv2.CascadeClassifier
 
         def bad_cascade(*args, **kwargs):
             raise RuntimeError("cv2 error")
@@ -834,7 +830,7 @@ class TestImageManagerEdgeCases:
         test_settings = Settings(dir=str(images_dir), seed_dir_str=str(seed_dir))
         monkeypatch.setattr("src.image_manager.settings", test_settings)
         monkeypatch.setattr("src.config.settings", test_settings)
-        manager = ImageManager()
+        ImageManager()
         assert images_dir.exists()
         assert seed_dir.exists()
 

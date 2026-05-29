@@ -251,7 +251,6 @@ class MetricsTracker:
             times = [row[0] for row in cursor.fetchall()]
         if not times:
             return {"p50": 0.0, "p95": 0.0, "p99": 0.0}
-        n = len(times)
 
         def _percentile(sorted_vals: list[float], p: float) -> float:
             k = (len(sorted_vals) - 1) * p
