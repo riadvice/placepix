@@ -247,6 +247,35 @@ Każdy obraz w PlacePix jest skanowany pod kątem 3 dominujących kolorów. Moż
 
 Podczas uruchamiania PlacePix wyodrębnia najczęstsze kolory z każdego obrazu za pomocą klastrowania k-means w przestrzeni kolorów LAB. Daje to percepcyjnie dokładne dopasowania, a nie surowe średnie RGB. Strona palety (`/palette`) wizualizuje te kolory i pozwala przeglądać według kategorii odcieni.
 
+## Filtrowanie według orientacji
+
+Filtruj losowe obrazy według ich natywnego proporcji przed wyborem. Jest to przydatne, gdy potrzebujesz obrazów, które naturalnie pasują do układu — krajobraz dla nagłówków, portret dla kart lub kwadrat dla miniaturek.
+
+### Punkty końcowe
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Konfiguracja
+
+Tolerancja `squarish` jest konfigurowalna przez zmienną środowiskową `ORIENTATION_SQUARISH_TOLERANCE` (domyślnie: `0.15`). Wartość `0.15` oznacza, że obrazy z proporcjami między `0.85` a `1.15` są uznawane za kwadratowe. Ustaw `0.0` dla dokładnego 1:1.
+
+### Jak to działa
+
+PlacePix odczytuje wymiary obrazów z nagłówków plików podczas początkowego skanowania (pliki lokalne) oraz podczas skanowania metadanych w tle (obrazy S3). Wymiary są przechowywane w pamięci i używane do filtrowania puli kandydatów przed losowym lub deterministycznym wyborem. Jeśli żądana jest orientacja, ale żaden obraz nie pasuje, zwracany jest `404`.
 ## Filtry i efekty
 
 Stosuj filtry i efekty w czasie rzeczywistym do dowolnego obrazu za pomocą parametrów zapytania. Całe przetwarzanie odbywa się po stronie serwera i jest buforowane dla kolejnych żądań.

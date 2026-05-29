@@ -247,5 +247,12 @@
   "docker.feature1": "Smart Scan + S3-stöd",
   "docker.feature2": "Färgextraktion",
   "docker.feature3": "Noll Konfiguration",
-  "docker.feature4": "Inbyggd URL-generator"
+  "docker.feature4": "Inbyggd URL-generator",
+  "url_builder.label.orientation": "Orientering",
+  "url_builder.placeholder.orientation": "t.ex. landskap",
+  "url_builder.help.orientation": "Filtrera bilder efter bildförhållande: landskap, porträtt eller kvadratisk",
+  "url_builder.orientation.landscape": "Landskap",
+  "url_builder.orientation.portrait": "Porträtt",
+  "url_builder.orientation.squarish": "Kvadratisk",
+  "api.param.orientation": "Orienteringsfilter (landskap, porträtt, kvadratisk)"
 }

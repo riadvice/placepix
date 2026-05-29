@@ -226,27 +226,36 @@ PlacePix inkluderer forhåndsdefinerte dimensjoner for populære sosiale plattfo
 
 Hvis du bygger et verktøy for administrasjon av sosiale medier og trenger **placeholder-bilder i Instagram story-størrelse**, bruk `/preset/instagram-story/{category}`. Kombiner med `?fit=smart` for porträttbilder og `?format=webp&quality=70` for optimalisert levering.
 
-## Fargesøk-API
 
-Hvert bilde i PlacePix skannes for sine 3 dominerende farger. Du kan søke i hele biblioteket etter hex-farge for å finne bilder som matcher merkepaletten din.
+## Retningsfilter
+
+Filtrer tilfeldige bilder etter deres opprinnelige sideforhold før valg. Dette er nyttig når du trenger bilder som naturlig passer inn i en layout — landskap for overskrifter, portrett for kort eller kvadratisk for miniatyrbilder.
 
 ### Endepunkter
 
 ```
-# Hent et bilde som matcher en spesifikk hex-farge
-/color/0ea5e9/400/300
+# Landscape images (width > height)
+/400/300?orientation=landscape
 
-# Filtrer ethvert endepunkt etter dominerende farge
-/400/300/nature?color=d97706
+# Portrait images (height > width)
+/400/300?orientation=portrait
 
-# List alle bilder som matcher en farge
-/api/color/3b82f6
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
 ```
 
-### Hvordan fargeskannning fungerer
+### Konfigurasjon
 
-Ved oppstart ekstraherer PlacePix de hyppigste fargene fra hvert bilde ved hjelp av k-means klynging i LAB-fargerom. Dette gir perceptuelt nøyaktige treff framfor rå RGB-gjennomsnitt. Palettsiden (`/palette`) visualiserer disse fargene og lar deg bla etter fargetonekategori.
+`squarish`-toleransen kan konfigureres via miljøvariabelen `ORIENTATION_SQUARISH_TOLERANCE` (standard: `0.15`). En verdi på `0.15` betyr at bilder med et sideforhold mellom `0.85` og `1.15` anses som kvadratiske. Sett til `0.0` for nøyaktig 1:1.
 
+### Hvordan det fungerer
+
+PlacePix leser bildedimensjoner fra filoverskrifter under den innledende skanningen (lokale filer) og under bakgrunnsskanningen av metadata (S3-bilder). Dimensjonene lagres i minnet og brukes til å filtrere kandidatpoolen før tilfeldig eller seed-basert utvalg. Hvis det forespørres retning, men ingen bilder samsvarer, returneres en `404`.
 ## Filter og effekter
 
 Bruk real-time filtre og effekter på ethvert bilde via spørreparametere. All behandling gjøres server-side og caches for påfølgende forespørsler.

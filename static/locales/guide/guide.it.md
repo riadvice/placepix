@@ -226,27 +226,36 @@ PlacePix include dimensioni predefinite per piattaforme social popolari e dimens
 
 Se stai creando uno strumento di gestione dei social media e hai bisogno di **immagini placeholder delle dimensioni delle storie Instagram**, usa `/preset/instagram-story/{category}`. Combina con `?fit=smart` per foto di ritratto e `?format=webp&quality=70` per una consegna ottimizzata.
 
-## API di ricerca per colore
 
-Ogni immagine in PlacePix viene scansionata per i suoi 3 colori dominanti principali. Puoi cercare l'intera libreria per colore hex per trovare immagini che corrispondono alla tua palette del brand.
+## Filtraggio per orientamento
+
+Filtra le immagini casuali in base al loro rapporto d'aspetto nativo prima della selezione. Questo è utile quando hai bisogno di immagini che si integrano naturalmente in un layout — paesaggio per le intestazioni, ritratto per le schede o quadrato per le miniature.
 
 ### Endpoint
 
 ```
-# Ottieni un'immagine che corrisponde a un colore hex specifico
-/color/0ea5e9/400/300
+# Landscape images (width > height)
+/400/300?orientation=landscape
 
-# Filtra qualsiasi endpoint per colore dominante
-/400/300/nature?color=d97706
+# Portrait images (height > width)
+/400/300?orientation=portrait
 
-# Elenca tutte le immagini che corrispondono a un colore
-/api/color/3b82f6
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
 ```
 
-### Come funziona la scansione dei colori
+### Configurazione
 
-All'avvio, PlacePix estrae i colori più frequenti da ogni immagine usando il clustering k-means nello spazio colore LAB. Questo produce corrispondenze percettivamente accurate piuttosto che medie RGB crude. La pagina della palette (`/palette`) visualizza questi colori e ti permette di navigare per categoria di tonalità.
+La tolleranza `squarish` è configurabile tramite la variabile d'ambiente `ORIENTATION_SQUARISH_TOLERANCE` (default: `0.15`). Un valore di `0.15` significa che le immagini con un rapporto d'aspetto tra `0.85` e `1.15` sono considerate quadrate. Imposta su `0.0` per un rapporto esatto di 1:1.
 
+### Funzionamento
+
+PlacePix legge le dimensioni delle immagini dalle intestazioni dei file durante la scansione iniziale (file locali) e durante la scansione dei metadati in background (immagini S3). Le dimensioni sono memorizzate in memoria e utilizzate per filtrare il pool di candidati prima della selezione casuale o deterministica. Se viene richiesta un'orientazione ma nessuna immagine corrisponde, viene restituito un `404`.
 ## Filtri ed effetti
 
 Applica filtri ed effetti in tempo reale a qualsiasi immagine tramite parametri di query. Tutta l'elaborazione viene eseguita lato server e messa in cache per le richieste successive.

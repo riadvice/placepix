@@ -79,6 +79,9 @@ class Settings(BaseSettings):
     ai_default_steps: int = Field(default=30)
     ai_default_cfg_scale: float = Field(default=7.0)
 
+    # Orientation filtering: tolerance for squarish images (0.15 = within 15% of 1:1)
+    orientation_squarish_tolerance: float = Field(default=0.15)
+
     # Custom fonts directory (optional, for text overlays)
     font_dir: str = Field(default="")
 

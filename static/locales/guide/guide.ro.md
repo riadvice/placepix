@@ -247,6 +247,35 @@ Fiecare imagine din PlacePix este scanată pentru primele 3 culori dominante. Pu
 
 La pornire, PlacePix extrage cele mai frecvente culori din fiecare imagine folosind gruparea k-means în spațiul de culori LAB. Acest lucru produce potriviri perceptual exacte în loc de medii RGB brute. Pagina paletei (`/palette`) vizualizează aceste culori și vă permite să răsfoiți după categorie de nuanță.
 
+## Filtrare după orientare
+
+Filtrează imaginile aleatoare după raportul lor de aspect nativ înainte de selecție. Acest lucru este util când ai nevoie de imagini care se potrivesc natural într-un layout — peisaj pentru anteturi, portret pentru carduri sau pătrat pentru miniaturi.
+
+### Endpoint-uri
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Configurare
+
+Toleranța `squarish` este configurabilă prin variabila de mediu `ORIENTATION_SQUARISH_TOLERANCE` (implicit: `0.15`). O valoare de `0.15` înseamnă că imaginile cu un raport de aspect între `0.85` și `1.15` sunt considerate pătrate. Setează la `0.0` pentru 1:1 exact.
+
+### Cum funcționează
+
+PlacePix citește dimensiunile imaginilor din anteturile fișierelor în timpul scanării inițiale (fișiere locale) și în timpul scanării de metadate în fundal (imagini S3). Dimensiunile sunt stocate în memorie și utilizate pentru a filtra grupul de candidați înainte de selecția aleatoare sau deterministă. Dacă este solicitată o orientare dar nu există imagini potrivite, se returnează `404`.
 ## Filtre și efecte
 
 Aplicați filtre și efecte real-time la orice imagine prin parametri de interogare. Toată procesarea se face pe partea de server și este cache-ată pentru cererile ulterioare.

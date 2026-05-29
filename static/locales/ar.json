@@ -247,5 +247,12 @@
   "docker.feature1": "مسح ذكي + دعم S3",
   "docker.feature2": "استخراج الألوان",
   "docker.feature3": "تكوين صفر",
-  "docker.feature4": "منشئ URL مدمج"
+  "docker.feature4": "منشئ URL مدمج",
+  "url_builder.label.orientation": "الاتجاه",
+  "url_builder.placeholder.orientation": "مثلاً، أفقي",
+  "url_builder.help.orientation": "تصفية الصور حسب نسبة العرض إلى الارتفاع: أفقي، عمودي، أو مربع",
+  "url_builder.orientation.landscape": "أفقي",
+  "url_builder.orientation.portrait": "عمودي",
+  "url_builder.orientation.squarish": "مربع",
+  "api.param.orientation": "تصفية الاتجاه (أفقي، عمودي، مربع)"
 }

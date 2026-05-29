@@ -122,10 +122,11 @@ function addCategoryToUrl(baseUrl, category) {
     return category ? `${baseUrl}/${category}` : baseUrl;
 }
 
-// Helper function to add optional seed and color match parameters
-function addSeedAndColorParams(params, seed, colorMatch, defaultColor = '#3b82f6') {
+// Helper function to add optional seed, color match, and orientation parameters
+function addSeedAndColorParams(params, seed, colorMatch, defaultColor = '#3b82f6', orientation = '') {
     if (seed) params.push(`seed=${encodeURIComponent(seed)}`);
     if (colorMatch && colorMatch !== defaultColor) params.push(`color=${encodeURIComponent(colorMatch.replace('#', ''))}`);
+    if (orientation) params.push(`orientation=${encodeURIComponent(orientation)}`);
 }
 
 // Endpoint URL builders
@@ -135,8 +136,9 @@ function buildRandomURL(params) {
     const category = document.getElementById('category').value;
     const seed = document.getElementById('seed').value;
     const colorMatch = document.getElementById('random-color-match').value;
+    const orientation = document.getElementById('orientation').value;
     let url = addCategoryToUrl(`/${width}/${height}`, category);
-    addSeedAndColorParams(params, seed, colorMatch);
+    addSeedAndColorParams(params, seed, colorMatch, '#3b82f6', orientation);
     return url;
 }
 
@@ -153,8 +155,9 @@ function buildRatioURL(params) {
     const ratioCategory = document.getElementById('ratio-category').value;
     const ratioSeed = document.getElementById('ratio-seed').value;
     const ratioColor = document.getElementById('ratio-color-match').value;
+    const orientation = document.getElementById('ratio-orientation').value;
     let url = addCategoryToUrl(`/ratio/${ratio}/${ratioHeight}`, ratioCategory);
-    addSeedAndColorParams(params, ratioSeed, ratioColor);
+    addSeedAndColorParams(params, ratioSeed, ratioColor, '#3b82f6', orientation);
     return url;
 }
 
@@ -163,8 +166,9 @@ function buildPresetURL(params) {
     const presetCategory = document.getElementById('preset-category').value;
     const presetSeed = document.getElementById('preset-seed').value;
     const presetColor = document.getElementById('preset-color-match').value;
+    const orientation = document.getElementById('preset-orientation').value;
     let url = addCategoryToUrl(`/preset/${preset}`, presetCategory);
-    addSeedAndColorParams(params, presetSeed, presetColor);
+    addSeedAndColorParams(params, presetSeed, presetColor, '#3b82f6', orientation);
     return url;
 }
 

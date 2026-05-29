@@ -247,6 +247,35 @@ Jedes Bild in PlacePix wird auf seine 3 dominantesten Farben gescannt. Sie könn
 
 Beim Start extrahiert PlacePix die häufigsten Farben aus jedem Bild mit k-Means-Clustering im LAB-Farbraum. Dies erzeugt wahrnehmungsgenaue Übereinstimmungen anstelle von reinen RGB-Durchschnitten. Die Palette-Seite (`/palette`) visualisiert diese Farben und lässt Sie nach Farbtonkategorien browsen.
 
+## Ausrichtungsfilter
+
+Filtern Sie zufällige Bilder nach ihrem nativen Seitenverhältnis vor der Auswahl. Das ist nützlich, wenn Sie Bilder benötigen, die natürlich in ein Layout passen — Landschaft für Header, Hochformat für Karten oder Quadrat für Vorschaubilder.
+
+### Endpunkte
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Konfiguration
+
+Die `squarish`-Toleranz ist über die Umgebungsvariable `ORIENTATION_SQUARISH_TOLERANCE` konfigurierbar (Standard: `0.15`). Ein Wert von `0.15` bedeutet, dass Bilder mit einem Seitenverhältnis zwischen `0.85` und `1.15` als quadratisch betrachtet werden. Setzen Sie `0.0` für exakt 1:1.
+
+### Funktionsweise
+
+PlacePix liest Bildabmessungen aus Datei-Headern während des initialen Scans (lokale Dateien) und während des Hintergrund-Metadaten-Scans (S3-Bilder). Die Abmessungen werden im Speicher gehalten und verwendet, um die Kandidatenliste vor der zufälligen oder deterministischen Auswahl zu filtern. Wenn keine passenden Bilder gefunden werden, wird ein `404` zurückgegeben.
 ## Filter und Effekte
 
 Wenden Sie Echtzeit-Filter und Effekte auf beliebige Bilder über Abfrageparameter an. Die gesamte Verarbeitung erfolgt serverseitig und wird für nachfolgende Anfragen zwischengespeichert.

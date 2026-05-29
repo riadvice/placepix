@@ -247,5 +247,12 @@
   "docker.feature1": "Chytré skenování + Podpora S3",
   "docker.feature2": "Extrakce barev",
   "docker.feature3": "Nulová konfigurace",
-  "docker.feature4": "Integrovaný generátor URL"
+  "docker.feature4": "Integrovaný generátor URL",
+  "url_builder.label.orientation": "Orientace",
+  "url_builder.placeholder.orientation": "např. krajina",
+  "url_builder.help.orientation": "Filtrovat obrázky podle poměru stran: krajina, portrét nebo čtverec",
+  "url_builder.orientation.landscape": "Krajina",
+  "url_builder.orientation.portrait": "Portrét",
+  "url_builder.orientation.squarish": "Čtverec",
+  "api.param.orientation": "Filtr orientace (krajina, portrét, čtverec)"
 }

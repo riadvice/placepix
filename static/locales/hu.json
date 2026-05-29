@@ -261,5 +261,12 @@
   "url_builder.placeholder.text": "A szöveged itt",
   "url_builder.placeholder.svg_text": "Alapértelmezett: {width}x{height}",
   "url_builder.placeholder.duotone": "#ff0000,#0000ff",
-  "url_builder.placeholder.border": "pl, 5 vagy 5,ff0000"
+  "url_builder.placeholder.border": "pl, 5 vagy 5,ff0000",
+  "url_builder.label.orientation": "Tájolás",
+  "url_builder.placeholder.orientation": "pl. tájkép",
+  "url_builder.help.orientation": "Szűrje a képeket képarány szerint: tájkép, portré vagy négyzet",
+  "url_builder.orientation.landscape": "Tájkép",
+  "url_builder.orientation.portrait": "Portré",
+  "url_builder.orientation.squarish": "Négyzet",
+  "api.param.orientation": "Tájolási szűrő (tájkép, portré, négyzet)"
 }

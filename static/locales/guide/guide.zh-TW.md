@@ -226,6 +226,37 @@ PlacePix 包含流行社交媒體平台和屏幕尺寸的預定義尺寸。使�
 
 如果您正在構建社交媒體管理工具並需要 **Instagram 故事尺寸的佔位符圖像**，請使用 `/preset/instagram-story/{category}`。結合 `?fit=smart` 用於肖像照片，`?format=webp&quality=70` 用於優化交付。
 
+
+## 方向篩選
+
+在選擇之前，按圖像的原始寬高比篩選隨機圖像。當您需要自然適合佈局的圖像時，這很有用——橫向用於頁首，縱向用於卡片，或方形用於縮圖。
+
+### 端點
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### 設定
+
+`squarish` 容差可透過環境變數 `ORIENTATION_SQUARISH_TOLERANCE` 設定（預設：`0.15`）。`0.15` 的值表示寬高比在 `0.85` 到 `1.15` 之間的圖像被視為方形。設定為 `0.0` 以獲得精確的 1:1。
+
+### 運作原理
+
+PlacePix 在初始掃描期間（本機檔案）和後台元資料掃描期間（S3 圖像）從檔案標頭讀取圖像尺寸。尺寸儲存在記憶體中，用於在隨機或種子選擇之前篩選候選池。如果請求了方向但沒有匹配的圖像，則返回 `404`。
+
 ## 顏色搜尋 API
 
 PlacePix 中的每張圖像都會被掃描其前 3 種主導色。您可以通過十六進制顏色搜索整個庫，以査找與您的品牌調色盤匹配的圖像。

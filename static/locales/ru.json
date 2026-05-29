@@ -247,5 +247,12 @@
   "docker.feature1": "Умное сканирование + Поддержка S3",
   "docker.feature2": "Извлечение цветов",
   "docker.feature3": "Нулевая конфигурация",
-  "docker.feature4": "Встроенный генератор URL"
+  "docker.feature4": "Встроенный генератор URL",
+  "url_builder.label.orientation": "Ориентация",
+  "url_builder.placeholder.orientation": "напр., альбомная",
+  "url_builder.help.orientation": "Фильтровать изображения по соотношению сторон: альбомная, портретная или квадратная",
+  "url_builder.orientation.landscape": "Альбомная",
+  "url_builder.orientation.portrait": "Портретная",
+  "url_builder.orientation.squarish": "Квадратная",
+  "api.param.orientation": "Фильтр ориентации (альбомная, портретная, квадратная)"
 }

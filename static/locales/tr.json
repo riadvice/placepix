@@ -247,5 +247,12 @@
   "docker.feature1": "Akıllı Tarama + S3 Desteği",
   "docker.feature2": "Renk çıkarma",
   "docker.feature3": "Sıfır Yapılandırma",
-  "docker.feature4": "Gömülü URL Oluşturucu"
+  "docker.feature4": "Gömülü URL Oluşturucu",
+  "url_builder.label.orientation": "Yön",
+  "url_builder.placeholder.orientation": "örn., yatay",
+  "url_builder.help.orientation": "En boy oranına göre görüntüleri filtrele: yatay, dikey veya kare",
+  "url_builder.orientation.landscape": "Yatay",
+  "url_builder.orientation.portrait": "Dikey",
+  "url_builder.orientation.squarish": "Kare",
+  "api.param.orientation": "Yön filtresi (yatay, dikey, kare)"
 }

@@ -226,6 +226,37 @@ PlacePix merangkumi dimensi yang telah ditentukan untuk platform sosial popular 
 
 Jika anda membina alat pengurusan media sosial dan memerlukan **imej placeholder saiz Instagram story**, gunakan `/preset/instagram-story/{category}`. Gabungkan dengan `?fit=smart` untuk foto potret dan `?format=webp&quality=70` untuk penghantaran yang dioptimumkan.
 
+
+## Penapisan Orientasi
+
+Tapis imej rawak mengikut nisbah aspek asli mereka sebelum pemilihan. Ini berguna apabila anda memerlukan imej yang semula jadi sesuai dengan susun atur — landskap untuk pengepala, potret untuk kad, atau segi empat sama untuk imej kecil.
+
+### Titik Akhir
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Konfigurasi
+
+Toleransi `squarish` boleh dikonfigurasi melalui pembolehubah persekitaran `ORIENTATION_SQUARISH_TOLERANCE` (lalai: `0.15`). Nilai `0.15` bermaksud imej dengan nisbah aspek antara `0.85` dan `1.15` dianggap segi empat sama. Tetapkan kepada `0.0` untuk 1:1 tepat.
+
+### Cara Ia Berfungsi
+
+PlacePix membaca dimensi imej daripada pengepala fail semasa imbasan awal (fail tempatan) dan semasa imbasan metadata latar belakang (imej S3). Dimensi disimpan dalam memori dan digunakan untuk menapis kumpulan calon sebelum pemilihan rawak atau benih. Jika orientasi diminta tetapi tiada imej yang sepadan, `404` dikembalikan.
+
 ## API Carian Warna
 
 Setiap imej dalam PlacePix diimbas untuk 3 warna dominan teratas. Anda boleh mencari keseluruhan pustaka mengikut warna hex untuk mencari imej yang sepadan dengan palet jenama anda.

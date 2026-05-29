@@ -1273,6 +1273,7 @@ async def serve_by_ratio(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    orientation: str = "",
 ) -> Response:
     """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
     logger.debug(f"Serving image by ratio: {ratio} at height {height}")
@@ -1282,9 +1283,9 @@ async def serve_by_ratio(
         raise HTTPException(status_code=400, detail="invalid aspect ratio format")
 
     if color:
-        entry = manager.pick_by_color(color, category or None)
+        entry = manager.pick_by_color(color, category or None, orientation=orientation or None)
     else:
-        entry = manager.pick(category or None, seed or None)
+        entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
         logger.warning(f"Category not found for ratio: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
@@ -1355,6 +1356,7 @@ async def serve_by_preset(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    orientation: str = "",
 ) -> Response:
     """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
     logger.debug(f"Serving image by preset: {preset_name}")
@@ -1365,9 +1367,9 @@ async def serve_by_preset(
     width, height = PRESETS[preset_name]
 
     if color:
-        entry = manager.pick_by_color(color, category or None)
+        entry = manager.pick_by_color(color, category or None, orientation=orientation or None)
     else:
-        entry = manager.pick(category or None, seed or None)
+        entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
         logger.warning(f"Category not found for preset: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
@@ -1678,14 +1680,15 @@ async def serve_image(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    orientation: str = "",
 ) -> Response:
     cat_display = category or "all"
     seed_display = seed or "random"
     logger.debug(f"Serving {width}x{height} from category '{cat_display}' (seed: {seed_display})")
     if color:
-        entry = manager.pick_by_color(color, category or None)
+        entry = manager.pick_by_color(color, category or None, orientation=orientation or None)
     else:
-        entry = manager.pick(category or None, seed or None)
+        entry = manager.pick(category or None, seed or None, orientation=orientation or None)
     if entry is None:
         logger.warning(f"Category not found: {category or 'all'}")
         raise HTTPException(status_code=404, detail="category not found")
@@ -1751,9 +1754,10 @@ async def serve_by_color(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    orientation: str = "",
 ) -> Response:
     logger.debug(f"Serving image by color: {hex_color} at {width}x{height}")
-    entry = manager.pick_by_color(hex_color)
+    entry = manager.pick_by_color(hex_color, orientation=orientation or None)
     if entry is None:
         logger.warning(f"No image matching color: {hex_color}")
         raise HTTPException(status_code=404, detail="no image matching that color")
@@ -2200,8 +2204,11 @@ async def image_info(category: str, filename: str) -> JSONResponse:
 
 
 @app.get("/api/color/{hex_color}")
-async def api_color_match(hex_color: str) -> JSONResponse:
-    matches = manager.find_by_color(hex_color)
+async def api_color_match(
+    hex_color: str,
+    orientation: str = "",
+) -> JSONResponse:
+    matches = manager.find_by_color(hex_color, orientation=orientation or None)
     return JSONResponse({
         "query": hex_color,
         "count": len(matches),

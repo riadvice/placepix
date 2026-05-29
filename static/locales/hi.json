@@ -247,5 +247,12 @@
   "docker.feature1": "स्मार्ट स्कैन + S3 सपोर्ट",
   "docker.feature2": "रंग निष्कर्षण",
   "docker.feature3": "जीरो कॉन्फ़िगरेशन",
-  "docker.feature4": "एम्बेडेड URL बिल्डर"
+  "docker.feature4": "एम्बेडेड URL बिल्डर",
+  "url_builder.label.orientation": "ओरिएंटेशन",
+  "url_builder.placeholder.orientation": "उदाहरण के लिए, लैंडस्केप",
+  "url_builder.help.orientation": "पहलू अनुपात के अनुसार चित्र फ़िल्टर करें: लैंडस्केप, पोर्ट्रेट, या वर्ग",
+  "url_builder.orientation.landscape": "लैंडस्केप",
+  "url_builder.orientation.portrait": "पोर्ट्रेट",
+  "url_builder.orientation.squarish": "वर्ग",
+  "api.param.orientation": "ओरिएंटेशन फ़िल्टर (लैंडस्केप, पोर्ट्रेट, वर्ग)"
 }

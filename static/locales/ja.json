@@ -247,5 +247,12 @@
   "docker.feature1": "スマートスキャン + S3対応",
   "docker.feature2": "色抽出",
   "docker.feature3": "ゼロ設定",
-  "docker.feature4": "組み込みURLビルダー"
+  "docker.feature4": "組み込みURLビルダー",
+  "url_builder.label.orientation": "向き",
+  "url_builder.placeholder.orientation": "例: 横長",
+  "url_builder.help.orientation": "アスペクト比で画像をフィルタリング: 横長、縦長、または正方形",
+  "url_builder.orientation.landscape": "横長",
+  "url_builder.orientation.portrait": "縦長",
+  "url_builder.orientation.squarish": "正方形",
+  "api.param.orientation": "向きフィルター (横長、縦長、正方形)"
 }

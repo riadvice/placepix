@@ -247,6 +247,35 @@ Cada imagem no PlacePix é escaneada para as suas 3 cores dominantes principais.
 
 No arranque, PlacePix extrai as cores mais frequentes de cada imagem usando clustering k-means no espaço de cor LAB. Isto produz correspondências perceptualmente precisas em vez de médias RGB brutas. A página de paleta (`/palette`) visualiza estas cores e permite navegar por categoria de matiz.
 
+## Filtragem por orientação
+
+Filtre imagens aleatórias pela sua proporção nativa antes da seleção. Isto é útil quando precisa de imagens que se encaixam naturalmente num layout — paisagem para cabeçalhos, retrato para cartões ou quadrado para miniaturas.
+
+### Endpoints
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Configuração
+
+A tolerância `squarish` é configurável através da variável de ambiente `ORIENTATION_SQUARISH_TOLERANCE` (predefinição: `0.15`). Um valor de `0.15` significa que imagens com proporção entre `0.85` e `1.15` são consideradas quadradas. Defina como `0.0` para 1:1 exato.
+
+### Como funciona
+
+O PlacePix lê as dimensões das imagens dos cabeçalhos dos ficheiros durante a verificação inicial (ficheiros locais) e durante a verificação de metadados em segundo plano (imagens S3). As dimensões são armazenadas na memória e usadas para filtrar o conjunto de candidatos antes da seleção aleatória ou determinística. Se uma orientação for solicitada mas nenhuma imagem corresponder, um `404` é devolvido.
 ## Filtros e Efeitos
 
 Aplique filtros e efeitos em tempo real a qualquer imagem via parâmetros de consulta. Todo o processamento é feito no lado do servidor e cacheado para solicitações subsequentes.

@@ -247,5 +247,12 @@
   "docker.feature1": "Розумне сканування + Підтримка S3",
   "docker.feature2": "Витягування кольорів",
   "docker.feature3": "Нульова конфігурація",
-  "docker.feature4": "Вбудований генератор URL"
+  "docker.feature4": "Вбудований генератор URL",
+  "url_builder.label.orientation": "Орієнтація",
+  "url_builder.placeholder.orientation": "напр., альбомна",
+  "url_builder.help.orientation": "Фільтрувати зображення за співвідношенням сторін: альбомна, портретна або квадратна",
+  "url_builder.orientation.landscape": "Альбомна",
+  "url_builder.orientation.portrait": "Портретна",
+  "url_builder.orientation.squarish": "Квадратна",
+  "api.param.orientation": "Фільтр орієнтації (альбомна, портретна, квадратна)"
 }

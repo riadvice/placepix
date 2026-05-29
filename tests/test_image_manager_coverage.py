@@ -118,6 +118,12 @@ def image_manager(temp_images_dir, monkeypatch):
         2: ["#00ff00"],
         3: ["#0000ff"],
     }
+    manager._dimensions = {
+        1: (800, 400),   # landscape
+        2: (400, 800),   # portrait
+        3: (500, 500),   # squarish
+    }
+    manager._s3_scanned = False
 
     return manager
 
@@ -714,3 +720,96 @@ def test_read_meta_invalid_yaml(temp_images_dir):
     manager = ImageManager()
     meta = manager._read_meta(cat_dir)
     assert meta.name == ""
+
+
+def test_image_manager_filter_by_orientation_landscape(image_manager):
+    """Test _filter_by_orientation with landscape filter."""
+    entries = list(image_manager._categories["test_category"].entries)
+    filtered = image_manager._filter_by_orientation(entries, "landscape")
+    assert len(filtered) == 1
+    assert filtered[0].id == 1
+
+
+def test_image_manager_filter_by_orientation_portrait(image_manager):
+    """Test _filter_by_orientation with portrait filter."""
+    entries = list(image_manager._categories["test_category"].entries)
+    filtered = image_manager._filter_by_orientation(entries, "portrait")
+    assert len(filtered) == 1
+    assert filtered[0].id == 2
+
+
+def test_image_manager_filter_by_orientation_squarish(image_manager):
+    """Test _filter_by_orientation with squarish filter."""
+    entries = list(image_manager._categories["test_category"].entries)
+    filtered = image_manager._filter_by_orientation(entries, "squarish")
+    assert len(filtered) == 1
+    assert filtered[0].id == 3
+
+
+def test_image_manager_filter_by_orientation_invalid(image_manager):
+    """Test _filter_by_orientation with invalid value returns all."""
+    entries = list(image_manager._categories["test_category"].entries)
+    filtered = image_manager._filter_by_orientation(entries, "invalid")
+    assert len(filtered) == 3
+
+
+def test_image_manager_filter_by_orientation_no_dimensions(image_manager):
+    """Test _filter_by_orientation when dimensions are missing."""
+    entries = list(image_manager._categories["test_category"].entries)
+    # Temporarily clear dimensions
+    old_dims = image_manager._dimensions.copy()
+    image_manager._dimensions = {}
+    filtered = image_manager._filter_by_orientation(entries, "landscape")
+    assert len(filtered) == 0
+    image_manager._dimensions = old_dims
+
+
+def test_image_manager_pick_with_orientation_landscape(image_manager):
+    """Test pick with landscape orientation."""
+    entry = image_manager.pick(category="test_category", orientation="landscape")
+    assert entry is not None
+    assert entry.id == 1
+
+
+def test_image_manager_pick_with_orientation_portrait(image_manager):
+    """Test pick with portrait orientation."""
+    entry = image_manager.pick(category="test_category", orientation="portrait")
+    assert entry is not None
+    assert entry.id == 2
+
+
+def test_image_manager_pick_with_orientation_squarish(image_manager):
+    """Test pick with squarish orientation."""
+    entry = image_manager.pick(category="test_category", orientation="squarish")
+    assert entry is not None
+    assert entry.id == 3
+
+
+def test_image_manager_pick_orientation_with_seed(image_manager):
+    """Test pick with orientation and seed combined."""
+    entry = image_manager.pick(
+        category="test_category", seed="test", orientation="landscape"
+    )
+    assert entry is not None
+    assert entry.id == 1
+
+
+def test_image_manager_pick_orientation_no_match(image_manager):
+    """Test pick with orientation when no images match."""
+    # All test entries are in test_category; request non-existent category
+    entry = image_manager.pick(category="nonexistent", orientation="landscape")
+    assert entry is None
+
+
+def test_image_manager_pick_by_color_with_orientation(image_manager):
+    """Test pick_by_color with orientation filter."""
+    entry = image_manager.pick_by_color("#ff0000", orientation="landscape")
+    assert entry is not None
+    assert entry.id == 1
+
+
+def test_image_manager_find_by_color_with_orientation(image_manager):
+    """Test find_by_color with orientation filter."""
+    matches = image_manager.find_by_color("#ff0000", orientation="landscape")
+    assert len(matches) == 1
+    assert matches[0].id == 1

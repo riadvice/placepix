@@ -247,6 +247,35 @@ Hvert billede i PlacePix skannes for dets 3 dominerende farver. Du kan søge i h
 
 Ved opstart ekstraherer PlacePix de mest hyppige farver fra hvert billede ved hjælp af k-means clustering i LAB-farverum. Dette producerer perceptuelt nøjagtige matches snarere end rå RGB-gennemsnit. Palettesiden (`/palette`) visualiserer disse farver og lader dig bladre efter farvetonekategori.
 
+## Filtrering efter orientering
+
+Filtrer tilfældige billeder efter deres oprindelige billedformat før valg. Dette er nyttigt, når du har brug for billeder, der naturligt passer ind i et layout — landskab til overskrifter, portræt til kort eller kvadratisk til miniaturebilleder.
+
+### Slutpunkter
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Konfiguration
+
+`squarish`-tolerancen kan konfigureres via miljøvariablen `ORIENTATION_SQUARISH_TOLERANCE` (standard: `0.15`). En værdi på `0.15` betyder, at billeder med et billedformat mellem `0.85` og `1.15` betragtes som kvadratiske. Indstil til `0.0` for præcis 1:1.
+
+### Sådan fungerer det
+
+PlacePix læser billeddimensioner fra filhoveder under den indledende scanning (lokale filer) og under baggrundsscanning af metadata (S3-billeder). Dimensionerne gemmes i hukommelsen og bruges til at filtrere kandidatpuljen før tilfældigt eller seed-baseret valg. Hvis der anmodes om orientering, men ingen billeder matcher, returneres en `404`.
 ## Filtre og effekter
 
 Anvend real-time filtre og effekter på ethvert billede via query-parametre. Al behandling sker server-side og caches for efterfølgende anmodninger.

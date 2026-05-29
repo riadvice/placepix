@@ -247,6 +247,35 @@ Elke afbeelding in PlacePix wordt gescand op de top 3 dominante kleuren. U kunt 
 
 Bij opstarten extraheert PlacePix de meest frequente kleuren uit elke afbeelding met k-means clustering in LAB-kleurruimte. Dit produceert perceptueel nauwkeurige overeenkomsten in plaats van ruwe RGB-gemiddelden. De paletpagina (`/palette`) visualiseert deze kleuren en laat u bladeren per kleurtint-categorie.
 
+## Oriëntatiefilter
+
+Filter willekeurige afbeeldingen op hun native beeldverhouding vóór de selectie. Dit is handig wanneer je afbeeldingen nodig hebt die natuurlijk in een lay-out passen — landschap voor headers, portret voor kaarten of vierkant voor miniaturen.
+
+### Eindpunten
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Configuratie
+
+De `squarish`-tolerantie is configureerbaar via de omgevingsvariabele `ORIENTATION_SQUARISH_TOLERANCE` (standaard: `0.15`). Een waarde van `0.15` betekent dat afbeeldingen met een beeldverhouding tussen `0.85` en `1.15` als vierkant worden beschouwd. Stel in op `0.0` voor exact 1:1.
+
+### Hoe het werkt
+
+PlacePix leest afbeeldingafmetingen uit bestandsheaders tijdens de initiële scan (lokale bestanden) en tijdens de achtergrondmetadata-scan (S3-afbeeldingen). De afmetingen worden in het geheugen opgeslagen en gebruikt om de kandidatenpool te filteren vóór willekeurige of seed-gebaseerde selectie. Als er om een oriëntatie wordt gevraagd maar er zijn geen overeenkomende afbeeldingen, wordt een `404` geretourneerd.
 ## Filters en effecten
 
 Pas real-time filters en effecten toe op elke afbeelding via query-parameters. Alle verwerking gebeurt server-side en wordt gecachet voor volgende verzoeken.

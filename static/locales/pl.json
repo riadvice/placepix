@@ -247,5 +247,12 @@
   "docker.feature1": "Inteligentne Skanowanie + Obsługa S3",
   "docker.feature2": "Ekstrakcja kolorów",
   "docker.feature3": "Zero Konfiguracja",
-  "docker.feature4": "Osadzony Builder URL"
+  "docker.feature4": "Osadzony Builder URL",
+  "url_builder.label.orientation": "Orientacja",
+  "url_builder.placeholder.orientation": "np. krajobraz",
+  "url_builder.help.orientation": "Filtruj obrazy według proporcji: krajobraz, portret lub kwadrat",
+  "url_builder.orientation.landscape": "Krajobraz",
+  "url_builder.orientation.portrait": "Portret",
+  "url_builder.orientation.squarish": "Kwadrat",
+  "api.param.orientation": "Filtr orientacji (krajobraz, portret, kwadrat)"
 }

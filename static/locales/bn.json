@@ -247,5 +247,12 @@
   "docker.feature1": "স্মার্ট স্ক্যান + S3 সাপোর্ট",
   "docker.feature2": "রঙ নিষ্কাশন",
   "docker.feature3": "জিরো কনফিগারেশন",
-  "docker.feature4": "এমবেডেড URL বিল্ডার"
+  "docker.feature4": "এমবেডেড URL বিল্ডার",
+  "url_builder.label.orientation": "অরিয়েন্টেশন",
+  "url_builder.placeholder.orientation": "যেমন, ল্যান্ডস্কেপ",
+  "url_builder.help.orientation": "অ্যাসপেক্ট রেশিও অনুযায়ী ছবি ফিল্টার করুন: ল্যান্ডস্কেপ, পোর্ট্রেট, বা স্কয়ার",
+  "url_builder.orientation.landscape": "ল্যান্ডস্কেপ",
+  "url_builder.orientation.portrait": "পোর্ট্রেট",
+  "url_builder.orientation.squarish": "স্কয়ার",
+  "api.param.orientation": "অরিয়েন্টেশন ফিল্টার (ল্যান্ডস্কেপ, পোর্ট্রেট, স্কয়ার)"
 }

@@ -247,6 +247,35 @@ Chaque image dans PlacePix est scannée pour ses 3 couleurs dominantes principal
 
 Au démarrage, PlacePix extrait les couleurs les plus fréquentes de chaque image en utilisant le clustering k-means dans l'espace couleur LAB. Cela produit des correspondances perceptuellement précises plutôt que des moyennes RGB brutes. La page palette (`/palette`) visualise ces couleurs et vous permet de naviguer par catégorie de teinte.
 
+## Filtrage par orientation
+
+Filtrez les images aléatoires selon leur rapport d'aspect natif avant la sélection. C'est utile lorsque vous avez besoin d'images qui s'intègrent naturellement à une mise en page — paysage pour les en-têtes, portrait pour les cartes, ou carré pour les vignettes.
+
+### Points de terminaison
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Configuration
+
+La tolérance `squarish` est configurable via la variable d'environnement `ORIENTATION_SQUARISH_TOLERANCE` (défaut : `0.15`). Une valeur de `0.15` signifie que les images avec un rapport d'aspect entre `0.85` et `1.15` sont considérées comme carrées. Réglez sur `0.0` pour un rapport exact de 1:1.
+
+### Fonctionnement
+
+PlacePix lit les dimensions des images à partir des en-têtes de fichiers lors du scan initial (fichiers locaux) et lors du scan de métadonnées en arrière-plan (images S3). Les dimensions sont stockées en mémoire et utilisées pour filtrer le pool de candidats avant la sélection aléatoire ou déterministe. Si une orientation est demandée mais qu'aucune image ne correspond, un `404` est retourné.
 ## Filtres et Effets
 
 Appliquez des filtres et effets en temps réel à n'importe quelle image via des paramètres de requête. Tout le traitement est fait côté serveur et mis en cache pour les requêtes suivantes.

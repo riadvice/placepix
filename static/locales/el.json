@@ -247,5 +247,12 @@
   "docker.feature1": "Έξυπνη σάρωση + Υποστήριξη S3",
   "docker.feature2": "Εξαγωγή χρωμάτων",
   "docker.feature3": "Μηδενική ρύθμιση",
-  "docker.feature4": "Ενσωματωμένος δημιουργός URL"
+  "docker.feature4": "Ενσωματωμένος δημιουργός URL",
+  "url_builder.label.orientation": "Προσανατολισμός",
+  "url_builder.placeholder.orientation": "π.χ. τοπίο",
+  "url_builder.help.orientation": "Φιλτράρετε εικόνες κατά αναλογία διαστάσεων: τοπίο, πορτρέτο ή τετράγωνο",
+  "url_builder.orientation.landscape": "Τοπίο",
+  "url_builder.orientation.portrait": "Πορτρέτο",
+  "url_builder.orientation.squarish": "Τετράγωνο",
+  "api.param.orientation": "Φίλτρο προσανατολισμού (τοπίο, πορτρέτο, τετράγωνο)"
 }

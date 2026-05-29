@@ -247,6 +247,35 @@ Každý obrázek v PlacePix je skenován na jeho 3 dominantní barvy. Můžete p
 
 Při spuštění PlacePix extrahuje z každého obrázku nejčastější barvy pomocí k-means clustering v LAB color space. To produkuje perceptuálně přesné shody spíše než raw RGB průměry. Stránka palety (`/palette`) vizualizuje tyto barvy a umožňuje vám procházet podle kategorie odstínů.
 
+## Filtrování podle orientace
+
+Před výběrem filtrujte náhodné obrázky podle jejich nativního poměru stran. To je užitečné, když potřebujete obrázky, které se přirozeně vejdou do rozvržení — krajina pro záhlaví, portrét pro karty nebo čtverec pro náhledy.
+
+### Koncové body
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Konfigurace
+
+Tolerance `squarish` je konfigurovatelná pomocí proměnné prostředí `ORIENTATION_SQUARISH_TOLERANCE` (výchozí: `0.15`). Hodnota `0.15` znamená, že obrázky s poměrem stran mezi `0.85` a `1.15` jsou považovány za čtvercové. Nastavte `0.0` pro přesný poměr 1:1.
+
+### Jak to funguje
+
+PlacePix čte rozměry obrázků ze záhlaví souborů během počátečního skenování (místní soubory) a během skenování metadat na pozadí (S3 obrázky). Rozměry jsou uloženy v paměti a použity k filtrování kandidátů před náhodným nebo deterministickým výběrem. Pokud je požadována orientace, ale žádné obrázky neodpovídají, vrátí se `404`.
 ## Filtry a efekty
 
 Aplikujte real-time filtry a efekty na jakýkoli obrázek pomocí query parametrů. Veškeré zpracování probíhá na straně serveru a je cacheováno pro následné požadavky.

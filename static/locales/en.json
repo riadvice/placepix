@@ -170,6 +170,7 @@
   "url_builder.label.noise": "Noise (0-100)",
   "url_builder.label.pixelate": "Pixelate (0-50)",
   "url_builder.label.fit": "Fit Mode",
+  "url_builder.label.orientation": "Orientation",
   "url_builder.label.border": "Border",
   "url_builder.label.padding": "Padding",
   "url_builder.label.tint": "Tint",
@@ -261,5 +262,11 @@
   "url_builder.placeholder.text": "Your text here",
   "url_builder.placeholder.svg_text": "Default: {width}x{height}",
   "url_builder.placeholder.duotone": "#ff0000,#0000ff",
-  "url_builder.placeholder.border": "e.g., 5 or 5,ff0000"
+  "url_builder.placeholder.border": "e.g., 5 or 5,ff0000",
+  "url_builder.placeholder.orientation": "e.g., landscape",
+  "url_builder.help.orientation": "Filter images by aspect ratio: landscape, portrait, or squarish",
+  "url_builder.orientation.landscape": "Landscape",
+  "url_builder.orientation.portrait": "Portrait",
+  "url_builder.orientation.squarish": "Squarish",
+  "api.param.orientation": "Orientation filter (landscape, portrait, squarish)"
 }

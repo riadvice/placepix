@@ -247,5 +247,12 @@
   "docker.feature1": "Scan Intelligent + Support S3",
   "docker.feature2": "Extraction des couleurs",
   "docker.feature3": "Zéro Configuration",
-  "docker.feature4": "Générateur d'URL Intégré"
+  "docker.feature4": "Générateur d'URL Intégré",
+  "url_builder.label.orientation": "Orientation",
+  "url_builder.placeholder.orientation": "ex., paysage",
+  "url_builder.help.orientation": "Filtrer les images par rapport d'aspect : paysage, portrait ou carré",
+  "url_builder.orientation.landscape": "Paysage",
+  "url_builder.orientation.portrait": "Portrait",
+  "url_builder.orientation.squarish": "Carré",
+  "api.param.orientation": "Filtre d'orientation (paysage, portrait, carré)"
 }

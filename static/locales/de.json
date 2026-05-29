@@ -247,5 +247,12 @@
   "docker.feature1": "Intelligenter Scan + S3-Unterstützung",
   "docker.feature2": "Farbextraktion",
   "docker.feature3": "Null Konfiguration",
-  "docker.feature4": "Integrierter URL-Generator"
+  "docker.feature4": "Integrierter URL-Generator",
+  "url_builder.label.orientation": "Ausrichtung",
+  "url_builder.placeholder.orientation": "z.B. Landschaft",
+  "url_builder.help.orientation": "Bilder nach Seitenverhältnis filtern: Landschaft, Hochformat oder Quadrat",
+  "url_builder.orientation.landscape": "Landschaft",
+  "url_builder.orientation.portrait": "Hochformat",
+  "url_builder.orientation.squarish": "Quadrat",
+  "api.param.orientation": "Ausrichtungsfilter (Landschaft, Hochformat, Quadrat)"
 }

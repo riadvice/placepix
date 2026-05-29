@@ -226,27 +226,36 @@ PlacePix menyertakan dimensi yang telah ditentukan sebelumnya untuk platform sos
 
 Jika Anda membuat alat manajemen media sosial dan memerlukan **gambar placeholder ukuran Instagram story**, gunakan `/preset/instagram-story/{category}`. Kombinasikan dengan `?fit=smart` untuk foto potret dan `?format=webp&quality=70` untuk pengiriman yang dioptimalkan.
 
-## API Pencarian Warna
 
-Setiap gambar di PlacePix dipindai untuk 3 warna dominan teratas. Anda dapat mencari seluruh perpustakaan berdasarkan warna hex untuk menemukan gambar yang cocok dengan palet merek Anda.
+## Penyaringan Orientasi
 
-### Endpoints
+Filter gambar acak berdasarkan rasio aspek asli mereka sebelum pemilihan. Ini berguna ketika Anda memerlukan gambar yang secara alami cocok dengan tata letak — lanskap untuk header, potret untuk kartu, atau persegi untuk thumbnail.
+
+### Endpoint
 
 ```
-# Dapatkan gambar yang cocok dengan warna hex tertentu
-/color/0ea5e9/400/300
+# Landscape images (width > height)
+/400/300?orientation=landscape
 
-# Filter endpoint apa pun berdasarkan warna dominan
-/400/300/nature?color=d97706
+# Portrait images (height > width)
+/400/300?orientation=portrait
 
-# Daftar semua gambar yang cocok dengan warna
-/api/color/3b82f6
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
 ```
 
-### Bagaimana Pemindaian Warna Bekerja
+### Konfigurasi
 
-Saat startup, PlacePix mengekstrak warna yang paling sering muncul dari setiap gambar menggunakan k-means clustering dalam ruang warna LAB. Ini menghasilkan kecocokan yang akurat secara perceptual daripada rata-rata RGB mentah. Halaman palet (`/palette`) memvisualisasikan warna-warna ini dan memungkinkan Anda menelusuri berdasarkan kategori warna.
+Toleransi `squarish` dapat dikonfigurasi melalui variabel lingkungan `ORIENTATION_SQUARISH_TOLERANCE` (default: `0.15`). Nilai `0.15` berarti gambar dengan rasio aspek antara `0.85` dan `1.15` dianggap persegi. Atur ke `0.0` untuk 1:1 yang tepat.
 
+### Cara Kerja
+
+PlacePix membaca dimensi gambar dari header file selama pemindaian awal (file lokal) dan selama pemindaian metadata latar belakang (gambar S3). Dimensi disimpan dalam memori dan digunakan untuk menyaring kumpulan kandidat sebelum pemilihan acak atau seed. Jika orientasi diminta tetapi tidak ada gambar yang cocok, `404` dikembalikan.
 ## Filter & Efek
 
 Terapkan filter dan efek real-time ke gambar apa pun melalui parameter query. Semua pemrosesan dilakukan di sisi server dan di-cache untuk permintaan selanjutnya.

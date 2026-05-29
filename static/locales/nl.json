@@ -247,5 +247,12 @@
   "docker.feature1": "Slimme Scan + S3 Ondersteuning",
   "docker.feature2": "Kleurextractie",
   "docker.feature3": "Nul Configuratie",
-  "docker.feature4": "Ingebouwde URL Generator"
+  "docker.feature4": "Ingebouwde URL Generator",
+  "url_builder.label.orientation": "Oriëntatie",
+  "url_builder.placeholder.orientation": "bijv. landschap",
+  "url_builder.help.orientation": "Filter afbeeldingen op beeldverhouding: landschap, portret of vierkant",
+  "url_builder.orientation.landscape": "Landschap",
+  "url_builder.orientation.portrait": "Portret",
+  "url_builder.orientation.squarish": "Vierkant",
+  "api.param.orientation": "Oriëntatiefilter (landschap, portret, vierkant)"
 }

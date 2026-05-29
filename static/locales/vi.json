@@ -247,5 +247,12 @@
   "docker.feature1": "Quét Thông Minh + Hỗ Trợ S3",
   "docker.feature2": "Trích xuất màu",
   "docker.feature3": "Cấu hình Zero",
-  "docker.feature4": "Trình tạo URL Nhúng"
+  "docker.feature4": "Trình tạo URL Nhúng",
+  "url_builder.label.orientation": "Hướng",
+  "url_builder.placeholder.orientation": "ví dụ, ngang",
+  "url_builder.help.orientation": "Lọc hình ảnh theo tỷ lệ khung hình: ngang, dọc hoặc vuông",
+  "url_builder.orientation.landscape": "Ngang",
+  "url_builder.orientation.portrait": "Dọc",
+  "url_builder.orientation.squarish": "Vuông",
+  "api.param.orientation": "Bộ lọc hướng (ngang, dọc, vuông)"
 }

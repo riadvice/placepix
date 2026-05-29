@@ -247,5 +247,12 @@
   "docker.feature1": "Smart Scan + S3 Support",
   "docker.feature2": "Color extraction",
   "docker.feature3": "Zero Configuration",
-  "docker.feature4": "Embedded URL Builder"
+  "docker.feature4": "Embedded URL Builder",
+  "url_builder.label.orientation": "Orientasyon",
+  "url_builder.placeholder.orientation": "halimbawa, landscape",
+  "url_builder.help.orientation": "I-filter ang mga larawan ayon sa aspect ratio: landscape, portrait, o square",
+  "url_builder.orientation.landscape": "Landscape",
+  "url_builder.orientation.portrait": "Portrait",
+  "url_builder.orientation.squarish": "Square",
+  "api.param.orientation": "Filter ng orientasyon (landscape, portrait, square)"
 }

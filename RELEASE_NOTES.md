@@ -16,6 +16,9 @@
 
 ### ✨ New Features
 
+#### Image Orientation Filtering
+- **`?orientation=landscape|portrait|squarish`** — Filter random images by native aspect ratio. Works on `/300/200`, `/ratio/`, `/preset/`, and `/color/` endpoints. Composes with `?seed` and `?color`. Squarish tolerance configurable via `ORIENTATION_SQUARISH_TOLERANCE` env var (default: `0.15`)
+
 #### SEO & Discoverability
 - **Complete SEO overhaul** — conditional meta tags, Open Graph / Twitter Cards, canonical URLs, JSON-LD Schema.org, semantic HTML, and Core Web Vitals optimizations; gated via `seo_enabled` / `site_url` settings
 - **Conditional SEO file serving** — `/robots.txt`, `/llms.txt`, and `/sitemap/*` are gated by `seo_enabled`; when disabled, a minimal robots.txt is returned and llms.txt/sitemaps return 404

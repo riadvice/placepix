@@ -226,27 +226,36 @@ PlacePix, popüler sosyal medya platformları ve ekran boyutları için önceden
 
 Bir sosyal medya yönetim aracı oluşturuyorsanız ve **Instagram story boyutu yer tutucu görüntülerine** ihtiyacınız varsa, `/preset/instagram-story/{category}` kullanın. Portre fotoğrafları için `?fit=smart` ile ve optimize edilmiş teslimat için `?format=webp&quality=70` ile birleştirin.
 
-## Renk Arama API
 
-PlacePix'teki her görüntü, ilk 3 baskın rengi için taranır. Marka paletinizle eşleşen görüntüleri bulmak için tüm kitaplığı hex rengine göre arayabilirsiniz.
+## Yön Filtreleme
 
-### Endpoints
+Seçimden önce rastgele görüntüleri yerel en boy oranlarına göre filtreleyin. Bu, başlıklar için yatay, kartlar için dikey veya küçük resimler için kare gibi doğal olarak bir düzene sığan görüntülere ihtiyaç duyduğunuzda kullanışlıdır.
+
+### Uç Noktalar
 
 ```
-# Belirli bir hex rengiyle eşleşen görüntü al
-/color/0ea5e9/400/300
+# Landscape images (width > height)
+/400/300?orientation=landscape
 
-# Herhangi bir uç noktayı baskın renge göre filtrele
-/400/300/nature?color=d97706
+# Portrait images (height > width)
+/400/300?orientation=portrait
 
-# Bir renkle eşleşen tüm görüntüleri listele
-/api/color/3b82f6
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
 ```
 
-### Renk Tarama Nasıl Çalışır
+### Yapılandırma
 
-Başlangıçta PlacePix, LAB renk uzayında k-means kümelemesi kullanarak her görüntüden en sık görülen renkleri çıkarır. Bu, ham RGB ortalamaları yerine algısal olarak doğru eşleşmeler üretir. Palet sayfası (`/palette`) bu renkleri görselleştirir ve ton kategorisine göre göz atmanıza olanak tanır.
+`squarish` toleransı `ORIENTATION_SQUARISH_TOLERANCE` ortam değişkeni üzerinden yapılandırılabilir (varsayılan: `0.15`). `0.15` değeri, en boy oranı `0.85` ile `1.15` arasında olan görüntülerin kare olarak kabul edildiği anlamına gelir. Tam 1:1 için `0.0` olarak ayarlayın.
 
+### Nasıl Çalışır
+
+PlacePix, başlangıç taraması sırasında (yerel dosyalar) ve arka plan meta veri taraması sırasında (S3 görüntüleri) dosya başlıklarından görüntü boyutlarını okur. Boyutlar bellekte saklanır ve rastgele veya seed tabanlı seçimden önce aday havuzunu filtrelemek için kullanılır. Bir yön istenir ancak eşleşen görüntü yoksa `404` döndürülür.
 ## Filtreler ve Efektler
 
 Sorgu parametreleri aracılığıyla herhangi bir görüntüye gerçek zamanlı filtreler ve efektler uygulayın. Tüm işleme sunucu tarafında yapılır ve sonraki istekler için önbelleğe alınır.

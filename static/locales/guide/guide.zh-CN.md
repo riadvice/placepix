@@ -226,6 +226,37 @@ PlacePix 包含流行社交媒体平台和屏幕尺寸的预定义尺寸。使�
 
 如果您正在构建社交媒体管理工具并需要 **Instagram 故事尺寸的占位符图像**，请使用 `/preset/instagram-story/{category}`。结合 `?fit=smart` 用于肖像照片，`?format=webp&quality=70` 用于优化交付。
 
+
+## 方向筛选
+
+在选择之前，按图像的原始宽高比筛选随机图像。当您需要自然适合布局的图像时，这很有用——横向用于页眉，纵向用于卡片，或方形用于缩略图。
+
+### 端点
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### 配置
+
+`squarish` 容差可通过环境变量 `ORIENTATION_SQUARISH_TOLERANCE` 配置（默认：`0.15`）。`0.15` 的值表示宽高比在 `0.85` 到 `1.15` 之间的图像被视为方形。设置为 `0.0` 以获得精确的 1:1。
+
+### 工作原理
+
+PlacePix 在初始扫描期间（本地文件）和后台元数据扫描期间（S3 图像）从文件头读取图像尺寸。尺寸存储在内存中，用于在随机或种子选择之前筛选候选池。如果请求了方向但没有匹配的图像，则返回 `404`。
+
 ## 颜色搜索 API
 
 PlacePix 中的每张图像都会被扫描其前 3 种主导色。您可以通过十六进制颜色搜索整个库，以查找与您的品牌调色板匹配的图像。

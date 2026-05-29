@@ -247,5 +247,12 @@
   "docker.feature1": "Escaneo Inteligente + Soporte S3",
   "docker.feature2": "Extracción de colores",
   "docker.feature3": "Configuración Cero",
-  "docker.feature4": "Generador de URL Integrado"
+  "docker.feature4": "Generador de URL Integrado",
+  "url_builder.label.orientation": "Orientación",
+  "url_builder.placeholder.orientation": "p. ej., horizontal",
+  "url_builder.help.orientation": "Filtrar imágenes por relación de aspecto: horizontal, vertical o cuadrada",
+  "url_builder.orientation.landscape": "Horizontal",
+  "url_builder.orientation.portrait": "Vertical",
+  "url_builder.orientation.squarish": "Cuadrada",
+  "api.param.orientation": "Filtro de orientación (horizontal, vertical, cuadrada)"
 }

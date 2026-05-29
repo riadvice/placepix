@@ -261,5 +261,12 @@
   "url_builder.placeholder.text": "Вашият текст тук",
   "url_builder.placeholder.svg_text": "По подразбиране: {width}x{height}",
   "url_builder.placeholder.duotone": "#ff0000,#0000ff",
-  "url_builder.placeholder.border": "напр, 5 или 5,ff0000"
+  "url_builder.placeholder.border": "напр, 5 или 5,ff0000",
+  "url_builder.label.orientation": "Ориентация",
+  "url_builder.placeholder.orientation": "напр. пейзаж",
+  "url_builder.help.orientation": "Филтрирайте изображенията по съотношение на страните: пейзаж, портрет или квадрат",
+  "url_builder.orientation.landscape": "Пейзаж",
+  "url_builder.orientation.portrait": "Портрет",
+  "url_builder.orientation.squarish": "Квадрат",
+  "api.param.orientation": "Филтър за ориентация (пейзаж, портрет, квадрат)"
 }

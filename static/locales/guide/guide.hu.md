@@ -247,6 +247,36 @@ A PlacePix minden képét átvizsgálja a 3 legdominánsabb szín szempontjábó
 
 Indításkor a PlacePix k-means klaszterezést használva kinyeri a leggyakoribb színeket minden képből a LAB színtérben. Ez érzékileg pontos egyezéseket eredményez a nyers RGB átlagok helyett. A paletta oldal (`/palette`) vizualizálja ezeket a színeket, és lehetővé teszi a színárnyalat-kategóriák szerinti böngészést.
 
+## Tájolás szűrés
+
+Szűrje a véletlenszerű képeket az eredeti képarányuk alapján a választás előtt. Ez akkor hasznos, amikor olyan képekre van szüksége, amelyek természetesen illeszkednek egy elrendezésbe — tájkép a fejlécekhez, portré a kártyákhoz, vagy négyzet a miniatűrökhöz.
+
+### Végpontok
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Konfiguráció
+
+A `squarish` tűrés a `ORIENTATION_SQUARISH_TOLERANCE` környezeti változón keresztül konfigurálható (alapértelmezett: `0.15`). A `0.15` érték azt jelenti, hogy a `0.85` és `1.15` közötti képarányú képek négyzetesnek minősülnek. Állítsa `0.0`-ra a pontos 1:1-hez.
+
+### Működés
+
+A PlacePix a képek méreteit a fájlfejlécekből olvassa ki az inicializáló szkennelés során (helyi fájlok), valamint a háttér-metadataszkennelés során (S3-képek). A méreteket a memóriában tárolja, és a véletlenszerű vagy seed-alapú választás előtt szűri a jelölt-készletet. Ha az orientációt kérik, de nincs egyező kép, `404` hiba tér vissza.
+
 ## Szűrők és effektek
 
 Alkalmazzon valós idejű szűrőket és effekteket bármely képre lekérdezési paramétereken keresztül. Minden feldolgozás szerveroldalon történik és cache-elésre kerül a későbbi kérésekhez.

@@ -247,6 +247,35 @@ Cada imagen en PlacePix es escaneada para sus 3 colores dominantes principales. 
 
 Al iniciar, PlacePix extrae los colores más frecuentes de cada imagen usando agrupamiento k-means en el espacio de color LAB. Esto produce coincidencias perceptualmente precisas en lugar de promedios RGB brutos. La página de paleta (`/palette`) visualiza estos colores y le permite navegar por categoría de matiz.
 
+## Filtrado de orientación
+
+Filtra imágenes aleatorias por su relación de aspecto nativa antes de la selección. Esto es útil cuando necesitas imágenes que encajen naturalmente en un diseño — horizontal para encabezados, vertical para tarjetas o cuadrada para miniaturas.
+
+### Endpoints
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Configuración
+
+La tolerancia `squarish` es configurable mediante la variable de entorno `ORIENTATION_SQUARISH_TOLERANCE` (predeterminado: `0.15`). Un valor de `0.15` significa que las imágenes con una relación de aspecto entre `0.85` y `1.15` se consideran cuadradas. Establece `0.0` para 1:1 exacto.
+
+### Cómo funciona
+
+PlacePix lee las dimensiones de las imágenes desde los encabezados de los archivos durante el escaneo inicial (archivos locales) y durante el escaneo de metadatos en segundo plano (imágenes S3). Las dimensiones se almacenan en memoria y se utilizan para filtrar el conjunto de candidatos antes de la selección aleatoria o determinística. Si se solicita una orientación pero no hay imágenes coincidentes, se devuelve un `404`.
 ## Filtros y Efectos
 
 Aplique filtros y efectos en tiempo real a cualquier imagen mediante parámetros de consulta. Todo el procesamiento se realiza del lado del servidor y se almacena en caché para solicitudes posteriores.

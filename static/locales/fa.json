@@ -261,5 +261,12 @@
   "url_builder.placeholder.text": "متن شما اینجا",
   "url_builder.placeholder.svg_text": "پیش‌فرض: {width}x{height}",
   "url_builder.placeholder.duotone": "#ff0000,#0000ff",
-  "url_builder.placeholder.border": "مثلاً ۵ یا ۵,ff0000"
+  "url_builder.placeholder.border": "مثلاً ۵ یا ۵,ff0000",
+  "url_builder.label.orientation": "جهت",
+  "url_builder.placeholder.orientation": "مثلاً، افقی",
+  "url_builder.help.orientation": "فیلتر تصاویر بر اساس نسبت ابعاد: افقی، عمودی یا مربعی",
+  "url_builder.orientation.landscape": "افقی",
+  "url_builder.orientation.portrait": "عمودی",
+  "url_builder.orientation.squarish": "مربعی",
+  "api.param.orientation": "فیلتر جهت (افقی، عمودی، مربعی)"
 }

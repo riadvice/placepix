@@ -226,27 +226,36 @@ PlacePix bao gồm các kích thước được xác định trước cho các n
 
 Nếu bạn đang xây dựng công cụ quản lý mạng xã hội và cần **hình ảnh placeholder kích thước Instagram story**, hãy sử dụng `/preset/instagram-story/{category}`. Kết hợp với `?fit=smart` cho ảnh chân dung và `?format=webp&quality=70` để tối ưu việc phân phối.
 
-## API Tìm kiếm Màu sắc
 
-Mỗi hình ảnh trong PlacePix được quét để tìm 3 màu chủ đạo hàng đầu. Bạn có thể tìm kiếm toàn bộ thư viện theo màu hex để tìm hình ảnh phù hợp với bảng màu thương hiệu của bạn.
+## Lọc theo Hướng
 
-### Các Endpoint
+Lọc hình ảnh ngẫu nhiên theo tỷ lệ khung hình gốc của chúng trước khi chọn. Điều này hữu ích khi bạn cần hình ảnh tự nhiên phù hợp với bố cục — ngang cho tiêu đề, dọc cho thẻ hoặc vuông cho hình thu nhỏ.
+
+### Điểm cuối
 
 ```
-# Lấy hình ảnh khớp với màu hex cụ thể
-/color/0ea5e9/400/300
+# Landscape images (width > height)
+/400/300?orientation=landscape
 
-# Lọc bất kỳ endpoint nào theo màu chủ đạo
-/400/300/nature?color=d97706
+# Portrait images (height > width)
+/400/300?orientation=portrait
 
-# Liệt kê tất cả hình ảnh khớp với một màu
-/api/color/3b82f6
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
 ```
 
-### Cách hoạt động của quét màu
+### Cấu hình
 
-Khi khởi động, PlacePix trích xuất các màu thường xuyên nhất từ mỗi hình ảnh bằng cách sử dụng phân cụm k-means trong không gian màu LAB. Điều này tạo ra các kết quả khớp chính xác về mặt nhận thức thay vì trung bình RGB thô. Trang bảng màu (`/palette`) trực quan hóa các màu này và cho phép bạn duyệt theo danh mục sắc thái.
+Độ dung sai `squarish` có thể cấu hình thông qua biến môi trường `ORIENTATION_SQUARISH_TOLERANCE` (mặc định: `0.15`). Giá trị `0.15` có nghĩa là hình ảnh có tỷ lệ khung hình từ `0.85` đến `1.15` được coi là vuông. Đặt thành `0.0` cho 1:1 chính xác.
 
+### Cách thức hoạt động
+
+PlacePix đọc kích thước hình ảnh từ tiêu đề tệp trong quá trình quét ban đầu (tệp cục bộ) và trong quá trình quét siêu dữ liệu nền (hình ảnh S3). Kích thước được lưu trữ trong bộ nhớ và được sử dụng để lọc nhóm ứng viên trước khi chọn ngẫu nhiên hoặc chọn theo seed. Nếu yêu cầu hướng nhưng không có hình ảnh phù hợp, `404` được trả về.
 ## Bộ lọc và Hiệu ứng
 
 Áp dụng bộ lọc và hiệu ứng real-time cho bất kỳ hình ảnh nào thông qua tham số truy vấn. Tất cả xử lý được thực hiện phía máy chủ và được lưu cache cho các yêu cầu tiếp theo.

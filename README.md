@@ -41,6 +41,7 @@
 - **Solid color placeholders** — `/solid/500/300/ff0000` with optional text overlay
 - **Aspect ratio sizing** — `/ratio/16:9/1080`
 - **Preset dimensions** — Instagram, YouTube, Facebook, and more
+- **Orientation filtering** — `?orientation=landscape|portrait|squarish` to filter by native aspect ratio
 - **Watermark overlay** — image or text with positioning and opacity
 - **Srcset generation** — responsive image sets via `/api/srcset`
 - **Upload API** — add images via `POST /api/upload`
@@ -84,6 +85,7 @@ GET /300/200.webp               # WebP format
 GET /300/200/nature             # From "nature" category
 GET /300/200?grayscale=true     # With filter
 GET /300/200?text=Hello         # With text overlay
+GET /300/200?orientation=landscape  # Filter by native aspect ratio
 GET /ratio/16:9/1080            # Aspect ratio sizing
 GET /preset/instagram-square    # Preset dimensions
 GET /solid/500/300/ff0000       # Solid color placeholder
@@ -110,6 +112,7 @@ Copy `.env.example` to `.env` and set what you need:
 | `PRIVACY_POLICY_URL` | Legal link | — |
 | `S3_ENABLED` | Use S3-compatible storage | `false` |
 | `AI_GENERATION_ENABLED` | Auto-generate images via AI | `false` |
+| `ORIENTATION_SQUARISH_TOLERANCE` | Tolerance for squarish filter (0.15 = 15%) | `0.15` |
 
 ## API
 

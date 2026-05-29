@@ -538,3 +538,110 @@ def test_tint_with_hash(client: TestClient):
     image_id = _get_image_id(client)
     response = client.get(f"/id/{image_id}/500/500?tint=%23ff0000")
     assert response.status_code == 200
+
+
+def test_orientation_landscape(client: TestClient):
+    """Test orientation=landscape filter on random endpoint."""
+    from src.main import manager
+    # Patch dimensions so we have a mix of orientations
+    for entry in manager._categories.get("nature", []).entries if hasattr(manager._categories.get("nature", []), "entries") else []:
+        pass  # no-op fallback
+    # Set dimensions on all entries
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (800, 400) for e in all_entries}
+    response = client.get("/500/500?orientation=landscape")
+    assert response.status_code == 200
+
+
+def test_orientation_portrait(client: TestClient):
+    """Test orientation=portrait filter on random endpoint."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (400, 800) for e in all_entries}
+    response = client.get("/500/500?orientation=portrait")
+    assert response.status_code == 200
+
+
+def test_orientation_squarish(client: TestClient):
+    """Test orientation=squarish filter on random endpoint."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (500, 500) for e in all_entries}
+    response = client.get("/500/500?orientation=squarish")
+    assert response.status_code == 200
+
+
+def test_orientation_no_match(client: TestClient):
+    """Test orientation filter with no matching images returns 404."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    # Make all entries landscape, then request portrait
+    manager._dimensions = {e.id: (800, 400) for e in all_entries}
+    response = client.get("/500/500?orientation=portrait")
+    assert response.status_code == 404
+
+
+def test_orientation_with_seed(client: TestClient):
+    """Test orientation combined with seed parameter."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (800, 400) for e in all_entries}
+    response = client.get("/500/500?orientation=landscape&seed=test123")
+    assert response.status_code == 200
+
+
+def test_orientation_on_ratio_endpoint(client: TestClient):
+    """Test orientation filter on ratio endpoint."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (800, 400) for e in all_entries}
+    response = client.get("/ratio/16:9/1080?orientation=landscape")
+    assert response.status_code == 200
+
+
+def test_orientation_on_preset_endpoint(client: TestClient):
+    """Test orientation filter on preset endpoint."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (800, 400) for e in all_entries}
+    response = client.get("/preset/instagram-square?orientation=landscape")
+    assert response.status_code == 200
+
+
+def test_orientation_on_color_endpoint(client: TestClient):
+    """Test orientation filter on color endpoint."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (800, 400) for e in all_entries}
+    response = client.get("/color/ff0000/500/500?orientation=landscape")
+    # May return 404 if no matching color
+    assert response.status_code in [200, 404]
+
+
+def test_api_color_match_with_orientation(client: TestClient):
+    """Test API color match endpoint with orientation filter."""
+    from src.main import manager
+    all_entries = []
+    for cat in manager._categories.values():
+        all_entries.extend(cat.entries)
+    manager._dimensions = {e.id: (800, 400) for e in all_entries}
+    response = client.get("/api/color/ff0000?orientation=landscape")
+    assert response.status_code == 200
+    data = response.json()
+    assert "images" in data

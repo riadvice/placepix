@@ -247,6 +247,36 @@ Every image in PlacePix is scanned for its top 3 dominant colors. You can search
 
 On startup, PlacePix extracts the most frequent colors from each image using k-means clustering in LAB color space. This produces perceptually accurate matches rather than raw RGB averages. The palette page (`/palette`) visualizes these colors and lets you browse by hue category.
 
+## Orientation Filtering
+
+Filter random images by their native aspect ratio before selection. This is useful when you need images that naturally fit a layout — landscape for headers, portrait for cards, or squarish for thumbnails.
+
+### Endpoints
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### Configuration
+
+The `squarish` tolerance is configurable via the `ORIENTATION_SQUARISH_TOLERANCE` environment variable (default: `0.15`). A value of `0.15` means images with an aspect ratio between `0.85` and `1.15` are considered squarish. Set to `0.0` for exact 1:1 only.
+
+### How It Works
+
+PlacePix reads image dimensions from file headers during the initial scan (local files) and during the background metadata scan (S3 images). The dimensions are stored in memory and used to filter the candidate pool before random or seeded selection. If orientation is requested but no images match, a `404` is returned.
+
 ## Filters & Effects
 
 Apply real-time filters and effects to any image via query parameters. All processing is done server-side and cached for subsequent requests.

@@ -247,6 +247,35 @@ PlacePix의 모든 이미지는 상위 3개의 지배적인 색상으로 스캔�
 
 시작 시 PlacePix는 LAB 색상 공간에서 k-means 클러스터링을 사용하여 각 이미지에서 가장 빈번한 색상을 추출합니다. 이는 원시 RGB 평균이 아닌 지각적으로 정확한 일치를 생성합니다. 팔레트 페이지(`/palette`)는 이러한 색상을 시각화하고 색조 카테고리별로 검색할 수 있게 합니다.
 
+## 방향 필터링
+
+선택하기 전에 이미지의 기본 가로세로 비율로 무작위 이미지를 필터링합니다. 이는 헤더용 가로, 카드용 세로 또는 썸네일용 정사각형 등 레이아웃에 자연스럽게 맞는 이미지가 필요할 때 유용합니다.
+
+### 엔드포인트
+
+```
+# Landscape images (width > height)
+/400/300?orientation=landscape
+
+# Portrait images (height > width)
+/400/300?orientation=portrait
+
+# Squarish images (within 15% of 1:1 by default)
+/400/300?orientation=squarish
+
+# Combined with other filters
+/400/300/nature?orientation=landscape&seed=spring
+/color/0ea5e9/400/300?orientation=portrait
+/api/color/3b82f6?orientation=landscape
+```
+
+### 설정
+
+`squarish` 허용 오차는 환경 변수 `ORIENTATION_SQUARISH_TOLERANCE`를 통해 구성할 수 있습니다(기본값: `0.15`). `0.15` 값은 가로세로 비율이 `0.85`에서 `1.15` 사이인 이미지를 정사각형으로 간주합니다. 정확한 1:1의 경우 `0.0`으로 설정하세요.
+
+### 작동 방식
+
+PlacePix는 초기 스캔 중(로컬 파일)과 백그라운드 메타데이터 스캔 중(S3 이미지)에 파일 헤더에서 이미지 크기를 읽습니다. 크기는 메모리에 저장되어 무작위 또는 시드 선택 전에 후보 풀을 필터링하는 데 사용됩니다. 방향이 요청되었지만 일치하는 이미지가 없으면 `404`가 반환됩니다.
 ## 필터 및 효과
 
 쿼리 매개변수를 통해 모든 이미지에 실시간 필터와 효과를 적용하세요. 모든 처리는 서버 측에서 수행되며 후속 요청을 위해 캐싱됩니다.

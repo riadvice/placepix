@@ -247,5 +247,12 @@
   "docker.feature1": "สแกนอัจฉริยะ + รองรับ S3",
   "docker.feature2": "การแยกสี",
   "docker.feature3": "การตั้งค่าศูนย์",
-  "docker.feature4": "URL Builder แบบฝังตัว"
+  "docker.feature4": "URL Builder แบบฝังตัว",
+  "url_builder.label.orientation": "การจัดแนว",
+  "url_builder.placeholder.orientation": "เช่น แนวนอน",
+  "url_builder.help.orientation": "กรองรูปภาพตามอัตราส่วน: แนวนอน แนวตั้ง หรือสี่เหลี่ยมจัตุรัส",
+  "url_builder.orientation.landscape": "แนวนอน",
+  "url_builder.orientation.portrait": "แนวตั้ง",
+  "url_builder.orientation.squarish": "สี่เหลี่ยมจัตุรัส",
+  "api.param.orientation": "ตัวกรองการจัดแนว (แนวนอน, แนวตั้ง, สี่เหลี่ยมจัตุรัส)"
 }

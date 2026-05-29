@@ -261,5 +261,12 @@
   "url_builder.placeholder.text": "Teks anda di sini",
   "url_builder.placeholder.svg_text": "Lalai: {width}x{height}",
   "url_builder.placeholder.duotone": "#ff0000,#0000ff",
-  "url_builder.placeholder.border": "cth, 5 atau 5,ff0000"
+  "url_builder.placeholder.border": "cth, 5 atau 5,ff0000",
+  "url_builder.label.orientation": "Orientasi",
+  "url_builder.placeholder.orientation": "cth., landskap",
+  "url_builder.help.orientation": "Tapis imej mengikut nisbah aspek: landskap, potret, atau segi empat sama",
+  "url_builder.orientation.landscape": "Landskap",
+  "url_builder.orientation.portrait": "Potret",
+  "url_builder.orientation.squarish": "Segi Empat Sama",
+  "api.param.orientation": "Penapis orientasi (landskap, potret, segi empat sama)"
 }

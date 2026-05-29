@@ -247,5 +247,12 @@
   "docker.feature1": "스마트 스캔 + S3 지원",
   "docker.feature2": "색상 추출",
   "docker.feature3": "제로 구성",
-  "docker.feature4": "임베디드 URL 빌더"
+  "docker.feature4": "임베디드 URL 빌더",
+  "url_builder.label.orientation": "방향",
+  "url_builder.placeholder.orientation": "예: 가로",
+  "url_builder.help.orientation": "가로세로 비율로 이미지 필터링: 가로, 세로 또는 정사각형",
+  "url_builder.orientation.landscape": "가로",
+  "url_builder.orientation.portrait": "세로",
+  "url_builder.orientation.squarish": "정사각형",
+  "api.param.orientation": "방향 필터 (가로, 세로, 정사각형)"
 }

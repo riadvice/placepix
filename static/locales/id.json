@@ -247,5 +247,12 @@
   "docker.feature1": "Pemindaian Cerdas + Dukungan S3",
   "docker.feature2": "Ekstraksi warna",
   "docker.feature3": "Konfigurasi Nol",
-  "docker.feature4": "URL Builder Terintegrasi"
+  "docker.feature4": "URL Builder Terintegrasi",
+  "url_builder.label.orientation": "Orientasi",
+  "url_builder.placeholder.orientation": "misalnya, lanskap",
+  "url_builder.help.orientation": "Filter gambar berdasarkan rasio aspek: lanskap, potret, atau persegi",
+  "url_builder.orientation.landscape": "Lanskap",
+  "url_builder.orientation.portrait": "Potret",
+  "url_builder.orientation.squarish": "Persegi",
+  "api.param.orientation": "Filter orientasi (lanskap, potret, persegi)"
 }

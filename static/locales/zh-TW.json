@@ -247,5 +247,12 @@
   "docker.feature1": "智能掃描 + S3 支援",
   "docker.feature2": "顏色提取",
   "docker.feature3": "零配置",
-  "docker.feature4": "嵌入式 URL 生成器"
+  "docker.feature4": "嵌入式 URL 生成器",
+  "url_builder.label.orientation": "方向",
+  "url_builder.placeholder.orientation": "例如，橫向",
+  "url_builder.help.orientation": "按寬高比篩選圖像：橫向、縱向或方形",
+  "url_builder.orientation.landscape": "橫向",
+  "url_builder.orientation.portrait": "縱向",
+  "url_builder.orientation.squarish": "方形",
+  "api.param.orientation": "方向篩選（橫向、縱向、方形）"
 }

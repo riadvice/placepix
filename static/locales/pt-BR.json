@@ -247,5 +247,12 @@
   "docker.feature1": "Varredura Inteligente + Suporte S3",
   "docker.feature2": "Extração de cores",
   "docker.feature3": "Configuração Zero",
-  "docker.feature4": "Construtor de URL Integrado"
+  "docker.feature4": "Construtor de URL Integrado",
+  "url_builder.label.orientation": "Orientação",
+  "url_builder.placeholder.orientation": "ex., paisagem",
+  "url_builder.help.orientation": "Filtrar imagens por proporção: paisagem, retrato ou quadrado",
+  "url_builder.orientation.landscape": "Paisagem",
+  "url_builder.orientation.portrait": "Retrato",
+  "url_builder.orientation.squarish": "Quadrado",
+  "api.param.orientation": "Filtro de orientação (paisagem, retrato, quadrado)"
 }

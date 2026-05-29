@@ -114,6 +114,7 @@ class ImageManager:
         self._categories: dict[str, Category] = {}
         self._total = 0
         self._colors: dict[int, list[str]] = {}
+        self._dimensions: dict[int, tuple[int, int]] = self._load_dimensions()
         self._scanning_colors = False
         self._is_leader = self._acquire_leader_lock()
         self._rescan()
@@ -126,7 +127,39 @@ class ImageManager:
     def total(self) -> int:
         return self._total
 
-    def pick(self, category: str | None = None, seed: str | None = None) -> ImageEntry | None:
+    def _filter_by_orientation(
+        self, entries: list[ImageEntry], orientation: str
+    ) -> list[ImageEntry]:
+        """Filter entries by native aspect ratio."""
+        orientation = orientation.lower()
+        if orientation not in ("landscape", "portrait", "squarish"):
+            return entries
+
+        filtered: list[ImageEntry] = []
+        for entry in entries:
+            dims = self._dimensions.get(entry.id)
+            if dims is None:
+                continue
+            w, h = dims
+            if w == 0 or h == 0:
+                continue
+            ratio = w / h
+            if orientation == "landscape" and ratio > 1:
+                filtered.append(entry)
+            elif orientation == "portrait" and ratio < 1:
+                filtered.append(entry)
+            elif orientation == "squarish":
+                tolerance = settings.orientation_squarish_tolerance
+                if 1 - tolerance <= ratio <= 1 + tolerance:
+                    filtered.append(entry)
+        return filtered
+
+    def pick(
+        self,
+        category: str | None = None,
+        seed: str | None = None,
+        orientation: str | None = None,
+    ) -> ImageEntry | None:
         cats = list(self._categories.values())
         if not cats:
             return None
@@ -152,13 +185,19 @@ class ImageManager:
         if not cat.entries:
             return None
 
+        candidates = cat.entries
+        if orientation:
+            candidates = self._filter_by_orientation(candidates, orientation)
+            if not candidates:
+                return None
+
         if seed is not None:
             # deterministic per category+seed
             hash_input = f"{seed}:{cat.name}"
-            idx = int(hashlib.sha256(hash_input.encode()).hexdigest(), 16) % len(cat.entries)
-            return cat.entries[idx]
+            idx = int(hashlib.sha256(hash_input.encode()).hexdigest(), 16) % len(candidates)
+            return candidates[idx]
 
-        return random.choice(cat.entries)
+        return random.choice(candidates)
 
     def pick_ai(self, category: str | None = None, seed: str | None = None) -> ImageEntry | None:
         """Pick only from AI-generated pool for a category. Returns None if no AI images."""
@@ -230,6 +269,37 @@ class ImageManager:
     @property
     def _manifest_path(self) -> Path:
         return settings.data_dir / ".placepix_manifest.json"
+
+    @property
+    def _dimensions_path(self) -> Path:
+        return settings.data_dir / ".placepix_dimensions.json"
+
+    def _load_dimensions(self) -> dict[int, tuple[int, int]]:
+        """Load persisted image dimensions."""
+        if self._dimensions_path.exists():
+            try:
+                with open(self._dimensions_path, "r", encoding="utf-8") as f:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                    data = json.load(f)
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                result: dict[int, tuple[int, int]] = {}
+                for k, v in data.items():
+                    if isinstance(v, (list, tuple)) and len(v) == 2:
+                        result[int(k)] = (int(v[0]), int(v[1]))
+                return result
+            except Exception:
+                pass
+        return {}
+
+    def _save_dimensions(self) -> None:
+        """Save image dimensions to disk."""
+        try:
+            with open(self._dimensions_path, "w", encoding="utf-8") as f:
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                json.dump({str(k): list(v) for k, v in self._dimensions.items()}, f, indent=2, sort_keys=True)
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        except Exception:
+            pass
 
     def _load_manifest(self) -> dict[str, int]:
         """Load the persistent id -> filename mapping."""
@@ -424,6 +494,7 @@ class ImageManager:
         self._total = total
         self._colors = colors
         self._save_manifest(manifest)
+        self._save_dimensions()
         logger.info(f"Scan complete: {total} images in {len(new_categories)} categories")
 
     def scan_colors(self) -> None:
@@ -484,6 +555,24 @@ class ImageManager:
                     except Exception as e:
                         logger.warning(f"Failed to extract colors from S3 image {entry.s3_key}: {e}")
 
+                # Also extract dimensions while we have the image open
+                dims: tuple[int, int] | None = None
+                if entry.path is not None:
+                    try:
+                        with Image.open(entry.path) as img:
+                            dims = img.size
+                    except Exception as e:
+                        logger.warning(f"Failed to read dimensions for local file {entry.filename}: {e}")
+                elif entry.s3_key and s3_client:
+                    try:
+                        with Image.open(io.BytesIO(image_data)) as img:
+                            dims = img.size
+                    except Exception as e:
+                        logger.warning(f"Failed to read dimensions for S3 image {entry.filename}: {e}")
+                if dims:
+                    self._dimensions[entry.id] = dims
+                    logger.debug(f"Dimensions extracted: {entry.filename} -> {dims}")
+
                 if extracted:
                     colors[entry.id] = extracted
                     logger.info(f"Color scan [{i}/{total}]: {entry.filename} -> {extracted}")
@@ -503,6 +592,7 @@ class ImageManager:
 
             self._colors = colors
             self._save_colors(colors)
+            self._save_dimensions()
             logger.info(f"Color scan complete: {len(missing_entries)} images processed")
         finally:
             self._scanning_colors = False
@@ -598,13 +688,21 @@ class ImageManager:
                 if key not in manifest:
                     manifest[key] = next_id
                     next_id += 1
-                entries.append(ImageEntry(
+                entry = ImageEntry(
                     path=child,
                     filename=child.name,
                     category=cat_name,
                     id=manifest[key],
                     ai=ai,
-                ))
+                )
+                entries.append(entry)
+                # Read dimensions from image header
+                try:
+                    with Image.open(child) as img:
+                        self._dimensions[entry.id] = img.size
+                        logger.debug(f"Dimensions extracted: {child.name} -> {img.size}")
+                except Exception as e:
+                    logger.warning(f"Failed to read dimensions for {child.name}: {e}")
 
         meta = self._read_meta(subdir)
         return entries, meta, next_id
@@ -613,7 +711,12 @@ class ImageManager:
     def get_colors(self, image_id: int) -> list[str]:
         return self._colors.get(image_id, [])
 
-    def pick_by_color(self, hex_color: str, category: str | None = None) -> ImageEntry | None:
+    def pick_by_color(
+        self,
+        hex_color: str,
+        category: str | None = None,
+        orientation: str | None = None,
+    ) -> ImageEntry | None:
         target_rgb = _hex_to_rgb(hex_color)
         if target_rgb is None:
             return None
@@ -630,11 +733,17 @@ class ImageManager:
                         candidates.append(entry)
                         break
 
+        if orientation:
+            candidates = self._filter_by_orientation(candidates, orientation)
         if not candidates:
             return None
         return random.choice(candidates)
 
-    def find_by_color(self, hex_color: str) -> list[ImageEntry]:
+    def find_by_color(
+        self,
+        hex_color: str,
+        orientation: str | None = None,
+    ) -> list[ImageEntry]:
         target_rgb = _hex_to_rgb(hex_color)
         if target_rgb is None:
             return []
@@ -647,6 +756,8 @@ class ImageManager:
                     if color_rgb and _color_distance(target_rgb, color_rgb) < 100:
                         matches.append(entry)
                         break
+        if orientation:
+            matches = self._filter_by_orientation(matches, orientation)
         return matches
 
     @staticmethod
