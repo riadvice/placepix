@@ -221,22 +221,24 @@ def test_ai_generation_success_response(client: TestClient, monkeypatch):
             },
         )()
 
-        with patch("src.main.manager.rescan"):
-            with patch("src.main.manager.get_by_filename") as mock_get:
-                mock_get.return_value = ImageEntry(
-                    path=Path("/tmp/test.png"),
-                    filename="test.png",
-                    category="nature",
-                    id=42,
-                    ai=True,
-                )
-                response = client.post(
-                    "/api/ai-generate",
-                    json={
-                        "prompt": "a cozy cabin",
-                        "category": "nature",
-                    },
-                )
+        with (
+            patch("src.main.manager.rescan"),
+            patch("src.main.manager.get_by_filename") as mock_get,
+        ):
+            mock_get.return_value = ImageEntry(
+                path=Path("/tmp/test.png"),
+                filename="test.png",
+                category="nature",
+                id=42,
+                ai=True,
+            )
+            response = client.post(
+                "/api/ai-generate",
+                json={
+                    "prompt": "a cozy cabin",
+                    "category": "nature",
+                },
+            )
 
     assert response.status_code == 200
     data = response.json()

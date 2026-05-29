@@ -696,17 +696,16 @@ class ImageProcessor:
         position = position.lower()
         if position == "top-left":
             return (padding, padding)
-        elif position == "top-right":
+        if position == "top-right":
             return (img_width - wm_width - padding, padding)
-        elif position == "bottom-left":
+        if position == "bottom-left":
             return (padding, img_height - wm_height - padding)
-        elif position == "bottom-right":
+        if position == "bottom-right":
             return (img_width - wm_width - padding, img_height - wm_height - padding)
-        elif position == "center":
+        if position == "center":
             return ((img_width - wm_width) // 2, (img_height - wm_height) // 2)
-        else:
-            # Default to bottom-right
-            return (img_width - wm_width - padding, img_height - wm_height - padding)
+        # Default to bottom-right
+        return (img_width - wm_width - padding, img_height - wm_height - padding)
 
     def _apply_invert(self, img: Image.Image) -> Image.Image:
         """Invert image colors."""

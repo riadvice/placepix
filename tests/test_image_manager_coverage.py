@@ -693,7 +693,7 @@ def test_scan_colors_already_scanning(image_manager):
     image_manager._scanning_colors = True
     # Should return early without doing anything
     image_manager.scan_colors()
-    assert image_manager._scanning_colors == True
+    assert image_manager._scanning_colors is True
 
 
 def test_scan_colors_all_have_colors(image_manager):

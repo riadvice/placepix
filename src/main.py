@@ -18,7 +18,7 @@ from typing import Annotated, Any
 
 import boto3
 from botocore.config import Config
-from fastapi import FastAPI, Header, HTTPException, Query, Request, UploadFile
+from fastapi import FastAPI, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -33,8 +33,10 @@ try:
 except Exception:
     _APSCHEDULER_AVAILABLE = False
 
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from multiavatar.multiavatar import multiavatar
 from PIL import Image, ImageDraw, ImageFont
+from pydantic import BaseModel
 
 from src.ai_generator import check_rate_limit, generate_image
 from src.avatar_generator import AvatarGenerator
@@ -127,7 +129,8 @@ def _validate_startup() -> None:
                 font_found = True
             else:
                 logger.warning(
-                    f"Custom font directory configured but no fonts found in {settings.font_dir_path}"
+                    "Custom font directory configured but no fonts found in"
+                    f" {settings.font_dir_path}"
                 )
 
     # Check system fonts as fallback
@@ -340,7 +343,9 @@ class CacheCleaner:
                     pass
             if removed:
                 logger.info(
-                    f"Cache TTL cleanup: removed {removed} stale files, freed {freed_bytes / 1024 / 1024:.2f} MB"
+                    "Cache TTL cleanup: removed %s stale files, freed %.2f MB",
+                    removed,
+                    freed_bytes / 1024 / 1024,
                 )
 
         # Size-based LRU eviction
@@ -348,12 +353,16 @@ class CacheCleaner:
             current_size = self._get_cache_size()
             if current_size > self.max_size_bytes:
                 logger.info(
-                    f"Cache size {current_size / 1024 / 1024:.2f} MB exceeds limit {self.max_size_mb} MB, evicting oldest files"
+                    "Cache size %.2f MB exceeds limit %s MB, evicting oldest files",
+                    current_size / 1024 / 1024,
+                    self.max_size_mb,
                 )
                 removed, freed = self._evict_by_size()
                 if removed:
                     logger.info(
-                        f"Cache size cleanup: removed {removed} files, freed {freed / 1024 / 1024:.2f} MB"
+                        "Cache size cleanup: removed %s files, freed %.2f MB",
+                        removed,
+                        freed / 1024 / 1024,
                     )
 
 
@@ -1000,7 +1009,10 @@ async def _serve_entry(
         if width > settings.base64_max_size or height > settings.base64_max_size:
             raise HTTPException(
                 status_code=400,
-                detail=f"base64 images limited to {settings.base64_max_size}x{settings.base64_max_size} px",
+                detail=(
+                    f"base64 images limited to {settings.base64_max_size}x"
+                    f"{settings.base64_max_size} px"
+                ),
             )
 
     # Prepare watermark config
@@ -1689,12 +1701,15 @@ async def svg_placeholder(
     font_size = min(width, height) // 8
     font_size = max(10, min(font_size, 120))
 
-    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
-  <rect width="100%" height="100%" fill="{bg_color}"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
-        fill="{fg_color}" font-family="system-ui, -apple-system, sans-serif"
-        font-size="{font_size}px" font-weight="500">{display_text}</text>
-</svg>"""
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}"'
+        f' height="{height}" viewBox="0 0 {width} {height}">\n'
+        f'  <rect width="100%" height="100%" fill="{bg_color}"/>\n'
+        f'  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"\n'
+        f'        fill="{fg_color}" font-family="system-ui, -apple-system, sans-serif"\n'
+        f'        font-size="{font_size}px" font-weight="500">{display_text}</text>\n'
+        f'</svg>'
+    )
 
     return Response(
         content=svg,
@@ -2749,9 +2764,6 @@ async def color_palette(
 
 
 # ── Upload ────────────────────────────────────────────────────────
-from fastapi import Form
-
-
 @app.post("/api/upload")
 async def upload_image(
     file: UploadFile,
@@ -2795,9 +2807,6 @@ async def upload_image(
 
 
 # ── AI Image Generation ────────────────────────────────────────────
-from pydantic import BaseModel
-
-
 class AIGenerateRequest(BaseModel):
     prompt: str
     negative_prompt: str = ""
@@ -2818,7 +2827,10 @@ async def ai_generate(
     if not settings.ai_generation_enabled:
         raise HTTPException(
             status_code=503,
-            detail="AI generation is experimental and currently disabled. Set AI_GENERATION_ENABLED=true to enable.",
+            detail=(
+                "AI generation is experimental and currently disabled."
+                " Set AI_GENERATION_ENABLED=true to enable."
+            ),
         )
 
     # Rate limiting: 1 generation per second per IP

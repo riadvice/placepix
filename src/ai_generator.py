@@ -92,7 +92,10 @@ def generate_image(
     if not settings.ai_generation_enabled:
         return GenerationResult(
             success=False,
-            error="AI generation is experimental and currently disabled. Set AI_GENERATION_ENABLED=true to enable.",
+            error=(
+                "AI generation is experimental and currently disabled."
+                " Set AI_GENERATION_ENABLED=true to enable."
+            ),
         )
 
     if not settings.ovh_ai_endpoints_token:
@@ -117,7 +120,11 @@ def generate_image(
     if len(existing) >= settings.ai_max_images_per_category:
         return GenerationResult(
             success=False,
-            error=f"Category '{category}' has reached the AI image cap ({settings.ai_max_images_per_category}). Delete some images to generate more.",
+            error=(
+                f"Category '{category}' has reached the AI image cap"
+                f" ({settings.ai_max_images_per_category})."
+                " Delete some images to generate more."
+            ),
         )
 
     # Build filename from slugified prompt

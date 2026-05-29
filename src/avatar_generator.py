@@ -424,17 +424,28 @@ class AvatarGenerator:
                 cx = width // 2
                 cy = height // 2
                 r = min(cx, cy)
-                shape += f'  <circle cx="{cx}" cy="{cy}" r="{r - border / 2}" fill="none" stroke="{border_hex}" stroke-width="{border}"/>\n'
+                shape += (
+                    f'  <circle cx="{cx}" cy="{cy}"'
+                    f' r="{r - border / 2}" fill="none"'
+                    f' stroke="{border_hex}" stroke-width="{border}"/>\n'
+                )
             else:
                 inset = border / 2
-                shape += f'  <rect x="{inset}" y="{inset}" width="{width - border}" height="{height - border}" fill="none" stroke="{border_hex}" stroke-width="{border}"/>\n'
+                shape += (
+                    f'  <rect x="{inset}" y="{inset}"'
+                    f' width="{width - border}" height="{height - border}"'
+                    f' fill="none" stroke="{border_hex}"'
+                    f' stroke-width="{border}"/>\n'
+                )
 
         shape += '  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"\n'
         shape += f'        fill="{fg_hex}" font-family="system-ui, -apple-system, sans-serif"\n'
         shape += f'        font-size="{font_size}px" font-weight="600">{text_escaped}</text>\n'
 
         svg = (
-            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">\n'
+            f'<svg xmlns="http://www.w3.org/2000/svg"'
+            f' width="{width}" height="{height}"'
+            f' viewBox="0 0 {width} {height}">\n'
             f"{shape}"
             f"</svg>"
         )

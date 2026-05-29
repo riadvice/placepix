@@ -49,7 +49,10 @@ def _hex_to_rgb(hex_str: str) -> tuple[int, int, int] | None:
 
 
 def _color_distance(c1: tuple[int, int, int], c2: tuple[int, int, int]) -> float:
-    return ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2 + (c1[2] - c2[2]) ** 2) ** 0.5
+    dr = c1[0] - c2[0]
+    dg = c1[1] - c2[1]
+    db = c1[2] - c2[2]
+    return math.sqrt(dr * dr + dg * dg + db * db)
 
 
 def _extract_dominant_colors_from_bytes(image_data: bytes, num_colors: int = 3) -> list[str]:
@@ -380,7 +383,9 @@ class ImageManager:
                     # If lock is older than 60 seconds, consider it stale
                     if lock_age > 60:
                         logger.warning(
-                            f"Found stale leader lock (age: {lock_age:.1f}s), attempting to break it"
+                            "Found stale leader lock (age: %.1fs),"
+                            " attempting to break it",
+                            lock_age,
                         )
                         # Try to break the stale lock by acquiring it
                         f2 = open(lock_file, "w")
@@ -390,7 +395,9 @@ class ImageManager:
                             f2.flush()
                             self._leader_lock_file = f2
                             logger.info(
-                                f"Worker {os.getpid()} acquired leader lock after breaking stale lock"
+                                "Worker %s acquired leader lock after"
+                                " breaking stale lock",
+                                os.getpid(),
                             )
                             atexit.register(self._release_leader_lock)
                             return True
@@ -937,7 +944,8 @@ class ImageManager:
         """Return unique dominant colors across all images, sorted by image count."""
         if category and category not in VALID_CATEGORIES:
             raise ValueError(
-                f"Invalid category: {category}. Valid categories are: {', '.join(sorted(VALID_CATEGORIES))}"
+                f"Invalid category: {category}."
+                f" Valid categories are: {', '.join(sorted(VALID_CATEGORIES))}"
             )
 
         color_counts: dict[str, int] = {}

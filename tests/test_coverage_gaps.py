@@ -1717,5 +1717,3 @@ assert ip._OPENCV_AVAILABLE is False
 """
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
     assert result.returncode == 0, f"stderr: {result.stderr}"
-
-

@@ -250,7 +250,7 @@ def test_avif_import_failure(monkeypatch):
     monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", False)
 
     # Should still work, just fallback
-    assert src.image_processor._AVIF_AVAILABLE == False
+    assert src.image_processor._AVIF_AVAILABLE is False
     monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", original_avif)
 
 
@@ -262,7 +262,7 @@ def test_opencv_import_failure(monkeypatch):
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", False)
 
     # Should still work, just fallback
-    assert src.image_processor._OPENCV_AVAILABLE == False
+    assert src.image_processor._OPENCV_AVAILABLE is False
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
 
 

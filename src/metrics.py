@@ -43,11 +43,11 @@ class MetricsTracker:
                 )
             """)
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_requests_timestamp 
+                CREATE INDEX IF NOT EXISTS idx_requests_timestamp
                 ON requests(timestamp)
             """)
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_requests_endpoint 
+                CREATE INDEX IF NOT EXISTS idx_requests_endpoint
                 ON requests(endpoint)
             """)
             conn.commit()
@@ -98,7 +98,7 @@ class MetricsTracker:
         """Get cache hit rate as percentage."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute("""
-                SELECT 
+                SELECT
                     COUNT(*) as total,
                     SUM(CASE WHEN cache_hit = 1 THEN 1 ELSE 0 END) as hits
                 FROM requests
@@ -207,7 +207,7 @@ class MetricsTracker:
             # Aggregate yesterday's data
             cursor = conn.execute(
                 """
-                SELECT 
+                SELECT
                     COUNT(*) as total_requests,
                     SUM(CASE WHEN cache_hit = 1 THEN 1 ELSE 0 END) as cache_hits,
                     AVG(response_time_ms) as avg_response_time
@@ -221,7 +221,7 @@ class MetricsTracker:
                 conn.execute(
                     """
                     INSERT INTO daily_stats (
-                        date, total_requests, cache_hits, 
+                        date, total_requests, cache_hits,
                         total_bandwidth_bytes, avg_response_time_ms
                     ) VALUES (?, ?, ?, ?, ?)
                     """,
@@ -272,7 +272,9 @@ class MetricsTracker:
                 """
                 SELECT
                     COUNT(*) as total,
-                    SUM(CASE WHEN status_code >= 400 AND status_code < 500 THEN 1 ELSE 0 END) as client_errors,
+                    SUM(CASE WHEN status_code >= 400
+                             AND status_code < 500 THEN 1 ELSE 0 END)
+                        as client_errors,
                     SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) as server_errors
                 FROM requests
                 """
