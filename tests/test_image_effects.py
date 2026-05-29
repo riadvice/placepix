@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 def _get_image_id(client: TestClient) -> int:
     """Helper to get a valid image ID from the manager."""
     from src.main import manager
+
     entry = manager.pick()
     assert entry is not None
     return entry.id
@@ -140,16 +141,18 @@ def test_effects_with_different_formats(client: TestClient):
 def test_noise_processor_method():
     """Test noise application in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     # Create a test image
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, noise=50)
         assert len(result) > 0
@@ -158,15 +161,17 @@ def test_noise_processor_method():
 def test_pixelate_processor_method():
     """Test pixelate application in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, pixelate=10)
         assert len(result) > 0
@@ -175,15 +180,17 @@ def test_pixelate_processor_method():
 def test_border_processor_method():
     """Test border application in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, border="10,ff0000")
         assert len(result) > 0
@@ -192,19 +199,21 @@ def test_border_processor_method():
 def test_lqip_processor_method():
     """Test LQIP generation in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (500, 500), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         normal = processor.process(test_img_path, width=500, height=500)
         lqip = processor.process(test_img_path, width=500, height=500, lqip=True)
-        
+
         # LQIP should be much smaller
         assert len(lqip) < len(normal) / 2
 
@@ -212,10 +221,12 @@ def test_lqip_processor_method():
 def test_quality_affects_file_size():
     """Test that quality parameter affects file size."""
     from pathlib import Path
-    from PIL import Image, ImageDraw
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image, ImageDraw
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         # Create a more complex image with gradients
@@ -225,11 +236,11 @@ def test_quality_affects_file_size():
             color = int(i / 500 * 255)
             draw.line([(0, i), (500, i)], fill=(color, 128, 255 - color))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         high_quality = processor.process(test_img_path, width=500, height=500, quality=95)
         low_quality = processor.process(test_img_path, width=500, height=500, quality=10)
-        
+
         # Higher quality should produce larger files
         assert len(high_quality) > len(low_quality)
 
@@ -328,15 +339,17 @@ def test_vignette_effect(client: TestClient):
 def test_invert_processor_method():
     """Test invert in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, invert=True)
         assert len(result) > 0
@@ -345,15 +358,17 @@ def test_invert_processor_method():
 def test_posterize_processor_method():
     """Test posterize in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, posterize=4)
         assert len(result) > 0
@@ -362,15 +377,17 @@ def test_posterize_processor_method():
 def test_duotone_processor_method():
     """Test duotone in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, duotone="ff0000,0000ff")
         assert len(result) > 0
@@ -379,15 +396,17 @@ def test_duotone_processor_method():
 def test_sharpen_processor_method():
     """Test sharpen in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, sharpen=1.5)
         assert len(result) > 0
@@ -396,15 +415,17 @@ def test_sharpen_processor_method():
 def test_emboss_processor_method():
     """Test emboss in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, emboss=True)
         assert len(result) > 0
@@ -413,15 +434,17 @@ def test_emboss_processor_method():
 def test_vignette_processor_method():
     """Test vignette in processor."""
     from pathlib import Path
-    from PIL import Image
-    from src.image_processor import ImageProcessor
     import tempfile
-    
+
+    from PIL import Image
+
+    from src.image_processor import ImageProcessor
+
     with tempfile.TemporaryDirectory() as tmpdir:
         test_img_path = Path(tmpdir) / "test.jpg"
         img = Image.new("RGB", (100, 100), color=(128, 128, 128))
         img.save(test_img_path)
-        
+
         processor = ImageProcessor()
         result = processor.process(test_img_path, width=100, height=100, vignette=0.5)
         assert len(result) > 0
@@ -431,7 +454,6 @@ def test_new_filters_combined(client: TestClient):
     """Test multiple new filters combined."""
     image_id = _get_image_id(client)
     response = client.get(
-        f"/id/{image_id}/500/500?"
-        "invert=true&posterize=4&sharpen=1.0&vignette=0.3"
+        f"/id/{image_id}/500/500?invert=true&posterize=4&sharpen=1.0&vignette=0.3"
     )
     assert response.status_code == 200

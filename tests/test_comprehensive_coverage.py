@@ -1,17 +1,14 @@
 """Comprehensive tests to achieve 100% coverage."""
+
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
-
-import pytest
 from fastapi.testclient import TestClient
-from PIL import Image
 
 
 def _get_image_id(client: TestClient) -> int:
     """Helper to get a valid image ID from the manager."""
     from src.main import manager
+
     entry = manager.pick()
     assert entry is not None
     return entry.id
@@ -20,6 +17,7 @@ def _get_image_id(client: TestClient) -> int:
 def test_config_avif_available(client: TestClient):
     """Test AVIF format availability check."""
     from src.image_processor import _AVIF_AVAILABLE
+
     # Just verify the flag exists
     assert isinstance(_AVIF_AVAILABLE, bool)
 
@@ -27,6 +25,7 @@ def test_config_avif_available(client: TestClient):
 def test_config_opencv_available(client: TestClient):
     """Test OpenCV availability check."""
     from src.image_processor import _OPENCV_AVAILABLE
+
     assert isinstance(_OPENCV_AVAILABLE, bool)
 
 
@@ -138,6 +137,7 @@ def test_random_image_with_category(client: TestClient):
     """Test random image from specific category."""
     category = _get_image_id(client)  # Reuse helper to get a category
     from src.main import manager
+
     categories = list(manager.categories.keys())
     if not categories:
         return
@@ -148,6 +148,7 @@ def test_random_image_with_category(client: TestClient):
 def test_random_image_with_extension(client: TestClient):
     """Test random image with file extension."""
     from src.main import manager
+
     categories = list(manager.categories.keys())
     if not categories:
         return
@@ -224,6 +225,7 @@ def test_random_redirect_endpoint(client: TestClient):
 def test_random_redirect_with_category(client: TestClient):
     """Test random redirect with category."""
     from src.main import manager
+
     categories = list(manager.categories.keys())
     if not categories:
         return
@@ -273,30 +275,21 @@ def test_combined_filters_and_effects(client: TestClient):
 
 def test_ratio_with_all_parameters(client: TestClient):
     """Test aspect ratio endpoint with all parameters."""
-    response = client.get(
-        "/ratio/16:9/1080?"
-        "grayscale=true&blur=2&quality=95&"
-        "border=10&padding=5"
-    )
+    response = client.get("/ratio/16:9/1080?grayscale=true&blur=2&quality=95&border=10&padding=5")
     assert response.status_code == 200
 
 
 def test_preset_with_all_parameters(client: TestClient):
     """Test preset endpoint with all parameters."""
     response = client.get(
-        "/preset/instagram-square?"
-        "sepia=true&noise=15&pixelate=3&"
-        "brightness=1.3&watermark=true"
+        "/preset/instagram-square?sepia=true&noise=15&pixelate=3&brightness=1.3&watermark=true"
     )
     assert response.status_code == 200
 
 
 def test_solid_color_with_all_parameters(client: TestClient):
     """Test solid color with all parameters."""
-    response = client.get(
-        "/solid/500/300/667eea/ffffff?"
-        "text=Hello&border=5&padding=10"
-    )
+    response = client.get("/solid/500/300/667eea/ffffff?text=Hello&border=5&padding=10")
     assert response.status_code == 200
 
 
@@ -433,10 +426,19 @@ def test_last_modified_header_present(client: TestClient):
 def test_all_presets_work(client: TestClient):
     """Test all preset dimensions work."""
     presets = [
-        "facebook-cover", "twitter-header", "instagram-square",
-        "instagram-portrait", "youtube-thumbnail", "leaderboard",
-        "banner", "skyscraper", "rectangle", "mobile", "tablet",
-        "desktop", "4k"
+        "facebook-cover",
+        "twitter-header",
+        "instagram-square",
+        "instagram-portrait",
+        "youtube-thumbnail",
+        "leaderboard",
+        "banner",
+        "skyscraper",
+        "rectangle",
+        "mobile",
+        "tablet",
+        "desktop",
+        "4k",
     ]
     for preset in presets:
         response = client.get(f"/preset/{preset}")
@@ -543,8 +545,13 @@ def test_tint_with_hash(client: TestClient):
 def test_orientation_landscape(client: TestClient):
     """Test orientation=landscape filter on random endpoint."""
     from src.main import manager
+
     # Patch dimensions so we have a mix of orientations
-    for entry in manager._categories.get("nature", []).entries if hasattr(manager._categories.get("nature", []), "entries") else []:
+    for entry in (
+        manager._categories.get("nature", []).entries
+        if hasattr(manager._categories.get("nature", []), "entries")
+        else []
+    ):
         pass  # no-op fallback
     # Set dimensions on all entries
     all_entries = []
@@ -558,6 +565,7 @@ def test_orientation_landscape(client: TestClient):
 def test_orientation_portrait(client: TestClient):
     """Test orientation=portrait filter on random endpoint."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)
@@ -569,6 +577,7 @@ def test_orientation_portrait(client: TestClient):
 def test_orientation_squarish(client: TestClient):
     """Test orientation=squarish filter on random endpoint."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)
@@ -580,6 +589,7 @@ def test_orientation_squarish(client: TestClient):
 def test_orientation_no_match(client: TestClient):
     """Test orientation filter with no matching images returns 404."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)
@@ -592,6 +602,7 @@ def test_orientation_no_match(client: TestClient):
 def test_orientation_with_seed(client: TestClient):
     """Test orientation combined with seed parameter."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)
@@ -603,6 +614,7 @@ def test_orientation_with_seed(client: TestClient):
 def test_orientation_on_ratio_endpoint(client: TestClient):
     """Test orientation filter on ratio endpoint."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)
@@ -614,6 +626,7 @@ def test_orientation_on_ratio_endpoint(client: TestClient):
 def test_orientation_on_preset_endpoint(client: TestClient):
     """Test orientation filter on preset endpoint."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)
@@ -625,6 +638,7 @@ def test_orientation_on_preset_endpoint(client: TestClient):
 def test_orientation_on_color_endpoint(client: TestClient):
     """Test orientation filter on color endpoint."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)
@@ -637,6 +651,7 @@ def test_orientation_on_color_endpoint(client: TestClient):
 def test_api_color_match_with_orientation(client: TestClient):
     """Test API color match endpoint with orientation filter."""
     from src.main import manager
+
     all_entries = []
     for cat in manager._categories.values():
         all_entries.extend(cat.entries)

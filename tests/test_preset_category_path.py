@@ -1,4 +1,5 @@
 """Tests for preset and ratio endpoints with category in path."""
+
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
@@ -7,6 +8,7 @@ from fastapi.testclient import TestClient
 def _get_available_category(client: TestClient) -> str:
     """Helper to get an available category from the manager."""
     from src.main import manager
+
     categories = list(manager.categories.keys())
     return categories[0] if categories else ""
 
@@ -74,9 +76,7 @@ def test_preset_category_with_filters(client: TestClient):
     category = _get_available_category(client)
     if not category:
         return  # Skip if no categories available
-    response = client.get(
-        f"/preset/instagram-square/{category}?grayscale=true&blur=3&quality=90"
-    )
+    response = client.get(f"/preset/instagram-square/{category}?grayscale=true&blur=3&quality=90")
     assert response.status_code == 200
 
 
@@ -85,9 +85,7 @@ def test_ratio_category_with_filters(client: TestClient):
     category = _get_available_category(client)
     if not category:
         return  # Skip if no categories available
-    response = client.get(
-        f"/ratio/16:9/1080/{category}?sepia=true&border=5&padding=10"
-    )
+    response = client.get(f"/ratio/16:9/1080/{category}?sepia=true&border=5&padding=10")
     assert response.status_code == 200
 
 

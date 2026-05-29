@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import base64
+from dataclasses import dataclass
 import logging
+from pathlib import Path
 import re
 import time
-from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 import requests
@@ -90,10 +90,16 @@ def generate_image(
     Call it via asyncio.to_thread() in async contexts.
     """
     if not settings.ai_generation_enabled:
-        return GenerationResult(success=False, error="AI generation is experimental and currently disabled. Set AI_GENERATION_ENABLED=true to enable.")
+        return GenerationResult(
+            success=False,
+            error="AI generation is experimental and currently disabled. Set AI_GENERATION_ENABLED=true to enable.",
+        )
 
     if not settings.ovh_ai_endpoints_token:
-        return GenerationResult(success=False, error="AI generation enabled but OVH_AI_ENDPOINTS_TOKEN is not configured.")
+        return GenerationResult(
+            success=False,
+            error="AI generation enabled but OVH_AI_ENDPOINTS_TOKEN is not configured.",
+        )
 
     steps = steps or settings.ai_default_steps
     cfg_scale = cfg_scale or settings.ai_default_cfg_scale

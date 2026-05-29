@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 def _get_image_id(client: TestClient) -> int:
     """Helper to get a valid image ID from the manager."""
     from src.main import manager
+
     entry = manager.pick()
     assert entry is not None
     return entry.id
@@ -113,9 +114,7 @@ def test_combined_advanced_features(client: TestClient):
     """Test combining smart crop, watermark, and effects."""
     image_id = _get_image_id(client)
     response = client.get(
-        f"/id/{image_id}/500/500?"
-        "fit=smart&watermark=bottom-right&"
-        "noise=10&quality=90"
+        f"/id/{image_id}/500/500?fit=smart&watermark=bottom-right&noise=10&quality=90"
     )
     assert response.status_code == 200
 

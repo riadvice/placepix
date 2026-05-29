@@ -4,9 +4,9 @@ import io
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
+import pytest
 
 from src.config import Settings
 
@@ -21,9 +21,7 @@ def s3_test_image_bytes() -> bytes:
 
 
 @pytest.fixture
-def s3_settings(
-    test_images_dir: Path, tmp_path: Path, s3_test_image_bytes: bytes
-) -> Settings:
+def s3_settings(test_images_dir: Path, tmp_path: Path, s3_test_image_bytes: bytes) -> Settings:
     """Settings with S3 enabled."""
     cache_dir = tmp_path / "cache"
     cache_dir.mkdir()
@@ -75,8 +73,9 @@ def s3_client(
     mock_body.read.return_value = s3_test_image_bytes
     mock_client.get_object.return_value = {"Body": mock_body}
 
-    with patch("src.image_manager.boto3.client", return_value=mock_client), patch(
-        "src.main.boto3.client", return_value=mock_client
+    with (
+        patch("src.image_manager.boto3.client", return_value=mock_client),
+        patch("src.main.boto3.client", return_value=mock_client),
     ):
         from src.image_manager import ImageManager
         from src.main import app

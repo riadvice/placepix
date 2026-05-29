@@ -1,9 +1,10 @@
 """Tests for seed module."""
+
 from __future__ import annotations
 
 import json
-import tempfile
 from pathlib import Path
+import tempfile
 
 from PIL import Image
 
@@ -61,24 +62,24 @@ def test_seed_images_empty_directory():
     with tempfile.TemporaryDirectory() as tmpdir:
         images_dir = Path(tmpdir)
         seed_images(images_dir, count_per_category=2)
-        
+
         # Check categories were created
         for slug, name, desc in SEED_CATEGORIES:
             cat_dir = images_dir / slug
             assert cat_dir.exists()
             assert cat_dir.is_dir()
-            
+
             # Check category.json
             meta_file = cat_dir / "category.json"
             assert meta_file.exists()
             meta = json.loads(meta_file.read_text())
             assert meta["name"] == name
             assert meta["description"] == desc
-            
+
             # Check sample images
             images = list(cat_dir.glob("sample_*.jpg"))
             assert len(images) == 2
-            
+
             # Verify images are valid
             for img_path in images:
                 with Image.open(img_path) as img:
@@ -91,13 +92,13 @@ def test_seed_images_non_empty_directory():
     """Test that seeding skips non-empty directory."""
     with tempfile.TemporaryDirectory() as tmpdir:
         images_dir = Path(tmpdir)
-        
+
         # Create a file to make directory non-empty
         (images_dir / "existing.txt").write_text("test")
-        
+
         # Should not seed
         seed_images(images_dir)
-        
+
         # Should only have the existing file
         files = list(images_dir.rglob("*"))
         assert len([f for f in files if f.is_file()]) == 1
@@ -108,7 +109,7 @@ def test_seed_images_custom_count():
     with tempfile.TemporaryDirectory() as tmpdir:
         images_dir = Path(tmpdir)
         seed_images(images_dir, count_per_category=3)
-        
+
         # Check each category has 3 images
         for slug, _, _ in SEED_CATEGORIES:
             cat_dir = images_dir / slug
@@ -121,7 +122,7 @@ def test_seed_images_single_image():
     with tempfile.TemporaryDirectory() as tmpdir:
         images_dir = Path(tmpdir)
         seed_images(images_dir, count_per_category=1)
-        
+
         for slug, _, _ in SEED_CATEGORIES:
             cat_dir = images_dir / slug
             images = list(cat_dir.glob("sample_*.jpg"))

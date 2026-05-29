@@ -1,22 +1,19 @@
 from __future__ import annotations
 
-import time
 from pathlib import Path
-from unittest.mock import patch
-
-import pytest
-from fastapi.testclient import TestClient
+import time
 
 from src.image_manager import ImageEntry
-from src.main import _cache_path, CacheCleaner
-
+from src.main import CacheCleaner, _cache_path
 
 # ── Hash-Based Cache Key Tests ──────────────────────────────────────
+
 
 class TestCacheHashDeterminism:
     def test_same_inputs_produce_same_key(self, test_images_dir, monkeypatch):
         """Identical params and image must yield the same cache path."""
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -29,6 +26,7 @@ class TestCacheHashDeterminism:
     def test_different_params_produce_different_keys(self, test_images_dir, monkeypatch):
         """Changing any param must produce a different cache path."""
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -44,6 +42,7 @@ class TestCacheHashDeterminism:
 
     def test_border_changes_hash(self, test_images_dir, monkeypatch):
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -55,6 +54,7 @@ class TestCacheHashDeterminism:
 
     def test_padding_changes_hash(self, test_images_dir, monkeypatch):
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -66,6 +66,7 @@ class TestCacheHashDeterminism:
 
     def test_noise_changes_hash(self, test_images_dir, monkeypatch):
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -77,6 +78,7 @@ class TestCacheHashDeterminism:
 
     def test_pixelate_changes_hash(self, test_images_dir, monkeypatch):
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -88,6 +90,7 @@ class TestCacheHashDeterminism:
 
     def test_quality_changes_hash(self, test_images_dir, monkeypatch):
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -99,6 +102,7 @@ class TestCacheHashDeterminism:
 
     def test_lqip_changes_hash(self, test_images_dir, monkeypatch):
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -110,6 +114,7 @@ class TestCacheHashDeterminism:
 
     def test_watermark_changes_hash(self, test_images_dir, monkeypatch):
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -117,7 +122,15 @@ class TestCacheHashDeterminism:
 
         base = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop", watermark="")
         with_watermark = _cache_path(
-            entry, 500, 500, "jpeg", False, 0, "", "crop", watermark="true",
+            entry,
+            500,
+            500,
+            "jpeg",
+            False,
+            0,
+            "",
+            "crop",
+            watermark="true",
             watermark_config={
                 "watermark_image": "",
                 "watermark_text": "hello",
@@ -130,6 +143,7 @@ class TestCacheHashDeterminism:
     def test_source_mtime_changes_hash(self, test_images_dir, monkeypatch):
         """Changing the source image mtime must invalidate the cache key."""
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
         img_path = test_images_dir / "test1.jpg"
@@ -147,9 +161,12 @@ class TestCacheHashDeterminism:
     def test_s3_key_in_hash_no_local_path(self, test_images_dir, monkeypatch):
         """S3 entries use s3_key in the hash instead of source_mtime."""
         from src.config import Settings
+
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
 
-        entry = ImageEntry(path=None, filename="remote.jpg", category="root", id=2, s3_key="photos/remote.jpg")
+        entry = ImageEntry(
+            path=None, filename="remote.jpg", category="root", id=2, s3_key="photos/remote.jpg"
+        )
 
         path1 = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop")
         path2 = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop")
@@ -157,6 +174,7 @@ class TestCacheHashDeterminism:
 
 
 # ── Cache Cleaner Tests ────────────────────────────────────────────
+
 
 class TestCacheCleaner:
     def test_removes_old_files(self, tmp_path: Path):
@@ -232,6 +250,7 @@ class TestCacheCleaner:
         os.utime(str(old_file), (now - 7200, now - 7200))
 
         import logging
+
         with caplog.at_level(logging.INFO, logger="src.main"):
             cleaner = CacheCleaner(cache_dir, ttl_hours=1)
             cleaner.run()
@@ -240,6 +259,7 @@ class TestCacheCleaner:
 
 
 # ── End-to-End Cache Tests ────────────────────────────────────────
+
 
 class _TestSettings:
     """Helper to build a settings object with a custom cache_dir."""
@@ -270,18 +290,18 @@ class TestEndToEndCache:
     def test_cache_path_creates_flat_structure(self, test_images_dir, monkeypatch, tmp_path):
         """Test that cache path creates flat structure with 2-char prefix."""
         from src.image_manager import ImageEntry
-        
+
         cache_dir = tmp_path / "test_cache"
         cache_dir.mkdir()
         test_settings = _TestSettings.make(test_images_dir, cache_dir)
         monkeypatch.setattr("src.config.settings", test_settings)
         monkeypatch.setattr("src.main.settings", test_settings)
-        
+
         img_path = test_images_dir / "test1.jpg"
         entry = ImageEntry(path=img_path, filename="test1.jpg", category="root", id=1)
-        
+
         cache_path = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop")
-        
+
         # Should be in flat structure: cache_dir/<first_2_hex>/<full_hash>.jpeg
         assert cache_path.parent.parent == cache_dir
         assert len(cache_path.parent.name) == 2
@@ -291,19 +311,19 @@ class TestEndToEndCache:
     def test_cache_path_is_deterministic(self, test_images_dir, monkeypatch, tmp_path):
         """Same inputs should produce same cache path."""
         from src.image_manager import ImageEntry
-        
+
         cache_dir = tmp_path / "test_cache2"
         cache_dir.mkdir()
         test_settings = _TestSettings.make(test_images_dir, cache_dir)
         monkeypatch.setattr("src.config.settings", test_settings)
         monkeypatch.setattr("src.main.settings", test_settings)
-        
+
         img_path = test_images_dir / "test1.jpg"
         entry = ImageEntry(path=img_path, filename="test1.jpg", category="root", id=1)
-        
+
         path1 = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop")
         path2 = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop")
-        
+
         assert path1 == path2
         assert path1.name == path2.name
         assert path1.parent == path2.parent

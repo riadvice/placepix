@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import logging
-import random
 from pathlib import Path
+import random
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -98,7 +98,7 @@ def _add_sample_text(img: Image.Image, text: str) -> Image.Image:
 def seed_images(images_dir: Path, count_per_category: int = 5) -> None:
     """Generate sample images if the directory is empty."""
     images_dir.mkdir(parents=True, exist_ok=True)
-    
+
     if any(images_dir.iterdir()):
         logger.info(f"Directory {images_dir} already has content, skipping seed")
         return  # already has content
@@ -111,6 +111,7 @@ def seed_images(images_dir: Path, count_per_category: int = 5) -> None:
 
         # Write category metadata
         import json
+
         meta = {"name": name, "description": desc}
         (cat_dir / "category.json").write_text(json.dumps(meta, indent=2))
 

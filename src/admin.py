@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 
 # Allow running from repo root without package install
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.config import settings
 from src.metrics import MetricsTracker
 
 
@@ -27,15 +26,11 @@ def _print_row(label: str, value: str, width: int = 40) -> None:
 
 def _print_table(headers: list[str], rows: list[list[str]], col_widths: list[int]) -> None:
     # Print header row
-    header_line = " | ".join(
-        f"{h:<{col_widths[i]}}" for i, h in enumerate(headers)
-    )
+    header_line = " | ".join(f"{h:<{col_widths[i]}}" for i, h in enumerate(headers))
     print(f"  {header_line}")
     print(f"  {'-' * (sum(col_widths) + 3 * (len(headers) - 1))}")
     for row in rows:
-        row_line = " | ".join(
-            f"{cell:<{col_widths[i]}}" for i, cell in enumerate(row)
-        )
+        row_line = " | ".join(f"{cell:<{col_widths[i]}}" for i, cell in enumerate(row))
         print(f"  {row_line}")
 
 

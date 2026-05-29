@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from io import BytesIO
 
-import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from src.avatar_generator import AvatarGenerator, _PALETTES
+from src.avatar_generator import _PALETTES, AvatarGenerator
 
 
 def test_extract_initials_two_words():

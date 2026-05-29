@@ -1,27 +1,27 @@
 """Tests for AI image generation via OVHcloud AI Endpoints."""
+
 from __future__ import annotations
 
-import time
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from src.config import Settings
 from src.image_manager import ImageEntry, ImageManager
 
 
 def _clear_rate_limit():
     """Clear the global rate limit state."""
     import src.ai_generator as ag
+
     ag._rate_limit_last.clear()
 
 
 def _make_test_manager(images_dir: Path, tmp_path: Path) -> ImageManager:
     """Create an ImageManager with test settings, patching all references."""
     import src.config
+
     # Save original values
     orig_dir = src.config.settings.dir
     orig_seed = src.config.settings.seed_dir_str
@@ -60,16 +60,20 @@ def test_ai_generation_rate_limiting(client: TestClient, monkeypatch):
     monkeypatch.setattr("src.ai_generator.settings.ai_generation_enabled", True)
 
     with patch("src.ai_generator.generate_image") as mock_gen:
-        mock_gen.return_value = type("Result", (), {
-            "success": True,
-            "path": Path("/tmp/test.png"),
-            "s3_key": None,
-            "filename": "test.png",
-            "category": "nature",
-            "id": 999,
-            "prompt": "a test",
-            "error": "",
-        })()
+        mock_gen.return_value = type(
+            "Result",
+            (),
+            {
+                "success": True,
+                "path": Path("/tmp/test.png"),
+                "s3_key": None,
+                "filename": "test.png",
+                "category": "nature",
+                "id": 999,
+                "prompt": "a test",
+                "error": "",
+            },
+        )()
 
         # First request should succeed (or fail non-429)
         response1 = client.post("/api/ai-generate", json={"prompt": "a test"})
@@ -202,16 +206,20 @@ def test_ai_generation_success_response(client: TestClient, monkeypatch):
     monkeypatch.setattr("src.ai_generator.settings.ovh_ai_endpoints_token", "fake-token")
 
     with patch("src.main.generate_image") as mock_gen:
-        mock_gen.return_value = type("Result", (), {
-            "success": True,
-            "path": Path("/tmp/test.png"),
-            "s3_key": "ai-generated/nature/test.png",
-            "filename": "test.png",
-            "category": "nature",
-            "id": 42,
-            "prompt": "a cozy cabin",
-            "error": "",
-        })()
+        mock_gen.return_value = type(
+            "Result",
+            (),
+            {
+                "success": True,
+                "path": Path("/tmp/test.png"),
+                "s3_key": "ai-generated/nature/test.png",
+                "filename": "test.png",
+                "category": "nature",
+                "id": 42,
+                "prompt": "a cozy cabin",
+                "error": "",
+            },
+        )()
 
         with patch("src.main.manager.rescan"):
             with patch("src.main.manager.get_by_filename") as mock_get:
@@ -222,10 +230,13 @@ def test_ai_generation_success_response(client: TestClient, monkeypatch):
                     id=42,
                     ai=True,
                 )
-                response = client.post("/api/ai-generate", json={
-                    "prompt": "a cozy cabin",
-                    "category": "nature",
-                })
+                response = client.post(
+                    "/api/ai-generate",
+                    json={
+                        "prompt": "a cozy cabin",
+                        "category": "nature",
+                    },
+                )
 
     assert response.status_code == 200
     data = response.json()

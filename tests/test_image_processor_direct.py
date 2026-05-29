@@ -1,11 +1,12 @@
 """Direct tests for ImageProcessor class methods."""
+
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
+import tempfile
 
-import pytest
 from PIL import Image
+import pytest
 
 from src.image_processor import ImageProcessor
 
@@ -14,6 +15,7 @@ from src.image_processor import ImageProcessor
 def test_image():
     """Create a test image with gradient for better compression testing."""
     from PIL import ImageDraw
+
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
         img = Image.new("RGB", (800, 600))
         draw = ImageDraw.Draw(img)
@@ -45,22 +47,22 @@ def test_processor_custom_limits():
 def test_clamp_size():
     """Test size clamping."""
     processor = ImageProcessor()
-    
+
     # Within limits
     w, h = processor.clamp_size(500, 300)
     assert w == 500
     assert h == 300
-    
+
     # Too large
     w, h = processor.clamp_size(5000, 5000)
     assert w == 2000
     assert h == 2000
-    
+
     # Too small
     w, h = processor.clamp_size(1, 1)
     assert w == 8
     assert h == 8
-    
+
     # Zero values
     w, h = processor.clamp_size(0, 0)
     assert w == 0
@@ -70,7 +72,7 @@ def test_clamp_size():
 def test_normalize_format():
     """Test format normalization."""
     processor = ImageProcessor()
-    
+
     assert processor._normalize_format("jpeg") == "jpeg"
     assert processor._normalize_format("jpg") == "jpeg"
     assert processor._normalize_format("png") == "png"
@@ -139,7 +141,7 @@ def test_process_saturation(test_image):
 def test_process_all_fit_modes(test_image):
     """Test all fit modes."""
     processor = ImageProcessor()
-    
+
     for fit_mode in ["crop", "scale", "contain", "cover", "smart"]:
         result = processor.process(test_image, width=400, height=300, fit=fit_mode)
         assert isinstance(result, bytes)
@@ -197,15 +199,15 @@ def test_process_lqip(test_image):
 def test_process_quality(test_image):
     """Test quality parameter."""
     processor = ImageProcessor()
-    
+
     # High quality
     high = processor.process(test_image, width=400, height=300, quality=95)
     assert isinstance(high, bytes)
-    
+
     # Low quality
     low = processor.process(test_image, width=400, height=300, quality=10)
     assert isinstance(low, bytes)
-    
+
     # Low quality should be smaller
     assert len(low) < len(high)
 
@@ -237,7 +239,7 @@ def test_process_png_format(test_image):
     result = processor.process(test_image, width=400, height=300, output_format="png")
     assert isinstance(result, bytes)
     # PNG signature
-    assert result[:8] == b'\x89PNG\r\n\x1a\n'
+    assert result[:8] == b"\x89PNG\r\n\x1a\n"
 
 
 def test_process_webp_format(test_image):

@@ -2,51 +2,49 @@ from __future__ import annotations
 
 import asyncio
 import base64
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 import hashlib
 import html
 import io
 import json
 import logging
-import yaml
 import os
-import re
-import markdown
-import shutil
-import signal
-import time
-from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Annotated
-
-from fastapi import FastAPI, HTTPException, Query, Request, UploadFile, Header
+import re
+import shutil
+import time
+from typing import Annotated, Any
 
 import boto3
 from botocore.config import Config
-
+from fastapi import FastAPI, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+import markdown
 from starlette.middleware.base import BaseHTTPMiddleware
+import yaml
 
 try:
     from apscheduler.schedulers.background import BackgroundScheduler
+
     _APSCHEDULER_AVAILABLE = True
 except Exception:
     _APSCHEDULER_AVAILABLE = False
 
+from multiavatar.multiavatar import multiavatar
+from PIL import Image, ImageDraw, ImageFont
+
 from src.ai_generator import check_rate_limit, generate_image
+from src.avatar_generator import AvatarGenerator
 from src.config import settings
 from src.image_manager import ImageEntry, ImageManager
 from src.image_processor import ImageProcessor
 from src.metrics import MetricsTracker
 from src.observer import start_watching
 from src.seed import seed_images
-from src.avatar_generator import AvatarGenerator
-from multiavatar.multiavatar import multiavatar
 
-from PIL import Image, ImageDraw, ImageFont
 
 # ── Logging Setup ───────────────────────────────────────────────────
 def setup_logging():
@@ -65,7 +63,9 @@ def setup_logging():
 
     return logger
 
+
 logger = setup_logging()
+
 
 # ── Git version ────────────────────────────────────────────────────
 def _get_git_version() -> str:
@@ -74,17 +74,21 @@ def _get_git_version() -> str:
         return env_version
     try:
         import subprocess
+
         # git describe gives: <tag>-<commits-since-tag>-g<short-hash>
         # e.g. 0.9-87-g929a1dad — falls back to just short hash if no tags
         result = subprocess.run(
             ["git", "describe", "--tags", "--always"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode == 0:
             return result.stdout.strip()
     except Exception:
         pass
     return "dev"
+
 
 _git_version = _get_git_version()
 
@@ -117,11 +121,15 @@ def _validate_startup() -> None:
     if settings.font_dir_path:
         # Check custom font directory
         if settings.font_dir_path.exists():
-            if any(settings.font_dir_path.glob("*.ttf")) or any(settings.font_dir_path.glob("*.ttc")):
+            if any(settings.font_dir_path.glob("*.ttf")) or any(
+                settings.font_dir_path.glob("*.ttc")
+            ):
                 font_found = True
             else:
-                logger.warning(f"Custom font directory configured but no fonts found in {settings.font_dir_path}")
-    
+                logger.warning(
+                    f"Custom font directory configured but no fonts found in {settings.font_dir_path}"
+                )
+
     # Check system fonts as fallback
     if not font_found:
         system_font_dirs = [
@@ -135,7 +143,7 @@ def _validate_startup() -> None:
                 if any(Path(font_dir).rglob("*.ttf")):
                     font_found = True
                     break
-        
+
         if not font_found:
             logger.warning("No system fonts found; text overlays may use fallback font")
 
@@ -157,10 +165,18 @@ def _validate_startup() -> None:
 
 # ── Color palette categories (name → dot color) ───────────────────
 HUE_CATEGORIES: list[tuple[str, str]] = [
-    ("Red", "#ef4444"), ("Orange", "#f97316"), ("Yellow", "#eab308"),
-    ("Green", "#22c55e"), ("Cyan", "#06b6d4"), ("Blue", "#3b82f6"),
-    ("Purple", "#a855f7"), ("Pink", "#ec4899"), ("Brown", "#a0522d"),
-    ("White", "#f8fafc"), ("Gray", "#94a3b8"), ("Black", "#0f172a"),
+    ("Red", "#ef4444"),
+    ("Orange", "#f97316"),
+    ("Yellow", "#eab308"),
+    ("Green", "#22c55e"),
+    ("Cyan", "#06b6d4"),
+    ("Blue", "#3b82f6"),
+    ("Purple", "#a855f7"),
+    ("Pink", "#ec4899"),
+    ("Brown", "#a0522d"),
+    ("White", "#f8fafc"),
+    ("Gray", "#94a3b8"),
+    ("Black", "#0f172a"),
 ]
 
 # ── Request Coalescing (thundering herd protection) ─────────────────
@@ -240,6 +256,7 @@ if manager._is_leader:
 else:
     logger.info(f"File watcher skipped (not leader worker, is_leader={manager._is_leader})")
     _observer = None
+
 
 # Cache cleaner class for TTL-based cleanup + size limit
 class CacheCleaner:
@@ -339,6 +356,7 @@ class CacheCleaner:
                         f"Cache size cleanup: removed {removed} files, freed {freed / 1024 / 1024:.2f} MB"
                     )
 
+
 # Scheduler (only start in leader worker)
 _scheduler = None
 if manager._is_leader and _APSCHEDULER_AVAILABLE:
@@ -349,7 +367,9 @@ if manager._is_leader and _APSCHEDULER_AVAILABLE:
             f"Starting cache cleanup scheduler (TTL: {settings.cache_ttl_hours}h, "
             f"interval: {settings.cache_cleanup_interval_minutes}m)"
         )
-        _cache_cleaner = CacheCleaner(settings.cache_dir, settings.cache_ttl_hours, settings.cache_max_size_mb)
+        _cache_cleaner = CacheCleaner(
+            settings.cache_dir, settings.cache_ttl_hours, settings.cache_max_size_mb
+        )
         _scheduler.add_job(
             _cache_cleaner.run,
             "interval",
@@ -402,7 +422,7 @@ async def lifespan(app: FastAPI):
     if _scheduler is not None:
         logger.info("Stopping background scheduler")
         _scheduler.shutdown(wait=False)
-    if manager._is_leader and hasattr(manager, '_leader_lock_file') and manager._leader_lock_file:
+    if manager._is_leader and hasattr(manager, "_leader_lock_file") and manager._leader_lock_file:
         logger.info("Releasing leader lock")
         manager._release_leader_lock()
     if _observer is not None:
@@ -416,11 +436,14 @@ app.router.lifespan_context = lifespan
 
 # Templates
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 jinja_env = Environment(
     loader=FileSystemLoader("templates"),
-    autoescape=select_autoescape(['html', 'xml']),
-    cache_size=0  # Disable caching to avoid unhashable type errors
+    autoescape=select_autoescape(["html", "xml"]),
+    cache_size=0,  # Disable caching to avoid unhashable type errors
 )
+
+
 def render_template(name: str, context: dict, request: Request | None = None) -> HTMLResponse:
     template = jinja_env.get_template(name)
     page_url = ""
@@ -437,6 +460,8 @@ def render_template(name: str, context: dict, request: Request | None = None) ->
     }
     content = template.render(**merged)
     return HTMLResponse(content)
+
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 logger.info("Static files mounted at /static")
 
@@ -447,6 +472,7 @@ logger.info("Static files mounted at /static")
 # are hidden (404) to keep private deployments off AI crawlers.
 
 _MINIMAL_ROBOTS = "User-agent: *\nAllow: /\n\nDisallow: /admin\n"
+
 
 @app.get("/robots.txt", response_class=Response, include_in_schema=False)
 async def robots_txt() -> Response:
@@ -460,7 +486,7 @@ async def robots_txt() -> Response:
                 content = re.sub(
                     r"Sitemap: https://[^/]+/sitemap/",
                     f"Sitemap: {settings.site_url.rstrip('/')}/sitemap/",
-                    content
+                    content,
                 )
         else:
             content = _MINIMAL_ROBOTS
@@ -509,6 +535,7 @@ async def sitemap_file(filename: str) -> Response:
         raise HTTPException(status_code=404, detail="sitemap not found")
     return Response(content=path.read_text(encoding="utf-8"), media_type="application/xml")
 
+
 logger.info(f"PlacePix ready - listening on {settings.bind_host}:{settings.bind_port}")
 
 
@@ -520,26 +547,26 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         response = await call_next(request)
         response_time_ms = (time.time() - start_time) * 1000
-        
+
         # Log the request
         logger.info(
             f"{request.method} {request.url.path} - "
             f"Status: {response.status_code} - "
             f"Time: {response_time_ms:.2f}ms"
         )
-        
+
         # Extract metadata from request
         endpoint = request.url.path
         method = request.method
         status_code = response.status_code
-        
+
         # Try to extract image metadata from path
         category = None
         width = None
         height = None
         format_ext = None
         cache_hit = response.headers.get("X-Cache-Hit") == "true"
-        
+
         # Parse path for metadata
         path_parts = endpoint.strip("/").split("/")
         if len(path_parts) >= 2 and path_parts[0].isdigit() and path_parts[1].isdigit():
@@ -549,7 +576,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
                 category = path_parts[2].split(".")[0]
                 if "." in path_parts[2]:
                     format_ext = path_parts[2].split(".")[1]
-        
+
         # Log the request
         try:
             metrics_tracker.log_request(
@@ -565,7 +592,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             )
         except Exception:
             pass  # Don't fail requests if metrics logging fails
-        
+
         return response
 
 
@@ -990,18 +1017,51 @@ async def _serve_entry(
     cache_path = None
     if settings.cache:
         cache_path = _cache_path(
-            entry, width, height, output_format, grayscale, blur, text, fit,
-            tint, brightness, contrast, saturation, sepia,
-            border, padding, noise, pixelate, quality, lqip, watermark,
-            watermark_config, invert, posterize, solarize, duotone, sharpen,
-            emboss, halftone, edges, oil_painting, pencil_sketch, cartoon, vignette,
-            radius, text_pos, text_color, text_bg,
+            entry,
+            width,
+            height,
+            output_format,
+            grayscale,
+            blur,
+            text,
+            fit,
+            tint,
+            brightness,
+            contrast,
+            saturation,
+            sepia,
+            border,
+            padding,
+            noise,
+            pixelate,
+            quality,
+            lqip,
+            watermark,
+            watermark_config,
+            invert,
+            posterize,
+            solarize,
+            duotone,
+            sharpen,
+            emboss,
+            halftone,
+            edges,
+            oil_painting,
+            pencil_sketch,
+            cartoon,
+            vignette,
+            radius,
+            text_pos,
+            text_color,
+            text_bg,
         )
         cached = _read_cached(cache_path)
         if cached is not None:
             logger.debug(f"Cache hit: {entry.filename} at {width}x{height}")
             if settings.cdn:
-                return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
+                return RedirectResponse(
+                    url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}"
+                )
 
             # Generate cache headers
             etag = _generate_etag(cached)
@@ -1010,7 +1070,9 @@ async def _serve_entry(
             # Check if client cache is still valid
             if _check_not_modified(if_none_match, if_modified_since, etag, last_modified):
                 logger.debug(f"Client cache valid: {entry.filename}")
-                return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
+                return Response(
+                    status_code=304, headers={"ETag": etag, "Last-Modified": last_modified}
+                )
 
             return _build_image_response(
                 cached, output_format, entry.category, width, height, is_random, as_base64
@@ -1018,12 +1080,43 @@ async def _serve_entry(
 
     # Build coalescing key
     inflight_key = _build_process_key(
-        entry, width, height, output_format, grayscale, blur, text, fit,
-        tint, brightness, contrast, saturation, sepia,
-        border, padding, noise, pixelate, quality, lqip, watermark,
-        watermark_config, invert, posterize, solarize, duotone, sharpen,
-        emboss, halftone, edges, oil_painting, pencil_sketch, cartoon, vignette,
-        radius, text_pos, text_color, text_bg,
+        entry,
+        width,
+        height,
+        output_format,
+        grayscale,
+        blur,
+        text,
+        fit,
+        tint,
+        brightness,
+        contrast,
+        saturation,
+        sepia,
+        border,
+        padding,
+        noise,
+        pixelate,
+        quality,
+        lqip,
+        watermark,
+        watermark_config,
+        invert,
+        posterize,
+        solarize,
+        duotone,
+        sharpen,
+        emboss,
+        halftone,
+        edges,
+        oil_painting,
+        pencil_sketch,
+        cartoon,
+        vignette,
+        radius,
+        text_pos,
+        text_color,
+        text_bg,
     )
 
     # Request coalescing: wait if another identical request is already processing
@@ -1103,7 +1196,9 @@ async def _serve_entry(
             _write_cache(cache_path, processed)
             logger.debug(f"Cached processed image: {cache_path}")
             if settings.cdn:
-                return RedirectResponse(url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}")
+                return RedirectResponse(
+                    url=f"{settings.cdn}/{cache_path.relative_to(settings.cache_dir)}"
+                )
     finally:
         await _release_inflight(inflight_key)
 
@@ -1119,8 +1214,15 @@ async def _serve_entry(
         return Response(status_code=304, headers={"ETag": etag, "Last-Modified": last_modified})
 
     return _build_image_response(
-        processed, output_format, entry.category, width, height, is_random, as_base64,
-        etag=etag, last_modified=last_modified,
+        processed,
+        output_format,
+        entry.category,
+        width,
+        height,
+        is_random,
+        as_base64,
+        etag=etag,
+        last_modified=last_modified,
     )
 
 
@@ -1139,16 +1241,22 @@ def _build_image_response(
     if as_base64:
         b64 = base64.b64encode(image_bytes).decode("ascii")
         data_url = f"data:image/{output_format};base64,{b64}"
-        return JSONResponse({
-            "data": data_url,
-            "width": width,
-            "height": height,
-            "format": output_format,
-        })
+        return JSONResponse(
+            {
+                "data": data_url,
+                "width": width,
+                "height": height,
+                "format": output_format,
+            }
+        )
 
     content_type = f"image/{output_format}"
     filename = f"placepix-{category}-{width}x{height}.{output_format}"
-    cache_control = "public, max-age=31536000, immutable" if not is_random else "public, max-age=0, must-revalidate"
+    cache_control = (
+        "public, max-age=31536000, immutable"
+        if not is_random
+        else "public, max-age=0, must-revalidate"
+    )
     headers: dict[str, str] = {
         "Content-Disposition": f'inline; filename="{filename}"',
         "Cache-Control": cache_control,
@@ -1217,17 +1325,48 @@ async def serve_by_id(
         logger.warning(f"Image not found: ID #{image_id}")
         raise HTTPException(status_code=404, detail="image not found")
     return await _serve_entry(
-        entry, width, height, ext, grayscale, blur, text, fit, format,
-        tint, brightness, contrast, saturation, sepia,
-        border, padding, noise, pixelate, quality, lqip, watermark,
+        entry,
+        width,
+        height,
+        ext,
+        grayscale,
+        blur,
+        text,
+        fit,
+        format,
+        tint,
+        brightness,
+        contrast,
+        saturation,
+        sepia,
+        border,
+        padding,
+        noise,
+        pixelate,
+        quality,
+        lqip,
+        watermark,
         watermark_config=None,
-        if_none_match=if_none_match, if_modified_since=if_modified_since,
-        is_random=False, as_base64=base64,
-        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
-        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
-        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        if_none_match=if_none_match,
+        if_modified_since=if_modified_since,
+        is_random=False,
+        as_base64=base64,
+        invert=invert,
+        posterize=posterize,
+        solarize=solarize,
+        duotone=duotone,
+        sharpen=sharpen,
+        emboss=emboss,
+        halftone=halftone,
+        edges=edges,
+        oil_painting=oil_painting,
+        pencil_sketch=pencil_sketch,
+        cartoon=cartoon,
         vignette=vignette,
-        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
+        radius=radius,
+        text_pos=text_pos,
+        text_color=text_color,
+        text_bg=text_bg,
     )
 
 
@@ -1301,17 +1440,48 @@ async def serve_by_ratio(
 
     is_random = not seed
     return await _serve_entry(
-        entry, width, height, ext, grayscale, blur, text, fit, format,
-        tint, brightness, contrast, saturation, sepia,
-        border, padding, noise, pixelate, quality, lqip, watermark,
+        entry,
+        width,
+        height,
+        ext,
+        grayscale,
+        blur,
+        text,
+        fit,
+        format,
+        tint,
+        brightness,
+        contrast,
+        saturation,
+        sepia,
+        border,
+        padding,
+        noise,
+        pixelate,
+        quality,
+        lqip,
+        watermark,
         watermark_config=None,
-        if_none_match=if_none_match, if_modified_since=if_modified_since,
-        is_random=is_random, as_base64=base64,
-        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
-        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
-        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        if_none_match=if_none_match,
+        if_modified_since=if_modified_since,
+        is_random=is_random,
+        as_base64=base64,
+        invert=invert,
+        posterize=posterize,
+        solarize=solarize,
+        duotone=duotone,
+        sharpen=sharpen,
+        emboss=emboss,
+        halftone=halftone,
+        edges=edges,
+        oil_painting=oil_painting,
+        pencil_sketch=pencil_sketch,
+        cartoon=cartoon,
         vignette=vignette,
-        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
+        radius=radius,
+        text_pos=text_pos,
+        text_color=text_color,
+        text_bg=text_bg,
     )
 
 
@@ -1385,17 +1555,48 @@ async def serve_by_preset(
 
     is_random = not seed
     return await _serve_entry(
-        entry, width, height, ext, grayscale, blur, text, fit, format,
-        tint, brightness, contrast, saturation, sepia,
-        border, padding, noise, pixelate, quality, lqip, watermark,
+        entry,
+        width,
+        height,
+        ext,
+        grayscale,
+        blur,
+        text,
+        fit,
+        format,
+        tint,
+        brightness,
+        contrast,
+        saturation,
+        sepia,
+        border,
+        padding,
+        noise,
+        pixelate,
+        quality,
+        lqip,
+        watermark,
         watermark_config=None,
-        if_none_match=if_none_match, if_modified_since=if_modified_since,
-        is_random=is_random, as_base64=base64,
-        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
-        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
-        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        if_none_match=if_none_match,
+        if_modified_since=if_modified_since,
+        is_random=is_random,
+        as_base64=base64,
+        invert=invert,
+        posterize=posterize,
+        solarize=solarize,
+        duotone=duotone,
+        sharpen=sharpen,
+        emboss=emboss,
+        halftone=halftone,
+        edges=edges,
+        oil_painting=oil_painting,
+        pencil_sketch=pencil_sketch,
+        cartoon=cartoon,
         vignette=vignette,
-        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
+        radius=radius,
+        text_pos=text_pos,
+        text_color=text_color,
+        text_bg=text_bg,
     )
 
 
@@ -1409,11 +1610,11 @@ async def solid_color_placeholder(
     text: str = "",
 ) -> Response:
     """Generate solid color placeholder with optional text."""
-    
+
     # Clamp size
     width = max(1, min(width, 5000))
     height = max(1, min(height, 5000))
-    
+
     # Parse colors
     def _parse_hex(color: str) -> tuple[int, int, int]:
         h = color.lstrip("#")
@@ -1422,32 +1623,33 @@ async def solid_color_placeholder(
         if len(h) != 6 or not all(c in "0123456789abcdefABCDEF" for c in h):
             return (204, 204, 204)  # Default gray
         return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
-    
+
     bg_rgb = _parse_hex(bg_color)
     fg_rgb = _parse_hex(fg_color)
-    
+
     # Create image
     img = Image.new("RGB", (width, height), bg_rgb)
-    
+
     # Add text if provided
     if text:
         draw = ImageDraw.Draw(img)
         font_size = max(12, min(width, height) // 10)
         font = _load_font(font_size)
-        
+
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
         x = (width - text_width) // 2
         y = (height - text_height) // 2
         draw.text((x, y), text, fill=fg_rgb, font=font)
-    
+
     # Convert to bytes
     import io
+
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     content = buffer.getvalue()
-    
+
     return Response(
         content=content,
         media_type="image/png",
@@ -1574,9 +1776,7 @@ async def avatar_image(
     """Generate an avatar image (letter-based or multiavatar)."""
     avatar_type = avatar_type.lower().strip()
     if avatar_type not in ("letter", "multiavatar"):
-        raise HTTPException(
-            status_code=400, detail="type must be 'letter' or 'multiavatar'"
-        )
+        raise HTTPException(status_code=400, detail="type must be 'letter' or 'multiavatar'")
 
     # ── Multiavatar path ──────────────────────────────────────────
     if avatar_type == "multiavatar":
@@ -1731,17 +1931,48 @@ async def serve_image(
     # Random images should not be cached long-term
     is_random = not seed
     return await _serve_entry(
-        entry, width, height, ext, grayscale, blur, text, fit, format,
-        tint, brightness, contrast, saturation, sepia,
-        border, padding, noise, pixelate, quality, lqip, watermark,
+        entry,
+        width,
+        height,
+        ext,
+        grayscale,
+        blur,
+        text,
+        fit,
+        format,
+        tint,
+        brightness,
+        contrast,
+        saturation,
+        sepia,
+        border,
+        padding,
+        noise,
+        pixelate,
+        quality,
+        lqip,
+        watermark,
         watermark_config=None,
-        if_none_match=if_none_match, if_modified_since=if_modified_since,
-        is_random=is_random, as_base64=base64,
-        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
-        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
-        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        if_none_match=if_none_match,
+        if_modified_since=if_modified_since,
+        is_random=is_random,
+        as_base64=base64,
+        invert=invert,
+        posterize=posterize,
+        solarize=solarize,
+        duotone=duotone,
+        sharpen=sharpen,
+        emboss=emboss,
+        halftone=halftone,
+        edges=edges,
+        oil_painting=oil_painting,
+        pencil_sketch=pencil_sketch,
+        cartoon=cartoon,
         vignette=vignette,
-        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
+        radius=radius,
+        text_pos=text_pos,
+        text_color=text_color,
+        text_bg=text_bg,
     )
 
 
@@ -1798,17 +2029,48 @@ async def serve_by_color(
         logger.warning(f"No image matching color: {hex_color}")
         raise HTTPException(status_code=404, detail="no image matching that color")
     return await _serve_entry(
-        entry, width, height, ext, grayscale, blur, text, fit, format,
-        tint, brightness, contrast, saturation, sepia,
-        border, padding, noise, pixelate, quality, lqip, watermark,
+        entry,
+        width,
+        height,
+        ext,
+        grayscale,
+        blur,
+        text,
+        fit,
+        format,
+        tint,
+        brightness,
+        contrast,
+        saturation,
+        sepia,
+        border,
+        padding,
+        noise,
+        pixelate,
+        quality,
+        lqip,
+        watermark,
         watermark_config=None,
-        if_none_match=if_none_match, if_modified_since=if_modified_since,
-        is_random=True, as_base64=base64,
-        invert=invert, posterize=posterize, solarize=solarize, duotone=duotone,
-        sharpen=sharpen, emboss=emboss, halftone=halftone, edges=edges,
-        oil_painting=oil_painting, pencil_sketch=pencil_sketch, cartoon=cartoon,
+        if_none_match=if_none_match,
+        if_modified_since=if_modified_since,
+        is_random=True,
+        as_base64=base64,
+        invert=invert,
+        posterize=posterize,
+        solarize=solarize,
+        duotone=duotone,
+        sharpen=sharpen,
+        emboss=emboss,
+        halftone=halftone,
+        edges=edges,
+        oil_painting=oil_painting,
+        pencil_sketch=pencil_sketch,
+        cartoon=cartoon,
         vignette=vignette,
-        radius=radius, text_pos=text_pos, text_color=text_color, text_bg=text_bg,
+        radius=radius,
+        text_pos=text_pos,
+        text_color=text_color,
+        text_bg=text_bg,
     )
 
 
@@ -1944,10 +2206,39 @@ async def url_builder(request: Request, lang: str = "en") -> Any:
 
 
 _GUIDE_LOCALES = [
-    "ar", "bg", "bn", "cs", "da", "de", "el", "en", "es", "fa",
-    "fil", "fr", "hi", "hu", "id", "it", "ja", "ko", "ms", "nl",
-    "no", "pl", "pt-BR", "pt-PT", "ro", "ru", "sv", "th", "tr", "uk",
-    "vi", "zh-CN", "zh-TW",
+    "ar",
+    "bg",
+    "bn",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "en",
+    "es",
+    "fa",
+    "fil",
+    "fr",
+    "hi",
+    "hu",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "ms",
+    "nl",
+    "no",
+    "pl",
+    "pt-BR",
+    "pt-PT",
+    "ro",
+    "ru",
+    "sv",
+    "th",
+    "tr",
+    "uk",
+    "vi",
+    "zh-CN",
+    "zh-TW",
 ]
 
 _RTL_LOCALES = {"ar", "fa"}
@@ -2091,10 +2382,12 @@ async def guide(request: Request, lang: str = "en") -> Any:
             # Extract Q/A from h3 tags within the section
             h3_pattern = re.compile(r"<h3>(.*?)</h3>\s*<p>(.*?)</p>", re.IGNORECASE | re.DOTALL)
             for q_match in h3_pattern.finditer(section["html"]):
-                faqs.append({
-                    "question": q_match.group(1),
-                    "answer": q_match.group(2),
-                })
+                faqs.append(
+                    {
+                        "question": q_match.group(1),
+                        "answer": q_match.group(2),
+                    }
+                )
 
     guide_data = {
         "title": meta.get("title", "PlacePix Developer Guide"),
@@ -2158,10 +2451,12 @@ async def features_redirect() -> RedirectResponse:
 # ── API metadata ──────────────────────────────────────────────────
 @app.get("/api/images")
 async def api_images() -> JSONResponse:
-    return JSONResponse({
-        "categories": manager.list_categories(),
-        "total": manager.total,
-    })
+    return JSONResponse(
+        {
+            "categories": manager.list_categories(),
+            "total": manager.total,
+        }
+    )
 
 
 @app.get("/api/categories")
@@ -2169,12 +2464,14 @@ async def api_categories() -> JSONResponse:
     """Get list of available image categories with metadata."""
     categories_detailed = manager.list_categories()
     category_names = [cat["name"] for cat in categories_detailed]
-    
-    return JSONResponse({
-        "categories": category_names,
-        "count": len(category_names),
-        "detailed": categories_detailed,
-    })
+
+    return JSONResponse(
+        {
+            "categories": category_names,
+            "count": len(category_names),
+            "detailed": categories_detailed,
+        }
+    )
 
 
 @app.get("/api/info/id/{image_id:int}")
@@ -2193,17 +2490,19 @@ async def image_info_by_id(image_id: int) -> JSONResponse:
     else:
         size = len(source.getvalue())
 
-    return JSONResponse({
-        "id": entry.id,
-        "filename": entry.filename,
-        "category": entry.category,
-        "width": width,
-        "height": height,
-        "format": fmt,
-        "size": size,
-        "colors": manager.get_colors(entry.id),
-        "serve_url": f"/id/{entry.id}/500/500",
-    })
+    return JSONResponse(
+        {
+            "id": entry.id,
+            "filename": entry.filename,
+            "category": entry.category,
+            "width": width,
+            "height": height,
+            "format": fmt,
+            "size": size,
+            "colors": manager.get_colors(entry.id),
+            "serve_url": f"/id/{entry.id}/500/500",
+        }
+    )
 
 
 @app.get("/api/info/{category}/{filename}")
@@ -2222,17 +2521,19 @@ async def image_info(category: str, filename: str) -> JSONResponse:
     else:
         size = len(source.getvalue())
 
-    return JSONResponse({
-        "id": entry.id,
-        "filename": entry.filename,
-        "category": entry.category,
-        "width": width,
-        "height": height,
-        "format": fmt,
-        "size": size,
-        "colors": manager.get_colors(entry.id),
-        "serve_url": f"/id/{entry.id}/500/500",
-    })
+    return JSONResponse(
+        {
+            "id": entry.id,
+            "filename": entry.filename,
+            "category": entry.category,
+            "width": width,
+            "height": height,
+            "format": fmt,
+            "size": size,
+            "colors": manager.get_colors(entry.id),
+            "serve_url": f"/id/{entry.id}/500/500",
+        }
+    )
 
 
 @app.get("/api/color/{hex_color}")
@@ -2241,20 +2542,22 @@ async def api_color_match(
     orientation: str = "",
 ) -> JSONResponse:
     matches = manager.find_by_color(hex_color, orientation=orientation or None)
-    return JSONResponse({
-        "query": hex_color,
-        "count": len(matches),
-        "images": [
-            {
-                "id": e.id,
-                "filename": e.filename,
-                "category": e.category,
-                "colors": manager.get_colors(e.id),
-                "url": f"/id/{e.id}/500/500",
-            }
-            for e in matches
-        ],
-    })
+    return JSONResponse(
+        {
+            "query": hex_color,
+            "count": len(matches),
+            "images": [
+                {
+                    "id": e.id,
+                    "filename": e.filename,
+                    "category": e.category,
+                    "colors": manager.get_colors(e.id),
+                    "url": f"/id/{e.id}/500/500",
+                }
+                for e in matches
+            ],
+        }
+    )
 
 
 @app.get("/api/blurhash/{image_id:int}")
@@ -2281,14 +2584,16 @@ async def get_blurhash(image_id: int) -> JSONResponse:
                 x_components=4,
                 y_components=3,
             )
-        return JSONResponse({
-            "blurhash": hash_str,
-            "width": entry.width if hasattr(entry, "width") else None,
-            "height": entry.height if hasattr(entry, "height") else None,
-            "id": entry.id,
-            "category": entry.category,
-            "filename": entry.filename,
-        })
+        return JSONResponse(
+            {
+                "blurhash": hash_str,
+                "width": entry.width if hasattr(entry, "width") else None,
+                "height": entry.height if hasattr(entry, "height") else None,
+                "id": entry.id,
+                "category": entry.category,
+                "filename": entry.filename,
+            }
+        )
     except Exception as e:
         logger.error(f"Blurhash generation failed for image {image_id}: {e}")
         raise HTTPException(status_code=500, detail=f"blurhash generation failed: {e}")
@@ -2313,8 +2618,8 @@ async def health() -> JSONResponse:
     try:
         total, used, free = shutil.disk_usage(str(settings.cache_dir))
         checks["disk"] = {
-            "total_gb": round(total / (1024 ** 3), 2),
-            "free_gb": round(free / (1024 ** 3), 2),
+            "total_gb": round(total / (1024**3), 2),
+            "free_gb": round(free / (1024**3), 2),
             "free_percent": round((free / total) * 100, 1),
         }
         if free < 500 * 1024 * 1024:  # < 500 MB free
@@ -2355,11 +2660,13 @@ async def readiness() -> JSONResponse:
             {"status": "not_ready", "images_loaded": 0, "categories": 0},
             status_code=503,
         )
-    return JSONResponse({
-        "status": "ready",
-        "images_loaded": manager.total,
-        "categories": len(manager.categories),
-    })
+    return JSONResponse(
+        {
+            "status": "ready",
+            "images_loaded": manager.total,
+            "categories": len(manager.categories),
+        }
+    )
 
 
 # ── Image Explorer ────────────────────────────────────────────────
@@ -2444,6 +2751,7 @@ async def color_palette(
 # ── Upload ────────────────────────────────────────────────────────
 from fastapi import Form
 
+
 @app.post("/api/upload")
 async def upload_image(
     file: UploadFile,
@@ -2451,7 +2759,7 @@ async def upload_image(
 ) -> JSONResponse:
     cat_display = category or "__root"
     logger.info(f"Upload request: {file.filename} to category '{cat_display}'")
-    
+
     if not settings.upload_enabled or not _upload_writable:
         logger.warning("Upload blocked: uploads are disabled or directory is not writable")
         raise HTTPException(status_code=403, detail="uploads are disabled")
@@ -2476,16 +2784,19 @@ async def upload_image(
     manager.rescan()
     logger.info("Registry rescanned after upload")
 
-    return JSONResponse({
-        "success": True,
-        "filename": file.filename,
-        "category": category or "__root",
-        "path": str(dest),
-    })
+    return JSONResponse(
+        {
+            "success": True,
+            "filename": file.filename,
+            "category": category or "__root",
+            "path": str(dest),
+        }
+    )
 
 
 # ── AI Image Generation ────────────────────────────────────────────
 from pydantic import BaseModel
+
 
 class AIGenerateRequest(BaseModel):
     prompt: str
@@ -2496,6 +2807,7 @@ class AIGenerateRequest(BaseModel):
     seed: int | None = None
     steps: int | None = None
     cfg_scale: float | None = None
+
 
 @app.post("/api/ai-generate")
 async def ai_generate(
@@ -2557,16 +2869,18 @@ async def ai_generate(
     entry = manager.get_by_filename(result.filename)
     image_id = entry.id if entry else 0
 
-    return JSONResponse({
-        "experimental": True,
-        "id": image_id,
-        "category": result.category,
-        "filename": result.filename,
-        "path": str(result.path) if result.path else None,
-        "s3_key": result.s3_key,
-        "ai": True,
-        "prompt": result.prompt,
-    })
+    return JSONResponse(
+        {
+            "experimental": True,
+            "id": image_id,
+            "category": result.category,
+            "filename": result.filename,
+            "path": str(result.path) if result.path else None,
+            "s3_key": result.s3_key,
+            "ai": True,
+            "prompt": result.prompt,
+        }
+    )
 
 
 # ── Srcset Generation ──────────────────────────────────────────────
@@ -2580,44 +2894,49 @@ async def generate_srcset(
     entry = manager.get_by_id(image_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="image not found")
-    
+
     # Parse sizes
     try:
         size_list = [int(s.strip()) for s in sizes.split(",")]
     except ValueError:
         raise HTTPException(status_code=400, detail="invalid sizes format")
-    
+
     # Calculate aspect ratio from original image
     source = _resolve_image_source(entry)
     with Image.open(source) as img:
         aspect_ratio = img.width / img.height
-    
+
     # Generate srcset entries
     srcset_entries = []
     for width in size_list:
         height = int(width / aspect_ratio)
         url = f"/id/{image_id}/{width}/{height}.{format}"
-        srcset_entries.append({
-            "url": url,
-            "width": width,
-            "height": height,
-            "descriptor": f"{width}w",
-        })
-    
+        srcset_entries.append(
+            {
+                "url": url,
+                "width": width,
+                "height": height,
+                "descriptor": f"{width}w",
+            }
+        )
+
     # Generate srcset string
     srcset_string = ", ".join(f"{e['url']} {e['descriptor']}" for e in srcset_entries)
-    
-    return JSONResponse({
-        "id": image_id,
-        "srcset": srcset_entries,
-        "srcset_string": srcset_string,
-        "aspect_ratio": round(aspect_ratio, 3),
-    })
+
+    return JSONResponse(
+        {
+            "id": image_id,
+            "srcset": srcset_entries,
+            "srcset_string": srcset_string,
+            "aspect_ratio": round(aspect_ratio, 3),
+        }
+    )
 
 
 # ── Entry point ─────────────────────────────────────────────────────
 def run() -> None:
     import uvicorn
+
     uvicorn.run(
         "src.main:app",
         host=settings.bind_host,

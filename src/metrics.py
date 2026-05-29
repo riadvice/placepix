@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import sqlite3
 from datetime import date, datetime, timezone
 from pathlib import Path
+import sqlite3
 from typing import Any
 
 from src.config import settings
@@ -130,8 +130,7 @@ class MetricsTracker:
                 (limit,),
             )
             return [
-                {"width": row[0], "height": row[1], "count": row[2]}
-                for row in cursor.fetchall()
+                {"width": row[0], "height": row[1], "count": row[2]} for row in cursor.fetchall()
             ]
 
     def get_popular_categories(self, limit: int = 10) -> list[dict[str, Any]]:
@@ -148,10 +147,7 @@ class MetricsTracker:
                 """,
                 (limit,),
             )
-            return [
-                {"category": row[0], "count": row[1]}
-                for row in cursor.fetchall()
-            ]
+            return [{"category": row[0], "count": row[1]} for row in cursor.fetchall()]
 
     def get_popular_formats(self, limit: int = 10) -> list[dict[str, Any]]:
         """Get most popular output formats."""
@@ -167,10 +163,7 @@ class MetricsTracker:
                 """,
                 (limit,),
             )
-            return [
-                {"format": row[0], "count": row[1]}
-                for row in cursor.fetchall()
-            ]
+            return [{"format": row[0], "count": row[1]} for row in cursor.fetchall()]
 
     def get_requests_by_endpoint(self) -> list[dict[str, Any]]:
         """Get request count by endpoint."""
@@ -183,10 +176,7 @@ class MetricsTracker:
                 ORDER BY count DESC
                 """
             )
-            return [
-                {"endpoint": row[0], "count": row[1]}
-                for row in cursor.fetchall()
-            ]
+            return [{"endpoint": row[0], "count": row[1]} for row in cursor.fetchall()]
 
     def get_requests_by_status(self) -> list[dict[str, Any]]:
         """Get request count by status code."""
@@ -199,15 +189,12 @@ class MetricsTracker:
                 ORDER BY status_code
                 """
             )
-            return [
-                {"status_code": row[0], "count": row[1]}
-                for row in cursor.fetchall()
-            ]
+            return [{"status_code": row[0], "count": row[1]} for row in cursor.fetchall()]
 
     def aggregate_daily_stats(self) -> None:
         """Aggregate stats for yesterday into daily_stats table."""
         yesterday = date.today().replace(day=date.today().day - 1)
-        
+
         with sqlite3.connect(self.db_path) as conn:
             # Check if already aggregated
             cursor = conn.execute(
@@ -216,7 +203,7 @@ class MetricsTracker:
             )
             if cursor.fetchone()[0] > 0:
                 return
-            
+
             # Aggregate yesterday's data
             cursor = conn.execute(
                 """
@@ -255,17 +242,12 @@ class MetricsTracker:
                 """,
                 (limit,),
             )
-            return [
-                {"day": row[0], "count": row[1]}
-                for row in cursor.fetchall()
-            ]
+            return [{"day": row[0], "count": row[1]} for row in cursor.fetchall()]
 
     def get_response_time_percentiles(self) -> dict[str, float]:
         """Get response time percentiles (p50, p95, p99)."""
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute(
-                "SELECT response_time_ms FROM requests ORDER BY response_time_ms"
-            )
+            cursor = conn.execute("SELECT response_time_ms FROM requests ORDER BY response_time_ms")
             times = [row[0] for row in cursor.fetchall()]
         if not times:
             return {"p50": 0.0, "p95": 0.0, "p99": 0.0}
@@ -319,10 +301,7 @@ class MetricsTracker:
                 """,
                 (limit,),
             )
-            return [
-                {"hour": row[0], "count": row[1]}
-                for row in cursor.fetchall()
-            ]
+            return [{"hour": row[0], "count": row[1]} for row in cursor.fetchall()]
 
     def get_bandwidth_estimate(self) -> dict[str, Any]:
         """Estimate bandwidth served based on requested dimensions."""

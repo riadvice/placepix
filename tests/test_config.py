@@ -1,7 +1,7 @@
 """Tests for config module."""
+
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from src.config import Settings
@@ -93,7 +93,7 @@ def test_watermark_settings():
         watermark_enabled=True,
         watermark_text="© Test",
         watermark_position="top-left",
-        watermark_opacity=0.8
+        watermark_opacity=0.8,
     )
     assert settings.watermark_enabled is True
     assert settings.watermark_text == "© Test"
@@ -103,12 +103,7 @@ def test_watermark_settings():
 
 def test_size_limits():
     """Test custom size limits."""
-    settings = Settings(
-        min_width=16,
-        min_height=16,
-        max_width=5000,
-        max_height=5000
-    )
+    settings = Settings(min_width=16, min_height=16, max_width=5000, max_height=5000)
     assert settings.min_width == 16
     assert settings.min_height == 16
     assert settings.max_width == 5000

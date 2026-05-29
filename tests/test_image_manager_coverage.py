@@ -14,25 +14,25 @@ Note: Some lines in image_manager.py are difficult to cover in a test environmen
 
 Current coverage: 76% (377/499 lines)
 """
+
 from __future__ import annotations
 
 import json
-import sys
-import tempfile
 from pathlib import Path
+import tempfile
 
 import pytest
 import yaml
 
 from src.image_manager import (
-    ImageManager,
-    ImageEntry,
     Category,
     CategoryMeta,
-    _hex_to_rgb,
+    ImageEntry,
+    ImageManager,
     _color_distance,
-    _extract_dominant_colors_from_bytes,
     _extract_dominant_colors,
+    _extract_dominant_colors_from_bytes,
+    _hex_to_rgb,
 )
 
 
@@ -109,7 +109,7 @@ def image_manager(temp_images_dir, monkeypatch):
                 category="test_category",
                 id=3,
             ),
-        ]
+        ],
     )
     manager._categories["test_category"] = cat
     manager._total = 3
@@ -119,9 +119,9 @@ def image_manager(temp_images_dir, monkeypatch):
         3: ["#0000ff"],
     }
     manager._dimensions = {
-        1: (800, 400),   # landscape
-        2: (400, 800),   # portrait
-        3: (500, 500),   # squarish
+        1: (800, 400),  # landscape
+        2: (400, 800),  # portrait
+        3: (500, 500),  # squarish
     }
     manager._s3_scanned = False
 
@@ -156,8 +156,9 @@ def test_color_distance():
 
 def test_extract_dominant_colors_from_bytes():
     """Test extracting dominant colors from image bytes."""
-    from PIL import Image
     import io
+
+    from PIL import Image
 
     # Create a simple red image
     img = Image.new("RGB", (100, 100), color=(255, 0, 0))
@@ -241,10 +242,9 @@ def test_image_manager_pick_empty_category_entries(image_manager):
     """Test pick when category has no entries."""
     # Add a category with no entries
     from src.image_manager import Category, CategoryMeta
+
     image_manager._categories["empty_cat"] = Category(
-        name="empty_cat",
-        meta=CategoryMeta(),
-        entries=[]
+        name="empty_cat", meta=CategoryMeta(), entries=[]
     )
     entry = image_manager.pick(category="empty_cat")
     assert entry is None
@@ -538,12 +538,15 @@ def test_read_meta_json(temp_images_dir):
 
     meta_file = cat_dir / "category.json"
     with open(meta_file, "w") as f:
-        json.dump({
-            "name": "JSON Category",
-            "description": "Test",
-            "author": "Test",
-            "tags": ["tag1"],
-        }, f)
+        json.dump(
+            {
+                "name": "JSON Category",
+                "description": "Test",
+                "author": "Test",
+                "tags": ["tag1"],
+            },
+            f,
+        )
 
     manager = ImageManager()
     meta = manager._read_meta(cat_dir)
@@ -557,12 +560,15 @@ def test_read_meta_yaml(temp_images_dir):
 
     meta_file = cat_dir / "category.yml"
     with open(meta_file, "w") as f:
-        yaml.dump({
-            "name": "YAML Category",
-            "description": "Test",
-            "author": "Test",
-            "tags": ["tag1"],
-        }, f)
+        yaml.dump(
+            {
+                "name": "YAML Category",
+                "description": "Test",
+                "author": "Test",
+                "tags": ["tag1"],
+            },
+            f,
+        )
 
     manager = ImageManager()
     meta = manager._read_meta(cat_dir)
@@ -598,25 +604,26 @@ def test_extract_dominant_colors_exception_path(temp_images_dir):
     # Create a file that's not a valid image
     invalid_file = temp_images_dir / "images" / "test_category" / "invalid.txt"
     invalid_file.write_text("not an image")
-    
+
     colors = _extract_dominant_colors(invalid_file)
     assert colors == []
 
 
 def test_extract_dominant_colors_palette_exception():
     """Test _extract_dominant_colors when palette is None."""
-    from PIL import Image
     import io
-    
+
+    from PIL import Image
+
     # Create a very small image that might fail quantization
     img = Image.new("RGB", (1, 1), color=(255, 0, 0))
     buffer = io.BytesIO()
     img.save(buffer, format="JPEG")
-    
+
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
         f.write(buffer.getvalue())
         path = Path(f.name)
-    
+
     try:
         colors = _extract_dominant_colors(path)
         # Should handle gracefully
@@ -628,6 +635,7 @@ def test_extract_dominant_colors_palette_exception():
 def test_boto3_import_failure(monkeypatch):
     """Test when boto3 import fails."""
     import src.image_manager
+
     original_boto3 = src.image_manager._BOTO3_AVAILABLE
     monkeypatch.setattr(src.image_manager, "_BOTO3_AVAILABLE", False)
     assert src.image_manager._BOTO3_AVAILABLE == False
@@ -655,16 +663,16 @@ def test_release_leader_lock_no_lock_file(monkeypatch):
     manager._scanning_colors = False
     manager._s3_scanned = False
     manager._is_leader = False
-    
+
     # Should not raise exception even without lock file
     manager._release_leader_lock()
 
 
 def test_release_leader_lock_exception(monkeypatch):
     """Test _release_leader_lock when flock fails."""
+
     from src.config import Settings
     import src.image_manager
-    import fcntl
 
     settings = Settings(
         host="127.0.0.1:3000",
@@ -682,10 +690,10 @@ def test_release_leader_lock_exception(monkeypatch):
     manager._scanning_colors = False
     manager._s3_scanned = False
     manager._is_leader = False
-    
+
     # Create a fake lock file
     manager._leader_lock_file = None
-    
+
     # Should not raise exception
     manager._release_leader_lock()
 
@@ -703,7 +711,7 @@ def test_scan_colors_all_have_colors(image_manager):
     # Ensure all entries have colors
     for entry in image_manager._categories["test_category"].entries:
         image_manager._colors[entry.id] = ["#ff0000"]
-    
+
     image_manager.scan_colors()
     # Should return early without extracting new colors
 
@@ -787,9 +795,7 @@ def test_image_manager_pick_with_orientation_squarish(image_manager):
 
 def test_image_manager_pick_orientation_with_seed(image_manager):
     """Test pick with orientation and seed combined."""
-    entry = image_manager.pick(
-        category="test_category", seed="test", orientation="landscape"
-    )
+    entry = image_manager.pick(category="test_category", seed="test", orientation="landscape")
     assert entry is not None
     assert entry.id == 1
 

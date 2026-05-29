@@ -1,29 +1,42 @@
 from __future__ import annotations
 
 import atexit
+from dataclasses import dataclass, field
+import fcntl
 import hashlib
 import io
 import json
 import logging
 import os
+from pathlib import Path
 import random
 import time
-import fcntl
-from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
-import yaml
+import boto3
+from botocore.config import Config
 from PIL import Image
+import yaml
 
 from src.config import settings
 
 logger = logging.getLogger(__name__)
 
-VALID_CATEGORIES = {"White", "Black", "Gray", "Brown", "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Other"}
-
-import boto3
-from botocore.config import Config
+VALID_CATEGORIES = {
+    "White",
+    "Black",
+    "Gray",
+    "Brown",
+    "Red",
+    "Orange",
+    "Yellow",
+    "Green",
+    "Cyan",
+    "Blue",
+    "Purple",
+    "Pink",
+    "Other",
+}
 
 
 def _hex_to_rgb(hex_str: str) -> tuple[int, int, int] | None:
@@ -254,14 +267,16 @@ class ImageManager:
         result = []
         for name, cat in self._categories.items():
             display_name = cat.meta.name or name
-            result.append({
-                "name": name,
-                "count": len(cat.entries),
-                "display_name": display_name,
-                "description": cat.meta.description,
-                "author": cat.meta.author,
-                "tags": cat.meta.tags,
-            })
+            result.append(
+                {
+                    "name": name,
+                    "count": len(cat.entries),
+                    "display_name": display_name,
+                    "description": cat.meta.description,
+                    "author": cat.meta.author,
+                    "tags": cat.meta.tags,
+                }
+            )
         return result
 
     def rescan(self) -> None:
@@ -297,7 +312,12 @@ class ImageManager:
         try:
             with open(self._dimensions_path, "w", encoding="utf-8") as f:
                 fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                json.dump({str(k): list(v) for k, v in self._dimensions.items()}, f, indent=2, sort_keys=True)
+                json.dump(
+                    {str(k): list(v) for k, v in self._dimensions.items()},
+                    f,
+                    indent=2,
+                    sort_keys=True,
+                )
                 fcntl.flock(f.fileno(), fcntl.LOCK_UN)
         except Exception:
             pass
@@ -337,7 +357,7 @@ class ImageManager:
         lock_file = settings.data_dir / ".placepix_leader.lock"
         try:
             lock_file.touch(exist_ok=True)
-            
+
             # First try to acquire lock with non-blocking mode
             f = open(lock_file, "w")
             try:
@@ -350,7 +370,7 @@ class ImageManager:
                 # Register cleanup on exit
                 atexit.register(self._release_leader_lock)
                 return True
-            except (IOError, BlockingIOError) as e:
+            except (IOError, BlockingIOError):
                 f.close()
                 # Lock is held by another process
                 # Check if it's a stale lock (process doesn't exist or lock is too old)
@@ -359,7 +379,9 @@ class ImageManager:
                     lock_age = time.time() - stat.st_mtime
                     # If lock is older than 60 seconds, consider it stale
                     if lock_age > 60:
-                        logger.warning(f"Found stale leader lock (age: {lock_age:.1f}s), attempting to break it")
+                        logger.warning(
+                            f"Found stale leader lock (age: {lock_age:.1f}s), attempting to break it"
+                        )
                         # Try to break the stale lock by acquiring it
                         f2 = open(lock_file, "w")
                         try:
@@ -367,7 +389,9 @@ class ImageManager:
                             f2.write(str(os.getpid()))
                             f2.flush()
                             self._leader_lock_file = f2
-                            logger.info(f"Worker {os.getpid()} acquired leader lock after breaking stale lock")
+                            logger.info(
+                                f"Worker {os.getpid()} acquired leader lock after breaking stale lock"
+                            )
                             atexit.register(self._release_leader_lock)
                             return True
                         except (IOError, BlockingIOError):
@@ -375,8 +399,10 @@ class ImageManager:
                             logger.debug(f"Worker {os.getpid()} could not break stale lock")
                 except Exception as ex:
                     logger.debug(f"Error checking stale lock: {ex}")
-                
-                logger.debug(f"Worker {os.getpid()} did not acquire leader lock (held by another process)")
+
+                logger.debug(
+                    f"Worker {os.getpid()} did not acquire leader lock (held by another process)"
+                )
                 return False
         except Exception as e:
             logger.warning(f"Failed to acquire leader lock: {e}")
@@ -384,7 +410,7 @@ class ImageManager:
 
     def _release_leader_lock(self) -> None:
         """Release the leader lock."""
-        if hasattr(self, '_leader_lock_file') and self._leader_lock_file:
+        if hasattr(self, "_leader_lock_file") and self._leader_lock_file:
             try:
                 fcntl.flock(self._leader_lock_file.fileno(), fcntl.LOCK_UN)
                 self._leader_lock_file.close()
@@ -425,7 +451,7 @@ class ImageManager:
     def _rescan(self) -> None:
         images_dir = settings.images_dir
         data_dir = settings.data_dir
-        
+
         if not images_dir.exists():
             images_dir.mkdir(parents=True)
         if not data_dir.exists():
@@ -451,7 +477,9 @@ class ImageManager:
                         if sub_item.name.startswith(".") or sub_item.name in self.IGNORE_FILES:
                             continue
                         if sub_item.is_dir():
-                            ai_entries, ai_meta, next_id = self._scan_subdir(sub_item, manifest, next_id, ai=True)
+                            ai_entries, ai_meta, next_id = self._scan_subdir(
+                                sub_item, manifest, next_id, ai=True
+                            )
                             ai_cat_name = f"ai-generated/{sub_item.name}"
                             if ai_entries:
                                 new_categories[ai_cat_name] = Category(
@@ -548,13 +576,13 @@ class ImageManager:
                 elif entry.s3_key and s3_client:
                     # S3 image - download and extract
                     try:
-                        response = s3_client.get_object(
-                            Bucket=settings.s3_bucket, Key=entry.s3_key
-                        )
+                        response = s3_client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
                         image_data = response["Body"].read()
                         extracted = _extract_dominant_colors_from_bytes(image_data)
                     except Exception as e:
-                        logger.warning(f"Failed to extract colors from S3 image {entry.s3_key}: {e}")
+                        logger.warning(
+                            f"Failed to extract colors from S3 image {entry.s3_key}: {e}"
+                        )
 
                 # Also extract dimensions while we have the image open
                 dims: tuple[int, int] | None = None
@@ -563,13 +591,17 @@ class ImageManager:
                         with Image.open(entry.path) as img:
                             dims = img.size
                     except Exception as e:
-                        logger.warning(f"Failed to read dimensions for local file {entry.filename}: {e}")
+                        logger.warning(
+                            f"Failed to read dimensions for local file {entry.filename}: {e}"
+                        )
                 elif entry.s3_key and s3_client:
                     try:
                         with Image.open(io.BytesIO(image_data)) as img:
                             dims = img.size
                     except Exception as e:
-                        logger.warning(f"Failed to read dimensions for S3 image {entry.filename}: {e}")
+                        logger.warning(
+                            f"Failed to read dimensions for S3 image {entry.filename}: {e}"
+                        )
                 if dims:
                     self._dimensions[entry.id] = dims
                     logger.debug(f"Dimensions extracted: {entry.filename} -> {dims}")
@@ -578,7 +610,9 @@ class ImageManager:
                     colors[entry.id] = extracted
                     logger.info(f"Color scan [{i}/{total}]: {entry.filename} -> {extracted}")
                 else:
-                    logger.warning(f"Color scan [{i}/{total}]: {entry.filename} -> no colors extracted")
+                    logger.warning(
+                        f"Color scan [{i}/{total}]: {entry.filename} -> no colors extracted"
+                    )
 
                 # Log progress every 5%
                 percent = int((i / total) * 100)
@@ -637,7 +671,9 @@ class ImageManager:
 
             for i, entry in enumerate(missing_entries, 1):
                 source = entry.path if entry.path else f"S3:{entry.s3_key}"
-                logger.info(f"Dimension scan [{i}/{total}]: processing {entry.filename} from {source}")
+                logger.info(
+                    f"Dimension scan [{i}/{total}]: processing {entry.filename} from {source}"
+                )
                 dims: tuple[int, int] | None = None
 
                 if entry.path is not None:
@@ -645,7 +681,9 @@ class ImageManager:
                         with Image.open(entry.path) as img:
                             dims = img.size
                     except Exception as e:
-                        logger.warning(f"Failed to read dimensions for local file {entry.filename}: {e}")
+                        logger.warning(
+                            f"Failed to read dimensions for local file {entry.filename}: {e}"
+                        )
                 elif entry.s3_key and s3_client:
                     try:
                         response = s3_client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
@@ -653,13 +691,17 @@ class ImageManager:
                         with Image.open(io.BytesIO(image_data)) as img:
                             dims = img.size
                     except Exception as e:
-                        logger.warning(f"Failed to read dimensions for S3 image {entry.s3_key}: {e}")
+                        logger.warning(
+                            f"Failed to read dimensions for S3 image {entry.s3_key}: {e}"
+                        )
 
                 if dims:
                     self._dimensions[entry.id] = dims
                     logger.info(f"Dimension scan [{i}/{total}]: {entry.filename} -> {dims}")
                 else:
-                    logger.warning(f"Dimension scan [{i}/{total}]: {entry.filename} -> no dimensions extracted")
+                    logger.warning(
+                        f"Dimension scan [{i}/{total}]: {entry.filename} -> no dimensions extracted"
+                    )
 
                 # Log progress every 5%
                 percent = int((i / total) * 100)
@@ -680,7 +722,9 @@ class ImageManager:
         """Scan S3 bucket for images and return categories."""
         new_categories: dict[str, Category] = {}
         try:
-            logger.info(f"Connecting to S3: endpoint={settings.s3_endpoint}, bucket={settings.s3_bucket}")
+            logger.info(
+                f"Connecting to S3: endpoint={settings.s3_endpoint}, bucket={settings.s3_bucket}"
+            )
             client = boto3.client(
                 "s3",
                 endpoint_url=settings.s3_endpoint,
@@ -709,7 +753,7 @@ class ImageManager:
                     if ext not in self.VALID_EXTS:
                         continue
 
-                    relative_key = key[len(prefix):] if prefix else key
+                    relative_key = key[len(prefix) :] if prefix else key
                     parts = relative_key.split("/")
                     if len(parts) > 1 and parts[0]:
                         # Handle ai-generated/nature/... structure
@@ -734,22 +778,27 @@ class ImageManager:
                             entries=[],
                         )
 
-                    new_categories[cat_name].entries.append(ImageEntry(
-                        path=None,
-                        filename=filename,
-                        category=cat_name,
-                        id=manifest[manifest_key],
-                        s3_key=key,
-                        ai=cat_name.startswith("ai-generated/"),
-                    ))
+                    new_categories[cat_name].entries.append(
+                        ImageEntry(
+                            path=None,
+                            filename=filename,
+                            category=cat_name,
+                            id=manifest[manifest_key],
+                            s3_key=key,
+                            ai=cat_name.startswith("ai-generated/"),
+                        )
+                    )
         except Exception as e:
             logger.error(f"S3 scan failed: {e}")
             import traceback
+
             logger.error(traceback.format_exc())
 
         return new_categories, next_id
 
-    def _scan_subdir(self, subdir: Path, manifest: dict[str, int], next_id: int, ai: bool = False) -> tuple[list[ImageEntry], CategoryMeta, int]:
+    def _scan_subdir(
+        self, subdir: Path, manifest: dict[str, int], next_id: int, ai: bool = False
+    ) -> tuple[list[ImageEntry], CategoryMeta, int]:
         entries: list[ImageEntry] = []
         # For AI images, include the ai-generated prefix in the key to avoid collisions
         if ai:
@@ -785,7 +834,6 @@ class ImageManager:
 
         meta = self._read_meta(subdir)
         return entries, meta, next_id
-
 
     def get_colors(self, image_id: int) -> list[str]:
         return self._colors.get(image_id, [])
@@ -888,8 +936,10 @@ class ImageManager:
     def list_colors(self, category: str = "", search: str = "") -> list[dict[str, Any]]:
         """Return unique dominant colors across all images, sorted by image count."""
         if category and category not in VALID_CATEGORIES:
-            raise ValueError(f"Invalid category: {category}. Valid categories are: {', '.join(sorted(VALID_CATEGORIES))}")
-        
+            raise ValueError(
+                f"Invalid category: {category}. Valid categories are: {', '.join(sorted(VALID_CATEGORIES))}"
+            )
+
         color_counts: dict[str, int] = {}
         color_samples: dict[str, list[int]] = {}
 
@@ -907,12 +957,14 @@ class ImageManager:
 
         result = []
         for hex_color in sorted(color_counts.keys(), key=lambda h: -color_counts[h]):
-            result.append({
-                "hex": hex_color,
-                "count": color_counts[hex_color],
-                "sample_ids": color_samples[hex_color],
-                "category": self._hex_to_hue_category(hex_color),
-            })
+            result.append(
+                {
+                    "hex": hex_color,
+                    "count": color_counts[hex_color],
+                    "sample_ids": color_samples[hex_color],
+                    "category": self._hex_to_hue_category(hex_color),
+                }
+            )
         return result
 
     def _read_meta(self, directory: Path) -> CategoryMeta:

@@ -1,11 +1,12 @@
 """Additional tests for ImageProcessor to increase coverage."""
+
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
+import tempfile
 
-import pytest
 from PIL import Image
+import pytest
 
 from src.image_processor import ImageProcessor
 
@@ -63,7 +64,7 @@ def test_process_with_watermark_image(complex_image):
         wm_img = Image.new("RGBA", (100, 100), color=(255, 255, 255, 128))
         wm_img.save(wm.name)
         wm_path = Path(wm.name)
-    
+
     try:
         processor = ImageProcessor()
         config = {
@@ -83,7 +84,7 @@ def test_process_watermark_all_positions(complex_image):
     """Test watermark at all positions."""
     processor = ImageProcessor()
     positions = ["top-left", "top-right", "bottom-left", "bottom-right", "center"]
-    
+
     for pos in positions:
         config = {
             "watermark_text": "Test",
@@ -100,8 +101,9 @@ def test_smart_crop_without_opencv(complex_image, monkeypatch):
     """Test smart crop falls back when OpenCV not available."""
     # Mock OpenCV as unavailable
     import src.image_processor
+
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", False)
-    
+
     processor = ImageProcessor()
     result = processor.process(complex_image, width=400, height=300, fit="smart")
     assert isinstance(result, bytes)
@@ -203,7 +205,7 @@ def test_process_all_effects_combined(complex_image):
 def test_normalize_format_variations():
     """Test format normalization with various inputs."""
     processor = ImageProcessor()
-    
+
     assert processor._normalize_format("JPEG") == "jpeg"
     assert processor._normalize_format("JPG") == "jpeg"
     assert processor._normalize_format("PNG") == "png"
@@ -216,17 +218,17 @@ def test_normalize_format_variations():
 def test_clamp_size_edge_cases():
     """Test size clamping edge cases."""
     processor = ImageProcessor()
-    
+
     # Negative values
     w, h = processor.clamp_size(-100, -100)
     assert w == 8
     assert h == 8
-    
+
     # Mixed valid/invalid
     w, h = processor.clamp_size(100, -50)
     assert w == 100
     assert h == 8
-    
+
     # Extremely large
     w, h = processor.clamp_size(10000, 10000)
     assert w == 2000
@@ -243,9 +245,10 @@ def test_process_with_invalid_image_path():
 def test_avif_import_failure(monkeypatch):
     """Test when pillow_avif import fails."""
     import src.image_processor
+
     original_avif = src.image_processor._AVIF_AVAILABLE
     monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", False)
-    
+
     # Should still work, just fallback
     assert src.image_processor._AVIF_AVAILABLE == False
     monkeypatch.setattr(src.image_processor, "_AVIF_AVAILABLE", original_avif)
@@ -254,9 +257,10 @@ def test_avif_import_failure(monkeypatch):
 def test_opencv_import_failure(monkeypatch):
     """Test when opencv import fails."""
     import src.image_processor
+
     original_opencv = src.image_processor._OPENCV_AVAILABLE
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", False)
-    
+
     # Should still work, just fallback
     assert src.image_processor._OPENCV_AVAILABLE == False
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
@@ -431,22 +435,26 @@ def test_watermark_position_from_config(complex_image):
 def test_smart_crop_opencv_error(complex_image, monkeypatch):
     """Test smart crop when opencv cascade loading fails."""
     import src.image_processor
+
     original_opencv = src.image_processor._OPENCV_AVAILABLE
-    
+
     # Mock OpenCV as available but cascade loading fails
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
-    
+
     # Mock cv2 to raise exception on cascade load
     import cv2
+
     original_cascade = cv2.CascadeClassifier
+
     def failing_cascade(*args, **kwargs):
         raise Exception("Cascade load failed")
+
     monkeypatch.setattr(cv2, "CascadeClassifier", failing_cascade)
-    
+
     processor = ImageProcessor()
     result = processor.process(complex_image, width=400, height=300, fit="smart")
     assert isinstance(result, bytes)
-    
+
     # Restore
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
     monkeypatch.setattr(cv2, "CascadeClassifier", original_cascade)
@@ -454,23 +462,26 @@ def test_smart_crop_opencv_error(complex_image, monkeypatch):
 
 def test_smart_crop_no_faces_detected(complex_image, monkeypatch):
     """Test smart crop when no faces are detected."""
-    import src.image_processor
     import cv2
     import numpy as np
-    
+
+    import src.image_processor
+
     original_opencv = src.image_processor._OPENCV_AVAILABLE
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
-    
+
     # Mock detectMultiScale to return empty array
     original_detect = cv2.CascadeClassifier.detectMultiScale
+
     def empty_detect(self, *args, **kwargs):
         return np.array([])
+
     monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", empty_detect)
-    
+
     processor = ImageProcessor()
     result = processor.process(complex_image, width=400, height=300, fit="smart")
     assert isinstance(result, bytes)
-    
+
     # Restore
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", original_opencv)
     monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", original_detect)
@@ -478,17 +489,20 @@ def test_smart_crop_no_faces_detected(complex_image, monkeypatch):
 
 def test_smart_crop_with_faces(complex_image, monkeypatch):
     """Test smart crop when faces are detected."""
-    import src.image_processor
     import cv2
     import numpy as np
+
+    import src.image_processor
 
     original_opencv = src.image_processor._OPENCV_AVAILABLE
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
 
     # Mock detectMultiScale to return faces
     original_detect = cv2.CascadeClassifier.detectMultiScale
+
     def faces_detect(self, *args, **kwargs):
         return np.array([[100, 100, 50, 50], [200, 150, 60, 60]])
+
     monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", faces_detect)
 
     processor = ImageProcessor()
@@ -502,17 +516,20 @@ def test_smart_crop_with_faces(complex_image, monkeypatch):
 
 def test_smart_crop_taller_than_wide(complex_image, monkeypatch):
     """Test smart crop when current ratio is taller than target."""
-    import src.image_processor
     import cv2
     import numpy as np
+
+    import src.image_processor
 
     original_opencv = src.image_processor._OPENCV_AVAILABLE
     monkeypatch.setattr(src.image_processor, "_OPENCV_AVAILABLE", True)
 
     # Mock detectMultiScale to return faces that create tall aspect ratio
     original_detect = cv2.CascadeClassifier.detectMultiScale
+
     def tall_faces_detect(self, *args, **kwargs):
         return np.array([[100, 100, 50, 200]])
+
     monkeypatch.setattr(cv2.CascadeClassifier, "detectMultiScale", tall_faces_detect)
 
     processor = ImageProcessor()
@@ -526,8 +543,8 @@ def test_smart_crop_taller_than_wide(complex_image, monkeypatch):
 
 def test_add_text_font_exception(complex_image, monkeypatch):
     """Test text overlay when font loading fails."""
-    import PIL.ImageFont
     from PIL import ImageFont
+    import PIL.ImageFont
 
     original_truetype = PIL.ImageFont.truetype
     original_load_default = PIL.ImageFont.load_default
@@ -552,8 +569,8 @@ def test_add_text_font_exception(complex_image, monkeypatch):
 
 def test_watermark_font_exception(complex_image, monkeypatch):
     """Test watermark text when font loading fails."""
-    import PIL.ImageFont
     from PIL import ImageFont
+    import PIL.ImageFont
 
     original_truetype = PIL.ImageFont.truetype
     original_load_default = PIL.ImageFont.load_default
@@ -624,6 +641,7 @@ def test_watermark_nonexistent_image_with_text(complex_image):
 def test_watermark_image_load_exception_with_mock(complex_image, monkeypatch):
     """Test watermark image load exception by mocking Path.exists and Image.open."""
     from pathlib import Path
+
     from PIL import Image
 
     # Create a real file that exists
@@ -635,6 +653,7 @@ def test_watermark_image_load_exception_with_mock(complex_image, monkeypatch):
     try:
         # Mock Image.open to raise exception for this specific path
         original_open = Image.open
+
         def selective_open(path, *args, **kwargs):
             if str(path) == str(wm_path):
                 raise Exception("Invalid image data")
@@ -681,5 +700,3 @@ def test_watermark_same_size_non_rgba(complex_image):
         assert isinstance(result, bytes)
     finally:
         wm_path.unlink()
-
-

@@ -31,11 +31,39 @@ dev = [
     "pytest-cov>=7.1.0",
     "pytest-xdist>=3.8.0",
     "httpx>=0.28.1",
+    "ruff>=0.15.15",
 ]
 
 [project.scripts]
 placepix = "src.main:run"
 placepix-stats = "src.admin:main"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors (FLK-E501, FLK-E302, FLK-E303, FLK-E305, FLK-E402, FLK-W293)
+    "W",   # pycodestyle warnings
+    "I",   # isort (import sorting - PYL-C0412)
+    "F",   # Pyflakes
+]
+ignore = []
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 100
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+known-first-party = ["src"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

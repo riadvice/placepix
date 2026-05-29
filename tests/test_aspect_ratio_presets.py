@@ -141,14 +141,23 @@ def test_solid_color_cache_headers(client: TestClient):
 def test_all_presets_exist():
     """Test that all documented presets are available."""
     from src.main import PRESETS
-    
+
     expected_presets = [
-        "facebook-cover", "twitter-header", "instagram-square",
-        "instagram-portrait", "youtube-thumbnail", "leaderboard",
-        "banner", "skyscraper", "rectangle", "mobile", "tablet",
-        "desktop", "4k"
+        "facebook-cover",
+        "twitter-header",
+        "instagram-square",
+        "instagram-portrait",
+        "youtube-thumbnail",
+        "leaderboard",
+        "banner",
+        "skyscraper",
+        "rectangle",
+        "mobile",
+        "tablet",
+        "desktop",
+        "4k",
     ]
-    
+
     for preset in expected_presets:
         assert preset in PRESETS, f"Preset {preset} not found"
 
@@ -156,13 +165,13 @@ def test_all_presets_exist():
 def test_aspect_ratio_parser():
     """Test aspect ratio parsing function."""
     from src.main import _parse_aspect_ratio
-    
+
     # Valid ratios
     assert _parse_aspect_ratio("16:9", 1080) == (1920, 1080)
     assert _parse_aspect_ratio("4:3", 768) == (1024, 768)
     assert _parse_aspect_ratio("1:1", 500) == (500, 500)
     assert _parse_aspect_ratio("21:9", 1080) == (2520, 1080)
-    
+
     # Invalid ratios
     assert _parse_aspect_ratio("invalid", 1080) == (0, 0)
     assert _parse_aspect_ratio("16", 1080) == (0, 0)

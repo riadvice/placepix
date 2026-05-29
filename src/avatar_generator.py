@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import io
-import math
 from pathlib import Path
-from typing import Tuple
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -12,45 +10,45 @@ from src.config import settings
 # Named color palettes (RGB tuples)
 _PALETTES: dict[str, list[tuple[int, int, int]]] = {
     "flatui": [
-        (26, 188, 156),   # turquoise
-        (46, 204, 113),   # emerald
-        (52, 152, 219),   # peter river
-        (155, 89, 182),   # amethyst
-        (52, 73, 94),     # wet asphalt
-        (22, 160, 133),   # green sea
-        (39, 174, 96),    # nephritis
-        (41, 128, 185),   # belize hole
-        (142, 68, 173),   # wisteria
-        (44, 62, 80),     # midnight blue
-        (241, 196, 15),   # sun flower
-        (230, 126, 34),   # orange
-        (231, 76, 60),    # alizarin
+        (26, 188, 156),  # turquoise
+        (46, 204, 113),  # emerald
+        (52, 152, 219),  # peter river
+        (155, 89, 182),  # amethyst
+        (52, 73, 94),  # wet asphalt
+        (22, 160, 133),  # green sea
+        (39, 174, 96),  # nephritis
+        (41, 128, 185),  # belize hole
+        (142, 68, 173),  # wisteria
+        (44, 62, 80),  # midnight blue
+        (241, 196, 15),  # sun flower
+        (230, 126, 34),  # orange
+        (231, 76, 60),  # alizarin
         (236, 240, 241),  # clouds
         (149, 165, 166),  # concrete
         (127, 140, 141),  # asbestos
-        (243, 156, 18),   # carrot
-        (211, 84, 0),     # pumpkin
-        (192, 57, 43),    # pomegranate
+        (243, 156, 18),  # carrot
+        (211, 84, 0),  # pumpkin
+        (192, 57, 43),  # pomegranate
         (189, 195, 199),  # silver
     ],
     "material": [
-        (244, 67, 54),    # red 500
-        (233, 30, 99),    # pink 500
-        (156, 39, 176),   # purple 500
-        (103, 58, 183),   # deep purple 500
-        (63, 81, 181),    # indigo 500
-        (33, 150, 243),   # blue 500
-        (3, 169, 244),    # light blue 500
-        (0, 188, 212),    # cyan 500
-        (0, 150, 136),    # teal 500
-        (76, 175, 80),    # green 500
-        (139, 195, 74),   # light green 500
-        (255, 235, 59),   # yellow 500
-        (255, 193, 7),    # amber 500
-        (255, 152, 0),    # orange 500
-        (255, 87, 34),    # deep orange 500
-        (121, 85, 72),    # brown 500
-        (96, 125, 139),   # blue grey 500
+        (244, 67, 54),  # red 500
+        (233, 30, 99),  # pink 500
+        (156, 39, 176),  # purple 500
+        (103, 58, 183),  # deep purple 500
+        (63, 81, 181),  # indigo 500
+        (33, 150, 243),  # blue 500
+        (3, 169, 244),  # light blue 500
+        (0, 188, 212),  # cyan 500
+        (0, 150, 136),  # teal 500
+        (76, 175, 80),  # green 500
+        (139, 195, 74),  # light green 500
+        (255, 235, 59),  # yellow 500
+        (255, 193, 7),  # amber 500
+        (255, 152, 0),  # orange 500
+        (255, 87, 34),  # deep orange 500
+        (121, 85, 72),  # brown 500
+        (96, 125, 139),  # blue grey 500
         (158, 158, 158),  # grey 500
     ],
     "pastel": [
@@ -72,48 +70,48 @@ _PALETTES: dict[str, list[tuple[int, int, int]]] = {
         (248, 248, 255),  # ghost white
     ],
     "neon": [
-        (57, 255, 20),    # neon green
-        (255, 7, 58),     # neon red
-        (255, 0, 255),    # neon magenta
-        (0, 255, 255),    # neon cyan
-        (255, 255, 0),    # neon yellow
-        (255, 128, 0),    # neon orange
-        (191, 0, 255),    # neon purple
-        (0, 128, 255),    # neon blue
-        (255, 0, 128),    # neon pink
-        (128, 255, 0),    # neon lime
-        (0, 255, 128),    # neon mint
+        (57, 255, 20),  # neon green
+        (255, 7, 58),  # neon red
+        (255, 0, 255),  # neon magenta
+        (0, 255, 255),  # neon cyan
+        (255, 255, 0),  # neon yellow
+        (255, 128, 0),  # neon orange
+        (191, 0, 255),  # neon purple
+        (0, 128, 255),  # neon blue
+        (255, 0, 128),  # neon pink
+        (128, 255, 0),  # neon lime
+        (0, 255, 128),  # neon mint
         (255, 102, 178),  # neon rose
     ],
     "cool": [
-        (41, 128, 185),   # belize hole
-        (52, 152, 219),   # peter river
-        (22, 160, 133),   # green sea
-        (26, 188, 156),   # turquoise
-        (44, 62, 80),     # midnight blue
-        (52, 73, 94),     # wet asphalt
-        (142, 68, 173),   # wisteria
-        (155, 89, 182),   # amethyst
-        (46, 204, 113),   # emerald
-        (39, 174, 96),    # nephritis
+        (41, 128, 185),  # belize hole
+        (52, 152, 219),  # peter river
+        (22, 160, 133),  # green sea
+        (26, 188, 156),  # turquoise
+        (44, 62, 80),  # midnight blue
+        (52, 73, 94),  # wet asphalt
+        (142, 68, 173),  # wisteria
+        (155, 89, 182),  # amethyst
+        (46, 204, 113),  # emerald
+        (39, 174, 96),  # nephritis
         (127, 140, 141),  # asbestos
         (149, 165, 166),  # concrete
     ],
     "warm": [
-        (231, 76, 60),    # alizarin
-        (243, 156, 18),   # carrot
-        (230, 126, 34),   # orange
-        (241, 196, 15),   # sun flower
-        (211, 84, 0),     # pumpkin
-        (192, 57, 43),    # pomegranate
-        (232, 126, 4),    # dark orange
-        (245, 176, 65),   # golden rod
-        (205, 92, 92),    # indian red
+        (231, 76, 60),  # alizarin
+        (243, 156, 18),  # carrot
+        (230, 126, 34),  # orange
+        (241, 196, 15),  # sun flower
+        (211, 84, 0),  # pumpkin
+        (192, 57, 43),  # pomegranate
+        (232, 126, 4),  # dark orange
+        (245, 176, 65),  # golden rod
+        (205, 92, 92),  # indian red
         (219, 112, 147),  # pale violet red
         (255, 160, 122),  # light salmon
-        (255, 140, 0),    # dark orange
-        (178, 34, 34),    # fire brick
-        (139, 0, 0),      # dark red
+        (255, 140, 0),  # dark orange
+        (178, 34, 34),  # fire brick
+        (139, 0, 0),  # dark red
     ],
 }
 
@@ -181,7 +179,9 @@ class AvatarGenerator:
         return palette
 
     @staticmethod
-    def extract_initials(name: str, max_letters: int = 2, single: bool = False, uppercase: bool = True) -> str:
+    def extract_initials(
+        name: str, max_letters: int = 2, single: bool = False, uppercase: bool = True
+    ) -> str:
         """Extract initials from a name.
 
         - Splits by whitespace.
@@ -309,7 +309,9 @@ class AvatarGenerator:
         border_rgb = self._parse_hex(border_color)
 
         # Extract initials
-        text = self.extract_initials(name, max_letters=max_letters, single=single, uppercase=uppercase)
+        text = self.extract_initials(
+            name, max_letters=max_letters, single=single, uppercase=uppercase
+        )
 
         # Create image with transparency support for circle/border
         img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
@@ -392,9 +394,13 @@ class AvatarGenerator:
             bg_hex = f"#{r:02x}{g:02x}{b:02x}"
 
         fg_hex = f"#{fg.lstrip('#')}" if fg.startswith("#") else f"#{fg}"
-        border_hex = f"#{border_color.lstrip('#')}" if border_color.startswith("#") else f"#{border_color}"
+        border_hex = (
+            f"#{border_color.lstrip('#')}" if border_color.startswith("#") else f"#{border_color}"
+        )
 
-        text = self.extract_initials(name, max_letters=max_letters, single=single, uppercase=uppercase)
+        text = self.extract_initials(
+            name, max_letters=max_letters, single=single, uppercase=uppercase
+        )
 
         # Escape XML special chars
         text_escaped = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -423,13 +429,13 @@ class AvatarGenerator:
                 inset = border / 2
                 shape += f'  <rect x="{inset}" y="{inset}" width="{width - border}" height="{height - border}" fill="none" stroke="{border_hex}" stroke-width="{border}"/>\n'
 
-        shape += f'  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"\n'
+        shape += '  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"\n'
         shape += f'        fill="{fg_hex}" font-family="system-ui, -apple-system, sans-serif"\n'
         shape += f'        font-size="{font_size}px" font-weight="600">{text_escaped}</text>\n'
 
         svg = (
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">\n'
-            f'{shape}'
-            f'</svg>'
+            f"{shape}"
+            f"</svg>"
         )
         return svg

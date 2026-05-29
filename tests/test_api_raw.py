@@ -1,13 +1,16 @@
 """Tests for /api/raw endpoints."""
+
 from __future__ import annotations
 
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+
 def _get_test1_id() -> int:
     """Look up the ID of test1.jpg in the root category."""
     from src.main import manager
+
     entry = manager.get_by_filename("test1.jpg")
     assert entry is not None, "test1.jpg not found in manager"
     return entry.id

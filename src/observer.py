@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import time
-from threading import Thread
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
@@ -19,7 +18,11 @@ class _RescanHandler(FileSystemEventHandler):
         self._last_rescan = 0.0
         self._debounce_seconds = 1.0
         # Ignore metadata files (they change due to internal operations)
-        self._ignore_patterns = [".placepix_manifest.json", ".placepix_colors.json", ".placepix_metrics.db"]
+        self._ignore_patterns = [
+            ".placepix_manifest.json",
+            ".placepix_colors.json",
+            ".placepix_metrics.db",
+        ]
 
     def _should_ignore(self, path: str) -> bool:
         """Check if file should be ignored (metadata files)."""
@@ -61,17 +64,19 @@ def start_watching(manager: ImageManager) -> Observer:
     """Start a watchdog observer and return it for later stopping."""
     observer = Observer()
     handler = _RescanHandler(manager)
-    
+
     # Check if the directory exists before scheduling
     if not settings.images_dir.exists():
-        logger.warning(f"Images directory does not exist: {settings.images_dir}, file watcher disabled")
+        logger.warning(
+            f"Images directory does not exist: {settings.images_dir}, file watcher disabled"
+        )
         return observer
-    
+
     try:
         observer.schedule(handler, str(settings.images_dir), recursive=True)
         observer.start()
         logger.info(f"File watcher active for: {settings.images_dir}")
     except Exception as e:
         logger.error(f"Failed to start file watcher for {settings.images_dir}: {e}")
-    
+
     return observer

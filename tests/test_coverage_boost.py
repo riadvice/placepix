@@ -1,22 +1,21 @@
 """Targeted tests to fill coverage gaps across all modules."""
+
 from __future__ import annotations
 
 import io
-import json
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
 from src.config import Settings
-from src.image_manager import ImageEntry, ImageManager
+from src.image_manager import ImageManager
 from src.metrics import MetricsTracker
 
-
 # ── Admin CLI Tests ────────────────────────────────────────────────
+
 
 class TestAdminCLI:
     def test_admin_cli_runs_with_data(self, tmp_path: Path, monkeypatch):
@@ -30,6 +29,7 @@ class TestAdminCLI:
 
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
         import sys
+
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
         admin_module.main()
@@ -46,6 +46,7 @@ class TestAdminCLI:
         tracker = MetricsTracker(db_path)
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
         import sys
+
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
         admin_module.main()
@@ -59,8 +60,9 @@ class TestAdminCLI:
         assert _fmt_number(1234) == "1,234"
         assert _fmt_number(0) == "0"
 
-        import sys
         from io import StringIO
+        import sys
+
         buf = StringIO()
         old_stdout = sys.stdout
         sys.stdout = buf
@@ -79,11 +81,23 @@ class TestAdminCLI:
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
-        tracker.log_request("/500/500", "GET", 200, 10.0, width=500, height=500, cache_hit=True, category="nature")
-        tracker.log_request("/600/600", "GET", 200, 5.0, width=600, height=600, cache_hit=True, category="architecture")
+        tracker.log_request(
+            "/500/500", "GET", 200, 10.0, width=500, height=500, cache_hit=True, category="nature"
+        )
+        tracker.log_request(
+            "/600/600",
+            "GET",
+            200,
+            5.0,
+            width=600,
+            height=600,
+            cache_hit=True,
+            category="architecture",
+        )
 
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
         import sys
+
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
         admin_module.main()
@@ -97,11 +111,16 @@ class TestAdminCLI:
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
-        tracker.log_request("/500/500", "GET", 200, 10.0, width=500, height=500, cache_hit=True, format="webp")
-        tracker.log_request("/600/600", "GET", 200, 5.0, width=600, height=600, cache_hit=True, format="jpeg")
+        tracker.log_request(
+            "/500/500", "GET", 200, 10.0, width=500, height=500, cache_hit=True, format="webp"
+        )
+        tracker.log_request(
+            "/600/600", "GET", 200, 5.0, width=600, height=600, cache_hit=True, format="jpeg"
+        )
 
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
         import sys
+
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
         admin_module.main()
@@ -116,6 +135,7 @@ class TestAdminCLI:
         tracker = MetricsTracker(db_path)
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)
         import sys
+
         captured = io.StringIO()
         monkeypatch.setattr(sys, "stdout", captured)
         admin_module.main()
@@ -123,6 +143,7 @@ class TestAdminCLI:
 
 
 # ── Observer Tests ─────────────────────────────────────────────────
+
 
 class TestObserver:
     def test_rescan_handler_events(self, tmp_path: Path):
@@ -184,8 +205,9 @@ class TestObserver:
 
     def test_rescan_handler_debounce(self, tmp_path: Path):
         """Test RescanHandler debounce."""
-        from src.observer import _RescanHandler
         import time
+
+        from src.observer import _RescanHandler
 
         mock_manager = MagicMock()
         handler = _RescanHandler(mock_manager)
@@ -203,8 +225,8 @@ class TestObserver:
 
     def test_start_watching(self, tmp_path: Path, monkeypatch):
         """Test start_watching creates and starts observer."""
-        from src.observer import start_watching
         from src.config import Settings
+        from src.observer import start_watching
 
         mock_manager = MagicMock()
         images_dir = tmp_path / "images"
@@ -219,6 +241,7 @@ class TestObserver:
 
 
 # ── Image Processor Exception Handling Tests ───────────────────────
+
 
 class TestImageProcessorExceptions:
     def test_avif_unavailable(self, monkeypatch):
@@ -237,6 +260,7 @@ class TestImageProcessorExceptions:
 
 
 # ── Image Manager Boto3 Tests ───────────────────────────────────────
+
 
 class TestImageManagerBoto3:
     def test_boto3_unavailable(self, monkeypatch):
@@ -308,7 +332,9 @@ class TestImageManagerBoto3:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        test_settings = Settings(dir=str(images_dir), seed_dir_str=str(seed_dir), data_dir=str(data_dir))
+        test_settings = Settings(
+            dir=str(images_dir), seed_dir_str=str(seed_dir), data_dir=str(data_dir)
+        )
         monkeypatch.setattr("src.image_manager.settings", test_settings)
         monkeypatch.setattr("src.config.settings", test_settings)
         manager = ImageManager()
@@ -324,6 +350,7 @@ class TestImageManagerBoto3:
 
 
 # ── Image Processor Watermark Tests ────────────────────────────────
+
 
 class TestImageProcessorWatermark:
     def test_watermark_with_image(self, tmp_path: Path):
@@ -451,6 +478,7 @@ class TestImageProcessorWatermark:
 
 # ── Image Processor Smart Crop Tests ───────────────────────────────
 
+
 class TestImageProcessorSmartCrop:
     def test_smart_crop_no_faces(self):
         """Test smart crop falls back to center when no faces."""
@@ -473,15 +501,19 @@ class TestImageProcessorSmartCrop:
 
         # Mock cv2.CascadeClassifier to raise exception
         import cv2
+
         orig = cv2.CascadeClassifier
+
         def bad_cascade(*args, **kwargs):
             raise RuntimeError("cv2 error")
+
         monkeypatch.setattr(cv2, "CascadeClassifier", bad_cascade)
         result = proc.process(buf, width=200, height=200, fit="smart")
         assert result is not None
 
 
 # ── Image Processor Border Tests ─────────────────────────────────
+
 
 class TestImageProcessorBorder:
     def test_border_processing(self):
@@ -512,6 +544,7 @@ class TestImageProcessorBorder:
 
 
 # ── Image Processor Gradient Tests ───────────────────────────────────
+
 
 class TestImageProcessorGradient:
     def test_gradient_linear(self):
@@ -562,11 +595,12 @@ class TestImageProcessorGradient:
 
 # ── Main.py Raw Serving Tests ────────────────────────────────────
 
+
 class TestRawServing:
     def test_raw_by_id(self, test_images_dir: Path, monkeypatch):
         """Test raw image serving by ID."""
-        from src.main import app
         from src.image_manager import ImageManager
+        from src.main import app
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -582,8 +616,8 @@ class TestRawServing:
 
     def test_raw_by_path(self, test_images_dir: Path, monkeypatch):
         """Test raw image serving by category/filename."""
-        from src.main import app
         from src.image_manager import ImageManager
+        from src.main import app
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -598,8 +632,8 @@ class TestRawServing:
 
     def test_raw_not_modified(self, test_images_dir: Path, monkeypatch):
         """Test raw serving returns 304 when not modified."""
-        from src.main import app
         from src.image_manager import ImageManager
+        from src.main import app
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -628,6 +662,7 @@ class TestRawServing:
 
 
 # ── Main.py Solid / SVG Tests ────────────────────────────────────
+
 
 class TestPlaceholderEndpoints:
     def test_solid_color_placeholder(self, client: TestClient):
@@ -671,6 +706,7 @@ class TestPlaceholderEndpoints:
 
 
 # ── Image Manager Edge Cases ───────────────────────────────────────
+
 
 class TestImageManagerEdgeCases:
     def test_manifest_invalid_json(self, tmp_path: Path, monkeypatch):
@@ -847,6 +883,7 @@ class TestImageManagerEdgeCases:
 
 # ── Metrics Edge Cases ─────────────────────────────────────────────
 
+
 class TestMetricsEdgeCases:
     def test_percentile_empty(self, tmp_path: Path):
         """Test percentiles with empty database."""
@@ -890,6 +927,7 @@ class TestMetricsEdgeCases:
 
 # ── Upload Endpoint Edge Cases ─────────────────────────────────────
 
+
 class TestUploadEdgeCases:
     def test_upload_disabled(self, client: TestClient, monkeypatch):
         """Test upload returns 403 when disabled."""
@@ -901,10 +939,12 @@ class TestUploadEdgeCases:
 
 # ── Main.py Entry Point Tests ──────────────────────────────────────
 
+
 class TestMainEntryPoint:
     def test_run_function(self, monkeypatch):
         """Test run() function exists and is importable."""
         from src.main import run
+
         assert callable(run)
 
     def test_boto3_unavailable(self, monkeypatch):
@@ -939,8 +979,9 @@ class TestMainEntryPoint:
 
     def test_get_git_version_subprocess_error(self, monkeypatch):
         """Test git version when subprocess fails."""
-        from src.main import _get_git_version
         import subprocess
+
+        from src.main import _get_git_version
 
         # Mock subprocess.run to fail
         def mock_run(*args, **kwargs):
@@ -953,8 +994,9 @@ class TestMainEntryPoint:
 
     def test_inflight_claim_release(self):
         """Test in-flight request claim and release."""
-        from src.main import _claim_inflight, _release_inflight
         import asyncio
+
+        from src.main import _claim_inflight, _release_inflight
 
         async def test():
             key = "test_key"
@@ -973,9 +1015,9 @@ class TestMainEntryPoint:
 
     def test_setup_logging(self, monkeypatch):
         """Test setup_logging function."""
-        from src.main import setup_logging
+
         from src.config import Settings
-        import logging
+        from src.main import setup_logging
 
         # Test with different log levels
         test_settings = Settings(log_level="DEBUG")
@@ -986,8 +1028,9 @@ class TestMainEntryPoint:
 
     def test_upload_writable_check(self, tmp_path: Path, monkeypatch):
         """Test upload directory writability check."""
-        from src.config import Settings
         import os
+
+        from src.config import Settings
 
         images_dir = tmp_path / "images"
         images_dir.mkdir()
@@ -1001,7 +1044,6 @@ class TestMainEntryPoint:
     def test_seed_images_enabled(self, tmp_path: Path, monkeypatch):
         """Test seed images enabled path."""
         from src.config import Settings
-        from src.seed import seed_images
 
         seed_dir = tmp_path / "seed"
         seed_dir.mkdir()
@@ -1034,6 +1076,7 @@ class TestMainEntryPoint:
 
 # ── Cache Cleaner Tests ───────────────────────────────────────────
 
+
 class TestCacheCleaner:
     def test_cache_cleaner_disabled(self, tmp_path: Path):
         """Test cache cleaner with TTL <= 0 does nothing."""
@@ -1047,8 +1090,9 @@ class TestCacheCleaner:
 
     def test_cache_cleaner_removes_old_files(self, tmp_path: Path):
         """Test cache cleaner removes files older than TTL."""
-        from src.main import CacheCleaner
         import time
+
+        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
@@ -1084,8 +1128,9 @@ class TestCacheCleaner:
 
     def test_cache_cleaner_removes_empty_subdirs(self, tmp_path: Path):
         """Test cache cleaner removes empty subdirectories."""
-        from src.main import CacheCleaner
         import time
+
+        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
@@ -1117,8 +1162,9 @@ class TestCacheCleaner:
 
     def test_cache_cleaner_handles_file_exceptions(self, tmp_path: Path):
         """Test cache cleaner handles file stat exceptions."""
-        from src.main import CacheCleaner
         import time
+
+        from src.main import CacheCleaner
 
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()

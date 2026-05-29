@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import os
 from pathlib import Path
 
@@ -12,7 +11,9 @@ class Settings(BaseSettings):
     """All settings have sensible defaults; .env is optional."""
 
     model_config = SettingsConfigDict(
-        env_file=[".env.test"] if os.getenv("TESTING") or os.getenv("PYTEST_CURRENT_TEST") else [".env"],
+        env_file=[".env.test"]
+        if os.getenv("TESTING") or os.getenv("PYTEST_CURRENT_TEST")
+        else [".env"],
         env_file_encoding="utf-8",
         extra="ignore",
     )
