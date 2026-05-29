@@ -16,14 +16,16 @@ from src.config import Settings
 
 
 class TestImageManagerGaps:
-    def test_hex_to_rgb_3char(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_hex_to_rgb_3char(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import _hex_to_rgb
 
         assert _hex_to_rgb("#abc") == (170, 187, 204)
         assert _hex_to_rgb("ABC") == (170, 187, 204)
 
-    def test_extract_dominant_colors_exception(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_extract_dominant_colors_exception(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import _extract_dominant_colors
 
@@ -31,7 +33,8 @@ class TestImageManagerGaps:
             result = _extract_dominant_colors(test_images_dir / "test1.jpg")
         assert result == []
 
-    def test_pick_empty_categories(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_empty_categories(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -41,7 +44,8 @@ class TestImageManagerGaps:
         manager._total = 0
         assert manager.pick() is None
 
-    def test_pick_empty_entries(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_empty_entries(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import Category, CategoryMeta, ImageManager
 
@@ -51,7 +55,8 @@ class TestImageManagerGaps:
         )
         assert manager.pick("empty_cat") is None
 
-    def test_get_by_filename(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_get_by_filename(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -61,14 +66,16 @@ class TestImageManagerGaps:
         assert result.filename == "test1.jpg"
         assert manager.get_by_filename("nonexistent.jpg") is None
 
-    def test_get_entry_category_not_found(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_get_entry_category_not_found(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
         manager = ImageManager()
         assert manager.get_entry("nonexistent_cat", "any.jpg") is None
 
-    def test_get_entry_filename_not_found(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_get_entry_filename_not_found(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -77,7 +84,8 @@ class TestImageManagerGaps:
         cat_name = list(manager.categories.keys())[0]
         assert manager.get_entry(cat_name, "nonexistent.jpg") is None
 
-    def test_save_manifest_exception(self, test_images_dir, monkeypatch, tmp_path):
+    @staticmethod
+    def test_save_manifest_exception(test_images_dir, monkeypatch, tmp_path):
         bad_dir = tmp_path / "readonly"
         bad_dir.mkdir()
         os.chmod(bad_dir, 0o555)
@@ -90,7 +98,8 @@ class TestImageManagerGaps:
         finally:
             os.chmod(bad_dir, 0o755)
 
-    def test_load_colors_exception(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_load_colors_exception(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -100,7 +109,8 @@ class TestImageManagerGaps:
         result = manager._load_colors()
         assert result == {}
 
-    def test_save_colors_exception(self, test_images_dir, monkeypatch, tmp_path):
+    @staticmethod
+    def test_save_colors_exception(test_images_dir, monkeypatch, tmp_path):
         bad_dir = tmp_path / "readonly2"
         bad_dir.mkdir()
         os.chmod(bad_dir, 0o555)
@@ -113,7 +123,8 @@ class TestImageManagerGaps:
         finally:
             os.chmod(bad_dir, 0o755)
 
-    def test_rescan_creates_dir(self, tmp_path, monkeypatch):
+    @staticmethod
+    def test_rescan_creates_dir(tmp_path, monkeypatch):
         from src.image_manager import ImageManager
 
         nonexistent = tmp_path / "nonexistent_images"
@@ -121,7 +132,8 @@ class TestImageManagerGaps:
         manager = ImageManager()
         assert nonexistent.exists()
 
-    def test_scan_s3_exception(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_scan_s3_exception(test_images_dir, monkeypatch):
         # Test that S3 scan handles exceptions gracefully without full initialization
         from src.image_manager import ImageManager
 
@@ -157,7 +169,8 @@ class TestImageManagerGaps:
         assert cats == {}
         assert next_id == 1
 
-    def test_scan_s3_filters(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_scan_s3_filters(test_images_dir, monkeypatch):
         monkeypatch.setattr(
             "src.image_manager.settings",
             Settings(
@@ -193,7 +206,8 @@ class TestImageManagerGaps:
         assert len(cats["nature"].entries) == 1
         assert cats["nature"].entries[0].filename == "forest.jpg"
 
-    def test_scan_s3_merge_existing_category(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_scan_s3_merge_existing_category(test_images_dir, monkeypatch):
         monkeypatch.setattr(
             "src.image_manager.settings",
             Settings(
@@ -229,7 +243,8 @@ class TestImageManagerGaps:
         # Should have merged entries
         assert len(cats["nature"].entries) >= 1
 
-    def test_scan_subdir_skips_invalid_ext(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_scan_subdir_skips_invalid_ext(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -242,28 +257,32 @@ class TestImageManagerGaps:
             e.filename.endswith((".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp")) for e in entries
         )
 
-    def test_pick_by_color_invalid_hex(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_by_color_invalid_hex(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
         manager = ImageManager()
         assert manager.pick_by_color("not-a-color") is None
 
-    def test_pick_by_color_missing_category(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_by_color_missing_category(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
         manager = ImageManager()
         assert manager.pick_by_color("#ff0000", category="nonexistent") is None
 
-    def test_find_by_color_invalid_hex(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_find_by_color_invalid_hex(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
         manager = ImageManager()
         assert manager.find_by_color("invalid") == []
 
-    def test_find_by_color_no_colors_for_entry(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_find_by_color_no_colors_for_entry(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -275,7 +294,8 @@ class TestImageManagerGaps:
         result = manager.find_by_color("#ff0000")
         assert isinstance(result, list)
 
-    def test_hex_to_hue_category_branches(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_hex_to_hue_category_branches(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -288,7 +308,8 @@ class TestImageManagerGaps:
         # Other branch at end
         assert ImageManager._hex_to_hue_category("#ff00ff") == "Pink"
 
-    def test_list_colors_category_filter(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_list_colors_category_filter(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -297,7 +318,8 @@ class TestImageManagerGaps:
         # Should be empty or filtered
         assert isinstance(result, list)
 
-    def test_list_colors_search_filter(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_list_colors_search_filter(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -305,7 +327,8 @@ class TestImageManagerGaps:
         result = manager.list_colors(search="ff")
         assert isinstance(result, list)
 
-    def test_list_entries_page_beyond_total(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_list_entries_page_beyond_total(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -314,7 +337,8 @@ class TestImageManagerGaps:
         assert entries == []
         assert total == manager.total
 
-    def test_category_meta_from_dict(self):
+    @staticmethod
+    def test_category_meta_from_dict():
         from src.image_manager import CategoryMeta
 
         meta = CategoryMeta.from_dict(
@@ -325,7 +349,8 @@ class TestImageManagerGaps:
         assert meta.author == "auth"
         assert meta.tags == ["a", "b"]
 
-    def test_s3_prefix_without_slash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_s3_prefix_without_slash(test_images_dir, monkeypatch):
         monkeypatch.setattr(
             "src.image_manager.settings",
             Settings(
@@ -350,7 +375,8 @@ class TestImageManagerGaps:
             cats, next_id = manager._scan_s3({}, 1)
         assert isinstance(cats, dict)
 
-    def test_s3_scan_error_handling(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_s3_scan_error_handling(test_images_dir, monkeypatch):
         monkeypatch.setattr(
             "src.image_manager.settings",
             Settings(
@@ -374,7 +400,8 @@ class TestImageManagerGaps:
         assert cats == {}
         assert next_id == 1
 
-    def test_read_meta_invalid_json(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_read_meta_invalid_json(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -385,7 +412,8 @@ class TestImageManagerGaps:
         meta = manager._read_meta(bad_dir)
         assert meta.name == ""
 
-    def test_read_meta_invalid_yaml(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_read_meta_invalid_yaml(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -396,7 +424,8 @@ class TestImageManagerGaps:
         meta = manager._read_meta(bad_dir)
         assert meta.name == ""
 
-    def test_load_manifest_invalid_json(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_load_manifest_invalid_json(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -406,7 +435,8 @@ class TestImageManagerGaps:
         result = manager._load_manifest()
         assert result == {}
 
-    def test_load_manifest_not_dict(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_load_manifest_not_dict(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -416,7 +446,8 @@ class TestImageManagerGaps:
         result = manager._load_manifest()
         assert result == {}
 
-    def test_pick_by_color_no_candidates(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_by_color_no_candidates(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -426,7 +457,8 @@ class TestImageManagerGaps:
         # May return None or an entry
         assert result is None or hasattr(result, "id")
 
-    def test_save_colors_exception(self, test_images_dir, monkeypatch, tmp_path):
+    @staticmethod
+    def test_save_colors_exception(test_images_dir, monkeypatch, tmp_path):
         bad_dir = tmp_path / "readonly"
         bad_dir.mkdir()
         os.chmod(bad_dir, 0o555)
@@ -439,44 +471,52 @@ class TestImageManagerGaps:
         finally:
             os.chmod(bad_dir, 0o755)
 
-    def test_hue_category_orange(self):
+    @staticmethod
+    def test_hue_category_orange():
         from src.image_manager import ImageManager
 
         assert ImageManager._hex_to_hue_category("#ffa500") == "Orange"
 
-    def test_hue_category_yellow(self):
+    @staticmethod
+    def test_hue_category_yellow():
         from src.image_manager import ImageManager
 
         assert ImageManager._hex_to_hue_category("#ffff00") == "Yellow"
 
-    def test_hue_category_green(self):
+    @staticmethod
+    def test_hue_category_green():
         from src.image_manager import ImageManager
 
         assert ImageManager._hex_to_hue_category("#00ff00") == "Green"
 
-    def test_hue_category_cyan(self):
+    @staticmethod
+    def test_hue_category_cyan():
         from src.image_manager import ImageManager
 
         assert ImageManager._hex_to_hue_category("#00ffff") == "Cyan"
 
-    def test_hue_category_blue(self):
+    @staticmethod
+    def test_hue_category_blue():
         from src.image_manager import ImageManager
 
         assert ImageManager._hex_to_hue_category("#0000ff") == "Blue"
 
-    def test_hue_category_purple(self):
+    @staticmethod
+    def test_hue_category_purple():
         from src.image_manager import ImageManager
 
         # #ff00ff is actually classified as Pink by the implementation
         assert ImageManager._hex_to_hue_category("#ff00ff") == "Pink"
 
-    def test_hue_category_pink(self):
+    @staticmethod
+    def test_hue_category_pink():
         from src.image_manager import ImageManager
 
         # #ffc0cb is classified as Red by the implementation
         assert ImageManager._hex_to_hue_category("#ffc0cb") == "Red"
 
-    def test_pick_by_color_no_match(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_by_color_no_match(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -486,7 +526,8 @@ class TestImageManagerGaps:
         result = manager.pick_by_color("#ff0000", category=None)
         assert result is None
 
-    def test_save_colors(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_save_colors(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -494,7 +535,8 @@ class TestImageManagerGaps:
         manager._save_colors({1: ["ff0000"]})
         # Should not crash
 
-    def test_save_manifest(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_save_manifest(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -502,7 +544,8 @@ class TestImageManagerGaps:
         manager._save_manifest({"test": 1})
         # Should not crash
 
-    def test_pick_by_color_category_not_found(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_by_color_category_not_found(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -510,20 +553,23 @@ class TestImageManagerGaps:
         result = manager.pick_by_color("#ff0000", category="nonexistent")
         assert result is None
 
-    def test_color_distance_calculation(self):
+    @staticmethod
+    def test_color_distance_calculation():
         from src.image_manager import _color_distance
 
         # Test color distance calculation
         dist = _color_distance((255, 0, 0), (0, 0, 255))
         assert dist > 0
 
-    def test_hex_to_rgb_invalid(self):
+    @staticmethod
+    def test_hex_to_rgb_invalid():
         from src.image_manager import _hex_to_rgb
 
         assert _hex_to_rgb("invalid") is None
         assert _hex_to_rgb("#gg0000") is None
 
-    def test_pick_with_seed(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_with_seed(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -534,7 +580,8 @@ class TestImageManagerGaps:
         entry2 = manager.pick(category=None, seed="test")
         assert entry1.id == entry2.id
 
-    def test_pick_with_category_seed(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pick_with_category_seed(test_images_dir, monkeypatch):
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
         from src.image_manager import ImageManager
 
@@ -546,21 +593,24 @@ class TestImageManagerGaps:
             entry2 = manager.pick(category=cat_name, seed="test")
             assert entry1.id == entry2.id
 
-    def test_processor_noise_zero(self, test_images_dir):
+    @staticmethod
+    def test_processor_noise_zero(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, noise=0)
         assert isinstance(result, bytes)
 
-    def test_processor_pixelate_zero(self, test_images_dir):
+    @staticmethod
+    def test_processor_pixelate_zero(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, pixelate=0)
         assert isinstance(result, bytes)
 
-    def test_processor_smart_crop_wide_image(self, test_images_dir):
+    @staticmethod
+    def test_processor_smart_crop_wide_image(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -570,7 +620,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_watermark_invalid_position(self, test_images_dir):
+    @staticmethod
+    def test_processor_watermark_invalid_position(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -580,7 +631,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_smart_crop_tall_image(self, test_images_dir):
+    @staticmethod
+    def test_processor_smart_crop_tall_image(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -590,7 +642,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_smart_crop_with_face_detection(self, test_images_dir):
+    @staticmethod
+    def test_processor_smart_crop_with_face_detection(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -600,7 +653,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_grayscale(self, test_images_dir):
+    @staticmethod
+    def test_processor_grayscale(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -609,14 +663,16 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_sepia(self, test_images_dir):
+    @staticmethod
+    def test_processor_sepia(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, sepia=True)
         assert isinstance(result, bytes)
 
-    def test_processor_brightness(self, test_images_dir):
+    @staticmethod
+    def test_processor_brightness(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -625,7 +681,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_contrast(self, test_images_dir):
+    @staticmethod
+    def test_processor_contrast(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -634,7 +691,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_saturation(self, test_images_dir):
+    @staticmethod
+    def test_processor_saturation(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -643,7 +701,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_tint(self, test_images_dir):
+    @staticmethod
+    def test_processor_tint(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -652,14 +711,16 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_blur(self, test_images_dir):
+    @staticmethod
+    def test_processor_blur(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, blur=2)
         assert isinstance(result, bytes)
 
-    def test_processor_fit_contain(self, test_images_dir):
+    @staticmethod
+    def test_processor_fit_contain(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -668,7 +729,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_fit_cover(self, test_images_dir):
+    @staticmethod
+    def test_processor_fit_cover(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -677,14 +739,16 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_fit_crop(self, test_images_dir):
+    @staticmethod
+    def test_processor_fit_crop(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, fit="crop")
         assert isinstance(result, bytes)
 
-    def test_processor_tint_invalid(self, test_images_dir):
+    @staticmethod
+    def test_processor_tint_invalid(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -693,14 +757,16 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_tint_short_hex(self, test_images_dir):
+    @staticmethod
+    def test_processor_tint_short_hex(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, tint="f00")
         assert isinstance(result, bytes)
 
-    def test_processor_text_overlay(self, test_images_dir):
+    @staticmethod
+    def test_processor_text_overlay(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -709,14 +775,16 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_padding(self, test_images_dir):
+    @staticmethod
+    def test_processor_padding(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, padding=10)
         assert isinstance(result, bytes)
 
-    def test_processor_border(self, test_images_dir):
+    @staticmethod
+    def test_processor_border(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -725,28 +793,32 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_lqip(self, test_images_dir):
+    @staticmethod
+    def test_processor_lqip(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, lqip=True)
         assert isinstance(result, bytes)
 
-    def test_processor_noise(self, test_images_dir):
+    @staticmethod
+    def test_processor_noise(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, noise=10)
         assert isinstance(result, bytes)
 
-    def test_processor_pixelate(self, test_images_dir):
+    @staticmethod
+    def test_processor_pixelate(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=200, height=200, pixelate=5)
         assert isinstance(result, bytes)
 
-    def test_processor_normalize_format_jpg(self, test_images_dir):
+    @staticmethod
+    def test_processor_normalize_format_jpg(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -755,7 +827,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_border_with_color(self, test_images_dir):
+    @staticmethod
+    def test_processor_border_with_color(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -764,7 +837,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_processor_border_invalid(self, test_images_dir):
+    @staticmethod
+    def test_processor_border_invalid(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -773,7 +847,8 @@ class TestImageManagerGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_resolve_image_source_no_path_no_s3(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_resolve_image_source_no_path_no_s3(test_images_dir, monkeypatch):
         from src.image_manager import ImageEntry
         from src.main import _resolve_image_source
 
@@ -781,7 +856,8 @@ class TestImageManagerGaps:
         with pytest.raises(Exception):
             _resolve_image_source(entry)
 
-    def test_api_info_category_filename(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_api_info_category_filename(test_images_dir, monkeypatch):
         from src.main import app, manager
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
@@ -794,7 +870,8 @@ class TestImageManagerGaps:
             response = client.get(f"/api/info/{cat_name}/{filename}")
             assert response.status_code == 200
 
-    def test_api_info_category_filename_not_found(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_api_info_category_filename_not_found(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -802,7 +879,8 @@ class TestImageManagerGaps:
         response = client.get("/api/info/nonexistent/file.jpg")
         assert response.status_code == 404
 
-    def test_random_category_not_found(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_random_category_not_found(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -810,7 +888,8 @@ class TestImageManagerGaps:
         response = client.get("/500/500/nonexistent_category_xyz")
         assert response.status_code == 404
 
-    def test_preset_category_not_found(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_preset_category_not_found(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -818,7 +897,8 @@ class TestImageManagerGaps:
         response = client.get("/preset/mobile/nonexistent_category")
         assert response.status_code == 404
 
-    def test_upload_disabled(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_upload_disabled(test_images_dir, monkeypatch):
         settings = Settings(
             host="127.0.0.1:3000",
             dir=str(test_images_dir),
@@ -833,7 +913,8 @@ class TestImageManagerGaps:
         response = client.post("/api/upload", files={"file": ("test.jpg", b"data", "image/jpeg")})
         assert response.status_code == 403
 
-    def test_upload_no_file(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_upload_no_file(test_images_dir, monkeypatch):
         settings = Settings(
             host="127.0.0.1:3000",
             dir=str(test_images_dir),
@@ -848,7 +929,8 @@ class TestImageManagerGaps:
         response = client.post("/api/upload")
         assert response.status_code == 422
 
-    def test_upload_with_category(self, test_images_dir, tmp_path, monkeypatch):
+    @staticmethod
+    def test_upload_with_category(test_images_dir, tmp_path, monkeypatch):
         seed_dir = tmp_path / "seed"
         seed_dir.mkdir()
         settings = Settings(
@@ -878,7 +960,8 @@ class TestImageManagerGaps:
         # May succeed or fail depending on permissions
         assert response.status_code in [200, 400, 422]
 
-    def test_color_swatches_endpoint(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_color_swatches_endpoint(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -887,7 +970,8 @@ class TestImageManagerGaps:
         # Should return HTML or 404 if no colors
         assert response.status_code in [200, 404]
 
-    def test_favicon_endpoint(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_favicon_endpoint(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -896,7 +980,8 @@ class TestImageManagerGaps:
         # May return 404 if no favicon
         assert response.status_code in [200, 404]
 
-    def test_admin_dashboard(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_admin_dashboard(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -905,7 +990,8 @@ class TestImageManagerGaps:
         # May return 404 if endpoint doesn't exist
         assert response.status_code in [200, 302, 307, 404]
 
-    def test_srcset_endpoint(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_srcset_endpoint(test_images_dir, monkeypatch):
         from src.main import app, manager
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
@@ -918,7 +1004,8 @@ class TestImageManagerGaps:
             # May return 200 or 404
             assert response.status_code in [200, 404]
 
-    def test_random_endpoint_with_color(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_random_endpoint_with_color(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -927,7 +1014,8 @@ class TestImageManagerGaps:
         # May return HTML, redirect, or 404
         assert response.status_code in [200, 302, 307, 404]
 
-    def test_srcset_invalid_sizes(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_srcset_invalid_sizes(test_images_dir, monkeypatch):
         from src.main import app, manager
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
@@ -940,25 +1028,29 @@ class TestImageManagerGaps:
             # May return 400 or 404 if endpoint doesn't exist
             assert response.status_code in [400, 404]
 
-    def test_parse_aspect_ratio_invalid(self):
+    @staticmethod
+    def test_parse_aspect_ratio_invalid():
         from src.main import _parse_aspect_ratio
 
         result = _parse_aspect_ratio("invalid", 100)
         assert result == (0, 0)
 
-    def test_parse_aspect_ratio_wrong_parts(self):
+    @staticmethod
+    def test_parse_aspect_ratio_wrong_parts():
         from src.main import _parse_aspect_ratio
 
         result = _parse_aspect_ratio("1:2:3", 100)
         assert result == (0, 0)
 
-    def test_parse_aspect_ratio_zero_division(self):
+    @staticmethod
+    def test_parse_aspect_ratio_zero_division():
         from src.main import _parse_aspect_ratio
 
         result = _parse_aspect_ratio("16:0", 100)
         assert result == (0, 0)
 
-    def test_ratio_endpoint(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_ratio_endpoint(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -967,7 +1059,8 @@ class TestImageManagerGaps:
         # May return HTML, redirect, or 404
         assert response.status_code in [200, 302, 307, 404]
 
-    def test_ratio_endpoint_invalid(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_ratio_endpoint_invalid(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -976,7 +1069,8 @@ class TestImageManagerGaps:
         # Should return 400 for invalid ratio
         assert response.status_code == 400
 
-    def test_preset_endpoint_unknown(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_preset_endpoint_unknown(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -985,7 +1079,8 @@ class TestImageManagerGaps:
         # Should return 404 for unknown preset
         assert response.status_code == 404
 
-    def test_serve_with_watermark_config(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_serve_with_watermark_config(test_images_dir, monkeypatch):
         from src.main import app
 
         settings = Settings(
@@ -1004,7 +1099,8 @@ class TestImageManagerGaps:
         # May return 200 or 404
         assert response.status_code in [200, 404]
 
-    def test_serve_with_cdn(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_serve_with_cdn(test_images_dir, monkeypatch):
         from src.main import app
 
         settings = Settings(
@@ -1020,7 +1116,8 @@ class TestImageManagerGaps:
         # May redirect or return 404
         assert response.status_code in [302, 307, 404]
 
-    def test_resolve_image_source_s3_no_path(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_resolve_image_source_s3_no_path(test_images_dir, monkeypatch):
         from src.image_manager import ImageEntry
         from src.main import _resolve_image_source
 
@@ -1031,7 +1128,8 @@ class TestImageManagerGaps:
         with pytest.raises(Exception):
             _resolve_image_source(entry)
 
-    def test_serve_by_id(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_serve_by_id(test_images_dir, monkeypatch):
         from src.main import app, manager
 
         monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
@@ -1044,7 +1142,8 @@ class TestImageManagerGaps:
             # May return 200 or 404
             assert response.status_code in [200, 404]
 
-    def test_serve_by_id_not_found(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_serve_by_id_not_found(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -1053,7 +1152,8 @@ class TestImageManagerGaps:
         # Should return 404 for non-existent ID
         assert response.status_code == 404
 
-    def test_color_endpoint(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_color_endpoint(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -1062,7 +1162,8 @@ class TestImageManagerGaps:
         # May return 200 or 404
         assert response.status_code in [200, 404]
 
-    def test_color_endpoint_invalid_hex(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_color_endpoint_invalid_hex(test_images_dir, monkeypatch):
         from src.main import app
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir)))
@@ -1076,7 +1177,8 @@ class TestImageManagerGaps:
 
 
 class TestImageProcessorGaps:
-    def test_default_format(self, test_images_dir):
+    @staticmethod
+    def test_default_format(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1084,7 +1186,8 @@ class TestImageProcessorGaps:
         result = processor.process(img_path, width=100, height=100, output_format="invalid")
         assert isinstance(result, bytes)
 
-    def test_jpg_alias(self, test_images_dir):
+    @staticmethod
+    def test_jpg_alias(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1092,7 +1195,8 @@ class TestImageProcessorGaps:
         result = processor.process(img_path, width=100, height=100, output_format="jpg")
         assert isinstance(result, bytes)
 
-    def test_resize_zero_dimensions(self, test_images_dir):
+    @staticmethod
+    def test_resize_zero_dimensions(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1100,7 +1204,8 @@ class TestImageProcessorGaps:
         result = processor.process(img_path, width=0, height=0)
         assert isinstance(result, bytes)
 
-    def test_resize_default_crop(self, test_images_dir):
+    @staticmethod
+    def test_resize_default_crop(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1108,7 +1213,8 @@ class TestImageProcessorGaps:
         result = processor.process(img_path, width=100, height=100, fit="unknown")
         assert isinstance(result, bytes)
 
-    def test_add_text_font_fallback(self, test_images_dir):
+    @staticmethod
+    def test_add_text_font_fallback(test_images_dir):
         from PIL import ImageFont
 
         from src.image_processor import ImageProcessor
@@ -1124,7 +1230,8 @@ class TestImageProcessorGaps:
             )
         assert isinstance(result, bytes)
 
-    def test_border_3char_hex(self, test_images_dir):
+    @staticmethod
+    def test_border_3char_hex(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1133,21 +1240,24 @@ class TestImageProcessorGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_noise_zero(self, test_images_dir):
+    @staticmethod
+    def test_noise_zero(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=100, height=100, noise=0)
         assert isinstance(result, bytes)
 
-    def test_pixelate_one(self, test_images_dir):
+    @staticmethod
+    def test_pixelate_one(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
         result = processor.process(test_images_dir / "test1.jpg", width=100, height=100, pixelate=1)
         assert isinstance(result, bytes)
 
-    def test_smart_crop_face_error(self, test_images_dir):
+    @staticmethod
+    def test_smart_crop_face_error(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1159,7 +1269,8 @@ class TestImageProcessorGaps:
             )
         assert isinstance(result, bytes)
 
-    def test_smart_crop_no_faces(self, test_images_dir):
+    @staticmethod
+    def test_smart_crop_no_faces(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1171,7 +1282,8 @@ class TestImageProcessorGaps:
             )
         assert isinstance(result, bytes)
 
-    def test_watermark_position_true(self, test_images_dir, tmp_path):
+    @staticmethod
+    def test_watermark_position_true(test_images_dir, tmp_path):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1190,7 +1302,8 @@ class TestImageProcessorGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_watermark_image_exception(self, test_images_dir, tmp_path):
+    @staticmethod
+    def test_watermark_image_exception(test_images_dir, tmp_path):
         from PIL import Image
 
         from src.image_processor import ImageProcessor
@@ -1221,7 +1334,8 @@ class TestImageProcessorGaps:
             )
         assert isinstance(result, bytes)
 
-    def test_watermark_text_font_fallback(self, test_images_dir):
+    @staticmethod
+    def test_watermark_text_font_fallback(test_images_dir):
         from PIL import ImageFont
 
         from src.image_processor import ImageProcessor
@@ -1247,7 +1361,8 @@ class TestImageProcessorGaps:
             )
         assert isinstance(result, bytes)
 
-    def test_watermark_none(self, test_images_dir):
+    @staticmethod
+    def test_watermark_none(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1266,7 +1381,8 @@ class TestImageProcessorGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_watermark_rgba_conversion(self, test_images_dir, tmp_path):
+    @staticmethod
+    def test_watermark_rgba_conversion(test_images_dir, tmp_path):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1288,7 +1404,8 @@ class TestImageProcessorGaps:
         )
         assert isinstance(result, bytes)
 
-    def test_watermark_default_position(self, test_images_dir):
+    @staticmethod
+    def test_watermark_default_position(test_images_dir):
         from src.image_processor import ImageProcessor
 
         processor = ImageProcessor()
@@ -1312,7 +1429,8 @@ class TestImageProcessorGaps:
 
 
 class TestMainGaps:
-    def test_serve_entry_zero_dimensions(self, client):
+    @staticmethod
+    def test_serve_entry_zero_dimensions(client):
         # Get a valid image ID first
         from src.main import manager
 
@@ -1321,7 +1439,8 @@ class TestMainGaps:
         response = client.get(f"/id/{entry.id}/0/0")
         assert response.status_code == 200
 
-    def test_serve_entry_invalid_format(self, client):
+    @staticmethod
+    def test_serve_entry_invalid_format(client):
         from src.main import manager
 
         entry = manager.pick()
@@ -1330,7 +1449,8 @@ class TestMainGaps:
         assert response.status_code == 200
         assert response.headers["content-type"] == "image/jpeg"
 
-    def test_serve_entry_jpg_alias(self, client):
+    @staticmethod
+    def test_serve_entry_jpg_alias(client):
         from src.main import manager
 
         entry = manager.pick()
@@ -1339,7 +1459,8 @@ class TestMainGaps:
         assert response.status_code == 200
         assert response.headers["content-type"] == "image/jpeg"
 
-    def test_serve_entry_not_modified(self, client):
+    @staticmethod
+    def test_serve_entry_not_modified(client):
         from src.main import manager
 
         entry = manager.pick()
@@ -1350,7 +1471,8 @@ class TestMainGaps:
             response2 = client.get(f"/id/{entry.id}/100/100", headers={"If-None-Match": etag})
             assert response2.status_code == 304
 
-    def test_serve_entry_s3_last_modified(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_serve_entry_s3_last_modified(test_images_dir, monkeypatch):
         from src.image_manager import ImageEntry
 
         entry = ImageEntry(path=None, filename="s3.jpg", category="test", id=999, s3_key="")
@@ -1359,15 +1481,18 @@ class TestMainGaps:
         with pytest.raises(Exception):
             _resolve_image_source(entry)
 
-    def test_serve_by_id_not_found(self, client):
+    @staticmethod
+    def test_serve_by_id_not_found(client):
         response = client.get("/id/99999/100/100")
         assert response.status_code == 404
 
-    def test_placeholder_invalid_hex(self, client):
+    @staticmethod
+    def test_placeholder_invalid_hex(client):
         response = client.get("/solid/100/100/zzzzzz")
         assert response.status_code == 200
 
-    def test_placeholder_font_fallback(self, client):
+    @staticmethod
+    def test_placeholder_font_fallback(client):
         from PIL import ImageFont
 
         default_font = ImageFont.load_default()
@@ -1378,20 +1503,24 @@ class TestMainGaps:
             response = client.get("/solid/100/100/ffffff?text=Hi")
         assert response.status_code == 200
 
-    def test_favicon(self, client):
+    @staticmethod
+    def test_favicon(client):
         response = client.get("/favicon.svg")
         # static/logo.svg exists in the repo
         assert response.status_code in (200, 404)
 
-    def test_image_explorer(self, client):
+    @staticmethod
+    def test_image_explorer(client):
         response = client.get("/images")
         assert response.status_code == 200
 
-    def test_palette_category(self, client):
+    @staticmethod
+    def test_palette_category(client):
         response = client.get("/palette?category=Red")
         assert response.status_code == 200
 
-    def test_upload_disabled(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_upload_disabled(test_images_dir, monkeypatch):
         settings = Settings(
             host="127.0.0.1:3000",
             dir=str(test_images_dir),
@@ -1406,7 +1535,8 @@ class TestMainGaps:
         response = client.post("/api/upload", files={"file": ("test.jpg", b"data", "image/jpeg")})
         assert response.status_code == 403
 
-    def test_upload_no_filename(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_upload_no_filename(test_images_dir, monkeypatch):
         settings = Settings(
             host="127.0.0.1:3000",
             dir=str(test_images_dir),
@@ -1422,7 +1552,8 @@ class TestMainGaps:
         # FastAPI may return 422 for empty filename; our code returns 400
         assert response.status_code in (400, 422)
 
-    def test_metrics_middleware_no_tracker(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_metrics_middleware_no_tracker(test_images_dir, monkeypatch):
         settings = Settings(
             host="127.0.0.1:3000",
             dir=str(test_images_dir),
@@ -1443,7 +1574,8 @@ class TestMainGaps:
 
 
 class TestMetricsGaps:
-    def test_aggregate_daily_stats(self, tmp_path):
+    @staticmethod
+    def test_aggregate_daily_stats(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1456,7 +1588,8 @@ class TestMetricsGaps:
         tracker.aggregate_daily_stats()
         # Should not crash even if no yesterday data
 
-    def test_cache_hit_rate_zero_total(self, tmp_path):
+    @staticmethod
+    def test_cache_hit_rate_zero_total(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1464,7 +1597,8 @@ class TestMetricsGaps:
         rate = tracker.get_cache_hit_rate()
         assert rate == 0.0
 
-    def test_aggregate_already_aggregated(self, tmp_path):
+    @staticmethod
+    def test_aggregate_already_aggregated(tmp_path):
         import sqlite3
 
         from src.metrics import MetricsTracker
@@ -1483,7 +1617,8 @@ class TestMetricsGaps:
         # Second aggregation should skip (not crash)
         tracker.aggregate_daily_stats()
 
-    def test_get_total_requests(self, tmp_path):
+    @staticmethod
+    def test_get_total_requests(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1492,7 +1627,8 @@ class TestMetricsGaps:
         total = tracker.get_total_requests()
         assert total == 1
 
-    def test_get_avg_response_time(self, tmp_path):
+    @staticmethod
+    def test_get_avg_response_time(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1501,7 +1637,8 @@ class TestMetricsGaps:
         avg = tracker.get_avg_response_time()
         assert avg == 100.0
 
-    def test_get_popular_sizes(self, tmp_path):
+    @staticmethod
+    def test_get_popular_sizes(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1511,7 +1648,8 @@ class TestMetricsGaps:
         # Just check it returns something
         assert isinstance(sizes, list)
 
-    def test_get_popular_categories(self, tmp_path):
+    @staticmethod
+    def test_get_popular_categories(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1521,7 +1659,8 @@ class TestMetricsGaps:
         # Just check it returns something
         assert isinstance(categories, list)
 
-    def test_get_popular_formats(self, tmp_path):
+    @staticmethod
+    def test_get_popular_formats(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1531,7 +1670,8 @@ class TestMetricsGaps:
         # Just check it returns something
         assert isinstance(formats, list)
 
-    def test_get_requests_by_endpoint(self, tmp_path):
+    @staticmethod
+    def test_get_requests_by_endpoint(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1540,7 +1680,8 @@ class TestMetricsGaps:
         endpoints = tracker.get_requests_by_endpoint()
         assert isinstance(endpoints, list)
 
-    def test_get_requests_by_status(self, tmp_path):
+    @staticmethod
+    def test_get_requests_by_status(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1549,7 +1690,8 @@ class TestMetricsGaps:
         statuses = tracker.get_requests_by_status()
         assert isinstance(statuses, list)
 
-    def test_get_stats_summary(self, tmp_path):
+    @staticmethod
+    def test_get_stats_summary(tmp_path):
         from src.metrics import MetricsTracker
 
         db_path = tmp_path / "metrics.db"
@@ -1564,7 +1706,8 @@ class TestMetricsGaps:
 
 
 class TestSeedGaps:
-    def test_font_fallback(self, tmp_path):
+    @staticmethod
+    def test_font_fallback(tmp_path):
         from PIL import Image, ImageFont
 
         from src.seed import _add_sample_text
@@ -1578,7 +1721,8 @@ class TestSeedGaps:
             result = _add_sample_text(img, "Test")
         assert result is not None
 
-    def test_random_gradient(self):
+    @staticmethod
+    def test_random_gradient():
         from PIL import Image
 
         from src.seed import _random_gradient
@@ -1587,7 +1731,8 @@ class TestSeedGaps:
         assert isinstance(img, Image.Image)
         assert img.size == (100, 100)
 
-    def test_seed_if_not_empty(self, tmp_path):
+    @staticmethod
+    def test_seed_if_not_empty(tmp_path):
         from src.seed import seed_images
 
         # Create a file so directory is not empty
@@ -1596,7 +1741,8 @@ class TestSeedGaps:
         # Should not add new files since directory is not empty
         assert len(list(tmp_path.iterdir())) == 1
 
-    def test_seed_empty_directory(self, tmp_path):
+    @staticmethod
+    def test_seed_empty_directory(tmp_path):
         from src.seed import seed_images
 
         # Seed an empty directory
@@ -1609,25 +1755,29 @@ class TestSeedGaps:
 
 
 class TestConfigGaps:
-    def test_bind_host_with_port(self):
+    @staticmethod
+    def test_bind_host_with_port():
         from src.config import Settings
 
         settings = Settings(host="127.0.0.1:8000", dir="/tmp")
         assert settings.bind_host == "127.0.0.1"
 
-    def test_bind_host_without_port(self):
+    @staticmethod
+    def test_bind_host_without_port():
         from src.config import Settings
 
         settings = Settings(host="127.0.0.1", dir="/tmp")
         assert settings.bind_host == "127.0.0.1"
 
-    def test_bind_port_with_port(self):
+    @staticmethod
+    def test_bind_port_with_port():
         from src.config import Settings
 
         settings = Settings(host="127.0.0.1:8000", dir="/tmp")
         assert settings.bind_port == 8000
 
-    def test_bind_port_without_port(self):
+    @staticmethod
+    def test_bind_port_without_port():
         from src.config import Settings
 
         settings = Settings(host="127.0.0.1", dir="/tmp")

@@ -10,7 +10,8 @@ from src.main import CacheCleaner, _cache_path
 
 
 class TestCacheHashDeterminism:
-    def test_same_inputs_produce_same_key(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_same_inputs_produce_same_key(test_images_dir, monkeypatch):
         """Identical params and image must yield the same cache path."""
         from src.config import Settings
 
@@ -23,7 +24,8 @@ class TestCacheHashDeterminism:
         path2 = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop")
         assert path1 == path2
 
-    def test_different_params_produce_different_keys(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_different_params_produce_different_keys(test_images_dir, monkeypatch):
         """Changing any param must produce a different cache path."""
         from src.config import Settings
 
@@ -40,7 +42,8 @@ class TestCacheHashDeterminism:
         assert _cache_path(entry, 500, 500, "jpeg", False, 0, "hello", "crop") != base
         assert _cache_path(entry, 500, 500, "jpeg", False, 0, "", "scale") != base
 
-    def test_border_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_border_changes_hash(test_images_dir, monkeypatch):
         from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
@@ -52,7 +55,8 @@ class TestCacheHashDeterminism:
         with_border = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop", border="5,ff0000")
         assert base != with_border
 
-    def test_padding_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_padding_changes_hash(test_images_dir, monkeypatch):
         from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
@@ -64,7 +68,8 @@ class TestCacheHashDeterminism:
         with_padding = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop", padding=10)
         assert base != with_padding
 
-    def test_noise_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_noise_changes_hash(test_images_dir, monkeypatch):
         from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
@@ -76,7 +81,8 @@ class TestCacheHashDeterminism:
         with_noise = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop", noise=10)
         assert base != with_noise
 
-    def test_pixelate_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_pixelate_changes_hash(test_images_dir, monkeypatch):
         from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
@@ -88,7 +94,8 @@ class TestCacheHashDeterminism:
         with_pixelate = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop", pixelate=5)
         assert base != with_pixelate
 
-    def test_quality_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_quality_changes_hash(test_images_dir, monkeypatch):
         from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
@@ -100,7 +107,8 @@ class TestCacheHashDeterminism:
         with_quality = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop", quality=50)
         assert base != with_quality
 
-    def test_lqip_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_lqip_changes_hash(test_images_dir, monkeypatch):
         from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
@@ -112,7 +120,8 @@ class TestCacheHashDeterminism:
         with_lqip = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop", lqip=True)
         assert base != with_lqip
 
-    def test_watermark_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_watermark_changes_hash(test_images_dir, monkeypatch):
         from src.config import Settings
 
         monkeypatch.setattr("src.main.settings", Settings(dir=str(test_images_dir), cache=True))
@@ -140,7 +149,8 @@ class TestCacheHashDeterminism:
         )
         assert base != with_watermark
 
-    def test_source_mtime_changes_hash(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_source_mtime_changes_hash(test_images_dir, monkeypatch):
         """Changing the source image mtime must invalidate the cache key."""
         from src.config import Settings
 
@@ -158,7 +168,8 @@ class TestCacheHashDeterminism:
         path2 = _cache_path(entry, 500, 500, "jpeg", False, 0, "", "crop")
         assert path1 != path2
 
-    def test_s3_key_in_hash_no_local_path(self, test_images_dir, monkeypatch):
+    @staticmethod
+    def test_s3_key_in_hash_no_local_path(test_images_dir, monkeypatch):
         """S3 entries use s3_key in the hash instead of source_mtime."""
         from src.config import Settings
 
@@ -177,7 +188,8 @@ class TestCacheHashDeterminism:
 
 
 class TestCacheCleaner:
-    def test_removes_old_files(self, tmp_path: Path):
+    @staticmethod
+    def test_removes_old_files(tmp_path: Path):
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
         sub = cache_dir / "ab"
@@ -200,7 +212,8 @@ class TestCacheCleaner:
         assert not old_file.exists()
         assert new_file.exists()
 
-    def test_keeps_all_files_when_ttl_zero(self, tmp_path: Path):
+    @staticmethod
+    def test_keeps_all_files_when_ttl_zero(tmp_path: Path):
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
         sub = cache_dir / "ab"
@@ -218,7 +231,8 @@ class TestCacheCleaner:
 
         assert old_file.exists()
 
-    def test_removes_empty_subdirs(self, tmp_path: Path):
+    @staticmethod
+    def test_removes_empty_subdirs(tmp_path: Path):
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
         sub = cache_dir / "ab"
@@ -236,7 +250,8 @@ class TestCacheCleaner:
 
         assert not sub.exists()
 
-    def test_logs_removed_count(self, tmp_path: Path, caplog):
+    @staticmethod
+    def test_logs_removed_count(tmp_path: Path, caplog):
         cache_dir = tmp_path / "cache"
         cache_dir.mkdir()
         sub = cache_dir / "ab"
@@ -287,7 +302,8 @@ class _TestSettings:
 
 
 class TestEndToEndCache:
-    def test_cache_path_creates_flat_structure(self, test_images_dir, monkeypatch, tmp_path):
+    @staticmethod
+    def test_cache_path_creates_flat_structure(test_images_dir, monkeypatch, tmp_path):
         """Test that cache path creates flat structure with 2-char prefix."""
         from src.image_manager import ImageEntry
 
@@ -308,7 +324,8 @@ class TestEndToEndCache:
         assert cache_path.name.endswith(".jpeg")
         assert len(cache_path.stem) == 64  # SHA256 hex length
 
-    def test_cache_path_is_deterministic(self, test_images_dir, monkeypatch, tmp_path):
+    @staticmethod
+    def test_cache_path_is_deterministic(test_images_dir, monkeypatch, tmp_path):
         """Same inputs should produce same cache path."""
         from src.image_manager import ImageEntry
 
