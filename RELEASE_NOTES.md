@@ -40,6 +40,10 @@
 
 ### 🔧 Improvements
 
+#### Code Quality
+- **DeepSource cleanup** — resolved 9 analyzer issues (PYL-W1203, W0612, F821, W0621, W0622, PTC-W0010, R1716, BAN-B607, PTC-W1003) across production and test code
+- **Formatting pipeline** — added `format.sh` with `ruff format` and configured `pyproject.toml`
+
 #### Infrastructure
 - **Fixed `docker-publish.sh`** - Added explicit tag argument support, proper version sorting, and corrected `docker build` argument order to reliably update the `latest` tag on Docker Hub.
 

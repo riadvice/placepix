@@ -25,7 +25,7 @@ def test_log_request(tmp_path: Path):
         response_time_ms=15.5,
         width=500,
         height=500,
-        format="jpeg",
+        image_format="jpeg",
         cache_hit=False,
     )
     assert tracker.get_total_requests() == 1
@@ -87,9 +87,9 @@ def test_popular_formats(tmp_path: Path):
     """Test popular formats tracking."""
     tracker = MetricsTracker(tmp_path / "test.db")
 
-    tracker.log_request("/500/500.webp", "GET", 200, 10.0, format="webp")
-    tracker.log_request("/500/500.webp", "GET", 200, 10.0, format="webp")
-    tracker.log_request("/500/500.png", "GET", 200, 10.0, format="png")
+    tracker.log_request("/500/500.webp", "GET", 200, 10.0, image_format="webp")
+    tracker.log_request("/500/500.webp", "GET", 200, 10.0, image_format="webp")
+    tracker.log_request("/500/500.png", "GET", 200, 10.0, image_format="png")
 
     formats = tracker.get_popular_formats()
     assert len(formats) == 2

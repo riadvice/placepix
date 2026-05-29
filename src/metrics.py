@@ -61,7 +61,7 @@ class MetricsTracker:
         category: str | None = None,
         width: int | None = None,
         height: int | None = None,
-        format: str | None = None,
+        image_format: str | None = None,
         cache_hit: bool = False,
     ) -> None:
         """Log a single request."""
@@ -82,7 +82,7 @@ class MetricsTracker:
                     category,
                     width,
                     height,
-                    format,
+                    image_format,
                     cache_hit,
                 ),
             )

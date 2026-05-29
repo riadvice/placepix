@@ -68,12 +68,17 @@ def _get_git_version() -> str:
     if env_version and env_version != "dev":
         return env_version
     try:
+        import shutil
         import subprocess
+
+        git_path = shutil.which("git")
+        if git_path is None:
+            return "dev"
 
         # git describe gives: <tag>-<commits-since-tag>-g<short-hash>
         # e.g. 0.9-87-g929a1dad — falls back to just short hash if no tags
         result = subprocess.run(
-            ["git", "describe", "--tags", "--always"],
+            [git_path, "describe", "--tags", "--always"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -592,7 +597,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
                 category=category,
                 width=width,
                 height=height,
-                format=format_ext,
+                image_format=format_ext,
                 cache_hit=cache_hit,
             )
         except Exception:
@@ -808,7 +813,8 @@ def _write_cache(cache_path: Path, data: bytes) -> None:
 
 def _generate_etag(content: bytes) -> str:
     """Generate ETag from content hash."""
-    return f'"{hashlib.md5(content).hexdigest()}"'
+    hasher = hashlib.md5(content, usedforsecurity=False)
+    return f'"{hasher.hexdigest()}"'
 
 
 def _get_last_modified(path: Path) -> str:
@@ -2349,18 +2355,18 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
     return {}, text
 
 
-def _split_sections(html: str) -> list[dict]:
+def _split_sections(html_text: str) -> list[dict]:
     """Split rendered HTML into sections by <h2> tags."""
     # Find all <h2> positions
     h2_pattern = re.compile(r"<h2>(.*?)</h2>", re.IGNORECASE)
-    matches = list(h2_pattern.finditer(html))
+    matches = list(h2_pattern.finditer(html_text))
 
     sections = []
     for i, match in enumerate(matches):
         heading = match.group(1)
         start = match.end()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(html)
-        section_html = html[start:end].strip()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(html_text)
+        section_html = html_text[start:end].strip()
         sections.append({"heading": heading, "html": section_html})
 
     return sections

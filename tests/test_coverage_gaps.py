@@ -1605,7 +1605,7 @@ class TestMetricsGaps:
 
         yesterday = date.today() - timedelta(days=1)
         # Log a request
-        tracker.log_request("/test", "GET", 200, 100, 500, 500, "jpeg", False)
+        tracker.log_request("/test", "GET", 200, 100)
         with sqlite3.connect(str(db_path)) as conn:
             conn.execute("UPDATE requests SET timestamp = ?", (yesterday.isoformat(),))
         # First aggregation
@@ -1639,7 +1639,7 @@ class TestMetricsGaps:
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(str(db_path))
-        tracker.log_request("/test", "GET", 200, 100, 500, 500, "jpeg", False)
+        tracker.log_request("/test", "GET", 200, 100, width=500, height=500)
         sizes = tracker.get_popular_sizes(limit=10)
         # Just check it returns something
         assert isinstance(sizes, list)
@@ -1650,7 +1650,7 @@ class TestMetricsGaps:
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(str(db_path))
-        tracker.log_request("/test", "GET", 200, 100, 500, 500, "jpeg", False, "nature")
+        tracker.log_request("/test", "GET", 200, 100, category="nature")
         categories = tracker.get_popular_categories(limit=10)
         # Just check it returns something
         assert isinstance(categories, list)
@@ -1661,7 +1661,7 @@ class TestMetricsGaps:
 
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(str(db_path))
-        tracker.log_request("/test", "GET", 200, 100, 500, 500, "jpeg", False)
+        tracker.log_request("/test", "GET", 200, 100, image_format="jpeg")
         formats = tracker.get_popular_formats(limit=10)
         # Just check it returns something
         assert isinstance(formats, list)

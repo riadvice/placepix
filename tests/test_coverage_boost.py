@@ -116,10 +116,10 @@ class TestAdminCLI:
         db_path = tmp_path / "metrics.db"
         tracker = MetricsTracker(db_path)
         tracker.log_request(
-            "/500/500", "GET", 200, 10.0, width=500, height=500, cache_hit=True, format="webp"
+            "/500/500", "GET", 200, 10.0, width=500, height=500, cache_hit=True, image_format="webp"
         )
         tracker.log_request(
-            "/600/600", "GET", 200, 5.0, width=600, height=600, cache_hit=True, format="jpeg"
+            "/600/600", "GET", 200, 5.0, width=600, height=600, cache_hit=True, image_format="jpeg"
         )
 
         monkeypatch.setattr("src.admin.MetricsTracker", lambda: tracker)

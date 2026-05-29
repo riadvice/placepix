@@ -363,37 +363,39 @@ class ImageManager:
             lock_file.touch(exist_ok=True)
 
             # First try to acquire lock with non-blocking mode
-            f = open(lock_file, "w")
-            try:
-                fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                # Write our PID to the lock file
-                f.write(str(os.getpid()))
-                f.flush()
-                self._leader_lock_file = f
-                logger.info("Worker %s acquired leader lock", os.getpid())
-                # Register cleanup on exit
-                atexit.register(self._release_leader_lock)
-                return True
-            except (IOError, BlockingIOError):
-                f.close()
-                # Lock is held by another process
-                # Check if it's a stale lock (process doesn't exist or lock is too old)
+            with open(lock_file, "w") as f:
                 try:
-                    stat = lock_file.stat()
-                    lock_age = time.time() - stat.st_mtime
-                    # If lock is older than 60 seconds, consider it stale
-                    if lock_age > 60:
-                        logger.warning(
-                            "Found stale leader lock (age: %.1fs), attempting to break it",
-                            lock_age,
-                        )
-                        # Try to break the stale lock by acquiring it
-                        f2 = open(lock_file, "w")
+                    fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    # Write our PID to the lock file
+                    f.write(str(os.getpid()))
+                    f.flush()
+                    # Dup fd so the lock survives after with closes f
+                    self._leader_lock_file = os.fdopen(os.dup(f.fileno()), "w")
+                    logger.info("Worker %s acquired leader lock", os.getpid())
+                    # Register cleanup on exit
+                    atexit.register(self._release_leader_lock)
+                    return True
+                except (IOError, BlockingIOError):
+                    pass
+            # Lock is held by another process
+            # Check if it's a stale lock (process doesn't exist or lock is too old)
+            try:
+                stat = lock_file.stat()
+                lock_age = time.time() - stat.st_mtime
+                # If lock is older than 60 seconds, consider it stale
+                if lock_age > 60:
+                    logger.warning(
+                        "Found stale leader lock (age: %.1fs), attempting to break it",
+                        lock_age,
+                    )
+                    # Try to break the stale lock by acquiring it
+                    with open(lock_file, "w") as f2:
                         try:
                             fcntl.flock(f2.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                             f2.write(str(os.getpid()))
                             f2.flush()
-                            self._leader_lock_file = f2
+                            # Dup fd so the lock survives after with closes f2
+                            self._leader_lock_file = os.fdopen(os.dup(f2.fileno()), "w")
                             logger.info(
                                 "Worker %s acquired leader lock after breaking stale lock",
                                 os.getpid(),
@@ -401,16 +403,16 @@ class ImageManager:
                             atexit.register(self._release_leader_lock)
                             return True
                         except (IOError, BlockingIOError):
-                            f2.close()
-                            logger.debug("Worker %s could not break stale lock", os.getpid())
-                except Exception as ex:
-                    logger.debug("Error checking stale lock: %s", ex)
+                            pass
+                    logger.debug("Worker %s could not break stale lock", os.getpid())
+            except Exception as ex:
+                logger.debug("Error checking stale lock: %s", ex)
 
-                logger.debug(
-                    "Worker %s did not acquire leader lock (held by another process)",
-                    os.getpid(),
-                )
-                return False
+            logger.debug(
+                "Worker %s did not acquire leader lock (held by another process)",
+                os.getpid(),
+            )
+            return False
         except Exception as e:
             logger.warning("Failed to acquire leader lock: %s", e)
             return False
@@ -948,7 +950,7 @@ class ImageManager:
         h *= 60
         # Brown: dark, earthy tones in orange/red range
         if total < 380 and (h < 45 or h >= 15):
-            if h < 45 and h >= 15:
+            if 15 <= h < 45:
                 return "Brown"
         if h < 15 or h >= 345:
             return "Red"
