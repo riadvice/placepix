@@ -318,7 +318,8 @@ Hasilkan avatar deterministik dari nama atau email apa pun. PlacePix mendukung d
 #### Avatar Huruf (`type=letter`)
 
 - `circle` — crop to a circle shape
-- `border={width},{color}` — add a border
+- `border={width}` — tambahkan batas
+- `border_color={hex}` — warna batas
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
@@ -338,7 +339,7 @@ Hasilkan avatar deterministik dari nama atau email apa pun. PlacePix mendukung d
 /avatar/128/John+Doe
 
 # Circle letter avatar with custom border
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel

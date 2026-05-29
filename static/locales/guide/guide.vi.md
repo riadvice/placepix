@@ -318,7 +318,8 @@ Tạo avatar xác định từ bất kỳ tên hoặc email nào. PlacePix hỗ 
 #### Avatar chữ cái (`type=letter`)
 
 - `circle` — crop to a circle shape
-- `border={width},{color}` — add a border
+- `border={width}` — thêm viền
+- `border_color={hex}` — màu viền
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
@@ -338,7 +339,7 @@ Tạo avatar xác định từ bất kỳ tên hoặc email nào. PlacePix hỗ 
 /avatar/128/John+Doe
 
 # Circle letter avatar with custom border
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel

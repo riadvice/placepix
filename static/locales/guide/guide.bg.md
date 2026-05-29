@@ -340,7 +340,8 @@ PlacePix чете размерите на изображенията от заг
 #### Буквен аватар (`type=letter`)
 
 - `circle` — crop to a circle shape
-- `border={width},{color}` — add a border
+- `border={width}` — добавяне на рамка
+- `border_color={hex}` — цвят на рамката
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
@@ -360,7 +361,7 @@ PlacePix чете размерите на изображенията от заг
 /avatar/128/John+Doe
 
 # Circle letter avatar with custom border
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel

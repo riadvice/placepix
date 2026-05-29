@@ -338,7 +338,8 @@ PlacePix는 초기 스캔 중(로컬 파일)과 백그라운드 메타데이터 
 #### 문자 아바타 (`type=letter`)
 
 - `circle` — crop to a circle shape
-- `border={width},{color}` — add a border
+- `border={width}` — 테두리 추가
+- `border_color={hex}` — 테두리 색상
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
@@ -358,7 +359,7 @@ PlacePix는 초기 스캔 중(로컬 파일)과 백그라운드 메타데이터 
 /avatar/128/John+Doe
 
 # Circle letter avatar with custom border
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel

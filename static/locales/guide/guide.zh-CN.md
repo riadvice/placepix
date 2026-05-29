@@ -340,7 +340,8 @@ PlacePix 中的每张图像都会被扫描其前 3 种主导色。您可以通�
 #### 字母头像 (`type=letter`)
 
 - `circle` — crop to a circle shape
-- `border={width},{color}` — add a border
+- `border={width}` — 添加边框
+- `border_color={hex}` — 边框颜色
 - `bg={hex}` — override background color
 - `fg={hex}` — override text/foreground color
 - `single=true` — use only the first letter
@@ -360,7 +361,7 @@ PlacePix 中的每张图像都会被扫描其前 3 种主导色。您可以通�
 /avatar/128/John+Doe
 
 # Circle letter avatar with custom border
-/avatar/128/John+Doe?circle=true&border=2,ffffff
+/avatar/128/John+Doe?circle=true&border=2&border_color=ffffff
 
 # Single initial, pastel palette
 /avatar/64/Alice?single=true&palette=pastel
