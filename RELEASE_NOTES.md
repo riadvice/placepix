@@ -31,6 +31,10 @@
 - **New `/guide` page** — multilingual developer documentation with E-E-A-T signals, `TechArticle` structured data, and server-side rendering for 30+ languages with language switcher
 
 
+### 🐞 Bug Fixes
+
+- **Avatar PNG fixes** — add transparency (RGBA), centered text with `anchor="mm"`, and fixed edge-quality drawing offsets
+
 ### 🔧 Improvements
 
 #### Infrastructure
