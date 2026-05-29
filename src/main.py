@@ -363,6 +363,14 @@ if manager._is_leader and _APSCHEDULER_AVAILABLE:
         "date",
         run_date=datetime.now() + timedelta(seconds=5),
     )
+
+    # One-time dimension scan at startup (slight delay after color scan)
+    logger.info("Scheduling one-time background dimension scan")
+    _scheduler.add_job(
+        manager.scan_dimensions,
+        "date",
+        run_date=datetime.now() + timedelta(seconds=10),
+    )
     _scheduler.start()
 
 # Upload directory writability check

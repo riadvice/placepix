@@ -116,6 +116,7 @@ class ImageManager:
         self._colors: dict[int, list[str]] = {}
         self._dimensions: dict[int, tuple[int, int]] = self._load_dimensions()
         self._scanning_colors = False
+        self._scanning_dimensions = False
         self._is_leader = self._acquire_leader_lock()
         self._rescan()
 
@@ -597,6 +598,84 @@ class ImageManager:
         finally:
             self._scanning_colors = False
 
+    def scan_dimensions(self) -> None:
+        """Extract dimensions for images that don't have them yet."""
+        if self._scanning_dimensions:
+            return
+        self._scanning_dimensions = True
+        try:
+            missing_entries: list[ImageEntry] = []
+            for cat in self._categories.values():
+                for entry in cat.entries:
+                    if entry.id not in self._dimensions:
+                        missing_entries.append(entry)
+
+            if not missing_entries:
+                logger.info("Dimension scan: all images already have dimensions")
+                return
+
+            logger.info(f"Dimension scan: extracting dimensions for {len(missing_entries)} images")
+
+            # Initialize S3 client if needed for S3 images
+            s3_client = None
+            has_s3_images = any(e.s3_key for e in missing_entries)
+            if has_s3_images and settings.s3_enabled:
+                try:
+                    s3_client = boto3.client(
+                        "s3",
+                        endpoint_url=settings.s3_endpoint,
+                        aws_access_key_id=settings.s3_access_key,
+                        aws_secret_access_key=settings.s3_secret_key,
+                        region_name=settings.s3_region or "auto",
+                        config=Config(signature_version="s3v4"),
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to initialize S3 client for dimension scan: {e}")
+
+            total = len(missing_entries)
+            last_logged_percent = 0
+
+            for i, entry in enumerate(missing_entries, 1):
+                source = entry.path if entry.path else f"S3:{entry.s3_key}"
+                logger.info(f"Dimension scan [{i}/{total}]: processing {entry.filename} from {source}")
+                dims: tuple[int, int] | None = None
+
+                if entry.path is not None:
+                    try:
+                        with Image.open(entry.path) as img:
+                            dims = img.size
+                    except Exception as e:
+                        logger.warning(f"Failed to read dimensions for local file {entry.filename}: {e}")
+                elif entry.s3_key and s3_client:
+                    try:
+                        response = s3_client.get_object(Bucket=settings.s3_bucket, Key=entry.s3_key)
+                        image_data = response["Body"].read()
+                        with Image.open(io.BytesIO(image_data)) as img:
+                            dims = img.size
+                    except Exception as e:
+                        logger.warning(f"Failed to read dimensions for S3 image {entry.s3_key}: {e}")
+
+                if dims:
+                    self._dimensions[entry.id] = dims
+                    logger.info(f"Dimension scan [{i}/{total}]: {entry.filename} -> {dims}")
+                else:
+                    logger.warning(f"Dimension scan [{i}/{total}]: {entry.filename} -> no dimensions extracted")
+
+                # Log progress every 5%
+                percent = int((i / total) * 100)
+                if percent >= last_logged_percent + 5 or i == total:
+                    logger.info(f"Dimension scan progress: {percent}% ({i}/{total} images)")
+                    last_logged_percent = percent
+
+                # Save dimensions periodically
+                if i % 10 == 0 or i == total:
+                    self._save_dimensions()
+
+            self._save_dimensions()
+            logger.info(f"Dimension scan complete: {len(missing_entries)} images processed")
+        finally:
+            self._scanning_dimensions = False
+
     def _scan_s3(self, manifest: dict[str, int], next_id: int) -> tuple[dict[str, Category], int]:
         """Scan S3 bucket for images and return categories."""
         new_categories: dict[str, Category] = {}
@@ -655,26 +734,14 @@ class ImageManager:
                             entries=[],
                         )
 
-                    entry_id = manifest[manifest_key]
                     new_categories[cat_name].entries.append(ImageEntry(
                         path=None,
                         filename=filename,
                         category=cat_name,
-                        id=entry_id,
+                        id=manifest[manifest_key],
                         s3_key=key,
                         ai=cat_name.startswith("ai-generated/"),
                     ))
-
-                    # Extract dimensions if not already cached
-                    if entry_id not in self._dimensions:
-                        try:
-                            response = client.get_object(Bucket=settings.s3_bucket, Key=key)
-                            image_data = response["Body"].read()
-                            with Image.open(io.BytesIO(image_data)) as img:
-                                self._dimensions[entry_id] = img.size
-                                logger.debug(f"Dimensions extracted (S3): {filename} -> {img.size}")
-                        except Exception as e:
-                            logger.warning(f"Failed to read dimensions for S3 image {key}: {e}")
         except Exception as e:
             logger.error(f"S3 scan failed: {e}")
             import traceback
