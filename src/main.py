@@ -2204,8 +2204,8 @@ async def image_info(category: str, filename: str) -> JSONResponse:
     if entry is None:
         raise HTTPException(status_code=404, detail="image not found")
 
-    from PIL import Image
-
+    source = _resolve_image_source(entry)
+    with Image.open(source) as img:
         width, height = img.size
         fmt = img.format.lower() if img.format else "unknown"
 
