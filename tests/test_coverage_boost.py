@@ -263,13 +263,6 @@ class TestImageProcessorExceptions:
 
 
 class TestImageManagerBoto3:
-    def test_boto3_unavailable(self, monkeypatch):
-        """Test boto3 unavailable handling."""
-        from src import image_manager
-
-        monkeypatch.setattr("src.image_manager._BOTO3_AVAILABLE", False)
-        assert not image_manager._BOTO3_AVAILABLE
-
     def test_hex_to_rgb(self):
         """Test hex to RGB conversion."""
         from src.image_manager import _hex_to_rgb
@@ -850,7 +843,7 @@ class TestImageManagerEdgeCases:
         seed_dir = tmp_path / "seed"
         seed_dir.mkdir()
 
-        monkeypatch.setattr("src.image_manager._BOTO3_AVAILABLE", False)
+        # boto3 is now a required dependency
         test_settings = Settings(dir=str(images_dir), seed_dir_str=str(seed_dir))
         monkeypatch.setattr("src.image_manager.settings", test_settings)
         monkeypatch.setattr("src.config.settings", test_settings)
@@ -946,13 +939,6 @@ class TestMainEntryPoint:
         from src.main import run
 
         assert callable(run)
-
-    def test_boto3_unavailable(self, monkeypatch):
-        """Test boto3 unavailable handling in main."""
-        from src import main
-
-        monkeypatch.setattr("src.main._BOTO3_AVAILABLE", False)
-        assert not main._BOTO3_AVAILABLE
 
     def test_apscheduler_unavailable(self, monkeypatch):
         """Test apscheduler unavailable handling in main."""

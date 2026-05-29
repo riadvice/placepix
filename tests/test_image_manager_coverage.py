@@ -632,16 +632,6 @@ def test_extract_dominant_colors_palette_exception():
         path.unlink()
 
 
-def test_boto3_import_failure(monkeypatch):
-    """Test when boto3 import fails."""
-    import src.image_manager
-
-    original_boto3 = src.image_manager._BOTO3_AVAILABLE
-    monkeypatch.setattr(src.image_manager, "_BOTO3_AVAILABLE", False)
-    assert src.image_manager._BOTO3_AVAILABLE == False
-    monkeypatch.setattr(src.image_manager, "_BOTO3_AVAILABLE", original_boto3)
-
-
 def test_release_leader_lock_no_lock_file(monkeypatch):
     """Test _release_leader_lock when no lock file exists."""
     from src.config import Settings

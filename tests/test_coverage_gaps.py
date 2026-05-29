@@ -546,15 +546,6 @@ class TestImageManagerGaps:
             entry2 = manager.pick(category=cat_name, seed="test")
             assert entry1.id == entry2.id
 
-    def test_boto3_import_exception_in_manager(self, test_images_dir, monkeypatch):
-        # Test that image_manager handles boto3 import exception
-        monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
-        with patch("src.image_manager.boto3", side_effect=ImportError("boto3 not available")):
-            from src.image_manager import _BOTO3_AVAILABLE
-
-            # The import exception should set _BOTO3_AVAILABLE to False
-            assert isinstance(_BOTO3_AVAILABLE, bool)
-
     def test_processor_avif_unavailable(self, test_images_dir):
         from src.image_processor import ImageProcessor
 
@@ -906,15 +897,6 @@ class TestImageManagerGaps:
         )
         # May succeed or fail depending on permissions
         assert response.status_code in [200, 400, 422]
-
-    def test_boto3_import_exception(self, test_images_dir, monkeypatch):
-        # Test that the app handles boto3 import exception gracefully
-        monkeypatch.setattr("src.image_manager.settings", Settings(dir=str(test_images_dir)))
-        with patch("src.main.boto3", side_effect=ImportError("boto3 not available")):
-            from src.main import _BOTO3_AVAILABLE
-
-            # The import exception should set _BOTO3_AVAILABLE to False
-            assert isinstance(_BOTO3_AVAILABLE, bool)
 
     def test_color_swatches_endpoint(self, test_images_dir, monkeypatch):
         from src.main import app
@@ -1685,33 +1667,6 @@ class TestConfigGaps:
 # ── Import Exception Tests (subprocess) ───────────────────────────
 
 
-def test_boto3_import_failure():
-    """Test that image_manager handles missing boto3 gracefully."""
-    code = """
-import sys
-from unittest.mock import patch
-
-# Remove boto3 from modules and mock __import__
-for mod in list(sys.modules.keys()):
-    if mod.startswith('boto3') or mod.startswith('botocore'):
-        del sys.modules[mod]
-
-real_import = __builtins__.__import__
-
-def bad_import(name, *args, **kwargs):
-    if name == 'boto3' or name.startswith('botocore'):
-        raise ImportError("No module named boto3")
-    return real_import(name, *args, **kwargs)
-
-with patch.object(__builtins__, '__import__', bad_import):
-    import src.image_manager as im
-
-assert im._BOTO3_AVAILABLE is False
-"""
-    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
 def test_pillow_avif_import_failure():
     """Test that image_processor handles missing pillow_avif gracefully."""
     code = """
@@ -1764,27 +1719,3 @@ assert ip._OPENCV_AVAILABLE is False
     assert result.returncode == 0, f"stderr: {result.stderr}"
 
 
-def test_main_boto3_import_failure():
-    """Test that main handles missing boto3 gracefully."""
-    code = """
-import sys
-from unittest.mock import patch
-
-for mod in list(sys.modules.keys()):
-    if mod.startswith('boto3') or mod.startswith('botocore'):
-        del sys.modules[mod]
-
-real_import = __builtins__.__import__
-
-def bad_import(name, *args, **kwargs):
-    if name == 'boto3' or name.startswith('botocore'):
-        raise ImportError("No module named boto3")
-    return real_import(name, *args, **kwargs)
-
-with patch.object(__builtins__, '__import__', bad_import):
-    import src.main as m
-
-assert m._BOTO3_AVAILABLE is False
-"""
-    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
