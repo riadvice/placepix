@@ -137,6 +137,3 @@ sudo apt-get install libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
 ## License
 
 MIT — see [LICENSE](LICENSE).
-
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Friadvice%2Fplacepix.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Friadvice%2Fplacepix?ref=badge_large)
