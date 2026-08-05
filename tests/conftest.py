@@ -7,7 +7,7 @@ from PIL import Image
 import pytest
 
 from src.config import Settings
-from src.image_manager import ImageManager
+import src.main
 from src.main import app
 
 
@@ -35,13 +35,17 @@ def test_images_dir(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def test_settings(test_images_dir: Path, tmp_path: Path) -> Settings:
-    """Create test settings."""
+    """Create test settings using isolated temp directories."""
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
     cache_dir = tmp_path / "cache"
     cache_dir.mkdir()
 
     return Settings(
         host="127.0.0.1:3000",
-        dir=str(test_images_dir),
+        dir=str(data_dir),
+        seed_dir_str=str(test_images_dir),
+        cache_dir=str(cache_dir),
         cache=True,
         cdn="",
         min_width=8,
@@ -49,6 +53,7 @@ def test_settings(test_images_dir: Path, tmp_path: Path) -> Settings:
         max_width=2400,
         max_height=2400,
         upload_enabled=True,
+        seed_enabled=False,
     )
 
 
@@ -59,9 +64,8 @@ def client(test_settings: Settings, monkeypatch) -> TestClient:
     monkeypatch.setattr("src.main.settings", test_settings)
     monkeypatch.setattr("src.image_manager.settings", test_settings)
 
-    # Reinitialize manager with test settings
-
-    manager = ImageManager()
-    monkeypatch.setattr("src.main.manager", manager)
+    # Rescan the existing in-place manager so both the app and test references
+    # (e.g. `from src.main import manager`) use the same temporary image set.
+    src.main.manager.rescan()
 
     return TestClient(app)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     workers: int = Field(default=2)
     dir: str = Field(default="./data", alias="data_dir")
     seed_dir_str: str = Field(default="./images", alias="images_dir")
+    cache_dir_str: str = Field(default=".cache", alias="cache_dir")
     cache: bool = Field(default=True)
     cdn: str = Field(default="")
     min_width: int = Field(default=8)
@@ -87,6 +88,16 @@ class Settings(BaseSettings):
     # Custom fonts directory (optional, for text overlays)
     font_dir: str = Field(default="")
 
+    @model_validator(mode="after")
+    def sync_image_dir(self) -> "Settings":
+        """When no image directory is specified, default to the data directory.
+
+        This keeps tests that only set `dir` consistent with the image registry.
+        """
+        if self.seed_dir_str == "./images" and self.dir != "./data":
+            self.seed_dir_str = self.dir
+        return self
+
     @property
     def bind_host(self) -> str:
         return self.host.rsplit(":", 1)[0] if ":" in self.host else self.host
@@ -109,7 +120,7 @@ class Settings(BaseSettings):
 
     @property
     def cache_dir(self) -> Path:
-        return Path(".cache").resolve()
+        return Path(self.cache_dir_str).resolve()
 
     @property
     def font_dir_path(self) -> Path | None:

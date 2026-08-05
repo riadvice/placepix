@@ -11,6 +11,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import random
 import re
 import shutil
 import time
@@ -1112,7 +1113,15 @@ async def _serve_entry(
                 )
 
             return _build_image_response(
-                cached, output_format, entry.category, width, height, is_random, as_base64
+                cached,
+                output_format,
+                entry.category,
+                width,
+                height,
+                is_random,
+                as_base64,
+                etag=etag,
+                last_modified=last_modified,
             )
 
     # Build coalescing key
@@ -1165,8 +1174,18 @@ async def _serve_entry(
         if settings.cache and cache_path is not None:
             cached = _read_cached(cache_path)
             if cached is not None:
+                etag = _generate_etag(cached)
+                last_modified = _get_last_modified(cache_path)
                 return _build_image_response(
-                    cached, output_format, entry.category, width, height, is_random, as_base64
+                    cached,
+                    output_format,
+                    entry.category,
+                    width,
+                    height,
+                    is_random,
+                    as_base64,
+                    etag=etag,
+                    last_modified=last_modified,
                 )
         # Cache miss after waiting (evicted or error) — fall through to process ourselves
         logger.debug("Cache miss after coalescing, processing: %s", entry.filename)
@@ -1177,8 +1196,18 @@ async def _serve_entry(
             if settings.cache and cache_path is not None:
                 cached = _read_cached(cache_path)
                 if cached is not None:
+                    etag = _generate_etag(cached)
+                    last_modified = _get_last_modified(cache_path)
                     return _build_image_response(
-                        cached, output_format, entry.category, width, height, is_random, as_base64
+                        cached,
+                        output_format,
+                        entry.category,
+                        width,
+                        height,
+                        is_random,
+                        as_base64,
+                        etag=etag,
+                        last_modified=last_modified,
                     )
 
     try:
@@ -1247,7 +1276,9 @@ async def _serve_entry(
 
     # Generate cache headers for new content
     etag = _generate_etag(processed)
-    if entry.path is not None:
+    if settings.cache and cache_path is not None:
+        last_modified = _get_last_modified(cache_path)
+    elif entry.path is not None:
         last_modified = _get_last_modified(entry.path)
     else:
         last_modified = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
@@ -1329,7 +1360,7 @@ async def serve_by_id(
     blur: int = 0,
     text: str = "",
     fit: str = "crop",
-    output_format: str = "",
+    output_format: str = Query(default="", alias="format"),
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -1431,7 +1462,7 @@ async def serve_by_ratio(
     seed: str = "",
     text: str = "",
     fit: str = "crop",
-    output_format: str = "",
+    output_format: str = Query(default="", alias="format"),
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -1545,7 +1576,7 @@ async def serve_by_preset(
     seed: str = "",
     text: str = "",
     fit: str = "crop",
-    output_format: str = "",
+    output_format: str = Query(default="", alias="format"),
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -1645,6 +1676,8 @@ async def serve_by_preset(
 
 @app.get("/solid/{width:int}/{height:int}/{bg_color}")
 @app.get("/solid/{width:int}/{height:int}/{bg_color}/{fg_color}")
+@app.get("/solid/{width:int}x{height:int}/{bg_color}")
+@app.get("/solid/{width:int}x{height:int}/{bg_color}/{fg_color}")
 async def solid_color_placeholder(
     width: int,
     height: int,
@@ -1929,7 +1962,7 @@ async def serve_image(
     seed: str = "",
     text: str = "",
     fit: str = "crop",
-    output_format: str = "",
+    output_format: str = Query(default="", alias="format"),
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -2041,7 +2074,7 @@ async def serve_by_color(
     blur: int = 0,
     text: str = "",
     fit: str = "crop",
-    output_format: str = "",
+    output_format: str = Query(default="", alias="format"),
     tint: str = "",
     brightness: float = 1.0,
     contrast: float = 1.0,
@@ -2124,6 +2157,33 @@ async def serve_by_color(
         text_color=text_color,
         text_bg=text_bg,
     )
+
+
+@app.get("/random/")
+@app.head("/random/")
+@app.get("/random/{category}")
+@app.head("/random/{category}")
+async def serve_random_redirect(
+    category: str = "",
+    color: str = "",
+    width: int = 500,
+    height: int = 500,
+) -> RedirectResponse:
+    """Redirect to a random image URL."""
+    if color:
+        return RedirectResponse(
+            url=f"/color/{color}/{width}/{height}", status_code=307
+        )
+
+    if not category:
+        categories = list(manager.categories.keys())
+        if not categories:
+            raise HTTPException(status_code=404, detail="no images available")
+        category = random.choice(categories)
+    elif category not in manager.categories:
+        raise HTTPException(status_code=404, detail="category not found")
+
+    return RedirectResponse(url=f"/{width}/{height}/{category}", status_code=307)
 
 
 # ── Raw image serving ───────────────────────────────────────────────
@@ -2633,8 +2693,8 @@ async def get_blurhash(image_id: int) -> JSONResponse:
             # Encode to blurhash
             hash_str = blurhash.encode(
                 img,
-                x_comp=4,
-                y_comp=3,
+                components_x=4,
+                components_y=3,
             )
         return JSONResponse(
             {
@@ -2803,19 +2863,23 @@ async def color_palette(
 # ── Upload ────────────────────────────────────────────────────────
 @app.post("/api/upload")
 async def upload_image(
-    file: UploadFile,
+    file: UploadFile | None = None,
     category: str = Form(default=""),
 ) -> JSONResponse:
     cat_display = category or "__root"
-    logger.info("Upload request: %s to category '%s'", file.filename, cat_display)
+    logger.info("Upload request: %s to category '%s'", getattr(file, "filename", None), cat_display)
 
     if not settings.upload_enabled or not _upload_writable:
         logger.warning("Upload blocked: uploads are disabled or directory is not writable")
         raise HTTPException(status_code=403, detail="uploads are disabled")
 
+    if not file:
+        logger.warning("Upload failed: no file provided")
+        raise HTTPException(status_code=422, detail="no file provided")
+
     if not file.filename:
         logger.warning("Upload failed: no filename provided")
-        raise HTTPException(status_code=400, detail="no file provided")
+        raise HTTPException(status_code=400, detail="no filename provided")
 
     if not category:
         logger.warning("Upload blocked: category is required (root uploads are not allowed)")
@@ -2937,7 +3001,7 @@ async def ai_generate(
 async def generate_srcset(
     image_id: int,
     sizes: str = "320,640,1024,1920",
-    output_format: str = "jpeg",
+    output_format: str = Query(default="jpeg", alias="format"),
 ) -> JSONResponse:
     """Generate srcset URLs for responsive images."""
     entry = manager.get_by_id(image_id)

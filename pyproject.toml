@@ -4,34 +4,34 @@ version = "1.0.0"
 description = "A self-hosted placeholder image server inspired by lorem-server and picsum.photos"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.136.3",
-    "uvicorn[standard]>=0.48.0",
+    "fastapi>=0.141.1",
+    "uvicorn[standard]>=0.52.1",
     "jinja2>=3.1.6",
-    "python-multipart>=0.0.29",
-    "pillow>=12.2.0",
-    "pydantic-settings>=2.14.1",
+    "python-multipart>=0.0.32",
+    "pillow>=12.3.0",
+    "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
     "watchdog>=6.0.0",
     "pyyaml>=6.0.3",
-    "pillow-avif-plugin>=1.5.5",
-    "opencv-python>=4.13.0.92",
-    "numpy>=2.4.6",
-    "boto3>=1.43.14",
-    "apscheduler>=3.11.2",
+    "pillow-avif-plugin>=1.6.0",
+    "opencv-contrib-python-headless>=5.0.0.93",
+    "numpy>=2.5.1",
+    "boto3>=1.43.64",
+    "apscheduler>=3.11.3",
     "requests>=2.34.2",
     "blurhash>=1.1.5",
-    "markdown>=3.10.2",
+    "markdown>=3.10.3",
     "pygments>=2.20.0",
     "multiavatar>=1.0.3",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=9.0.3",
+    "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pytest-xdist>=3.8.0",
     "httpx>=0.28.1",
-    "ruff>=0.15.15",
+    "ruff>=0.16.1",
 ]
 
 [project.scripts]

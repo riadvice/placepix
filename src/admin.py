@@ -6,6 +6,8 @@ import sys
 # Allow running from repo root without package install
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.metrics import MetricsTracker
+
 
 def _fmt_number(n: int) -> str:
     """Format large numbers with commas."""
@@ -33,8 +35,6 @@ def _print_table(headers: list[str], rows: list[list[str]], col_widths: list[int
 
 
 def main() -> None:
-    from src.metrics import MetricsTracker
-
     tracker = MetricsTracker()
     stats = tracker.get_stats_summary()
 

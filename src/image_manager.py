@@ -423,15 +423,8 @@ class ImageManager:
             try:
                 fcntl.flock(self._leader_lock_file.fileno(), fcntl.LOCK_UN)
                 self._leader_lock_file.close()
-                try:
-                    logger.info("Worker %s released leader lock", os.getpid())
-                except Exception:
-                    pass
-            except Exception as e:
-                try:
-                    logger.warning("Failed to release leader lock: %s", e)
-                except Exception:
-                    pass
+            except Exception:
+                pass
 
     def _load_colors(self) -> dict[int, list[str]]:
         if self._colors_path.exists():
@@ -472,6 +465,7 @@ class ImageManager:
 
         new_categories: dict[str, Category] = {}
         total = 0
+        root_entries: list[ImageEntry] = []
 
         # Scan images_dir for user images
         logger.debug("  Scanning: %s", images_dir)
@@ -511,6 +505,31 @@ class ImageManager:
                             entries=entries,
                         )
                         total += len(entries)
+            elif item.is_file() and item.suffix.lower() in self.VALID_EXTS:
+                key = f"root/{item.name}"
+                if key not in manifest:
+                    manifest[key] = next_id
+                    next_id += 1
+                entry = ImageEntry(
+                    path=item,
+                    filename=item.name,
+                    category="root",
+                    id=manifest[key],
+                )
+                root_entries.append(entry)
+                try:
+                    with Image.open(item) as img:
+                        self._dimensions[entry.id] = img.size
+                except Exception as e:
+                    logger.warning("Failed to read dimensions for %s: %s", item.name, e)
+
+        if root_entries:
+            new_categories["root"] = Category(
+                name="root",
+                meta=CategoryMeta(),
+                entries=root_entries,
+            )
+            total += len(root_entries)
 
         # Scan S3 if enabled (all workers need S3 images in memory)
         if settings.s3_enabled and settings.s3_endpoint and settings.s3_bucket:

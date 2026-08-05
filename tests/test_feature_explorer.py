@@ -9,7 +9,7 @@ def test_feature_explorer_page(client: TestClient):
     """Test that feature explorer page loads."""
     response = client.get("/features")
     assert response.status_code == 200
-    assert "Feature Explorer" in response.text
+    assert "URL Builder" in response.text
     assert "URL Constructor" in response.text
 
 
