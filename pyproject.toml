@@ -65,6 +65,14 @@ combine-as-imports = true
 force-sort-within-sections = true
 known-first-party = ["src"]
 
+[tool.coverage.run]
+concurrency = ["thread", "multiprocessing"]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
