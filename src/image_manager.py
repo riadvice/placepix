@@ -16,6 +16,8 @@ from typing import Any
 
 import boto3
 from botocore.config import Config
+import cv2
+import numpy as np
 from PIL import Image
 import yaml
 
@@ -97,6 +99,8 @@ class ImageEntry:
     id: int = 0
     s3_key: str = ""
     ai: bool = False
+    focal_x: float = 0.5
+    focal_y: float = 0.5
 
 
 @dataclass
@@ -132,6 +136,7 @@ class ImageManager:
         self._total = 0
         self._colors: dict[int, list[str]] = {}
         self._dimensions: dict[int, tuple[int, int]] = self._load_dimensions()
+        self._focal_points: dict[int, tuple[float, float]] = {}
         self._scanning_colors = False
         self._scanning_dimensions = False
         self._is_leader = self._acquire_leader_lock()
@@ -311,6 +316,67 @@ class ImageManager:
                 pass
         return {}
 
+    @staticmethod
+    def _detect_focal_point(path: Path) -> tuple[float, float]:
+        """Detect a subject-aware focal point using face detection or saliency."""
+        try:
+            img = cv2.imread(str(path))
+            if img is None:
+                return (0.5, 0.5)
+            h, w = img.shape[:2]
+            if w == 0 or h == 0:
+                return (0.5, 0.5)
+
+            # 1. Try face detection
+            try:
+                cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+                if Path(cascade_path).exists():
+                    face_cascade = cv2.CascadeClassifier(cascade_path)
+                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    faces = face_cascade.detectMultiScale(
+                        gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
+                    )
+                    if len(faces) > 0:
+                        x_min = int(min(x for x, y, fw, fh in faces))
+                        y_min = int(min(y for x, y, fw, fh in faces))
+                        x_max = int(max(x + fw for x, y, fw, fh in faces))
+                        y_max = int(max(y + fh for x, y, fw, fh in faces))
+                        return (
+                            (x_min + x_max) / 2.0 / w,
+                            (y_min + y_max) / 2.0 / h,
+                        )
+            except Exception:
+                pass
+
+            # 2. Fall back to fine-grained saliency
+            try:
+                saliency = cv2.saliency.StaticSaliencyFineGrained_create()
+                ok, sal = saliency.computeSaliency(img)
+                if ok and sal is not None and sal.sum() > 0:
+                    threshold = 0.5 * sal.max()
+                    ys, xs = np.where(sal >= threshold)
+                    if len(xs):
+                        return (
+                            float(xs.mean() / w),
+                            float(ys.mean() / h),
+                        )
+            except Exception:
+                pass
+        except Exception:
+            pass
+        return (0.5, 0.5)
+
+    def get_focal(self, image_id: int) -> tuple[float, float]:
+        """Return the focal point for an image, computing and caching it on demand."""
+        if image_id in self._focal_points:
+            return self._focal_points[image_id]
+        entry = self.get_by_id(image_id)
+        if entry is None or entry.path is None or not entry.path.exists():
+            return (0.5, 0.5)
+        fx, fy = self._detect_focal_point(entry.path)
+        self._focal_points[image_id] = (fx, fy)
+        return (fx, fy)
+
     def _save_dimensions(self) -> None:
         """Save image dimensions to disk."""
         try:
@@ -325,6 +391,21 @@ class ImageManager:
                 fcntl.flock(f.fileno(), fcntl.LOCK_UN)
         except Exception:
             pass
+
+    def get_dimensions(self, image_id: int) -> tuple[int, int] | None:
+        """Return the original dimensions for an image, or None if not known."""
+        if image_id in self._dimensions:
+            return self._dimensions[image_id]
+        entry = self.get_by_id(image_id)
+        if entry is not None and entry.path is not None and entry.path.exists():
+            try:
+                with Image.open(entry.path) as img:
+                    dims = img.size
+                    self._dimensions[image_id] = dims
+                    return dims
+            except Exception:
+                pass
+        return None
 
     def _load_manifest(self) -> dict[str, int]:
         """Load the persistent id -> filename mapping."""

@@ -761,6 +761,8 @@ def _cache_path(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    focal_x: float = 0.5,
+    focal_y: float = 0.5,
 ) -> Path:
     """Build a deterministic flat cache file path using SHA256 hash."""
     hash_input: dict[str, Any] = {
@@ -800,6 +802,8 @@ def _cache_path(
         "text_pos": text_pos,
         "text_color": text_color,
         "text_bg": text_bg,
+        "focal_x": focal_x,
+        "focal_y": focal_y,
     }
     if watermark_config:
         hash_input["watermark_config"] = {
@@ -919,6 +923,8 @@ def _build_process_key(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    focal_x: float = 0.5,
+    focal_y: float = 0.5,
 ) -> str:
     """Build a deterministic key for request coalescing (no filesystem side effects)."""
     hash_input: dict[str, Any] = {
@@ -958,6 +964,8 @@ def _build_process_key(
         "text_pos": text_pos,
         "text_color": text_color,
         "text_bg": text_bg,
+        "focal_x": focal_x,
+        "focal_y": focal_y,
     }
     if watermark_config:
         hash_input["watermark_config"] = {
@@ -1017,12 +1025,23 @@ async def _serve_entry(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    focal: str = "",
 ) -> Response:
     """Process and serve a single image entry with coalescing and base64 support."""
     # Validate size
     width, height = processor.clamp_size(width, height)
     if width == 0 and height == 0:
         width, height = 500, 500
+
+    # Resolve focal point: explicit query wins over auto-detected subject
+    focal_x, focal_y = manager.get_focal(entry.id)
+    if focal:
+        try:
+            fx, fy = (float(v) for v in focal.split(","))
+            focal_x = max(0.0, min(1.0, fx))
+            focal_y = max(0.0, min(1.0, fy))
+        except Exception:
+            logger.warning("Invalid focal query parameter: %s", focal)
 
     # Determine output format
     output_format = output_format or ext.lstrip(".") or "jpeg"
@@ -1092,6 +1111,8 @@ async def _serve_entry(
             text_pos,
             text_color,
             text_bg,
+            focal_x,
+            focal_y,
         )
         cached = _read_cached(cache_path)
         if cached is not None:
@@ -1163,6 +1184,8 @@ async def _serve_entry(
         text_pos,
         text_color,
         text_bg,
+        focal_x,
+        focal_y,
     )
 
     # Request coalescing: wait if another identical request is already processing
@@ -1261,6 +1284,8 @@ async def _serve_entry(
                 text_pos=text_pos,
                 text_color=text_color,
                 text_bg=text_bg,
+                focal_x=focal_x,
+                focal_y=focal_y,
             )
 
         # Cache if enabled
@@ -1392,6 +1417,7 @@ async def serve_by_id(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    focal: str = "",
 ) -> Response:
     logger.debug("Serving image by ID #%s at %sx%s", image_id, width, height)
     entry = manager.get_by_id(image_id)
@@ -1441,6 +1467,7 @@ async def serve_by_id(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        focal=focal,
     )
 
 
@@ -1496,6 +1523,7 @@ async def serve_by_ratio(
     text_color: str = "ffffff",
     text_bg: str = "000000",
     orientation: str = "",
+    focal: str = "",
 ) -> Response:
     """Serve image with aspect ratio (e.g., /ratio/16:9/1080)."""
     logger.debug("Serving image by ratio: %s at height %s", ratio, height)
@@ -1556,6 +1584,7 @@ async def serve_by_ratio(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        focal=focal,
     )
 
 
@@ -1610,6 +1639,7 @@ async def serve_by_preset(
     text_color: str = "ffffff",
     text_bg: str = "000000",
     orientation: str = "",
+    focal: str = "",
 ) -> Response:
     """Serve image with preset dimensions (e.g., /preset/instagram-square)."""
     logger.debug("Serving image by preset: %s", preset_name)
@@ -1671,6 +1701,7 @@ async def serve_by_preset(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        focal=focal,
     )
 
 
@@ -1996,6 +2027,7 @@ async def serve_image(
     text_color: str = "ffffff",
     text_bg: str = "000000",
     orientation: str = "",
+    focal: str = "",
 ) -> Response:
     cat_display = category or "all"
     seed_display = seed or "random"
@@ -2058,6 +2090,7 @@ async def serve_image(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        focal=focal,
     )
 
 
@@ -2107,6 +2140,7 @@ async def serve_by_color(
     text_color: str = "ffffff",
     text_bg: str = "000000",
     orientation: str = "",
+    focal: str = "",
 ) -> Response:
     logger.debug("Serving image by color: %s at %sx%s", hex_color, width, height)
     entry = manager.pick_by_color(hex_color, orientation=orientation or None)
@@ -2156,6 +2190,7 @@ async def serve_by_color(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        focal=focal,
     )
 
 
@@ -3042,6 +3077,88 @@ async def generate_srcset(
             "srcset": srcset_entries,
             "srcset_string": srcset_string,
             "aspect_ratio": round(aspect_ratio, 3),
+        }
+    )
+
+
+# ── Responsive Code Snippets ────────────────────────────────────────
+@app.get("/api/snippet/{image_id:int}")
+async def generate_snippet(
+    image_id: int,
+    widths: str = "320,640,960,1280,1920",
+    output_format: str = Query(default="webp", alias="format"),
+    fit: str = "cover",
+    sizes_attr: str = "100vw",
+    alt: str = "",
+    cls: str = "",
+    loading: str = "lazy",
+    decoding: str = "async",
+) -> JSONResponse:
+    """Generate copy-paste responsive image snippets for web designers."""
+    entry = manager.get_by_id(image_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+
+    try:
+        width_list = [int(w.strip()) for w in widths.split(",") if w.strip()]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="invalid widths format")
+    if not width_list:
+        raise HTTPException(status_code=400, detail="at least one width is required")
+
+    dims = manager.get_dimensions(image_id)
+    if dims is None:
+        source = _resolve_image_source(entry)
+        with Image.open(source) as img:
+            dims = img.size
+    orig_w, orig_h = dims
+    aspect_ratio = orig_w / orig_h if orig_h else 1.0
+
+    def _url(w: int, fmt: str) -> str:
+        h = max(1, int(w / aspect_ratio))
+        return f"/id/{image_id}/{w}/{h}.{fmt}?fit={fit}"
+
+    srcset = ", ".join(f"{_url(w, output_format)} {w}w" for w in width_list)
+    default_url = _url(width_list[-1], output_format)
+    safe_alt = html.escape(alt)
+    safe_cls = html.escape(cls)
+
+    img_attrs = (
+        f'src="{default_url}" '
+        f'srcset="{srcset}" '
+        f'sizes="{html.escape(sizes_attr)}" '
+        f'alt="{safe_alt}" '
+        f'width="{orig_w}" '
+        f'height="{orig_h}" '
+        f'loading="{html.escape(loading)}" '
+        f'decoding="{html.escape(decoding)}"'
+    )
+    if safe_cls:
+        img_attrs += f' class="{safe_cls}"'
+    img_tag = f"<img {img_attrs} />"
+
+    webp_srcset = ", ".join(f"{_url(w, 'webp')} {w}w" for w in width_list)
+    jpeg_srcset = ", ".join(f"{_url(w, 'jpeg')} {w}w" for w in width_list)
+    picture_tag = (
+        f'<picture>\n'
+        f'  <source type="image/webp" srcset="{webp_srcset}" sizes="{html.escape(sizes_attr)}">\n'
+        f'  <source type="image/jpeg" srcset="{jpeg_srcset}" sizes="{html.escape(sizes_attr)}">\n'
+        f'  <img {img_attrs} />\n'
+        f'</picture>'
+    )
+
+    css_background = f"background-image: url({default_url}); /* {orig_w}x{orig_h} */"
+
+    return JSONResponse(
+        {
+            "id": image_id,
+            "aspect_ratio": round(aspect_ratio, 3),
+            "srcset": srcset,
+            "sizes": sizes_attr,
+            "img": img_tag,
+            "picture": picture_tag,
+            "css_background": css_background,
+            "default_url": default_url,
         }
     )
 

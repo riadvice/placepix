@@ -108,6 +108,8 @@ class ImageProcessor:
         text_pos: str = "center",
         text_color: str = "ffffff",
         text_bg: str = "000000",
+        focal_x: float = 0.5,
+        focal_y: float = 0.5,
     ) -> bytes:
         with Image.open(image_path) as img:
             img = img.convert("RGB")
@@ -179,7 +181,7 @@ class ImageProcessor:
 
             if width > 0 or height > 0:
                 w, h = self.clamp_size(width, height)
-                img = self._resize(img, w, h, fit)
+                img = self._resize(img, w, h, fit, focal_x=focal_x, focal_y=focal_y)
 
             # Apply pixelate effect
             if pixelate > 1:
@@ -228,7 +230,15 @@ class ImageProcessor:
 
             return buffer.getvalue()
 
-    def _resize(self, img: Image.Image, width: int, height: int, fit: str) -> Image.Image:
+    def _resize(
+        self,
+        img: Image.Image,
+        width: int,
+        height: int,
+        fit: str,
+        focal_x: float = 0.5,
+        focal_y: float = 0.5,
+    ) -> Image.Image:
         if width == 0 and height == 0:
             return img
 
@@ -243,10 +253,10 @@ class ImageProcessor:
             return img.resize((width, height), Image.Resampling.LANCZOS)
 
         if fit == "crop":
-            return self._crop_center(img, width, height)
+            return self._crop_center(img, width, height, focal_x=focal_x, focal_y=focal_y)
 
         if fit == "smart":
-            return self._smart_crop(img, width, height)
+            return self._smart_crop(img, width, height, focal_x=focal_x, focal_y=focal_y)
 
         if fit == "contain":
             img.thumbnail((width, height), Image.Resampling.LANCZOS)
@@ -259,24 +269,33 @@ class ImageProcessor:
             new_w = int(img.width * ratio)
             new_h = int(img.height * ratio)
             img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-            return self._crop_center(img, width, height)
+            return self._crop_center(img, width, height, focal_x=focal_x, focal_y=focal_y)
 
         # default: crop center (fills exactly)
         return self._crop_center(img, width, height)
 
-    def _crop_center(self, img: Image.Image, width: int, height: int) -> Image.Image:
+    def _crop_center(
+        self,
+        img: Image.Image,
+        width: int,
+        height: int,
+        focal_x: float = 0.5,
+        focal_y: float = 0.5,
+    ) -> Image.Image:
         img_ratio = img.width / img.height
         target_ratio = width / height
 
         if img_ratio > target_ratio:
             # image is wider, crop width
             new_width = int(img.height * target_ratio)
-            left = (img.width - new_width) // 2
+            focal_px = int(img.width * focal_x)
+            left = max(0, min(img.width - new_width, focal_px - new_width // 2))
             img = img.crop((left, 0, left + new_width, img.height))
         else:
             # image is taller, crop height
             new_height = int(img.width / target_ratio)
-            top = (img.height - new_height) // 2
+            focal_py = int(img.height * focal_y)
+            top = max(0, min(img.height - new_height, focal_py - new_height // 2))
             img = img.crop((0, top, img.width, top + new_height))
 
         return img.resize((width, height), Image.Resampling.LANCZOS)
@@ -470,66 +489,37 @@ class ImageProcessor:
 
         return lqip
 
-    def _smart_crop(self, img: Image.Image, width: int, height: int) -> Image.Image:
-        """Smart crop using OpenCV face detection, fallback to center crop."""
-        # Convert PIL to OpenCV format
-        img_array = np.array(img)
-        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+    def _smart_crop(
+        self,
+        img: Image.Image,
+        width: int,
+        height: int,
+        focal_x: float = 0.5,
+        focal_y: float = 0.5,
+    ) -> Image.Image:
+        """Smart crop using a focal point, with optional on-the-fly face detection."""
+        if focal_x == 0.5 and focal_y == 0.5:
+            # Try to detect a subject (faces) when no focal point is provided
+            try:
+                img_array = np.array(img)
+                gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+                cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+                if Path(cascade_path).exists():
+                    face_cascade = cv2.CascadeClassifier(cascade_path)
+                    faces = face_cascade.detectMultiScale(
+                        gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
+                    )
+                    if len(faces) > 0:
+                        x_min = min(x for x, y, w, h in faces)
+                        y_min = min(y for x, y, w, h in faces)
+                        x_max = max(x + w for x, y, w, h in faces)
+                        y_max = max(y + h for x, y, w, h in faces)
+                        focal_x = (x_min + x_max) / 2.0 / img.width
+                        focal_y = (y_min + y_max) / 2.0 / img.height
+            except Exception:
+                pass
 
-        # Load Haar Cascade for face detection
-        try:
-            cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-            face_cascade = cv2.CascadeClassifier(cascade_path)
-            faces = face_cascade.detectMultiScale(
-                gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
-            )
-        except Exception:
-            # Fallback to center crop on error
-            return self._crop_center(img, width, height)
-
-        if len(faces) == 0:
-            # No faces detected, use center crop
-            return self._crop_center(img, width, height)
-
-        # Calculate bounding box that includes all faces
-        x_min = min(x for x, y, w, h in faces)
-        y_min = min(y for x, y, w, h in faces)
-        x_max = max(x + w for x, y, w, h in faces)
-        y_max = max(y + h for x, y, w, h in faces)
-
-        # Add padding around faces (20%)
-        face_width = x_max - x_min
-        face_height = y_max - y_min
-        padding_x = int(face_width * 0.2)
-        padding_y = int(face_height * 0.2)
-
-        x_min = max(0, x_min - padding_x)
-        y_min = max(0, y_min - padding_y)
-        x_max = min(img.width, x_max + padding_x)
-        y_max = min(img.height, y_max + padding_y)
-
-        # Calculate crop region maintaining target aspect ratio
-        target_ratio = width / height
-        current_width = x_max - x_min
-        current_height = y_max - y_min
-        current_ratio = current_width / current_height
-
-        if current_ratio > target_ratio:
-            # Too wide, adjust width
-            new_width = int(current_height * target_ratio)
-            x_center = (x_min + x_max) // 2
-            x_min = max(0, x_center - new_width // 2)
-            x_max = min(img.width, x_min + new_width)
-        else:
-            # Too tall, adjust height
-            new_height = int(current_width / target_ratio)
-            y_center = (y_min + y_max) // 2
-            y_min = max(0, y_center - new_height // 2)
-            y_max = min(img.height, y_min + new_height)
-
-        # Crop and resize
-        cropped = img.crop((x_min, y_min, x_max, y_max))
-        return cropped.resize((width, height), Image.Resampling.LANCZOS)
+        return self._crop_center(img, width, height, focal_x=focal_x, focal_y=focal_y)
 
     def _apply_watermark(self, img: Image.Image, position: str, config: dict) -> Image.Image:
         """Apply watermark to image."""
