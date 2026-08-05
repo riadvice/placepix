@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim AS base
 
 ARG GIT_VERSION=dev
 ENV GIT_VERSION=${GIT_VERSION}
@@ -38,6 +39,24 @@ ENV IMAGES_DIR=/app/images
 ENV CACHE=true
 ENV HOST=0.0.0.0:3000
 ENV WORKERS=1
+
+FROM base AS test
+
+# Install development/test dependencies and copy the test suite
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -e '.[dev]'
+
+COPY tests/ ./tests/
+COPY .env.test ./
+COPY unit_tests.sh ./
+
+ENV TESTING=1
+ENV ENV_FILE=/app/.env.test
+
+ENTRYPOINT ["./unit_tests.sh"]
+CMD ["--fast"]
+
+FROM base AS production
 
 EXPOSE 3000
 

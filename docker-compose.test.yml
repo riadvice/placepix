@@ -1,0 +1,13 @@
+services:
+  test:
+    build:
+      context: .
+      target: test
+      args:
+        GIT_VERSION: dev
+    image: placepix:test
+    environment:
+      TESTING: "1"
+      ENV_FILE: "/app/.env.test"
+    entrypoint: ["./unit_tests.sh"]
+    command: ["--fast"]
