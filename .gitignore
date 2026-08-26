@@ -10,6 +10,8 @@ __pycache__/
 dist/
 build/
 .coverage*
+coverage.xml
+htmlcov/
 
 # Cache & generated images
 .cache/

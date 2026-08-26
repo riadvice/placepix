@@ -79,7 +79,7 @@ echo "📦 Ensuring test dependencies are installed..."
 pip install pytest pytest-cov pytest-xdist --quiet
 
 # Build pytest command using pytest-xdist for process-level parallelism
-PYTEST_CMD="pytest tests/ -n $PARALLEL_JOBS --dist=load -m 'not slow'"
+PYTEST_CMD="pytest tests/ -n $PARALLEL_JOBS --dist=loadscope -m 'not slow'"
 
 if [ "$FAST_MODE" = true ]; then
     echo "🚀 Running tests in fast mode (no coverage)..."
