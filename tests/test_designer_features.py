@@ -330,3 +330,35 @@ def test_serve_image_accepts_scrim(client: TestClient) -> None:
     assert plain.status_code == dimmed.status_code == 200
     # The scrim must take part in the cache key, not return the cached plain render.
     assert plain.content != dimmed.content
+
+
+# ── UI surfaces ──────────────────────────────────────────────────────
+def test_url_builder_exposes_the_new_endpoints(client: TestClient) -> None:
+    """The builder sidebar and config panels cover mockups and wireframes."""
+    body = client.get("/url-builder").text
+    assert 'data-endpoint="mockup"' in body
+    assert 'data-endpoint="skeleton"' in body
+    assert 'id="mockup-device"' in body
+    assert 'id="skeleton-preset"' in body
+    assert 'id="scrim-mode"' in body
+
+
+def test_url_builder_lists_every_device_and_preset(client: TestClient) -> None:
+    """Every frame and layout the API serves is offered in the builder."""
+    body = client.get("/url-builder").text
+    for device in mockup.DEVICES:
+        assert f'value="{device}"' in body
+    for preset in skeleton.PRESETS:
+        assert f'value="{preset}"' in body
+
+
+def test_homepage_features_the_new_endpoints(client: TestClient) -> None:
+    """The feature list and demo strips on the homepage include all three."""
+    body = client.get("/").text
+    assert 'id="mockup"' in body
+    assert 'id="skeleton"' in body
+    assert "/#mockup" in body and "/#skeleton" in body
+    assert "/mockup/iphone/300" in body
+    assert "/skeleton/card/400/300" in body
+    assert "/api/contrast/{image_id}" in body
+    assert "?scrim=bottom:0.6" in body

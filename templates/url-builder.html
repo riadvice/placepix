@@ -154,6 +154,16 @@
                     <span data-i18n="url_builder.endpoint.gradient">Gradient</span>
                     <span class="tooltip" data-i18n="url_builder.endpoint.gradient">Gradient</span>
                 </div>
+                <div class="endpoint-sidebar-item" data-endpoint="mockup">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    <span data-i18n="url_builder.endpoint.mockup">Mockup</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.mockup">Mockup</span>
+                </div>
+                <div class="endpoint-sidebar-item" data-endpoint="skeleton">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    <span data-i18n="url_builder.endpoint.skeleton">Wireframe</span>
+                    <span class="tooltip" data-i18n="url_builder.endpoint.skeleton">Wireframe</span>
+                </div>
                 <div class="endpoint-sidebar-item" data-endpoint="avatar">
                     <i class="fa-solid fa-user-circle"></i>
                     <span data-i18n="url_builder.endpoint.avatar">Avatar</span>
@@ -405,6 +415,85 @@
                         </div>
                     </div>
                     
+                    <!-- Mockup endpoint -->
+                    <div class="endpoint-config" data-endpoint="mockup">
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.device">Device Frame</label>
+                            <select id="mockup-device">
+                                <option value="iphone">iPhone</option>
+                                <option value="android">Android phone</option>
+                                <option value="tablet">Tablet</option>
+                                <option value="macbook">Laptop</option>
+                                <option value="browser">Browser (light)</option>
+                                <option value="browser-dark">Browser (dark)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.frame_width">Frame Width</label>
+                            <input type="number" id="mockup-width" value="600" min="120" max="4000">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.category">Category <small>(optional)</small></label>
+                            <input type="text" id="mockup-category" placeholder="nature" data-i18n="url_builder.placeholder.category" data-i18n-attr="placeholder">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.address_bar">Address Bar Label</label>
+                            <input type="text" id="mockup-url" value="placepix.net">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.frame_background">Background <small>(optional, fills rounded corners)</small></label>
+                            <input type="color" id="mockup-bg" value="#f2f2f5">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="mockup-transparent" checked>
+                                <label for="mockup-transparent" data-i18n="url_builder.label.transparent">Transparent corners</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.seed">Seed <small>(optional, pins the image)</small></label>
+                            <input type="text" id="mockup-seed" placeholder="my-seed" data-i18n="url_builder.placeholder.seed" data-i18n-attr="placeholder">
+                        </div>
+                    </div>
+
+                    <!-- Wireframe / skeleton endpoint -->
+                    <div class="endpoint-config" data-endpoint="skeleton">
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.wireframe_preset">Layout</label>
+                            <select id="skeleton-preset">
+                                <option value="card">Card</option>
+                                <option value="article">Article</option>
+                                <option value="profile">Profile</option>
+                                <option value="list">List</option>
+                                <option value="grid">Grid</option>
+                                <option value="form">Form</option>
+                                <option value="dashboard">Dashboard</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Width</label>
+                            <input type="number" id="skeleton-width" value="600" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label>Height</label>
+                            <input type="number" id="skeleton-height" value="400" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.theme">Theme</label>
+                            <select id="skeleton-theme">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="url_builder.label.block_radius">Block Radius</label>
+                            <input type="number" id="skeleton-radius" value="8" min="0" max="64">
+                        </div>
+                        <div class="form-group skeleton-repeat-controls">
+                            <label data-i18n="url_builder.label.repeat_counts">Rows / Columns <small>(grid, list and form)</small></label>
+                            <input type="number" id="skeleton-rows" value="0" min="0" max="24" placeholder="rows">
+                            <input type="number" id="skeleton-cols" value="0" min="0" max="24" placeholder="cols">
+                        </div>
+                    </div>
+
                     <!-- Avatar endpoint -->
                     <div class="endpoint-config" data-endpoint="avatar">
                         <div class="form-group">
@@ -666,6 +755,19 @@
                     <div class="form-group">
                         <label>Text Overlay <small>(optional)</small></label>
                         <input type="text" id="text" placeholder="Your text here" data-i18n="url_builder.placeholder.text" data-i18n-attr="placeholder">
+                    </div>
+
+                    <div class="form-group">
+                        <label data-i18n="url_builder.label.scrim">Text Scrim <small>(keeps overlay text legible)</small></label>
+                        <select id="scrim-mode">
+                            <option value="">None</option>
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                            <option value="bottom">Gradient from bottom</option>
+                            <option value="top">Gradient from top</option>
+                        </select>
+                        <input type="range" id="scrim-opacity" min="0" max="100" value="40">
+                        <small><span id="scrim-value">40</span>%</small>
                     </div>
                     
                     <div class="checkbox-group">

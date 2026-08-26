@@ -211,6 +211,60 @@ function buildGradientURL(params) {
     return `/gradient/${gradWidth}x${gradHeight}/${gradFrom}/${gradTo}`;
 }
 
+function buildMockupURL(params) {
+    const device = document.getElementById('mockup-device').value;
+    const width = document.getElementById('mockup-width').value;
+    const category = document.getElementById('mockup-category').value.trim();
+    const addressBar = document.getElementById('mockup-url').value.trim();
+    const seed = document.getElementById('mockup-seed').value.trim();
+    const transparent = document.getElementById('mockup-transparent').checked;
+    const background = document.getElementById('mockup-bg').value.replace('#', '');
+
+    let url = `/mockup/${device}/${width}`;
+    if (category) url += `/${encodeURIComponent(category)}`;
+    if (seed) params.push(`seed=${encodeURIComponent(seed)}`);
+    if (device.startsWith('browser') && addressBar && addressBar !== 'placepix.net') {
+        params.push(`url=${encodeURIComponent(addressBar)}`);
+    }
+    if (!transparent) params.push(`background=${background}`);
+    _pushOwnFormat(params, 'png');
+    return { url, supportsFormat: false };
+}
+
+function buildSkeletonURL(params) {
+    const preset = document.getElementById('skeleton-preset').value;
+    const width = document.getElementById('skeleton-width').value;
+    const height = document.getElementById('skeleton-height').value;
+    const theme = document.getElementById('skeleton-theme').value;
+    const radius = document.getElementById('skeleton-radius').value;
+    const rows = document.getElementById('skeleton-rows').value;
+    const cols = document.getElementById('skeleton-cols').value;
+
+    const url = `/skeleton/${preset}/${width}/${height}`;
+    if (theme !== 'light') params.push(`theme=${theme}`);
+    if (radius != 8) params.push(`radius=${radius}`);
+    if (rows > 0) params.push(`rows=${rows}`);
+    if (cols > 0) params.push(`cols=${cols}`);
+    _pushOwnFormat(params, 'png');
+    return { url, supportsFormat: false };
+}
+
+// These endpoints default to PNG rather than JPEG, so they carry ?format= instead
+// of the shared extension the photo endpoints use. 'jpeg' is the select's own
+// default rather than a deliberate choice, so it is left off the URL.
+function _pushOwnFormat(params, defaultFormat) {
+    const format = document.getElementById('format').value;
+    if (format && format !== defaultFormat && format !== 'jpeg') {
+        params.push(`format=${format}`);
+    }
+}
+
+// The mockup and wireframe endpoints render their own pixels, so the shared
+// photo filters do not apply to them.
+function endpointTakesFilters() {
+    return currentEndpoint !== 'mockup' && currentEndpoint !== 'skeleton';
+}
+
 function toggleAvatarType() {
     const avatarType = document.getElementById('avatar-type').value;
     const letterControls = document.querySelector('.avatar-letter-controls');
@@ -308,6 +362,16 @@ function updateURL() {
         case 'gradient':
             url = buildGradientURL(params);
             break;
+        case 'mockup':
+            const mockupResult = buildMockupURL(params);
+            url = mockupResult.url;
+            supportsFormat = mockupResult.supportsFormat;
+            break;
+        case 'skeleton':
+            const skeletonResult = buildSkeletonURL(params);
+            url = skeletonResult.url;
+            supportsFormat = skeletonResult.supportsFormat;
+            break;
         case 'avatar':
             const avatarResult = buildAvatarURL(params);
             url = avatarResult.url;
@@ -329,6 +393,12 @@ function updateURL() {
     }
     
     // Add query parameters
+    if (!endpointTakesFilters()) {
+        if (params.length > 0) url += '?' + params.join('&');
+        document.getElementById('url-output').innerHTML = `<div>${window.location.origin}${url}</div>`;
+        return;
+    }
+
     if (document.getElementById('grayscale').checked) params.push('grayscale=true');
     if (document.getElementById('sepia').checked) params.push('sepia=true');
     if (document.getElementById('invert').checked) params.push('invert=true');
@@ -396,6 +466,13 @@ function updateURL() {
     
     const text = document.getElementById('text').value;
     if (text) params.push(`text=${encodeURIComponent(text)}`);
+
+    const scrimMode = document.getElementById('scrim-mode').value;
+    const scrimOpacity = document.getElementById('scrim-opacity').value;
+    if (scrimMode && scrimOpacity > 0) {
+        const amount = parseFloat((scrimOpacity / 100).toFixed(2));
+        params.push(`scrim=${scrimMode === 'dark' ? amount : `${scrimMode}:${amount}`}`);
+    }
     
     // Combine URL and params
     if (params.length > 0) {
@@ -434,7 +511,7 @@ function loadPreview() {
     const fileSizeDisplay = document.getElementById('file-size');
     
     // Add cache-busting for random images (endpoints without seed or ID)
-    const isRandom = currentEndpoint === 'random' || currentEndpoint === 'ratio' || currentEndpoint === 'preset';
+    const isRandom = ['random', 'ratio', 'preset', 'mockup'].includes(currentEndpoint);
     const hasSeed = url.includes('seed=');
     
     if (isRandom && !hasSeed) {
@@ -634,6 +711,14 @@ document.addEventListener('keydown', function(e) {
         toggleTheme();
     }
 });
+
+// Scrim opacity readout
+const scrimOpacityInput = document.getElementById('scrim-opacity');
+if (scrimOpacityInput) {
+    scrimOpacityInput.addEventListener('input', () => {
+        document.getElementById('scrim-value').textContent = scrimOpacityInput.value;
+    });
+}
 
 // Avatar type toggle
 document.getElementById('avatar-type').addEventListener('change', toggleAvatarType);
