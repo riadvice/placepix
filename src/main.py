@@ -35,11 +35,14 @@ import yaml
 from src.ai_generator import check_rate_limit, generate_image
 from src.avatar_generator import AvatarGenerator
 from src.config import settings
+import src.contrast as contrast_analysis
 from src.image_manager import ImageEntry, ImageManager
 from src.image_processor import ImageProcessor
 from src.metrics import MetricsTracker
+import src.mockup as mockup
 from src.observer import start_watching
 from src.seed import seed_images
+import src.skeleton as skeleton
 
 
 # ── Logging Setup ───────────────────────────────────────────────────
@@ -761,6 +764,7 @@ def _cache_path(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     focal_x: float = 0.5,
     focal_y: float = 0.5,
 ) -> Path:
@@ -802,6 +806,7 @@ def _cache_path(
         "text_pos": text_pos,
         "text_color": text_color,
         "text_bg": text_bg,
+        "scrim": scrim,
         "focal_x": focal_x,
         "focal_y": focal_y,
     }
@@ -923,6 +928,7 @@ def _build_process_key(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     focal_x: float = 0.5,
     focal_y: float = 0.5,
 ) -> str:
@@ -964,6 +970,7 @@ def _build_process_key(
         "text_pos": text_pos,
         "text_color": text_color,
         "text_bg": text_bg,
+        "scrim": scrim,
         "focal_x": focal_x,
         "focal_y": focal_y,
     }
@@ -1025,6 +1032,7 @@ async def _serve_entry(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     focal: str = "",
 ) -> Response:
     """Process and serve a single image entry with coalescing and base64 support."""
@@ -1111,6 +1119,7 @@ async def _serve_entry(
             text_pos,
             text_color,
             text_bg,
+            scrim,
             focal_x,
             focal_y,
         )
@@ -1184,6 +1193,7 @@ async def _serve_entry(
         text_pos,
         text_color,
         text_bg,
+        scrim,
         focal_x,
         focal_y,
     )
@@ -1284,6 +1294,7 @@ async def _serve_entry(
                 text_pos=text_pos,
                 text_color=text_color,
                 text_bg=text_bg,
+                scrim=scrim,
                 focal_x=focal_x,
                 focal_y=focal_y,
             )
@@ -1417,6 +1428,7 @@ async def serve_by_id(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     focal: str = "",
 ) -> Response:
     logger.debug("Serving image by ID #%s at %sx%s", image_id, width, height)
@@ -1467,6 +1479,7 @@ async def serve_by_id(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        scrim=scrim,
         focal=focal,
     )
 
@@ -1522,6 +1535,7 @@ async def serve_by_ratio(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     orientation: str = "",
     focal: str = "",
 ) -> Response:
@@ -1584,6 +1598,7 @@ async def serve_by_ratio(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        scrim=scrim,
         focal=focal,
     )
 
@@ -1638,6 +1653,7 @@ async def serve_by_preset(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     orientation: str = "",
     focal: str = "",
 ) -> Response:
@@ -1701,6 +1717,7 @@ async def serve_by_preset(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        scrim=scrim,
         focal=focal,
     )
 
@@ -1858,6 +1875,128 @@ async def gradient_placeholder(
             "ETag": _generate_etag(gradient_bytes),
         },
     )
+
+
+# ── Device & Browser Mockups ─────────────────────────────────────────
+@app.get("/mockup/{device}/{width:int}")
+@app.get("/mockup/{device}/{width:int}/{category}")
+@app.get("/mockup/{device}/{width:int}.{ext}")
+@app.get("/mockup/{device}/{width:int}/{category}.{ext}")
+async def mockup_image(
+    device: str,
+    width: int,
+    category: str = "",
+    ext: str = "",
+    seed: str = "",
+    url: str = "placepix.net",
+    background: str = "",
+    orientation: str = "",
+    quality: int = 90,
+    output_format: str = Query(default="", alias="format"),
+) -> Response:
+    """Composite a placeholder into a phone, tablet, laptop or browser frame."""
+    if device not in mockup.DEVICES:
+        raise HTTPException(status_code=404, detail="unknown device")
+
+    width = max(120, min(width, settings.max_width))
+
+    entry = manager.pick(category or None, seed or None, orientation=orientation or None)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="category not found")
+
+    source = _resolve_image_source(entry)
+    output_format = (ext.lstrip(".") or output_format or "png").lower()
+    if output_format not in ("png", "jpeg", "jpg", "webp", "avif"):
+        raise HTTPException(status_code=400, detail="unsupported format")
+
+    try:
+        with Image.open(source) as img:
+            content = mockup.render_bytes(
+                img,
+                device,
+                width=width,
+                url=url,
+                background=background,
+                output_format=output_format,
+                quality=quality,
+            )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    fmt = "jpeg" if output_format == "jpg" else output_format
+    # A random pick must not be cached long-term; a seeded one is stable.
+    cache_control = (
+        "public, max-age=2592000, immutable" if seed else "public, max-age=60, must-revalidate"
+    )
+    return Response(
+        content=content,
+        media_type=f"image/{fmt}",
+        headers={
+            "Content-Disposition": f'inline; filename="placepix-{device}-{width}.{fmt}"',
+            "Cache-Control": cache_control,
+            "ETag": _generate_etag(content),
+        },
+    )
+
+
+@app.get("/api/mockups")
+async def api_mockups() -> JSONResponse:
+    """List the available device frames."""
+    return JSONResponse({"devices": mockup.list_devices()})
+
+
+# ── Wireframe / Skeleton Placeholders ────────────────────────────────
+@app.get("/skeleton/{preset}/{width:int}/{height:int}")
+@app.get("/skeleton/{preset}/{width:int}/{height:int}.{ext}")
+async def skeleton_image(
+    preset: str,
+    width: int,
+    height: int,
+    ext: str = "",
+    theme: str = "light",
+    radius: int = 8,
+    rows: int = 0,
+    cols: int = 0,
+    quality: int = 90,
+    output_format: str = Query(default="", alias="format"),
+) -> Response:
+    """Generate a lo-fi wireframe / skeleton-loading placeholder."""
+    width, height = processor.clamp_size(width, height)
+    output_format = (ext.lstrip(".") or output_format or "png").lower()
+    if output_format not in ("png", "jpeg", "jpg", "webp", "avif"):
+        raise HTTPException(status_code=400, detail="unsupported format")
+
+    try:
+        content = skeleton.render_bytes(
+            preset,
+            width,
+            height,
+            theme=theme,
+            radius=max(0, radius),
+            rows=max(0, min(rows, 24)),
+            cols=max(0, min(cols, 24)),
+            output_format=output_format,
+            quality=quality,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    fmt = "jpeg" if output_format == "jpg" else output_format
+    return Response(
+        content=content,
+        media_type=f"image/{fmt}",
+        headers={
+            "Content-Disposition": f'inline; filename="placepix-{preset}-{width}x{height}.{fmt}"',
+            "Cache-Control": "public, max-age=2592000, immutable",
+            "ETag": _generate_etag(content),
+        },
+    )
+
+
+@app.get("/api/skeletons")
+async def api_skeletons() -> JSONResponse:
+    """List the available wireframe presets and themes."""
+    return JSONResponse({"presets": skeleton.list_presets(), "themes": sorted(skeleton.THEMES)})
 
 
 # ── Letter Avatar ────────────────────────────────────────────────────
@@ -2026,6 +2165,7 @@ async def serve_image(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     orientation: str = "",
     focal: str = "",
 ) -> Response:
@@ -2090,6 +2230,7 @@ async def serve_image(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        scrim=scrim,
         focal=focal,
     )
 
@@ -2139,6 +2280,7 @@ async def serve_by_color(
     text_pos: str = "center",
     text_color: str = "ffffff",
     text_bg: str = "000000",
+    scrim: str = "",
     orientation: str = "",
     focal: str = "",
 ) -> Response:
@@ -2190,6 +2332,7 @@ async def serve_by_color(
         text_pos=text_pos,
         text_color=text_color,
         text_bg=text_bg,
+        scrim=scrim,
         focal=focal,
     )
 
@@ -2744,6 +2887,48 @@ async def get_blurhash(image_id: int) -> JSONResponse:
     except Exception as e:
         logger.error("Blurhash generation failed for image %s: %s", image_id, e)
         raise HTTPException(status_code=500, detail=f"blurhash generation failed: {e}")
+
+
+# ── Text Safety / Contrast ────────────────────────────────────────
+@app.get("/api/contrast/{image_id:int}")
+async def api_contrast(
+    image_id: int,
+    grid: int = 3,
+    target: float = contrast_analysis.AA_NORMAL,
+    text_color: str = Query(default="#ffffff", alias="text"),
+) -> JSONResponse:
+    """Report whether overlaid text stays legible over an image.
+
+    Returns the mean colour, WCAG ratio against `text` and recommended text colour per
+    region of a `grid` x `grid` split, plus the scrim opacity needed to reach `target`.
+    """
+    entry = manager.get_by_id(image_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="image not found")
+
+    grid = max(1, min(grid, 8))
+    if target < 1.0 or target > 21.0:
+        raise HTTPException(status_code=400, detail="target must be between 1 and 21")
+    try:
+        contrast_analysis.parse_color(text_color)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    try:
+        source = _resolve_image_source(entry)
+        with Image.open(source) as img:
+            # The analysis only needs mean colours, so a thumbnail is plenty.
+            img = img.convert("RGB")
+            img.thumbnail((320, 320), Image.Resampling.LANCZOS)
+            report = contrast_analysis.analyze(img, grid=grid, target=target, text_color=text_color)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Contrast analysis failed for image %s: %s", image_id, e)
+        raise HTTPException(status_code=500, detail=f"contrast analysis failed: {e}")
+
+    report.update({"id": entry.id, "category": entry.category, "filename": entry.filename})
+    return JSONResponse(report)
 
 
 # ── Favicon ───────────────────────────────────────────────────────

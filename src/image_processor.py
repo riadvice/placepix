@@ -108,6 +108,7 @@ class ImageProcessor:
         text_pos: str = "center",
         text_color: str = "ffffff",
         text_bg: str = "000000",
+        scrim: str = "",
         focal_x: float = 0.5,
         focal_y: float = 0.5,
     ) -> bytes:
@@ -209,6 +210,9 @@ class ImageProcessor:
 
             if radius > 0:
                 img = self._apply_radius(img, radius)
+
+            if scrim:
+                img = self._apply_scrim(img, scrim)
 
             if text:
                 img = self._add_text(img, text, text_pos, text_color, text_bg)
@@ -363,6 +367,39 @@ class ImageProcessor:
         draw.text((x, y), text, fill=tc, font=font)
 
         return img
+
+    def _apply_scrim(self, img: Image.Image, spec: str) -> Image.Image:
+        """Darken or lighten the image so overlaid text stays legible.
+
+        Accepts "0.4" (uniform black), "light:0.3" (uniform white), or
+        "bottom:0.6"/"top:0.5" for a gradient that fades out over half the image.
+        """
+        mode, _, raw = spec.rpartition(":")
+        mode = (mode or "dark").lower()
+        try:
+            opacity = float(raw)
+        except ValueError:
+            return img
+        opacity = max(0.0, min(opacity, 1.0))
+        if opacity == 0.0:
+            return img
+
+        color = (255, 255, 255) if mode == "light" else (0, 0, 0)
+        width, height = img.size
+        alpha = Image.new("L", (width, height), int(opacity * 255))
+
+        if mode in ("bottom", "top"):
+            # Fade from full opacity at the edge to nothing at the midpoint.
+            ramp = Image.new("L", (1, height))
+            for y in range(height):
+                pos = y / max(height - 1, 1)
+                pos = pos if mode == "bottom" else 1.0 - pos
+                strength = max(0.0, (pos - 0.5) * 2.0)
+                ramp.putpixel((0, y), int(opacity * strength * 255))
+            alpha = ramp.resize((width, height))
+
+        overlay = Image.new("RGB", (width, height), color)
+        return Image.composite(overlay, img, alpha)
 
     def _apply_radius(self, img: Image.Image, radius: int) -> Image.Image:
         """Apply rounded corners to image."""
