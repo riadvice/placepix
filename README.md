@@ -45,6 +45,9 @@
 - **Orientation filtering** — `?orientation=landscape|portrait|squarish` to filter by native aspect ratio
 - **Watermark overlay** — image or text with positioning and opacity
 - **Srcset generation** — responsive image sets via `/api/srcset`
+- **Device & browser mockups** — `/mockup/iphone/600` frames a placeholder in a phone, tablet, laptop or browser
+- **Wireframe placeholders** — `/skeleton/card/400/300` draws lo-fi grey-box / skeleton-loading blocks
+- **Text-contrast report** — `/api/contrast/{id}` grades overlaid text per region and suggests a `?scrim=` opacity
 - **Upload API** — add images via `POST /api/upload`
 - **Admin dashboard** — password-protected usage metrics
 - **Browser caching** — ETag, Last-Modified, 304 responses
@@ -90,6 +93,9 @@ GET /300/200?orientation=landscape  # Filter by native aspect ratio
 GET /ratio/16:9/1080            # Aspect ratio sizing
 GET /preset/instagram-square    # Preset dimensions
 GET /solid/500/300/ff0000       # Solid color placeholder
+GET /mockup/iphone/600          # Placeholder inside a phone frame
+GET /skeleton/card/400/300      # Lo-fi wireframe block
+GET /300/200?text=Hi&scrim=bottom:0.6  # Gradient scrim behind overlay text
 ```
 
 **Full reference:** Visit `/url-builder` on your running instance for an interactive explorer.

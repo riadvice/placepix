@@ -98,6 +98,30 @@ Parameters:
 - ?format=webp – output format
 - ?quality=80 – quality (1-100)
 
+### Device & browser mockup
+GET /mockup/{device}/{width}
+Example: /mockup/iphone/600
+Example with category: /mockup/browser/1200/nature
+Composites a placeholder into a device frame. Devices: iphone, android, tablet,
+macbook, browser, browser-dark. The width is the width of the whole frame.
+Parameters:
+- ?seed={string} – pin the image (also makes the response cacheable)
+- ?url={text} – address-bar label for the browser frames
+- ?background={hex} – flatten the transparent corners onto a colour
+- ?format=png|jpeg|webp|avif – output format (default png)
+
+### Wireframe / skeleton placeholder (no images required)
+GET /skeleton/{preset}/{width}/{height}
+Example: /skeleton/card/400/300
+Example with options: /skeleton/grid/800/600?theme=dark&rows=3&cols=4
+Draws lo-fi grey-box blocks for wireframes and skeleton-loading states.
+Presets: card, article, profile, list, grid, form, dashboard.
+Parameters:
+- ?theme=light|dark – palette (default light)
+- ?radius={px} – corner radius of the blocks (default 8)
+- ?rows={n} / ?cols={n} – repeat count for grid, list and form
+- ?format=png|jpeg|webp|avif – output format (default png)
+
 ### SVG placeholder (no images required, <500 bytes)
 GET /svg/{width}/{height}
 Example: /svg/400/300
@@ -144,6 +168,9 @@ Apply these to any image endpoint above:
 
 ### Overlays
 - ?text=Hello+World – text overlay
+- ?scrim=0.4 – darken the image behind the text (uniform black, 0-1)
+- ?scrim=light:0.3 – lighten instead, for dark text
+- ?scrim=bottom:0.6 – gradient scrim fading out over the top half (also top:)
 - ?border=4,ffffff – border width and color
 - ?watermark=1 – apply configured watermark
 - ?padding=20 – internal padding
@@ -181,6 +208,10 @@ function PlaceholderImage({ width, height, category, fit = 'crop' }) {
 - GET /api/color/{hex} – Find images matching a hex color
 - GET /api/blurhash/{image_id} – Get BlurHash string for low-quality preview
 - GET /api/srcset – Generate responsive srcset markup
+- GET /api/contrast/{image_id} – WCAG contrast report per region, with the scrim opacity
+  overlaid text needs (?text={hex}, ?grid={n}, ?target={ratio})
+- GET /api/mockups – List the available device frames
+- GET /api/skeletons – List the available wireframe presets and themes
 - POST /api/upload – Upload a new image (if upload_enabled=true)
 - POST /api/ai-generate – Generate image via AI (if ai_generation_enabled=true)
 - GET /health – Liveness probe (returns 200 OK)
