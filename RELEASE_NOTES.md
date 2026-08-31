@@ -2,9 +2,32 @@
 
 ## Released versions
 
+- [v0.4 - 2026-08-31](#v04)
 - [v0.3 - 2026-05-29](#v03)
 - [v0.2 - 2026-05-26](#v02)
 - [v0.1 - 2026-05-25](#v01)
+
+## v0.4
+
+### 🚀 Introduction
+
+- **Version Number**: 0.4
+- **Release Date**: 2026-08-31
+- **General Overview**: Device mockups, wireframe placeholders, subject-aware focal points, responsive snippets, and a text-contrast toolkit.
+
+### ✨ New Features
+
+- **Device & browser mockups** — `/mockup/{device}/{width}` frames a placeholder in a phone, tablet, laptop or browser (`/api/mockups` lists frames)
+- **Wireframe placeholders** — `/skeleton/{preset}/{width}/{height}` draws lo-fi grey-box / skeleton-loading blocks (`/api/skeletons` lists presets)
+- **Subject-aware focal point** — smart crop auto-centres on the subject, with a `?focal=x,y` override
+- **Responsive snippets** — `/api/snippet/{id}` returns copy-paste `srcset`/`<picture>` markup
+- **Text contrast & scrim** — `?scrim=` overlays for legible text and `/api/contrast/{id}` for a per-region WCAG report
+
+### 🔧 Improvements
+
+- **URL builder** — surfaced the mockup, wireframe and scrim features in the UI
+- **Dependency refresh** — OpenCV 5 and refreshed core packages
+- **Testing** — Docker-based test runner plus `pytest-xdist` parallelism
 
 ## v0.3
 
