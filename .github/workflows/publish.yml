@@ -15,6 +15,10 @@ on:
 
 env:
   IMAGE: riadvice/placepix
+  PLATFORMS: linux/amd64,linux/arm64
+
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -76,6 +80,10 @@ jobs:
             echo "Publishing $VERSION only; :latest stays on $HIGHEST."
           fi
 
+      # Required to build the arm64 image on an amd64 runner.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -91,6 +99,7 @@ jobs:
           context: .
           target: production
           push: true
+          platforms: ${{ env.PLATFORMS }}
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
             GIT_VERSION=${{ steps.tags.outputs.version }}
@@ -104,8 +113,36 @@ jobs:
             echo
             echo "Tags: \`${{ steps.tags.outputs.tags }}\`"
             echo
+            echo "Platforms: \`${{ env.PLATFORMS }}\`"
+            echo
             echo "Deploy with:"
             echo '```bash'
             echo "cd /opt/placepix && docker compose up -d"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  release:
+    name: Create GitHub release
+    needs: publish
+    runs-on: ubuntu-latest
+    # Only for real tag pushes; a manual dispatch republishes an existing tag.
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $tag already exists, nothing to do."
+            exit 0
+          fi
+          gh release create "$tag" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "PlacePix $tag" \
+              --generate-notes
