@@ -15,6 +15,11 @@ Built with Python 3.12, FastAPI, Pillow, and OpenCV. Supports Docker deployment,
 Single command:
 docker run -d -p 3000:3000 -v ./images:/app/images riadvice/placepix:latest
 
+Provision a server in one line (installs Docker, creates /opt/placepix, pulls and starts the image):
+curl -fsSL https://raw.githubusercontent.com/riadvice/placepix/master/deploy/provision.sh | bash
+
+Set PORT to listen on a port other than 3000. Deploying an update is `docker compose up -d`: images are built and published by CI, never on the server.
+
 Docker Compose (recommended for persistence):
 services:
   placepix:

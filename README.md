@@ -27,6 +27,7 @@
 
 - [Features](#features)
 - [Get Started in 5 Steps](#get-started-in-5-steps)
+- [Deploy to a Server](#deploy-to-a-server)
 - [URL Examples](#url-examples)
 - [Developer Guide](https://placepix.net/guide) — full API reference & feature documentation
 - [Environment Variables](#environment-variables)
@@ -56,9 +57,9 @@
 
 ## Get Started in 5 Steps
 
-1. **Install Docker**
+1. **Get the image**
    ```bash
-   docker build -t placepix .
+   docker pull riadvice/placepix:latest
    ```
 
 2. **Add your images**
@@ -69,9 +70,9 @@
 
 3. **Run the server**
    ```bash
-   docker run -d -p 3000:3000 -v $(pwd)/images:/app/images --name placepix placepix
+   docker run -d -p 3000:3000 -v $(pwd)/images:/app/images --name placepix riadvice/placepix:latest
    ```
-   Or use `docker-compose up -d`.
+   Or use `docker compose up -d`. Set `PORT` to listen somewhere other than 3000.
 
 4. **Open the UI**
    Visit `http://localhost:3000` to browse and build URLs.
@@ -80,6 +81,36 @@
    ```html
    <img src="http://localhost:3000/300/200/nature" />
    ```
+
+## Deploy to a Server
+
+One command provisions a host: Docker, the deployment directory, and the
+container pulled from Docker Hub.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/riadvice/placepix/master/deploy/provision.sh | bash
+```
+
+It leaves the server holding configuration and state only — no source code, no
+virtualenv, no build:
+
+```
+/opt/placepix/
+├── .env                 settings and secrets
+├── docker-compose.yml
+├── data/                metrics database
+└── images/              the image library
+```
+
+Deploying a new version is then a pull, not a build:
+
+```bash
+cd /opt/placepix && docker compose up -d
+```
+
+Images are built and published by CI on every version tag, so servers never
+compile anything. See **[deploy/README.md](deploy/README.md)** for nginx and TLS
+setup, rollbacks, backups, and a host-migration runbook.
 
 ## URL Examples
 
@@ -107,6 +138,7 @@ Copy `.env.example` to `.env` and set what you need:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `HOST` | Bind address | `127.0.0.1:3000` |
+| `PORT` | Port to listen on; overrides the port in `HOST` | `3000` |
 | `IMAGES_DIR` | Images folder | `./images` |
 | `CACHE` | Enable file cache | `true` |
 | `CDN` | CDN base URL | — |
@@ -120,6 +152,14 @@ Copy `.env.example` to `.env` and set what you need:
 | `S3_ENABLED` | Use S3-compatible storage | `false` |
 | `AI_GENERATION_ENABLED` | Auto-generate images via AI | `false` |
 | `ORIENTATION_SQUARISH_TOLERANCE` | Tolerance for squarish filter (0.15 = 15%) | `0.15` |
+
+Deployment-only settings, read by `deploy/docker-compose.yml`:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PLACEPIX_TAG` | Image tag to run; pin it to roll back | `latest` |
+| `BIND_ADDR` | Address the port is published on | `127.0.0.1` |
+| `MEMORY_LIMIT` | Container memory ceiling | `1g` |
 
 ## API
 
