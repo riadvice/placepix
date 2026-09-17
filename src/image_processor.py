@@ -799,7 +799,7 @@ class ImageProcessor:
                 block = gray.crop(
                     (x, y, min(x + dot_size, img.width), min(y + dot_size, img.height))
                 )
-                brightness = sum(block.getdata()) / (block.width * block.height)
+                brightness = sum(block.get_flattened_data()) / (block.width * block.height)
 
                 # Calculate dot radius based on brightness
                 radius = (dot_size / 2) * (1 - brightness / 255)
