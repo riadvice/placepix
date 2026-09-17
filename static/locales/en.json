@@ -250,6 +250,7 @@
   "console.load_categories_error": "Failed to load categories:",
   "docker.title": "One-Line Docker Deploy",
   "docker.desc": "Get PlacePix running in seconds with a single Docker command. No configuration needed.",
+  "docker.full_install": "Or provision a whole server in one line — installs Docker, sets up /opt/placepix and starts the service:",
   "docker.features": "Features:",
   "docker.feature1": "Smart Scan + S3 Support",
   "docker.feature2": "Color extraction",
