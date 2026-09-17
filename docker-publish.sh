@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Manual publish to Docker Hub.
+#
+# The normal path is CI: pushing a tag triggers .github/workflows/publish.yml,
+# which tests the image and pushes it. Use this script only when you need to
+# publish from a workstation.
+
 # Configuration
 HUB_REPO="riadvice/placepix"
 IMAGE_NAME="$HUB_REPO"
@@ -30,6 +36,15 @@ if [[ -n "${1:-}" ]]; then
         git tag --sort=-v:refname | sed 's/^/  /'
         exit 1
     fi
+    HEAD_SHA=$(git rev-parse HEAD)
+    TAG_SHA=$(git rev-parse "refs/tags/$VERSION_TAG^{commit}")
+    if [[ "$HEAD_SHA" != "$TAG_SHA" ]]; then
+        echo "[placepix] ERROR: HEAD is not at tag '$VERSION_TAG'."
+        echo "[placepix] The image is built from the working tree, so this would"
+        echo "[placepix] publish '$VERSION_TAG' with the wrong code."
+        echo "[placepix]   git checkout $VERSION_TAG"
+        exit 1
+    fi
     echo "[placepix] Publishing explicit tag: $VERSION_TAG"
 else
     # Auto-detect tag on current HEAD; sort by version so 0.2 beats 0.1
@@ -57,11 +72,23 @@ fi
 # ------------------------------------------------------------------
 # Build
 # ------------------------------------------------------------------
+# Only move :latest when this is the newest release, so publishing a hotfix
+# for an older line cannot roll production back.
+HIGHEST_TAG=$(git tag --list '[0-9]*' | sort -V | tail -n 1)
+BUILD_TAGS=(-t "$IMAGE_NAME:$VERSION_TAG")
+PUSH_LATEST=false
+if [[ "$VERSION_TAG" == "$HIGHEST_TAG" ]]; then
+    BUILD_TAGS+=(-t "$IMAGE_NAME:latest")
+    PUSH_LATEST=true
+else
+    echo "[placepix] $VERSION_TAG is not the highest tag ($HIGHEST_TAG); leaving :latest alone."
+fi
+
 echo "[placepix] Building Docker image $IMAGE_NAME:$VERSION_TAG ..."
 docker build \
+    --target production \
     --build-arg GIT_VERSION="$VERSION_TAG" \
-    -t "$IMAGE_NAME:$VERSION_TAG" \
-    -t "$IMAGE_NAME:latest" \
+    "${BUILD_TAGS[@]}" \
     .
 
 # ------------------------------------------------------------------
@@ -70,7 +97,10 @@ docker build \
 echo "[placepix] Pushing $IMAGE_NAME:$VERSION_TAG ..."
 docker push "$IMAGE_NAME:$VERSION_TAG"
 
-echo "[placepix] Pushing $IMAGE_NAME:latest ..."
-docker push "$IMAGE_NAME:latest"
-
-echo "[placepix] Done! $VERSION_TAG is now the 'latest' on Docker Hub."
+if [[ "$PUSH_LATEST" == true ]]; then
+    echo "[placepix] Pushing $IMAGE_NAME:latest ..."
+    docker push "$IMAGE_NAME:latest"
+    echo "[placepix] Done! $VERSION_TAG is now the 'latest' on Docker Hub."
+else
+    echo "[placepix] Done! $VERSION_TAG published; 'latest' still points at $HIGHEST_TAG."
+fi
