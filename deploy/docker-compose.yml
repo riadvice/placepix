@@ -1,0 +1,60 @@
+# PlacePix - production deployment.
+#
+# Copy this file to /opt/placepix/docker-compose.yml. That directory holds the
+# deployment and nothing else:
+#
+#   /opt/placepix/
+#   ├── .env                 secrets and settings (never in git)
+#   ├── docker-compose.yml   this file
+#   ├── data/                metrics db, manifests  (back this up)
+#   └── images/              the image library      (back this up)
+#
+# No source code, no git checkout, no build. The image is built by CI and
+# pulled from Docker Hub, so deploying is:
+#
+#   cd /opt/placepix && docker compose up -d
+#
+# Roll back by setting PLACEPIX_TAG=0.3 in .env and running that again.
+
+services:
+  placepix:
+    image: riadvice/placepix:${PLACEPIX_TAG:-latest}
+    container_name: placepix
+    # Always check the registry, so `up -d` alone is a complete deploy.
+    pull_policy: always
+    restart: unless-stopped
+
+    # Bound to loopback by default: nginx terminates TLS and proxies here, so
+    # the app has no reason to be reachable directly from the internet.
+    # Set BIND_ADDR=0.0.0.0 in .env only if you are not fronting it with nginx.
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${PORT:-3000}:${PORT:-3000}"
+
+    environment:
+      PORT: ${PORT:-3000}
+
+    env_file:
+      - path: .env
+        required: false
+
+    volumes:
+      # Host-mounted: this is the state that matters.
+      - ./images:/app/images
+      - ./data:/app/data
+      # Named volume: derived renders, safe to discard, kept out of /opt/placepix.
+      - placepix-cache:/app/.cache
+
+    # Container logs are unbounded by default and will quietly fill the disk.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-1g}
+
+volumes:
+  placepix-cache:
