@@ -249,6 +249,7 @@
   "console.load_categories_error": "Nabigo ang pag-load ng categories:",
   "docker.title": "Isang Linyang Docker Deploy",
   "docker.desc": "Patakbuhin ang PlacePix sa ilang segundo gamit ang isang Docker command. Walang kailangang configuration.",
+  "docker.full_install": "O i-provision ang buong server sa isang linya — nag-i-install ng Docker, gumagawa ng /opt/placepix, at sinisimulan ang serbisyo:",
   "docker.features": "Mga Feature:",
   "docker.feature1": "Smart Scan + S3 Support",
   "docker.feature2": "Color extraction",

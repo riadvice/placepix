@@ -249,6 +249,7 @@
   "console.load_categories_error": "โหลดหมวดหมู่ไม่สำเร็จ:",
   "docker.title": "Docker Deploy หนึ่งบรรทัด",
   "docker.desc": "เรียกใช้ PlacePix ในไม่กี่วินาทีด้วยคำสั่ง Docker เดียว ไม่ต้องการการกำหนดค่า",
+  "docker.full_install": "หรือจัดเตรียมเซิร์ฟเวอร์ทั้งเครื่องด้วยคำสั่งเดียว — ติดตั้ง Docker สร้าง /opt/placepix และเริ่มบริการ:",
   "docker.features": "คุณสมบัติ:",
   "docker.feature1": "สแกนอัจฉริยะ + รองรับ S3",
   "docker.feature2": "การแยกสี",

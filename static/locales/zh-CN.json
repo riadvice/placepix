@@ -249,6 +249,7 @@
   "console.load_categories_error": "加载类别失败:",
   "docker.title": "单行 Docker 部署",
   "docker.desc": "使用单个 Docker 命令在几秒钟内运行 PlacePix。无需配置。",
+  "docker.full_install": "也可以用一行命令配置整台服务器 —— 安装 Docker、创建 /opt/placepix 并启动服务：",
   "docker.features": "功能:",
   "docker.feature1": "智能扫描 + S3 支持",
   "docker.feature2": "颜色提取",

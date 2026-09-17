@@ -249,6 +249,7 @@
   "console.load_categories_error": "Caricamento categorie non riuscito:",
   "docker.title": "Deploy Docker in una riga",
   "docker.desc": "Esegui PlacePix in pochi secondi con un singolo comando Docker. Nessuna configurazione necessaria.",
+  "docker.full_install": "Oppure configura un intero server in una riga: installa Docker, crea /opt/placepix e avvia il servizio:",
   "docker.features": "Caratteristiche:",
   "docker.feature1": "Scansione Intelligente + Supporto S3",
   "docker.feature2": "Estrazione dei colori",

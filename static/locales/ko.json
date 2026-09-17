@@ -249,6 +249,7 @@
   "console.load_categories_error": "카테고리 로드 실패:",
   "docker.title": "원라인 Docker 배포",
   "docker.desc": "단일 Docker 명령으로 몇 초 만에 PlacePix를 실행하세요. 구성이 필요하지 않습니다.",
+  "docker.full_install": "또는 한 줄로 서버 전체를 구성하세요 — Docker를 설치하고 /opt/placepix를 만든 뒤 서비스를 시작합니다:",
   "docker.features": "기능:",
   "docker.feature1": "스마트 스캔 + S3 지원",
   "docker.feature2": "색상 추출",

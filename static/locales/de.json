@@ -249,6 +249,7 @@
   "console.load_categories_error": "Kategorien konnten nicht geladen werden:",
   "docker.title": "Docker-Deployment in einer Zeile",
   "docker.desc": "Starten Sie PlacePix in Sekunden mit einem einzigen Docker-Befehl. Keine Konfiguration erforderlich.",
+  "docker.full_install": "Oder richten Sie einen ganzen Server mit einem Befehl ein — installiert Docker, legt /opt/placepix an und startet den Dienst:",
   "docker.features": "Funktionen:",
   "docker.feature1": "Intelligenter Scan + S3-Unterstützung",
   "docker.feature2": "Farbextraktion",

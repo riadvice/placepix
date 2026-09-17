@@ -249,6 +249,7 @@
   "console.load_categories_error": "カテゴリの読み込みに失敗しました:",
   "docker.title": "ワンラインDockerデプロイ",
   "docker.desc": "単一のDockerコマンドで数秒でPlacePixを実行。設定は不要です。",
+  "docker.full_install": "サーバー全体を1行でセットアップすることもできます — Docker をインストールし、/opt/placepix を作成してサービスを起動します:",
   "docker.features": "機能:",
   "docker.feature1": "スマートスキャン + S3対応",
   "docker.feature2": "色抽出",

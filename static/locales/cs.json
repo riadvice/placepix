@@ -249,6 +249,7 @@
   "console.load_categories_error": "Načítání kategorií selhalo:",
   "docker.title": "Docker nasazení na jednom řádku",
   "docker.desc": "Spusťte PlacePix za pár sekund jedním Docker příkazem. Není vyžadována konfigurace.",
+  "docker.full_install": "Nebo připravte celý server jediným příkazem — nainstaluje Docker, vytvoří /opt/placepix a spustí službu:",
   "docker.features": "Funkce:",
   "docker.feature1": "Chytré skenování + Podpora S3",
   "docker.feature2": "Extrakce barev",

@@ -249,6 +249,7 @@
   "console.load_categories_error": "Gagal memuatkan kategori:",
   "docker.title": "Deploy Docker Satu Baris",
   "docker.desc": "Dapatkan PlacePix berjalan dalam beberapa saat dengan satu perintah Docker. Tiada konfigurasi diperlukan.",
+  "docker.full_install": "Atau sediakan keseluruhan pelayan dalam satu baris — memasang Docker, mencipta /opt/placepix dan memulakan perkhidmatan:",
   "docker.features": "Ciri-ciri:",
   "docker.feature1": "Imbasan Pintar + Sokongan S3",
   "docker.feature2": "Pengekstrakan warna",

@@ -249,6 +249,7 @@
   "console.load_categories_error": "Kategóriák betöltése sikertelen:",
   "docker.title": "Egy Soros Docker Deploy",
   "docker.desc": "Indítsd el a PlacePix-et másodpercek alatt egyetlen Docker paranccsal. Nincs szükség konfigurációra.",
+  "docker.full_install": "Vagy állítson be egy teljes szervert egyetlen paranccsal — telepíti a Dockert, létrehozza a /opt/placepix könyvtárat és elindítja a szolgáltatást:",
   "docker.features": "Funkciók:",
   "docker.feature1": "Intelligens Szkennelés + S3 Támogatás",
   "docker.feature2": "Szín kinyerés",

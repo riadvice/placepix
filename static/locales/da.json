@@ -249,6 +249,7 @@
   "console.load_categories_error": "Kunne ikke indlæse kategorier:",
   "docker.title": "En-linje Docker Deploy",
   "docker.desc": "Få PlacePix kørende på få sekunder med en enkelt Docker-kommando. Ingen konfiguration nødvendig.",
+  "docker.full_install": "Eller klargør en hel server med én kommando — installerer Docker, opretter /opt/placepix og starter tjenesten:",
   "docker.features": "Funktioner:",
   "docker.feature1": "Smart Scan + S3 Support",
   "docker.feature2": "Farveudtrækning",

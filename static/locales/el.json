@@ -249,6 +249,7 @@
   "console.load_categories_error": "Αποτυχία φόρτωσης κατηγοριών:",
   "docker.title": "Docker Deploy σε μία γραμμή",
   "docker.desc": "Εκτελέστε το PlacePix σε δευτερόλεπτα με μία εντολή Docker. Δεν απαιτείται ρύθμιση.",
+  "docker.full_install": "Ή προετοιμάστε έναν ολόκληρο διακομιστή με μία εντολή — εγκαθιστά το Docker, δημιουργεί το /opt/placepix και ξεκινά την υπηρεσία:",
   "docker.features": "Χαρακτηριστικά:",
   "docker.feature1": "Έξυπνη σάρωση + Υποστήριξη S3",
   "docker.feature2": "Εξαγωγή χρωμάτων",

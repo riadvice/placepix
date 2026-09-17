@@ -249,6 +249,7 @@
   "console.load_categories_error": "Eșec la încărcarea categoriilor:",
   "docker.title": "Deploy Docker într-o Singură Linie",
   "docker.desc": "Porniți PlacePix în câteva secunde cu o singură comandă Docker. Nu este necesară configurare.",
+  "docker.full_install": "Sau pregătește un server întreg dintr-o singură linie — instalează Docker, creează /opt/placepix și pornește serviciul:",
   "docker.features": "Funcționalități:",
   "docker.feature1": "Scanare Inteligentă + Suport S3",
   "docker.feature2": "Extracție culori",

@@ -249,6 +249,7 @@
   "console.load_categories_error": "載入類別失敗:",
   "docker.title": "單行 Docker 部署",
   "docker.desc": "使用單一 Docker 命令在幾秒內運行 PlacePix。無需配置。",
+  "docker.full_install": "也可以用一行指令配置整台伺服器 —— 安裝 Docker、建立 /opt/placepix 並啟動服務：",
   "docker.features": "功能:",
   "docker.feature1": "智能掃描 + S3 支援",
   "docker.feature2": "顏色提取",

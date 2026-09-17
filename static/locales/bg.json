@@ -249,6 +249,7 @@
   "console.load_categories_error": "Неуспешно зареждане на категории:",
   "docker.title": "Едноредов Docker Разгръщане",
   "docker.desc": "Пуснете PlacePix за секунди с една Docker команда. Не се нуждае от конфигурация.",
+  "docker.full_install": "Или подгответе цял сървър с една команда — инсталира Docker, създава /opt/placepix и стартира услугата:",
   "docker.features": "Функции:",
   "docker.feature1": "Интелигентно Сканиране + S3 Поддръжка",
   "docker.feature2": "Извличане на цветове",

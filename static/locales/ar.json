@@ -249,6 +249,7 @@
   "console.load_categories_error": "فشل تحميل الفئات:",
   "docker.title": "نشر Docker بسطر واحد",
   "docker.desc": "شغّل PlacePix في ثوانٍ بأمر Docker واحد. لا حاجة للتكوين.",
+  "docker.full_install": "أو جهّز خادمًا كاملاً بسطر واحد — يثبّت Docker، ويُنشئ مجلد النشر، ويشغّل الخدمة:",
   "docker.features": "الميزات:",
   "docker.feature1": "مسح ذكي + دعم S3",
   "docker.feature2": "استخراج الألوان",

@@ -249,6 +249,7 @@
   "console.load_categories_error": "Falha ao carregar categorias:",
   "docker.title": "Deploy Docker em uma linha",
   "docker.desc": "Execute o PlacePix em segundos com um único comando Docker. Sem configuração necessária.",
+  "docker.full_install": "Ou provisione um servidor inteiro em uma linha — instala o Docker, cria /opt/placepix e inicia o serviço:",
   "docker.features": "Recursos:",
   "docker.feature1": "Varredura Inteligente + Suporte S3",
   "docker.feature2": "Extração de cores",

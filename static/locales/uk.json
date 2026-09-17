@@ -249,6 +249,7 @@
   "console.load_categories_error": "Не вдалося завантажити категорії:",
   "docker.title": "Docker Deploy в один рядок",
   "docker.desc": "Запустіть PlacePix за секунди за допомогою однієї команди Docker. Конфігурація не потрібна.",
+  "docker.full_install": "Або підготуйте цілий сервер однією командою — встановить Docker, створить /opt/placepix і запустить сервіс:",
   "docker.features": "Функції:",
   "docker.feature1": "Розумне сканування + Підтримка S3",
   "docker.feature2": "Витягування кольорів",

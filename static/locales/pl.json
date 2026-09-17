@@ -249,6 +249,7 @@
   "console.load_categories_error": "Nie udało się załadować kategorii:",
   "docker.title": "Wdrożenie Docker w jednej linii",
   "docker.desc": "Uruchom PlacePix w kilka sekund jednym poleceniem Docker. Konfiguracja nie jest wymagana.",
+  "docker.full_install": "Albo przygotuj cały serwer jednym poleceniem — instaluje Dockera, tworzy /opt/placepix i uruchamia usługę:",
   "docker.features": "Funkcje:",
   "docker.feature1": "Inteligentne Skanowanie + Obsługa S3",
   "docker.feature2": "Ekstrakcja kolorów",

@@ -249,6 +249,7 @@
   "console.load_categories_error": "Échec du chargement des catégories :",
   "docker.title": "Déploiement Docker en une ligne",
   "docker.desc": "Lancez PlacePix en quelques secondes avec une seule commande Docker. Aucune configuration requise.",
+  "docker.full_install": "Ou provisionnez un serveur complet en une ligne — installe Docker, crée /opt/placepix et démarre le service :",
   "docker.features": "Fonctionnalités :",
   "docker.feature1": "Scan Intelligent + Support S3",
   "docker.feature2": "Extraction des couleurs",

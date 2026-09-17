@@ -249,6 +249,7 @@
   "console.load_categories_error": "Không thể tải danh mục:",
   "docker.title": "Triển khai Docker một dòng",
   "docker.desc": "Chạy PlacePix trong vài giây với một lệnh Docker duy nhất. Không cần cấu hình.",
+  "docker.full_install": "Hoặc thiết lập toàn bộ máy chủ chỉ với một dòng — cài Docker, tạo /opt/placepix và khởi động dịch vụ:",
   "docker.features": "Tính năng:",
   "docker.feature1": "Quét Thông Minh + Hỗ Trợ S3",
   "docker.feature2": "Trích xuất màu",

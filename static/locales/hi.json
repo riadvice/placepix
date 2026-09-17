@@ -249,6 +249,7 @@
   "console.load_categories_error": "श्रेणियां लोड करने में विफल:",
   "docker.title": "एक लाइन Docker डिप्लॉय",
   "docker.desc": "एक डॉकर कमांड के साथ सेकंड में PlacePix चलाएं। कोई कॉन्फ़िगरेशन की आवश्यकता नहीं।",
+  "docker.full_install": "या एक ही लाइन में पूरा सर्वर तैयार करें — Docker इंस्टॉल करता है, /opt/placepix बनाता है और सेवा शुरू करता है:",
   "docker.features": "विशेषताएं:",
   "docker.feature1": "स्मार्ट स्कैन + S3 सपोर्ट",
   "docker.feature2": "रंग निष्कर्षण",

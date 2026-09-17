@@ -249,6 +249,7 @@
   "console.load_categories_error": "بارگذاری دسته‌بندی‌ها ناموفق بود:",
   "docker.title": "استقرار تک‌خطی Docker",
   "docker.desc": "PlacePix را در ثانیه‌ها با یک دستور Docker اجرا کنید. نیازی به پیکربندی نیست.",
+  "docker.full_install": "یا یک سرور کامل را با یک خط آماده کنید — داکر را نصب می‌کند، پوشهٔ استقرار را می‌سازد و سرویس را اجرا می‌کند:",
   "docker.features": "ویژگی‌ها:",
   "docker.feature1": "اسکن هوشمند + پشتیبانی S3",
   "docker.feature2": "استخراج رنگ",

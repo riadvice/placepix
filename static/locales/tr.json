@@ -249,6 +249,7 @@
   "console.load_categories_error": "Kategoriler yüklenemedi:",
   "docker.title": "Tek Satırlı Docker Dağıtımı",
   "docker.desc": "Tek bir Docker komutuyla saniyeler içinde PlacePix'i çalıştırın. Yapılandırma gerekmez.",
+  "docker.full_install": "Ya da tek satırda bir sunucunun tamamını hazırlayın — Docker'ı kurar, /opt/placepix dizinini oluşturur ve servisi başlatır:",
   "docker.features": "Özellikler:",
   "docker.feature1": "Akıllı Tarama + S3 Desteği",
   "docker.feature2": "Renk çıkarma",

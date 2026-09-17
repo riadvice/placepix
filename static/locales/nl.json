@@ -249,6 +249,7 @@
   "console.load_categories_error": "Categorieën laden mislukt:",
   "docker.title": "Docker Deploy in één regel",
   "docker.desc": "Start PlacePix in seconden met één Docker-commando. Geen configuratie nodig.",
+  "docker.full_install": "Of richt een complete server in met één regel — installeert Docker, maakt /opt/placepix aan en start de service:",
   "docker.features": "Kenmerken:",
   "docker.feature1": "Slimme Scan + S3 Ondersteuning",
   "docker.feature2": "Kleurextractie",
