@@ -52,10 +52,14 @@ function copyCategoryURL(category, event) {
 }
 
 // Copy code snippet to clipboard
+// Snippets that are shell commands rather than URL paths. Anything else is
+// treated as a path and gets the site origin prepended.
+const SHELL_COMMAND_PREFIXES = ['docker', 'curl', 'sudo', 'bash', 'sh '];
+
 function copyCode(button, code) {
-  // If it's a Docker command, copy as-is without URL prefix
-  const textToCopy = code.startsWith('docker') ? code : window.location.origin + code;
-  const isDockerCommand = code.startsWith('docker');
+  // Shell commands are copied as-is, without the URL prefix
+  const isDockerCommand = SHELL_COMMAND_PREFIXES.some(prefix => code.startsWith(prefix));
+  const textToCopy = isDockerCommand ? code : window.location.origin + code;
   navigator.clipboard.writeText(textToCopy).then(() => {
     const originalIcon = button.innerHTML;
     button.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
