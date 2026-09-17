@@ -2,10 +2,70 @@
 
 ## Released versions
 
+- [v0.5 - 2026-09-17](#v05)
 - [v0.4 - 2026-08-31](#v04)
 - [v0.3 - 2026-05-29](#v03)
 - [v0.2 - 2026-05-26](#v02)
 - [v0.1 - 2026-05-25](#v01)
+
+## v0.5
+
+### 🚀 Introduction
+
+- **Version Number**: 0.5
+- **Release Date**: 2026-09-17
+- **General Overview**: Production deployments move from building on the server to pulling a CI-built image, with a one-line provisioner, a configurable port, and multi-architecture images.
+
+### ✨ New Features
+
+#### Deployment
+- **One-line server provisioning** — `curl -fsSL https://raw.githubusercontent.com/riadvice/placepix/master/deploy/provision.sh | bash` installs Docker, creates `/opt/placepix`, and starts the service. Idempotent, and an existing `.env` is never overwritten
+- **Pull-based production compose** — `deploy/docker-compose.yml` runs a prebuilt image, so a deployment is `docker compose up -d` with no source checkout, no build and no `docker system prune`. The server holds only `.env`, `docker-compose.yml`, `data/` and `images/`
+- **Rollback by tag** — set `PLACEPIX_TAG=0.4` in `.env` and redeploy
+- **nginx vhost templates** — `deploy/nginx-setup.sh` renders the vhost, reading the port back out of `.env` so nginx and the container cannot disagree. Includes an HTTP-only bootstrap vhost for the pre-certificate stage of a new host
+
+#### Configuration
+- **Configurable port** — a single `PORT` variable (default `3000`) drives the app, image, compose, run scripts and nginx vhost, resolved as environment > `.env` > default. `HOST=addr:port` keeps working unchanged
+
+#### Distribution
+- **Multi-architecture images** — `linux/amd64` and `linux/arm64` are published for every release
+- **Releases built in CI** — pushing a version tag builds the image, runs the test suite inside it, pushes to Docker Hub and cuts a GitHub release. `:latest` only moves when the published tag is the newest one
+
+### 🐞 Bug Fixes
+
+- **Test image could not build** — `.dockerignore` excluded `tests/`, `*.sh` and `.env.*`, the exact paths the `test` stage copies, so `docker-test.sh` and `docker-compose.test.yml` had never worked
+- **Runtime environment leaked into tests** — `HOST`, `DATA_DIR` and `IMAGES_DIR` were set in the Dockerfile's `base` stage, and real environment variables outrank `env_file` in pydantic-settings, so tests silently ran against `/app/data` instead of `./test_data`
+- **`docker-build.sh` pushed an invalid reference** — `docker push placepix:latest` resolves to `docker.io/library/placepix` and could only ever fail; the script now builds without pushing
+- **`docker-publish.sh` could publish the wrong code** — it verified that a tag existed, then built from the working tree; it now refuses unless `HEAD` is at that tag
+- **`:latest` could be rolled back** — publishing a hotfix for an older line moved `latest` to it
+- **Compose failed without a `.env`** — a fresh checkout could not run `docker compose` at all
+- **Copy buttons corrupted shell commands** — any snippet not starting with `docker` had the site URL prepended, so copying a `curl` line produced `https://placepix.net/curl ...`
+- **Pillow 14 compatibility** — replaced the deprecated `Image.getdata()` in the halftone filter
+- **Home page install command** — the "Install Docker" step built from source instead of pulling the published image
+
+### 🔧 Improvements
+
+#### Operations
+- **Container logs capped** at 10 MB × 3 files; unbounded `json-file` logs were a disk-exhaustion risk
+- **Loopback binding by default** — the container publishes on `127.0.0.1`, so the app is no longer reachable directly on its port, bypassing nginx and TLS
+- **Memory ceiling** — configurable via `MEMORY_LIMIT`, default 1 GB
+- **Render cache moved to a named volume**, keeping the deployment directory to configuration and state only
+
+#### Quality
+- **Test coverage raised from 79% to 91%** — 926 tests, adding cover for the AI generator, cache cleanup and eviction, colour and dimension scans, avatar rendering, startup validation and the SEO-gated endpoints
+- **Dependencies updated** — uvicorn, numpy, boto3 and ruff; `httpx` replaced with `httpx2`, which starlette now requires for its test client
+- **GitHub Actions updated** to their latest major versions across all workflows
+- **Dead pytest configuration removed** — `asyncio_mode` warned on every run with no `pytest-asyncio` installed
+
+#### Documentation
+- **Deployment guide** — `deploy/README.md` covers installation, nginx and TLS, updates, rollbacks, backups, troubleshooting and a host-migration runbook
+- **One-line install on the home page**, translated into all 33 supported languages
+
+### ⚠️ Upgrade Notes
+
+- **Existing servers that build from a git checkout keep working**, but the recommended layout is now `/opt/placepix` holding only `.env`, `docker-compose.yml`, `data/` and `images/`
+- **Migrating a host** means copying `.env`, `data/` and `images/` together — image IDs live in `data/.placepix_manifest.json`, so moving images without it reassigns every ID and breaks existing `/id/{n}` URLs. The render cache should not be copied
+- **`BIND_ADDR=0.0.0.0`** restores the previous behaviour of publishing the port on all interfaces
 
 ## v0.4
 

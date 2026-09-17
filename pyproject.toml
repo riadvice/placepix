@@ -1,6 +1,6 @@
 [project]
 name = "placepix"
-version = "1.0.0"
+version = "0.5"
 description = "A self-hosted placeholder image server inspired by lorem-server and picsum.photos"
 requires-python = ">=3.12"
 dependencies = [

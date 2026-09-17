@@ -258,7 +258,7 @@ _processing_sem = asyncio.Semaphore(settings.max_concurrent_processing)
 
 
 # ── Setup ───────────────────────────────────────────────────────────
-app = FastAPI(title="PlacePix", version="1.0.0")
+app = FastAPI(title="PlacePix", version=_git_version)
 
 # Seed images if enabled
 if settings.seed_enabled:
