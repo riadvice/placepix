@@ -21,8 +21,12 @@
 #   --port N         Port the app listens on (default: 3000)
 #   --tag TAG        Image tag to deploy (default: latest)
 #   --ref REF        Git ref to fetch deploy files from (default: master)
+#   --with-nginx     Install nginx and manage the PlacePix vhost. Off by
+#                    default: on a host that already serves other sites this
+#                    would add a second vhost for the same server_name and
+#                    collide with the existing one. Leave it off and point your
+#                    own vhost at 127.0.0.1:PORT.
 #   --skip-docker    Do not install Docker
-#   --skip-nginx     Do not install or configure nginx
 #   --skip-start     Prepare everything but do not start the container
 #   --help           Show this help
 
@@ -34,7 +38,7 @@ PORT="3000"
 TAG="latest"
 REF="master"
 SKIP_DOCKER=false
-SKIP_NGINX=false
+WITH_NGINX=false
 SKIP_START=false
 
 RAW_BASE="https://raw.githubusercontent.com/riadvice/placepix"
@@ -52,10 +56,10 @@ while [[ $# -gt 0 ]]; do
         --port)   PORT="${2:-}"; shift 2 ;;
         --tag)    TAG="${2:-}"; shift 2 ;;
         --ref)    REF="${2:-}"; shift 2 ;;
+        --with-nginx)  WITH_NGINX=true; shift ;;
         --skip-docker) SKIP_DOCKER=true; shift ;;
-        --skip-nginx)  SKIP_NGINX=true; shift ;;
         --skip-start)  SKIP_START=true; shift ;;
-        -h|--help) sed -n '2,28p' "$0" | sed 's/^# \?//'; exit 0 ;;
+        -h|--help) sed -n '2,32p' "$0" | sed 's/^# \?//'; exit 0 ;;
         *) die "Unknown option: $1" ;;
     esac
 done
@@ -135,7 +139,7 @@ fi
 ok "Deployment directory ready"
 
 # ── 3. nginx ────────────────────────────────────────────────────────
-if [[ "$SKIP_NGINX" == false ]]; then
+if [[ "$WITH_NGINX" == true ]]; then
     if ! command -v nginx >/dev/null 2>&1; then
         log "Installing nginx..."
         $SUDO apt-get update -qq && $SUDO apt-get install -y -qq nginx
@@ -164,6 +168,10 @@ if [[ "$SKIP_NGINX" == false ]]; then
         warn "Obtain a certificate, then re-run this script to switch to TLS:"
         warn "  sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN --agree-tos -m devops@riadvice.com --redirect -n"
     fi
+else
+    log "Leaving nginx alone. Point your existing vhost at the app:"
+    log "    proxy_pass http://127.0.0.1:$PORT;"
+    log "  then: sudo nginx -t && sudo systemctl reload nginx"
 fi
 
 # ── 4. Start ────────────────────────────────────────────────────────
