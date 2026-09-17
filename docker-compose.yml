@@ -1,9 +1,14 @@
 services:
   placepix:
-    build: .
+    build:
+      context: .
+      args:
+        PORT: ${PORT:-3000}
     container_name: placepix
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
+    environment:
+      PORT: ${PORT:-3000}
     volumes:
       - ./images:/app/images
       - ./.cache:/app/.cache

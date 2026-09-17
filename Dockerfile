@@ -3,6 +3,10 @@ FROM python:3.12-slim AS base
 
 ARG GIT_VERSION=dev
 ENV GIT_VERSION=${GIT_VERSION}
+
+# Port the app listens on inside the container (override at build or run time)
+ARG PORT=3000
+ENV PORT=${PORT}
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -37,7 +41,7 @@ RUN mkdir -p /app/images /app/.cache /app/data
 ENV DATA_DIR=/app/data
 ENV IMAGES_DIR=/app/images
 ENV CACHE=true
-ENV HOST=0.0.0.0:3000
+ENV HOST=0.0.0.0:${PORT}
 ENV WORKERS=1
 
 FROM base AS test
@@ -58,11 +62,11 @@ CMD ["--fast"]
 
 FROM base AS production
 
-EXPOSE 3000
+EXPOSE ${PORT}
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3000/health', timeout=5)" || exit 1
+    CMD python -c "import os, urllib.request; urllib.request.urlopen('http://localhost:' + os.environ.get('PORT', '3000') + '/health', timeout=5)" || exit 1
 
 # Labels
 LABEL org.opencontainers.image.title="PlacePix" \
@@ -71,4 +75,4 @@ LABEL org.opencontainers.image.title="PlacePix" \
       org.opencontainers.image.source="https://github.com/riadvice/placepix" \
       org.opencontainers.image.licenses="MIT"
 
-CMD ["sh", "-c", "python -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --workers $WORKERS"]
+CMD ["sh", "-c", "python -m uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-3000} --workers ${WORKERS:-1}"]

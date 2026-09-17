@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     )
 
     host: str = Field(default="127.0.0.1:3000")
+    # Overrides the port carried by `host` when set (e.g. PORT=8080).
+    port: int | None = Field(default=None)
     workers: int = Field(default=2)
     dir: str = Field(default="./data", alias="data_dir")
     seed_dir_str: str = Field(default="./images", alias="images_dir")
@@ -104,6 +106,8 @@ class Settings(BaseSettings):
 
     @property
     def bind_port(self) -> int:
+        if self.port is not None:
+            return self.port
         return int(self.host.rsplit(":", 1)[1]) if ":" in self.host else 3000
 
     @property

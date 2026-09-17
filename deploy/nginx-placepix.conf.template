@@ -1,13 +1,17 @@
-# Nginx configuration for PlacePix with Let's Encrypt SSL
-# Place this in /etc/nginx/sites-available/placepix
-# Then: ln -s /etc/nginx/sites-available/placepix /etc/nginx/sites-enabled/
-# And: nginx -t && systemctl reload nginx
+# Nginx configuration for PlacePix with Let's Encrypt SSL.
+#
+# This is a TEMPLATE - do not edit the installed copy by hand.
+# Render and install it with:
+#     ./deploy/nginx-setup.sh --domain placepix.net --install
+#
+# __DOMAIN__ and __PORT__ are substituted by that script; PORT is read from
+# /opt/placepix/.env so nginx can never disagree with the app's actual port.
 
 # HTTP server - redirect to HTTPS
 server {
     listen 80;
     listen [::]:80;
-    server_name your-domain.com www.your-domain.com;
+    server_name __DOMAIN__ www.__DOMAIN__;
 
     # Let's Encrypt ACME challenge
     location /.well-known/acme-challenge/ {
@@ -24,11 +28,11 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name your-domain.com www.your-domain.com;
+    server_name __DOMAIN__ www.__DOMAIN__;
 
     # SSL certificates (Let's Encrypt)
-    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/__DOMAIN__/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/__DOMAIN__/privkey.pem;
 
     # SSL configuration
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -48,7 +52,7 @@ server {
 
     # Proxy to PlacePix container
     location / {
-        proxy_pass http://127.0.0.1:3000;
+        proxy_pass http://127.0.0.1:__PORT__;
         proxy_http_version 1.1;
         
         # Headers
@@ -72,7 +76,7 @@ server {
 
     # Cache static assets if needed
     location ~* \.(jpg|jpeg|png|gif|ico|webp|avif|svg)$ {
-        proxy_pass http://127.0.0.1:3000;
+        proxy_pass http://127.0.0.1:__PORT__;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

@@ -37,11 +37,22 @@ log "Installing dependencies..."
 pip install -q --upgrade pip
 pip install -q -e "$SCRIPT_DIR"
 
+# ─── Resolve port ───────────────────────────────────────────────────
+# Precedence: environment > .env > default
+if [[ -z "${PORT:-}" && -f ".env" ]]; then
+  PORT=$(grep -E "^PORT=" .env 2>/dev/null | cut -d '=' -f2 | tr -d ' ')
+fi
+PORT="${PORT:-3000}"
+case "$PORT" in
+  ''|*[!0-9]*) PORT=3000 ;;
+esac
+export PORT
+
 # ─── Launch ─────────────────────────────────────────────────────────
 ok "Dependencies ready"
 log "Starting PlacePic server..."
-log "API docs: http://127.0.0.1:3000/docs"
-log "Web UI : http://127.0.0.1:3000/"
+log "API docs: http://127.0.0.1:$PORT/docs"
+log "Web UI : http://127.0.0.1:$PORT/"
 log ""
 log "Press Ctrl+C to stop"
 
@@ -60,8 +71,8 @@ esac
 
 if [[ "$WORKERS" -gt 1 ]]; then
   log "Running with $WORKERS workers (reload disabled)"
-  exec python -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --workers "$WORKERS" "$@"
+  exec python -m uvicorn src.main:app --host 0.0.0.0 --port "$PORT" --workers "$WORKERS" "$@"
 else
   log "Running with auto-reload (single worker)"
-  exec python -m uvicorn src.main:app --host 0.0.0.0 --port 3000 --reload --reload-dir src "$@"
+  exec python -m uvicorn src.main:app --host 0.0.0.0 --port "$PORT" --reload --reload-dir src "$@"
 fi

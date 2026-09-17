@@ -56,6 +56,26 @@ def test_bind_port_custom():
     assert settings.bind_port == 9999
 
 
+def test_port_defaults_to_none():
+    """Test port is unset by default so host keeps carrying the port."""
+    settings = Settings(_env_file=None)
+    assert settings.port is None
+    assert settings.bind_port == 3000
+
+
+def test_port_overrides_host_port():
+    """Test PORT takes precedence over the port embedded in HOST."""
+    settings = Settings(host="0.0.0.0:3000", port=8080)
+    assert settings.bind_port == 8080
+    assert settings.bind_host == "0.0.0.0"
+
+
+def test_port_applies_when_host_has_no_port():
+    """Test PORT is used when HOST carries no port at all."""
+    settings = Settings(host="localhost", port=8080)
+    assert settings.bind_port == 8080
+
+
 def test_images_dir_property():
     """Test images_dir property returns resolved Path."""
     settings = Settings(dir="./test_images")
