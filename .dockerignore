@@ -88,3 +88,13 @@ dev.sh
 # Scripts
 scripts/
 *.sh
+
+# ── Re-includes for the `test` build stage ──────────────────────────
+# The exclusions above (tests/, *.sh, .env.*) would otherwise make
+# `docker build --target test` fail outright on its COPY steps.
+# These enter the build CONTEXT only: the production stage never COPYs
+# them, so the shipped image is unaffected. Note .env itself stays
+# excluded above - real secrets must never enter the context.
+!tests/
+!unit_tests.sh
+!.env.test

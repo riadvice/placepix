@@ -1,12 +1,13 @@
 # syntax=docker/dockerfile:1
+
+# Port the app listens on inside the container (override at build or run time).
+# Declared before the first FROM so every stage can opt into it.
+ARG PORT=3000
+
 FROM python:3.12-slim AS base
 
 ARG GIT_VERSION=dev
 ENV GIT_VERSION=${GIT_VERSION}
-
-# Port the app listens on inside the container (override at build or run time)
-ARG PORT=3000
-ENV PORT=${PORT}
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -38,11 +39,11 @@ COPY sitemap/ ./sitemap/
 # Ensure the mount point exists
 RUN mkdir -p /app/images /app/.cache /app/data
 
-ENV DATA_DIR=/app/data
-ENV IMAGES_DIR=/app/images
-ENV CACHE=true
-ENV HOST=0.0.0.0:${PORT}
-ENV WORKERS=1
+# NOTE: runtime configuration (HOST, PORT, DATA_DIR, IMAGES_DIR, ...) is
+# deliberately NOT set here. Real environment variables outrank env_file in
+# pydantic-settings, so anything set in `base` leaks into the `test` stage and
+# silently overrides .env.test - pointing tests at production paths and ports.
+# Those values belong to the `production` stage alone.
 
 FROM base AS test
 
@@ -62,9 +63,17 @@ CMD ["--fast"]
 
 FROM base AS production
 
+ARG PORT
+ENV PORT=${PORT}
+ENV HOST=0.0.0.0:${PORT}
+ENV DATA_DIR=/app/data
+ENV IMAGES_DIR=/app/images
+ENV CACHE=true
+ENV WORKERS=1
+
 EXPOSE ${PORT}
 
-# Healthcheck
+# Healthcheck (reads PORT at runtime, so changing it needs no rebuild)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import os, urllib.request; urllib.request.urlopen('http://localhost:' + os.environ.get('PORT', '3000') + '/health', timeout=5)" || exit 1
 
